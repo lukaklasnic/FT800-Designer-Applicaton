@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import ( QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QFrame, QPushButton, QCheckBox, QColorDialog, QComboBox, QSpinBox, QFileDialog, QLineEdit )
-from PyQt6.QtCore import ( Qt )
+from PyQt6.QtWidgets import ( QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QFrame, QPushButton, QCheckBox, QColorDialog, QComboBox, QSpinBox,QSplashScreen, QFileDialog, QLineEdit )
+from PyQt6.QtCore import ( Qt, QTimer )
 from PyQt6.QtGui import (QPixmap, QPainter, QPen, QColor,  QIcon )
 from widgets import  ( RectangleWidget, LineWidget, CircleWidget, KeysWidget, ButtonWidget, GaugeWidget, ClockWidget, ProgressBarWidget, ScrollBarWidget, DialWidget, SliderWidget, ToggleWidget, LabelWidget, ImageWidget, Widget_icon, ColorRectangle, EllipseWidget,NumericWidget  )
 import sys
@@ -18,6 +18,7 @@ class MainWindow( QMainWindow ):
         self.setMainLayouts()
         
     def setTitleBar( self ):
+        
         self.setWindowTitle( "FT800 Designer application" )
         self.setWindowIcon( QIcon( "B:/Dokumenti/Fakultet\Merno Informacioni Sistemi i Smart Tehnologije/FT800 Designer/ftdi_logo" ) )
 
@@ -1210,8 +1211,38 @@ class MainWindow( QMainWindow ):
         print("="*60 + "\n")
 
 if __name__ == "__main__":
-    app = QApplication( sys.argv )
+    from pathlib import Path
+    from PyQt6.QtGui import QGuiApplication
+
+    QGuiApplication.setHighDpiScaleFactorRoundingPolicy(
+        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+    )
+
+    app = QApplication(sys.argv)
+
+    BASE_DIR = Path(__file__).resolve().parent
+    logo_path = BASE_DIR / "bootup_logo.png"
+
+    splash_pix = QPixmap(str(logo_path))
+
+    splash = QSplashScreen(
+        splash_pix.scaled(
+            800, 450,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        ),
+        Qt.WindowType.WindowStaysOnTopHint
+    )
+
+    splash.show()
+    app.processEvents()
+
     window = MainWindow()
-    window.resize(800, 600)
-    window.show()
-    sys.exit( app.exec() )
+
+    QTimer.singleShot(3000, lambda: (
+        splash.finish(window),
+        window.show()
+    ))
+    window.resize(1024, 720)
+
+    sys.exit(app.exec())
