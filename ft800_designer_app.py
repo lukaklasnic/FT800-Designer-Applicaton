@@ -20,7 +20,7 @@ class MainWindow( QMainWindow ):
     def setTitleBar( self ):
         
         self.setWindowTitle( "FT800 Designer application" )
-        self.setWindowIcon( QIcon( "B:/Dokumenti/Fakultet\Merno Informacioni Sistemi i Smart Tehnologije/FT800 Designer/ftdi_logo" ) )
+        self.setWindowIcon( QIcon( "B:\Dokumenti\Fakultet\Merno Informacioni Sistemi i Smart Tehnologije\FT800-Designer-Applicaton\designer_logo_ic" ) )
 
     def setScrollArea( self ):
         self.scroll_area = QScrollArea()
