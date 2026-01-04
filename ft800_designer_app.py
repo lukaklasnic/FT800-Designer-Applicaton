@@ -85,7 +85,7 @@ class MainWindow( QMainWindow ):
         generate_button = QPushButton( "Generate" )
         generate_button.setFixedSize( 100, 50 )
         generate_button.setStyleSheet( """QPushButton {background-color: #dea24a;color: black;font-weight: bold;border: 2px solid #dea24a;border-radius: 5px;font-size: 12px;}QPushButton:hover {background-color: darkorange;border: 2px solid darkorange;}QPushButton:pressed {background-color: #cc5500;border: 2px solid #cc5500;}""" )
-        generate_button.clicked.connect(self.generate_image_resources)
+        generate_button.clicked.connect(self.print_all_widget_dicts)
         
         top_layout.addWidget( generate_button )
         top_layout.addStretch( 1 )
