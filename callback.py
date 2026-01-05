@@ -6808,6 +6808,7 @@ def generateWidgetName(main_window, widget_type):
         'Image': [ImageWidget],
         'Keys': [KeysWidget],
         'Numeric': [NumericWidget],
+        'Ellipse': [EllipseWidget]
     }
     
     # Prikupi postojeća imena za ovaj tip

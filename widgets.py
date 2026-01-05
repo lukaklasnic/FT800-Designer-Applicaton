@@ -5910,6 +5910,43 @@ class ToggleWidget(QWidget):
         self._height = 30  # Fiksna visina
         self.setFixedSize(width, self._height)
         self.update()
+    
+    # OVERRIDE MOVE METODA
+    def move(self, x, y):
+        super().move(x, y)
+        
+        main_window = self._find_main_window()
+        if main_window and main_window.current_shape == self:
+            try:
+                if hasattr(main_window, 'pos_x_spin_toggle'):
+                    main_window.pos_x_spin_toggle.blockSignals(True)
+                    main_window.pos_x_spin_toggle.setValue(x)
+                    main_window.pos_x_spin_toggle.blockSignals(False)
+            except RuntimeError:
+                pass
+            
+            try:
+                if hasattr(main_window, 'pos_y_spin_toggle'):
+                    main_window.pos_y_spin_toggle.blockSignals(True)
+                    main_window.pos_y_spin_toggle.setValue(y)
+                    main_window.pos_y_spin_toggle.blockSignals(False)
+            except RuntimeError:
+                pass
+
+    # OVERRIDE RESIZE METODA
+    def resize(self, width, height):
+        super().resize(width, height)
+        self._width = width
+        
+        main_window = self._find_main_window()
+        if main_window and main_window.current_shape == self:
+            try:
+                if hasattr(main_window, 'width_spin_toggle'):
+                    main_window.width_spin_toggle.blockSignals(True)
+                    main_window.width_spin_toggle.setValue(width)
+                    main_window.width_spin_toggle.blockSignals(False)
+            except RuntimeError:
+                pass
 
     def get_width(self):
         """Getter za width"""
@@ -5947,6 +5984,17 @@ class ToggleWidget(QWidget):
         """Postavlja stanje toggle-a (True = ON, False = OFF)"""
         self.is_on = is_on
         self.update()
+        
+        # Ažuriraj state checkbox u properties bar-u
+        main_window = self._find_main_window()
+        if main_window and main_window.current_shape == self:
+            try:
+                if hasattr(main_window, 'state_checkbox_toggle'):
+                    main_window.state_checkbox_toggle.blockSignals(True)
+                    main_window.state_checkbox_toggle.setChecked(self.is_on)
+                    main_window.state_checkbox_toggle.blockSignals(False)
+            except RuntimeError:
+                pass
 
     def get_state(self):
         """Getter za stanje toggle-a"""
@@ -6073,17 +6121,9 @@ class ToggleWidget(QWidget):
                 thumb_rect = self.get_thumb_rect()
                 if thumb_rect.contains(event.pos()):
                     self.toggle_state()
-                    # Ažuriraj state checkbox u properties baru
-                    main_window = self._find_main_window()
-                    if main_window and hasattr(main_window, 'state_checkbox_toggle'):
-                        main_window.state_checkbox_toggle.blockSignals(True)
-                        main_window.state_checkbox_toggle.setChecked(self.is_on)
-                        main_window.state_checkbox_toggle.blockSignals(False)
                     self.update_properties_dict()
 
                 self.clicked.emit(self)
-                # Ažuriraj sve properties kada se selektuje
-                self.update_all_properties()
 
         event.accept()
 
@@ -6106,10 +6146,7 @@ class ToggleWidget(QWidget):
 
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-            super().move(new_x, new_y)
-
-            # Ažuriraj properties bar U TOKU draganja (real-time)
-            self._update_properties_position()
+            self.move(new_x, new_y)
 
         event.accept()
 
@@ -6118,10 +6155,6 @@ class ToggleWidget(QWidget):
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
-
-            # Ažuriraj properties bar NAKON što se završi drag ili resize
-            self._update_properties_size()
-            self._update_properties_position()
 
             # Ažuriraj rečnik
             self.update_properties_dict()
@@ -6173,82 +6206,6 @@ class ToggleWidget(QWidget):
 
         self.set_size(new_width, self._height)
 
-        # Ažuriraj properties bar U TOKU resize-a (real-time)
-        self._update_properties_size()
-        self._update_properties_position() 
-
-    def _update_properties_size(self):
-        """Ažuriraj veličinu u properties bar-u"""
-        main_window = self._find_main_window()
-        if not main_window:
-            return
-
-        # Proveri da li je ovaj widget trenutno selektovan
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-
-            # Ažuriraj width spin ako postoji u properties baru
-            if hasattr(main_window, 'width_spin_toggle'):
-                main_window.width_spin_toggle.blockSignals(True)
-                main_window.width_spin_toggle.setValue(self._width)
-                main_window.width_spin_toggle.blockSignals(False)
-
-    def _update_properties_position(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self._find_main_window()
-        if not main_window:
-            return
-
-        # Proveri da li je ovaj widget trenutno selektovan
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-
-            # Ažuriraj position spin-ove ako postoje u properties baru
-            if hasattr(main_window, 'pos_x_spin_toggle'):
-                main_window.pos_x_spin_toggle.blockSignals(True)
-                main_window.pos_x_spin_toggle.setValue(self.x())
-                main_window.pos_x_spin_toggle.blockSignals(False)
-
-            if hasattr(main_window, 'pos_y_spin_toggle'):
-                main_window.pos_y_spin_toggle.blockSignals(True)
-                main_window.pos_y_spin_toggle.setValue(self.y())
-                main_window.pos_y_spin_toggle.blockSignals(False)
-
-    def update_all_properties(self):
-        """Ažurira sve properties u properties baru"""
-        self._update_properties_size()
-        self._update_properties_position()
-
-        # Ažuriraj ostale properties ako su prikazane
-        main_window = self._find_main_window()
-        if not main_window:
-            return
-
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-
-            # Ažuriraj checkbox-ove ako postoje
-            if hasattr(main_window, 'active_checkbox_toggle'):
-                main_window.active_checkbox_toggle.blockSignals(True)
-                main_window.active_checkbox_toggle.setChecked(self.active)
-                main_window.active_checkbox_toggle.blockSignals(False)
-
-            if hasattr(main_window, 'visible_checkbox_toggle'):
-                main_window.visible_checkbox_toggle.blockSignals(True)
-                main_window.visible_checkbox_toggle.setChecked(self.visible)
-                main_window.visible_checkbox_toggle.blockSignals(False)
-
-            if hasattr(main_window, 'state_checkbox_toggle'):
-                main_window.state_checkbox_toggle.blockSignals(True)
-                main_window.state_checkbox_toggle.setChecked(self.is_on)
-                main_window.state_checkbox_toggle.blockSignals(False)
-
-            # Ažuriraj ime ako postoji
-            if hasattr(main_window, 'name_edit_toggle'):
-                main_window.name_edit_toggle.blockSignals(True)
-                main_window.name_edit_toggle.setText(self.custom_name)
-                main_window.name_edit_toggle.blockSignals(False)
-
     def _find_main_window(self):
         """Pronađi glavni prozor u hijerarhiji"""
         parent = self.parent()
@@ -6283,10 +6240,6 @@ class ToggleWidget(QWidget):
         h = self._height
         
         # Background
-
-            
-        
-        # Glavni track
         pen = QPen(self.track_color)
         painter.setPen(pen)
         painter.setBrush(self.background_color)
@@ -6304,19 +6257,13 @@ class ToggleWidget(QWidget):
         painter.drawPie(w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, -180 * 16)
         
         if self._3d:
-
-            # 3D efekat - tamnija pozadina
-        #    shadow_color = QColor(self.background_color)
-        #    shadow_color = shadow_color.darker(120)
-        #    painter.setBrush(shadow_color)
-        #    painter.setPen(Qt.PenStyle.NoPen)
-        #    painter.drawRect(0, 0, w, h)
-                # Donji beli border
+            # Donji beli border
             pen = QPen(self.white_border_color)
             pen.setWidth(2)
             painter.setPen(pen)
             radius = h // 2
-                    # Donja linija
+            
+            # Donja linija
             painter.drawLine(radius, h, w - radius, h)
 
             # Desni donji luk
@@ -6324,6 +6271,7 @@ class ToggleWidget(QWidget):
 
             # Levi donji luk
             painter.drawArc(0, 0, 2 * radius, 2 * radius, 225 * 16, 45 * 16)
+            
             pen = QPen(self.border_color)
             pen.setWidth(3)
             painter.setPen(pen)
@@ -6336,11 +6284,6 @@ class ToggleWidget(QWidget):
 
             # Desni gornji luk
             painter.drawArc(w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, -45 * 16)
-        
-
-        
-        # Gornji crni border
-
         
         # Thumb (knob)
         thumb_rect = self.get_thumb_rect()
@@ -7104,29 +7047,24 @@ class EllipseWidget(QWidget):
         self._width = width
         self._height = height
 
-        # Status properties (konzistentno sa drugim widget-ima)
+        # Status properties
         self.active = True
         self.visible = True
         self.static = False
         self.custom_name = None
         self.stack_order = 1
 
-        # Geometry properties
-        self._x = 0
-        self._y = 0
-
         # Ellipse properties
-        self.border_color = QColor(0, 0, 0)  # Crna boja border-a
+        self.border_color = QColor(0, 0, 0)
         self.border_width = 2
         self.fill_enabled = False
-        # UKLONI: self.fill_color = QColor(0, 0, 255)  # Plava boja popune
-        self.gradient_enabled = True  # Podrazumevano gradijent
-        self.gradient_type = "Top-Bottom"  # Top-Bottom, Bottom-Top, Left-Right, Right-Left
-        self.gradient_start_color = QColor(0, 0, 255)  # Plava
-        self.gradient_end_color = QColor(0, 0, 128)    # Tamno plava
+        self.gradient_enabled = True
+        self.gradient_type = "Top-Bottom"
+        self.gradient_start_color = QColor(0, 0, 255)
+        self.gradient_end_color = QColor(0, 0, 128)
         
         # Selection
-        self.selected = False
+        self.is_selected = False
         self.dragging = False
         self.resizing = False
         self.resize_corner = None
@@ -7138,14 +7076,11 @@ class EllipseWidget(QWidget):
         self.setFixedSize(self._width, self._height)
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        
-        # Rečnik za properties
-        self.update_properties_dict()
     
     def set_size(self, width, height):
         """Postavlja veličinu widgeta"""
-        self._width = max(20, width)  # Minimum 20px
-        self._height = max(20, height)  # Minimum 20px
+        self._width = max(20, width)
+        self._height = max(20, height)
         self.setFixedSize(self._width, self._height)
         self.update()
     
@@ -7164,17 +7099,15 @@ class EllipseWidget(QWidget):
     
     def set_border_width(self, width):
         """Postavlja debljinu border-a"""
-        self.border_width = max(1, min(20, width))  # Ograniči na 1-20
+        self.border_width = max(1, min(20, width))
         self.update()
     
     def set_fill_enabled(self, enabled):
         """Omogućava ili onemogućava popunu"""
         self.fill_enabled = enabled
-        # Kada je popuna omogućena, uvek je gradijent
         if enabled:
             self.gradient_enabled = True
         self.update()
-    
     
     def set_gradient_type(self, gradient_type):
         """Postavlja tip gradijenta"""
@@ -7189,7 +7122,7 @@ class EllipseWidget(QWidget):
     
     def set_selected(self, selected):
         """Postavlja selektovani status"""
-        self.selected = selected
+        self.is_selected = selected
         self.update()
     
     def set_visible(self, visible):
@@ -7197,18 +7130,6 @@ class EllipseWidget(QWidget):
         self.visible = visible
         self.setVisible(visible)
         self.update()
-    
-    def update_properties_dict(self):
-        """Ažurira rečnik svojstava"""
-        main_window = self._find_main_window()
-        if not main_window:
-            return
-            
-        if hasattr(main_window, 'all_ellipse_dicts'):
-            if self.custom_name in main_window.all_ellipse_dicts:
-                main_window.all_ellipse_dicts[self.custom_name] = self.get_properties_dict()
-            else:
-                main_window.all_ellipse_dicts[self.custom_name] = self.get_properties_dict()
     
     def get_properties_dict(self):
         """Vraća rečnik sa svim svojstvima elipse"""
@@ -7242,29 +7163,26 @@ class EllipseWidget(QWidget):
     
     def _draw_selection_handles(self, painter):
         """Crtanje resize handle-ova na uglovima"""
-        if not self.selected:
+        if not self.is_selected:
             return
             
         handle_size = 8
         half_size = handle_size // 2
 
-        # Zeleni handle-ovi
         painter.setBrush(QColor(0, 255, 0))
         painter.setPen(QPen(QColor(0, 80, 200), 1))
 
-        # 4 ugla
         corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-            QPoint(4, self.height()-4),  # donji levi
-            QPoint(self.width()-4, self.height()-4)  # donji desni
+            QPoint(4, 4),
+            QPoint(self.width()-4, 4),
+            QPoint(4, self.height()-4),
+            QPoint(self.width()-4, self.height()-4)
         ]
 
         for corner in corners:
             painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
                               handle_size, handle_size)
 
-            # Mali beli centar
             painter.setBrush(QColor(255, 255, 255))
             painter.setPen(Qt.PenStyle.NoPen)
             painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
@@ -7273,7 +7191,7 @@ class EllipseWidget(QWidget):
     
     def _draw_selection_border(self, painter):
         """Crtanje crvenog isprekidanog okvira"""
-        if not self.selected:
+        if not self.is_selected:
             return
             
         margin = 2
@@ -7319,29 +7237,22 @@ class EllipseWidget(QWidget):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
 
-            # Proveri da li je kliknut resize handle
             self.resize_corner = self._get_corner_at(mouse_pos)
 
             if self.resize_corner:
-                # Počni resize
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
             else:
-                # Počni dragovanje
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                
-                # Emituj signal za selekciju
                 self.clicked.emit(self)
-                self._update_properties()
 
         event.accept()
     
     def mouseMoveEvent(self, event):
         mouse_pos = event.pos()
         
-        # Proveri da li je miš preko resize handle-a
         corner = self._get_corner_at(mouse_pos)
         if corner:
             if corner in ["top_left", "bottom_right"]:
@@ -7353,17 +7264,12 @@ class EllipseWidget(QWidget):
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self._handle_resize(event.globalPosition().toPoint())
-            self._update_properties_size()
-            self._update_properties_position()
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
             delta = mouse_pos - self.drag_start_pos
             
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-            super().move(new_x, new_y)
-            
-            self._update_properties_position()
+            self.move(new_x, new_y)
         
         event.accept()
     
@@ -7372,10 +7278,6 @@ class EllipseWidget(QWidget):
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
-
-            self._update_properties_size()
-            self._update_properties_position()
-            self.update_properties_dict()
 
         event.accept()
     
@@ -7404,131 +7306,10 @@ class EllipseWidget(QWidget):
 
         self.set_size(new_width, new_height)
     
-    def _update_properties_size(self):
-        """Ažuriraj veličinu u properties bar-u"""
-        main_window = self._find_main_window()
-        if not main_window:
-            return
-
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-
-            # Proveri da li ima ellipse specifične kontrole
-            if hasattr(main_window, 'width_spin_ellipse'):
-                main_window.width_spin_ellipse.blockSignals(True)
-                main_window.width_spin_ellipse.setValue(self._width)
-                main_window.width_spin_ellipse.blockSignals(False)
-            # Fallback na opšte kontrole
-            elif hasattr(main_window, 'width_spin'):
-                main_window.width_spin.blockSignals(True)
-                main_window.width_spin.setValue(self._width)
-                main_window.width_spin.blockSignals(False)
-
-            if hasattr(main_window, 'height_spin_ellipse'):
-                main_window.height_spin_ellipse.blockSignals(True)
-                main_window.height_spin_ellipse.setValue(self._height)
-                main_window.height_spin_ellipse.blockSignals(False)
-            elif hasattr(main_window, 'height_spin'):
-                main_window.height_spin.blockSignals(True)
-                main_window.height_spin.setValue(self._height)
-                main_window.height_spin.blockSignals(False)
-    
-    def _update_properties_position(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self._find_main_window()
-        if not main_window:
-            return
-
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-
-            # Proveri da li ima ellipse specifične kontrole
-            if hasattr(main_window, 'pos_x_spin_ellipse'):
-                main_window.pos_x_spin_ellipse.blockSignals(True)
-                main_window.pos_x_spin_ellipse.setValue(self.x())
-                main_window.pos_x_spin_ellipse.blockSignals(False)
-            elif hasattr(main_window, 'pos_x_spin'):
-                main_window.pos_x_spin.blockSignals(True)
-                main_window.pos_x_spin.setValue(self.x())
-                main_window.pos_x_spin.blockSignals(False)
-
-            if hasattr(main_window, 'pos_y_spin_ellipse'):
-                main_window.pos_y_spin_ellipse.blockSignals(True)
-                main_window.pos_y_spin_ellipse.setValue(self.y())
-                main_window.pos_y_spin_ellipse.blockSignals(False)
-            elif hasattr(main_window, 'pos_y_spin'):
-                main_window.pos_y_spin.blockSignals(True)
-                main_window.pos_y_spin.setValue(self.y())
-                main_window.pos_y_spin.blockSignals(False)
-    
-    def _update_properties(self):
-        """Ažurira sve properties u properties baru"""
-        main_window = self._find_main_window()
-        if not main_window:
-            return
-
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj checkbox-ove
-            if hasattr(main_window, 'active_checkbox'):
-                main_window.active_checkbox.blockSignals(True)
-                main_window.active_checkbox.setChecked(self.active)
-                main_window.active_checkbox.blockSignals(False)
-                
-            if hasattr(main_window, 'visible_checkbox'):
-                main_window.visible_checkbox.blockSignals(True)
-                main_window.visible_checkbox.setChecked(self.visible)
-                main_window.visible_checkbox.blockSignals(False)
-                
-            if hasattr(main_window, 'static_checkbox'):
-                main_window.static_checkbox.blockSignals(True)
-                main_window.static_checkbox.setChecked(self.static)
-                main_window.static_checkbox.blockSignals(False)
-            
-            # Ažuriraj ime
-            if hasattr(main_window, 'name_edit'):
-                main_window.name_edit.blockSignals(True)
-                main_window.name_edit.setText(self.custom_name)
-                main_window.name_edit.blockSignals(False)
-            
-            # Ažuriraj stack order
-            if hasattr(main_window, 'stack_order_spin'):
-                main_window.stack_order_spin.blockSignals(True)
-                if main_window.current_shape in main_window.all_shapes:
-                    index = main_window.all_shapes.index(main_window.current_shape) + 1
-                    main_window.stack_order_spin.setValue(index)
-                main_window.stack_order_spin.blockSignals(False)
-            
-            # Ažuriraj border width
-            if hasattr(main_window, 'border_width_spin'):
-                main_window.border_width_spin.blockSignals(True)
-                main_window.border_width_spin.setValue(self.border_width)
-                main_window.border_width_spin.blockSignals(False)
-            
-            # Ažuriraj border color
-            if hasattr(main_window, 'border_color_rect'):
-                main_window.border_color_rect.setStyleSheet(
-                    f"background-color: {self.border_color.name()}; border: 1px solid #ccc;"
-                )
-            
-            # Ažuriraj fill checkbox
-            if hasattr(main_window, 'fill_checkbox'):
-                main_window.fill_checkbox.blockSignals(True)
-                main_window.fill_checkbox.setChecked(self.fill_enabled)
-                main_window.fill_checkbox.blockSignals(False)
-            
-            # Ažuriraj fill color
-            if hasattr(main_window, 'fill_color_rect'):
-                main_window.fill_color_rect.setStyleSheet(
-                    f"background-color: {self.fill_color.name()}; border: 1px solid #ccc;"
-                )
-    
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        # Margine za border
         margin = self.border_width // 2
         ellipse_rect = QRect(
             margin,
@@ -7539,7 +7320,6 @@ class EllipseWidget(QWidget):
 
         # Crtanje popune ako je omogućena
         if self.fill_enabled and self.gradient_enabled:
-            # Kreiraj gradijent na osnovu tipa
             if self.gradient_type == "Top-Bottom":
                 gradient = QLinearGradient(0, 0, 0, self._height)
             elif self.gradient_type == "Bottom-Top":
@@ -7562,9 +7342,65 @@ class EllipseWidget(QWidget):
         painter.drawEllipse(ellipse_rect)
 
         # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-        if self.selected:
+        if self.is_selected:
             self._draw_selection_border(painter)
             self._draw_selection_handles(painter)
+    
+    # KLJUČNE METODE ZA AŽURIRANJE PROPERTIES BAR-A
+    def move(self, x, y):
+        """Override move metode da ažurira properties bar"""
+        super().move(x, y)
+        
+        main_window = self._find_main_window()
+        if main_window and main_window.current_shape == self:
+            try:
+                if hasattr(main_window, 'pos_x_spin_ellipse'):
+                    main_window.pos_x_spin_ellipse.blockSignals(True)
+                    main_window.pos_x_spin_ellipse.setValue(x)
+                    main_window.pos_x_spin_ellipse.blockSignals(False)
+            except RuntimeError:
+                pass
+            
+            try:
+                if hasattr(main_window, 'pos_y_spin_ellipse'):
+                    main_window.pos_y_spin_ellipse.blockSignals(True)
+                    main_window.pos_y_spin_ellipse.setValue(y)
+                    main_window.pos_y_spin_ellipse.blockSignals(False)
+            except RuntimeError:
+                pass
+
+    def resize(self, width, height):
+        """Override resize metode da ažurira properties bar"""
+        super().resize(width, height)
+        self._width = width
+        self._height = height
+        
+        main_window = self._find_main_window()
+        if main_window and main_window.current_shape == self:
+            try:
+                if hasattr(main_window, 'width_spin_ellipse'):
+                    main_window.width_spin_ellipse.blockSignals(True)
+                    main_window.width_spin_ellipse.setValue(width)
+                    main_window.width_spin_ellipse.blockSignals(False)
+            except RuntimeError:
+                pass
+            
+            try:
+                if hasattr(main_window, 'height_spin_ellipse'):
+                    main_window.height_spin_ellipse.blockSignals(True)
+                    main_window.height_spin_ellipse.setValue(height)
+                    main_window.height_spin_ellipse.blockSignals(False)
+            except RuntimeError:
+                pass
+    
+    # Metoda za ažuriranje properties rečnika (za konzistentnost)
+    def update_properties_dict(self):
+        """Ažurira properties rečnik"""
+        main_window = self._find_main_window()
+        if not main_window or not hasattr(main_window, 'all_ellipse_dicts'):
+            return
+            
+        main_window.all_ellipse_dicts[self.custom_name] = self.get_properties_dict()
 
 class NumericWidget(QWidget):
     clicked = pyqtSignal(object)

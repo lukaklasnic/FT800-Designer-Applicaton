@@ -751,7 +751,7 @@ class MainWindow( QMainWindow ):
             return
 
         if shape:
-            shape.custom_name = generateWidgetName(self, "Rectangle")
+            
         
             # DODAJ OVO: Inicijalni stack_order
             if self.all_shapes:
