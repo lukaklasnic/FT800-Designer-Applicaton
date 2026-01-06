@@ -303,6 +303,8 @@ class RectangleWidget(QWidget):
         self.static = False
         self.custom_name = ""
         self.stack_order = 1
+
+        self.tag = 0  # DEFAULT TAG VREDNOST
         
         # Postavi atribute za mouse events
         self.setMouseTracking(True)
@@ -562,6 +564,7 @@ class RectangleWidget(QWidget):
             'static': self.static,
             'name': self.custom_name,
             'stack_order': self.stack_order,
+            'tag': self.tag,
             'x': self.x(),
             'y': self.y(),
             'width': self.width(),
@@ -660,6 +663,7 @@ class RectangleWidget(QWidget):
                 main_window.height_spin_rect.blockSignals(True)
                 main_window.height_spin_rect.setValue(height)
                 main_window.height_spin_rect.blockSignals(False)
+
 class LineWidget(QWidget):
     clicked = pyqtSignal(object)
     
@@ -692,6 +696,8 @@ class LineWidget(QWidget):
         self.resize_start_points = None
         self.resize_corner = None
         self.drag_start_pos = QPoint()
+
+        self.tag = 0
         
         # Ažuriraj veličinu widgeta bazirano na koordinatama
         self._update_widget_size()
@@ -1094,6 +1100,7 @@ class LineWidget(QWidget):
             'type': 'Line',
             'name': getattr(self, 'custom_name', 'Line_0'),
             'stack_order': getattr(self, 'stack_order', 0),
+            'tag': self.tag,
             'start_x': self._start_x,
             'start_y': self._start_y,
             'end_x': self._end_x,
@@ -1148,6 +1155,7 @@ class CircleWidget(QWidget):
         self.resize_start_diameter = 0
         
         self.setMouseTracking(True)
+        self.tag = 0
         
         # Rečnik za properties
         self.properties_dict = {}
@@ -1398,6 +1406,7 @@ class CircleWidget(QWidget):
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
+            'tag': self.tag,
             'name': self.custom_name,
             'x': self.x(),
             'y': self.y(),
@@ -2255,6 +2264,8 @@ class ButtonWidget(QWidget):
         self.visible = True
         self.static = False
         self.stack_order = 1
+
+        self.tag = 0
         
         # Postavi atribute za mouse events
         #self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
@@ -2282,6 +2293,7 @@ class ButtonWidget(QWidget):
             'static': self.static,
             'name': self.custom_name,
             'stack_order': self.stack_order,
+            'tag': self.tag,
             'position_x': self.x(),
             'position_y': self.y(),
             'width': self.width(),
@@ -4073,6 +4085,8 @@ class ScrollBarWidget(QWidget):
         self.thumb_drag_start_pos = QPoint()
         self.thumb_drag_start_value = 0
 
+        self.tag = 0
+
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
@@ -4653,6 +4667,7 @@ class ScrollBarWidget(QWidget):
             'type': 'ScrollBar',
             'name': getattr(self, 'custom_name', 'ScrollBar_0'),
             'stack_order': getattr(self, 'stack_order', 0),
+            'tag': self.tag,
             'position': (self.x(), self.y()),
             'width': self._width,
             'height': self._height,
@@ -4720,6 +4735,8 @@ class DialWidget(QWidget):
         self.custom_name = None
         self.stack_order = 1
 
+        self.tag = 0
+
     def get_scaled_value(self, original_value):
         """Vraća vrednost skaliranu u odnosu na originalni dijametar"""
         scale_factor = self.diameter / 100.0  # Originalni dijametar je 100
@@ -4782,6 +4799,7 @@ class DialWidget(QWidget):
             'type': 'Dial',
             'name': getattr(self, 'custom_name', 'Dial_0'),
             'stack_order': getattr(self, 'stack_order', 0),
+            'tag': self.tag,
             'position': (self.x(), self.y()),
             'diameter': self.diameter,
             'active': self.active,
@@ -5176,6 +5194,8 @@ class SliderWidget(QWidget):
         self._3d = True  # Dodaj 3D atribut
         self.custom_name = None
         self.stack_order = 1
+
+        self.tag = 0
         
         # Progress vrednost (0-100)
         self.value = 50
@@ -5730,6 +5750,7 @@ class SliderWidget(QWidget):
             'type': 'Slider',
             'name': getattr(self, 'custom_name', 'Slider_0'),
             'stack_order': getattr(self, 'stack_order', 0),
+            'tag': self.tag,
             'position': (self.x(), self.y()),
             'width': self._width,
             'height': self._height,
@@ -5787,6 +5808,8 @@ class ToggleWidget(QWidget):
         # Proporcije bazirane na originalu (width=250, height=150)
         self.original_width = 250
         self.original_height = 150
+
+        self.tag=0
         
         # Resize i drag varijable
         self.resizing = False
@@ -5939,6 +5962,7 @@ class ToggleWidget(QWidget):
             'type': 'Toggle',
             'name': getattr(self, 'custom_name', 'Toggle_0'),
             'stack_order': getattr(self, 'stack_order', 0),
+            'tag': self.tag,
             'position': (self.x(), self.y()),
             'width': self._width,
             'height': self._height,
@@ -6991,6 +7015,8 @@ class EllipseWidget(QWidget):
         self.drag_start_pos = QPoint()
         self.resize_start_pos = QPoint()
         self.resize_start_size = QSize()
+
+        self.tag = 0
         
         # Postavi fiksnu veličinu
         self.setFixedSize(self._width, self._height)
@@ -7077,6 +7103,7 @@ class EllipseWidget(QWidget):
             'type': 'Ellipse',
             'name': getattr(self, 'custom_name', 'Ellipse_0'),
             'stack_order': getattr(self, 'stack_order', 0),
+            'tag': self.tag,
             'position': (self.x(), self.y()),
             'width': self._width,
             'height': self._height,

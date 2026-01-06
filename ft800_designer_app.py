@@ -1,13 +1,10 @@
 from PyQt6.QtWidgets import ( QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QFrame, QPushButton, QCheckBox, QColorDialog, QComboBox, QSpinBox,QSplashScreen, QFileDialog, QLineEdit )
 from PyQt6.QtCore import ( Qt, QTimer )
-from PyQt6.QtGui import (QPixmap, QPainter, QPen, QColor,  QIcon )
+from PyQt6.QtGui import (QPixmap, QPainter, QPen, QColor,  QIcon, QGuiApplication )
 from widgets import  ( RectangleWidget, LineWidget, CircleWidget, KeysWidget, ButtonWidget, GaugeWidget, ClockWidget, ProgressBarWidget, ScrollBarWidget, DialWidget, SliderWidget, ToggleWidget, LabelWidget, ImageWidget, Widget_icon, ColorRectangle, EllipseWidget,NumericWidget  )
 import sys
-from callback import (showButtonProperties, updateButtonSize, showLineProperties,  generateWidgetName, renumberAllWidgets, showCircleProperties, updateCircleSize, showRectangleProperties, showClockProperties, updateClockSize, updateGaugeSize, showGaugeProperties, showDialProperties, updateDialSize, showToggleProperties, updateToggleSize, showLabelProperties, updateLabelSize, showSliderProperties, showScrollBarProperties, showProgressBarProperties, showKeysProperties, update_keys_size, updateImageSize, showImageProperties, showEllipseProperties, updateEllipseSize,showNumericProperties  )
+from callback import (generate_auto_tag, showButtonProperties, updateButtonSize, showLineProperties,  generateWidgetName, renumberAllWidgets, showCircleProperties, updateCircleSize, showRectangleProperties, showClockProperties, updateClockSize, updateGaugeSize, showGaugeProperties, showDialProperties, updateDialSize, showToggleProperties, updateToggleSize, showLabelProperties, updateLabelSize, showSliderProperties, showScrollBarProperties, showProgressBarProperties, showKeysProperties, update_keys_size, updateImageSize, showImageProperties, showEllipseProperties, updateEllipseSize,showNumericProperties  )
 from pathlib import Path
-import struct
-from PIL import Image
-
 
 class MainWindow( QMainWindow ):
     def __init__( self ):
@@ -506,6 +503,8 @@ class MainWindow( QMainWindow ):
             shape.custom_name = generateWidgetName(self, "Rectangle")
             shape.stack_order = len(self.all_shapes) + 1
 
+            shape.tag = generate_auto_tag(self, shape)
+
             # Inicijalizuj rečnik za rectangle-ove
             if not hasattr(self, 'all_rectangle_dicts'):
                 self.all_rectangle_dicts = {}
@@ -532,6 +531,8 @@ class MainWindow( QMainWindow ):
             shape.custom_name = generateWidgetName(self, "Line")
             shape.stack_order = len(self.all_shapes) + 1
 
+            shape.tag = generate_auto_tag(self, shape)
+
             # Inicijalizuj rečnik za linije
             if not hasattr(self, 'all_line_dicts'):
                 self.all_line_dicts = {}
@@ -547,6 +548,8 @@ class MainWindow( QMainWindow ):
             shape.stack_order = len(self.all_shapes) + 1
             shape.update_center_position()
 
+            shape.tag = generate_auto_tag(self, shape)
+
             # Inicijalizuj rečnik za circle-ove
             if not hasattr(self, 'all_circle_dicts'):
                 self.all_circle_dicts = {}
@@ -559,6 +562,8 @@ class MainWindow( QMainWindow ):
             # Generiši ime
             shape.custom_name = generateWidgetName(self, "Ellipse")
             shape.stack_order = len(self.all_shapes) + 1
+
+            shape.tag = generate_auto_tag(self, shape)
 
             # Inicijalizuj rečnik za ellipse-ove
             if not hasattr(self, 'all_ellipse_dicts'):
@@ -573,6 +578,7 @@ class MainWindow( QMainWindow ):
             # Generiši ime
             shape.custom_name = generateWidgetName(self, "Numeric")
             shape.stack_order = len(self.all_shapes) + 1
+            
 
             # Inicijalizuj rečnik za numeric widgete
             if not hasattr(self, 'all_numeric_dicts'):
@@ -593,6 +599,8 @@ class MainWindow( QMainWindow ):
                 self.all_button_dicts = {}
             self.all_button_dicts[ shape.custom_name ] = shape.get_properties_dict()
 
+            shape.tag = generate_auto_tag(self, shape)
+
         elif self.selected_shape == "Gauge":
             shape = GaugeWidget(80, self.canvas_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
@@ -601,6 +609,8 @@ class MainWindow( QMainWindow ):
             # Koristi generateWidgetName za generisanje imena
             shape.custom_name = generateWidgetName(self, "Gauge")
             shape.stack_order = len(self.all_shapes) + 1
+
+            shape.tag = generate_auto_tag(self, shape)
 
             # Ažuriraj properties dict
             shape.update_properties_dict()
@@ -657,6 +667,8 @@ class MainWindow( QMainWindow ):
                 self.all_scrollbar_dicts = {}
             self.all_scrollbar_dicts[shape.custom_name] = shape.get_properties_dict()
 
+            shape.tag = generate_auto_tag(self, shape)
+
         elif self.selected_shape == "Dial":
             shape = DialWidget(80, self.canvas_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
@@ -670,6 +682,8 @@ class MainWindow( QMainWindow ):
             if not hasattr(self, 'all_dial_dicts'):
                 self.all_dial_dicts = {}
             self.all_dial_dicts[shape.custom_name] = shape.get_properties_dict()
+
+            shape.tag = generate_auto_tag(self, shape)
 
         elif self.selected_shape == "Slider":
             shape = SliderWidget(200, 50, self.canvas_container)  # Povećana visina za bolji prikaz
@@ -685,6 +699,8 @@ class MainWindow( QMainWindow ):
                 self.all_slider_dicts = {}
             self.all_slider_dicts[shape.custom_name] = shape.get_properties_dict()
 
+            shape.tag = generate_auto_tag(self, shape)
+
         elif self.selected_shape == "Toggle":
             shape = ToggleWidget(80, 30, self.canvas_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
@@ -698,6 +714,8 @@ class MainWindow( QMainWindow ):
             if not hasattr(self, 'all_toggle_dicts'):
                 self.all_toggle_dicts = {}
             self.all_toggle_dicts[shape.custom_name] = shape.get_properties_dict()
+
+            shape.tag = generate_auto_tag(self, shape)
 
         elif self.selected_shape == "Label":
             shape = LabelWidget(100, 40, self.canvas_container)
@@ -752,7 +770,6 @@ class MainWindow( QMainWindow ):
 
         if shape:
             
-        
             # DODAJ OVO: Inicijalni stack_order
             if self.all_shapes:
                 max_stack_order = max([s.stack_order for s in self.all_shapes])
@@ -930,6 +947,34 @@ class MainWindow( QMainWindow ):
     def updateShapeBorderWidth( self ):
         if ( self.current_shape and not isinstance( self.current_shape, ( GaugeWidget, ClockWidget, ProgressBarWidget ) ) and hasattr( self.current_shape, 'set_border_width' ) ):
             self.current_shape.set_border_width( self.border_width_spin.value() )
+
+    def set_tag(self, tag_value):
+        """Postavlja tag vrednost za widget"""
+        self.tag = tag_value
+        self.update_properties_dict()  # Ažuriraj rečnik
+
+        # Ažuriraj odgovarajući rečnik u MainWindow
+        main_window = self._find_main_window()
+        if main_window:
+            # Pronađi odgovarajući rečnik
+            if isinstance(self, RectangleWidget) and hasattr(main_window, 'all_rectangle_dicts'):
+                main_window.all_rectangle_dicts[self.custom_name] = self.get_properties_dict()
+            elif isinstance(self, CircleWidget) and hasattr(main_window, 'all_circle_dicts'):
+                main_window.all_circle_dicts[self.custom_name] = self.get_properties_dict()
+            elif isinstance(self, LineWidget) and hasattr(main_window, 'all_line_dicts'):
+                main_window.all_line_dicts[self.custom_name] = self.get_properties_dict()
+            elif isinstance(self, ButtonWidget) and hasattr(main_window, 'all_button_dicts'):
+                main_window.all_button_dicts[self.custom_name] = self.get_properties_dict()
+            elif isinstance(self, EllipseWidget) and hasattr(main_window, 'all_ellipse_dicts'):
+                main_window.all_ellipse_dicts[self.custom_name] = self.get_properties_dict()
+            elif isinstance(self, DialWidget) and hasattr(main_window, 'all_dial_dicts'):
+                main_window.all_dial_dicts[self.custom_name] = self.get_properties_dict()
+            elif isinstance(self, ScrollBarWidget) and hasattr(main_window, 'all_scroll_bar_dicts'):
+                main_window.all_scroll_bar_dicts[self.custom_name] = self.get_properties_dict()
+            elif isinstance(self, SliderWidget) and hasattr(main_window, 'all_slider_dicts'):
+                main_window.all_slider_dicts[self.custom_name] = self.get_properties_dict()
+            elif isinstance(self, ToggleWidget) and hasattr(main_window, 'all_toggle_dicts'):
+                main_window.all_toggle_dicts[self.custom_name] = self.get_properties_dict()
     
     def print_all_widget_dicts(self):
         """Ispisuje sve rečnike za sve widget-e"""
@@ -966,8 +1011,7 @@ class MainWindow( QMainWindow ):
         print("="*60 + "\n")
 
 if __name__ == "__main__":
-    from pathlib import Path
-    from PyQt6.QtGui import QGuiApplication
+
 
     QGuiApplication.setHighDpiScaleFactorRoundingPolicy(
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough

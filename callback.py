@@ -138,6 +138,28 @@ def showButtonProperties( main_window, current_index ):
     stack_order_widget.setLayout(stack_order_layout)
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
     current_index += 1
+
+
+    # Tag input
+    tag_layout = QHBoxLayout()
+    tag_layout.setContentsMargins(20, 5, 10, 5)
+    tag_input_label = QLabel("Tag value:")
+    tag_input_label.setStyleSheet("color: white; font-size: 14px;")
+    tag_layout.addWidget(tag_input_label)
+    tag_layout.addStretch(1)
+
+    main_window.tag_spin_button = QSpinBox()
+    main_window.tag_spin_button.setRange(0, 255)
+    main_window.tag_spin_button.setValue(main_window.current_shape.tag)
+    main_window.tag_spin_button.valueChanged.connect(lambda value: update_button_tag(main_window, value))
+    main_window.tag_spin_button.setStyleSheet("color: black; background-color: white;")
+    main_window.tag_spin_button.setFixedWidth(60)
+    tag_layout.addWidget(main_window.tag_spin_button)
+
+    tag_widget = QWidget()
+    tag_widget.setLayout(tag_layout)
+    main_window.properties_layout.insertWidget(current_index, tag_widget)
+    current_index += 1
     
     # 3. GEOMETRY SECTION
     geometry_label = QLabel( "Geometry" )
@@ -360,6 +382,12 @@ def showButtonProperties( main_window, current_index ):
     
     return current_index
 
+def update_button_tag(main_window, value):
+    """Ažurira tag vrednost za button"""
+    if main_window.current_shape and isinstance(main_window.current_shape, ButtonWidget):
+        main_window.current_shape.tag = value
+        if hasattr(main_window, 'all_button_dicts'):
+            main_window.all_button_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def update_button_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -590,6 +618,28 @@ def showLineProperties(main_window, current_index):
     stack_order_widget.setLayout(stack_order_layout)
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
     current_index += 1
+
+
+    # Tag input
+    tag_layout = QHBoxLayout()
+    tag_layout.setContentsMargins(20, 5, 10, 5)
+    tag_input_label = QLabel("Tag value:")
+    tag_input_label.setStyleSheet("color: white; font-size: 14px;")
+    tag_layout.addWidget(tag_input_label)
+    tag_layout.addStretch(1)
+
+    main_window.tag_spin_line = QSpinBox()
+    main_window.tag_spin_line.setRange(0, 255)
+    main_window.tag_spin_line.setValue(main_window.current_shape.tag)
+    main_window.tag_spin_line.valueChanged.connect(lambda value: update_line_tag(main_window, value))
+    main_window.tag_spin_line.setStyleSheet("color: black; background-color: white;")
+    main_window.tag_spin_line.setFixedWidth(60)
+    tag_layout.addWidget(main_window.tag_spin_line)
+
+    tag_widget = QWidget()
+    tag_widget.setLayout(tag_layout)
+    main_window.properties_layout.insertWidget(current_index, tag_widget)
+    current_index += 1
     
 
     # 3. GEOMETRY SECTION (samo tačke)
@@ -717,6 +767,14 @@ def showLineProperties(main_window, current_index):
 
     return current_index
 # CALLBACK METODE ZA LINE (konzistentne sa drugim widget-ima):
+
+
+def update_line_tag(main_window, value):
+    """Ažurira tag vrednost za line"""
+    if main_window.current_shape and isinstance(main_window.current_shape, LineWidget):
+        main_window.current_shape.tag = value
+        if hasattr(main_window, 'all_line_dicts'):
+            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def update_line_active(main_window, state):
     """Ažurira active status za line"""
@@ -929,6 +987,27 @@ def showCircleProperties(main_window, current_index):
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
     current_index += 1
 
+    # Tag input
+    tag_layout = QHBoxLayout()
+    tag_layout.setContentsMargins(20, 5, 10, 5)
+    tag_input_label = QLabel("Tag value:")
+    tag_input_label.setStyleSheet("color: white; font-size: 14px;")
+    tag_layout.addWidget(tag_input_label)
+    tag_layout.addStretch(1)
+
+    main_window.tag_spin_circle = QSpinBox()
+    main_window.tag_spin_circle.setRange(0, 255)
+    main_window.tag_spin_circle.setValue(main_window.current_shape.tag)
+    main_window.tag_spin_circle.valueChanged.connect(lambda value: update_circle_tag(main_window, value))
+    main_window.tag_spin_circle.setStyleSheet("color: black; background-color: white;")
+    main_window.tag_spin_circle.setFixedWidth(60)
+    tag_layout.addWidget(main_window.tag_spin_circle)
+
+    tag_widget = QWidget()
+    tag_widget.setLayout(tag_layout)
+    main_window.properties_layout.insertWidget(current_index, tag_widget)
+    current_index += 1
+
 
     # 3. GEOMETRY SECTION
     geometry_label = QLabel("Geometry")
@@ -1099,6 +1178,13 @@ def showCircleProperties(main_window, current_index):
     return current_index
 
 # CALLBACK METODE ZA CIRCLE:
+
+def update_circle_tag(main_window, value):
+    """Ažurira tag vrednost za circle"""
+    if main_window.current_shape and isinstance(main_window.current_shape, CircleWidget):
+        main_window.current_shape.tag = value
+        if hasattr(main_window, 'all_circle_dicts'):
+            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def update_circle_active(main_window, state):
     """Ažurira active status za circle"""
@@ -1384,6 +1470,27 @@ def showRectangleProperties(main_window, current_index):
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
     current_index += 1
 
+    # Tag input
+    tag_layout = QHBoxLayout()
+    tag_layout.setContentsMargins(20, 5, 10, 5)
+    tag_input_label = QLabel("Tag value:")
+    tag_input_label.setStyleSheet("color: white; font-size: 14px;")
+    tag_layout.addWidget(tag_input_label)
+    tag_layout.addStretch(1)
+
+    main_window.tag_spin_rect = QSpinBox()
+    main_window.tag_spin_rect.setRange(0, 255)
+    main_window.tag_spin_rect.setValue(main_window.current_shape.tag)
+    main_window.tag_spin_rect.valueChanged.connect(lambda value: update_rectangle_tag(main_window, value))
+    main_window.tag_spin_rect.setStyleSheet("color: black; background-color: white;")
+    main_window.tag_spin_rect.setFixedWidth(60)
+    tag_layout.addWidget(main_window.tag_spin_rect)
+
+    tag_widget = QWidget()
+    tag_widget.setLayout(tag_layout)
+    main_window.properties_layout.insertWidget(current_index, tag_widget)
+    current_index += 1
+
     # 3. GEOMETRY SECTION
     geometry_label = QLabel("Geometry")
     geometry_label.setStyleSheet("color: white; font-size: 12px; font-weight: bold; margin-top: 10px;")
@@ -1621,6 +1728,14 @@ def showRectangleProperties(main_window, current_index):
     return current_index
 
 # CALLBACK METODE ZA RECTANGLE:
+
+
+def update_rectangle_tag(main_window, value):
+    """Ažurira tag vrednost za rectangle"""
+    if main_window.current_shape and isinstance(main_window.current_shape, RectangleWidget):
+        main_window.current_shape.tag = value
+        if hasattr(main_window, 'all_rectangle_dicts'):
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def update_rectangle_active(main_window, state):
     """Ažurira active status za rectangle"""
@@ -2874,6 +2989,28 @@ def showDialProperties(main_window, current_index):
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
     current_index += 1
 
+
+    # Tag input
+    tag_layout = QHBoxLayout()
+    tag_layout.setContentsMargins(20, 5, 10, 5)
+    tag_input_label = QLabel("Tag value:")
+    tag_input_label.setStyleSheet("color: white; font-size: 14px;")
+    tag_layout.addWidget(tag_input_label)
+    tag_layout.addStretch(1)
+
+    main_window.tag_spin_dial = QSpinBox()
+    main_window.tag_spin_dial.setRange(0, 255)
+    main_window.tag_spin_dial.setValue(main_window.current_shape.tag)
+    main_window.tag_spin_dial.valueChanged.connect(lambda value: update_dial_tag(main_window, value))
+    main_window.tag_spin_dial.setStyleSheet("color: black; background-color: white;")
+    main_window.tag_spin_dial.setFixedWidth(60)
+    tag_layout.addWidget(main_window.tag_spin_dial)
+
+    tag_widget = QWidget()
+    tag_widget.setLayout(tag_layout)
+    main_window.properties_layout.insertWidget(current_index, tag_widget)
+    current_index += 1
+
     # 3. GEOMETRY SECTION
     geometry_label = QLabel("Geometry")
     geometry_label.setStyleSheet("color: white; font-size: 12px; font-weight: bold; margin-top: 10px;")
@@ -2988,6 +3125,13 @@ def showDialProperties(main_window, current_index):
     return current_index
 
 # CALLBACK METODE ZA DIAL:
+
+def update_dial_tag(main_window, value):
+    """Ažurira tag vrednost za dial"""
+    if main_window.current_shape and isinstance(main_window.current_shape, DialWidget):
+        main_window.current_shape.tag = value
+        if hasattr(main_window, 'all_dial_dicts'):
+            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def update_dial_active(main_window, state):
     """Ažurira active status za dial"""
@@ -3181,6 +3325,27 @@ def showToggleProperties(main_window, current_index):
     stack_order_widget.setLayout(stack_order_layout)
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
     current_index += 1
+
+    # Tag input
+    tag_layout = QHBoxLayout()
+    tag_layout.setContentsMargins(20, 5, 10, 5)
+    tag_input_label = QLabel("Tag value:")
+    tag_input_label.setStyleSheet("color: white; font-size: 14px;")
+    tag_layout.addWidget(tag_input_label)
+    tag_layout.addStretch(1)
+
+    main_window.tag_spin_toggle = QSpinBox()
+    main_window.tag_spin_toggle.setRange(0, 255)
+    main_window.tag_spin_toggle.setValue(main_window.current_shape.tag)
+    main_window.tag_spin_toggle.valueChanged.connect(lambda value: update_button_tag(main_window, value))
+    main_window.tag_spin_toggle.setStyleSheet("color: black; background-color: white;")
+    main_window.tag_spin_toggle.setFixedWidth(60)
+    tag_layout.addWidget(main_window.tag_spin_toggle)
+
+    tag_widget = QWidget()
+    tag_widget.setLayout(tag_layout)
+    main_window.properties_layout.insertWidget(current_index, tag_widget)
+    current_index += 1
     
     
     # 3. GEOMETRY SECTION
@@ -3323,6 +3488,12 @@ def showToggleProperties(main_window, current_index):
     return current_index
 
 # Dodaj ove funkcije u callback.py
+
+def update_toggle_tag(main_window, value):
+    if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
+        main_window.current_shape.tag = value
+        if hasattr(main_window, 'all_toggle_dicts'):
+            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def updateTogglePosition(main_window):
     """Ažurira poziciju toggle-a kada se promeni u properties baru"""
@@ -3916,6 +4087,27 @@ def showSliderProperties(main_window, current_index):
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
     current_index += 1
 
+    # Tag input
+    tag_layout = QHBoxLayout()
+    tag_layout.setContentsMargins(20, 5, 10, 5)
+    tag_input_label = QLabel("Tag value:")
+    tag_input_label.setStyleSheet("color: white; font-size: 14px;")
+    tag_layout.addWidget(tag_input_label)
+    tag_layout.addStretch(1)
+
+    main_window.tag_spin_slider = QSpinBox()
+    main_window.tag_spin_slider.setRange(0, 255)
+    main_window.tag_spin_slider.setValue(main_window.current_shape.tag)
+    main_window.tag_spin_slider.valueChanged.connect(lambda value: update_slider_tag(main_window, value))
+    main_window.tag_spin_slider.setStyleSheet("color: black; background-color: white;")
+    main_window.tag_spin_slider.setFixedWidth(60)
+    tag_layout.addWidget(main_window.tag_spin_slider)
+
+    tag_widget = QWidget()
+    tag_widget.setLayout(tag_layout)
+    main_window.properties_layout.insertWidget(current_index, tag_widget)
+    current_index += 1
+
     # 3. GEOMETRY SECTION
     geometry_label = QLabel("Geometry")
     geometry_label.setStyleSheet("color: white; font-size: 12px; font-weight: bold; margin-top: 10px;")
@@ -4113,6 +4305,13 @@ def showSliderProperties(main_window, current_index):
     return current_index
 
 # CALLBACK METODE ZA SLIDER:
+
+def update_slider_tag(main_window, value):
+    """Ažurira tag vrednost za slider"""
+    if main_window.current_shape and isinstance(main_window.current_shape, SliderWidget):
+        main_window.current_shape.tag = value
+        if hasattr(main_window, 'all_slider_dicts'):
+            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def change_slider_background_left_color(main_window):
     """Menja boju pozadine sa leve strane (progress deo) slider-a"""
@@ -4340,6 +4539,27 @@ def showScrollBarProperties(main_window, current_index):
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
     current_index += 1
 
+    # Tag input
+    tag_layout = QHBoxLayout()
+    tag_layout.setContentsMargins(20, 5, 10, 5)
+    tag_input_label = QLabel("Tag value:")
+    tag_input_label.setStyleSheet("color: white; font-size: 14px;")
+    tag_layout.addWidget(tag_input_label)
+    tag_layout.addStretch(1)
+
+    main_window.tag_spin_scrollbar = QSpinBox()
+    main_window.tag_spin_scrollbar.setRange(0, 255)
+    main_window.tag_spin_scrollbar.setValue(main_window.current_shape.tag)
+    main_window.tag_spin_scrollbar.valueChanged.connect(lambda value: update_scrollbar_tag(main_window, value))
+    main_window.tag_spin_scrollbar.setStyleSheet("color: black; background-color: white;")
+    main_window.tag_spin_scrollbar.setFixedWidth(60)
+    tag_layout.addWidget(main_window.tag_spin_scrollbar)
+
+    tag_widget = QWidget()
+    tag_widget.setLayout(tag_layout)
+    main_window.properties_layout.insertWidget(current_index, tag_widget)
+    current_index += 1
+
     # 3. GEOMETRY SECTION
     geometry_label = QLabel("Geometry")
     geometry_label.setStyleSheet("color: white; font-size: 12px; font-weight: bold; margin-top: 10px;")
@@ -4541,6 +4761,13 @@ def showScrollBarProperties(main_window, current_index):
     return current_index
 
 # ISPRAVLJENE CALLBACK METODE ZA SCROLLBAR:
+
+def update_scrollbar_tag(main_window, value):
+    """Ažurira tag vrednost za scrollbar"""
+    if main_window.current_shape and isinstance(main_window.current_shape, ScrollBarWidget):
+        main_window.current_shape.tag = value
+        if hasattr(main_window, 'all_scrollbar_dicts'):
+            main_window.all_scrollbar_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def update_scrollbar_active(main_window, state):
     """Ažurira active status za scrollbar"""
@@ -5979,6 +6206,27 @@ def showEllipseProperties(main_window, current_index):
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
     current_index += 1
 
+    # Tag input
+    tag_layout = QHBoxLayout()
+    tag_layout.setContentsMargins(20, 5, 10, 5)
+    tag_input_label = QLabel("Tag value:")
+    tag_input_label.setStyleSheet("color: white; font-size: 14px;")
+    tag_layout.addWidget(tag_input_label)
+    tag_layout.addStretch(1)
+
+    main_window.tag_spin_ellipse = QSpinBox()
+    main_window.tag_spin_ellipse.setRange(0, 255)
+    main_window.tag_spin_ellipse.setValue(main_window.current_shape.tag)
+    main_window.tag_spin_ellipse.valueChanged.connect(lambda value: update_ellipse_tag(main_window, value))
+    main_window.tag_spin_ellipse.setStyleSheet("color: black; background-color: white;")
+    main_window.tag_spin_ellipse.setFixedWidth(60)
+    tag_layout.addWidget(main_window.tag_spin_ellipse)
+
+    tag_widget = QWidget()
+    tag_widget.setLayout(tag_layout)
+    main_window.properties_layout.insertWidget(current_index, tag_widget)
+    current_index += 1
+
     # GEOMETRY SECTION
     geometry_label = QLabel("Geometry")
     geometry_label.setStyleSheet("color: white; font-size: 12px; font-weight: bold; margin-top: 10px;")
@@ -6170,6 +6418,14 @@ def showEllipseProperties(main_window, current_index):
     current_index += 1
 
     return current_index
+
+
+def update_ellipse_tag(main_window, value):
+    """Ažurira tag vrednost za ellipse"""
+    if main_window.current_shape and isinstance(main_window.current_shape, EllipseWidget):
+        main_window.current_shape.tag = value
+        if hasattr(main_window, 'all_ellipse_dicts'):
+            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def showFilledWarning(main_window, state):
     """Prikazuje upozorenje kada se enabluje Filled opcija"""
@@ -6676,142 +6932,21 @@ def updateNumericNumberAlignment(main_window, text):
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Canvas callback funkcije
-def showCanvasProperties(main_window, current_index):
-        if main_window.canvas_properties_visible or main_window.current_shape:
-            return
-        
-        properties_name = QLabel( "Main screen properties" )
-        properties_name.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
-        main_window.properties_layout.insertWidget( 1, properties_name )
-
-        background_color_properties_layout = QHBoxLayout()
-        background_color_properties_layout.setContentsMargins( 20, 5, 10, 5 )
-        
-        background_color_label = QLabel( "Background color" )
-        background_color_label.setStyleSheet( "color: white; font-size: 14px" )
-        background_color_properties_layout.addWidget( background_color_label )
-        background_color_properties_layout.addStretch( 1 )
-
-        main_window.canvas_color_rect = ColorRectangle( main_window.canvas_color )
-        main_window.canvas_color_rect.mousePressEvent = lambda e: main_window.changeCanvasColor()
-        background_color_properties_layout.addWidget( main_window.canvas_color_rect )
-
-        background_color_widget = QWidget()
-        background_color_widget.setLayout( background_color_properties_layout )
-        main_window.properties_layout.insertWidget( 2, background_color_widget )
-
-        grid_main_label = QLabel( "Grid" )
-        grid_main_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
-        main_window.properties_layout.insertWidget( 3, grid_main_label )
-        
-        checkbox_layout = QHBoxLayout()
-        checkbox_layout.setContentsMargins( 20, 5, 10, 5 )
-        
-        checkbox_enable_label = QLabel( "Enable grid" )
-        checkbox_enable_label.setStyleSheet( "color: white; font-size: 14px;" )
-        checkbox_layout.addWidget( checkbox_enable_label )
-        
-        checkbox_layout.addStretch( 1 )
-        
-        main_window.grid_checkbox = QCheckBox()
-        main_window.grid_checkbox.stateChanged.connect( main_window.toggleGrid )
-        main_window.grid_checkbox.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
-        checkbox_layout.addWidget( main_window.grid_checkbox )
-        
-        checkbox_widget = QWidget()
-        checkbox_widget.setLayout( checkbox_layout )
-        main_window.properties_layout.insertWidget( 4, checkbox_widget )
-        
-        grid_color_layout = QHBoxLayout()
-        grid_color_layout.setContentsMargins( 20, 5, 10, 5 )
-
-        grid_color_label = QLabel( "Grid color" )
-        grid_color_label.setStyleSheet("color: white; font-size: 14px;")
-        grid_color_layout.addWidget(grid_color_label)
-        grid_color_layout.addStretch( 1 )
-
-        main_window.grid_color_rect = ColorRectangle( main_window.grid_color ) 
-        main_window.grid_color_rect.mousePressEvent = lambda e: main_window.changeGridColor()
-        grid_color_layout.addWidget( main_window.grid_color_rect )
-
-        grid_color_widget = QWidget()
-        grid_color_widget.setLayout( grid_color_layout )
-        main_window.properties_layout.insertWidget( 5, grid_color_widget )
-
-        grid_type_layout = QHBoxLayout()
-        grid_type_layout.setContentsMargins( 20, 5, 10, 5 )
-
-        grid_type_label = QLabel( "Grid type:" )
-        grid_type_label.setStyleSheet( "color: white; font-size: 14px" )
-        grid_type_layout.addWidget( grid_type_label )
-
-        grid_type_layout.addStretch( 1 )
-
-        main_window.grid_type_combobox = QComboBox()
-        main_window.grid_type_combobox.addItems( [ "Lines", "Dots" ] )
-        main_window.grid_type_combobox.setCurrentText( "Lines" if main_window.grid_type == "lines" else "Dots" )
-        main_window.grid_type_combobox.currentTextChanged.connect( main_window.changeGridType )
-        main_window.grid_type_combobox.setStyleSheet( "color: white; background-color: #383838;" )
-        main_window.grid_type_combobox.setFixedWidth( 50 )
-        grid_type_layout.addWidget( main_window.grid_type_combobox )
-
-        grid_type_widget = QWidget()
-        grid_type_widget.setLayout( grid_type_layout )
-        main_window.properties_layout.insertWidget( 6, grid_type_widget )
-
-        grid_size_layout = QHBoxLayout()
-        grid_size_layout.setContentsMargins( 20, 5, 10, 5 )
-
-        grid_size_label = QLabel( "Grid size" )
-        grid_size_label.setStyleSheet( "color: white; font-size: 14px" )
-        grid_size_layout.addWidget( grid_size_label )
-
-        grid_size_layout.addStretch(1)
-
-        main_window.grid_size_spinbox = QSpinBox()
-        main_window.grid_size_spinbox.setRange( 5, 100 )
-        main_window.grid_size_spinbox.setValue( main_window.grid_size )
-        main_window.grid_size_spinbox.valueChanged.connect( main_window.changeGridSize )
-        main_window.grid_size_spinbox.setStyleSheet( "color: white; background-color: 383838;" )
-        main_window.grid_size_spinbox.setFixedWidth( 50 )
-        grid_size_layout.addWidget( main_window.grid_size_spinbox )
-
-        grid_size_widget = QWidget()
-        grid_size_widget.setLayout( grid_size_layout )
-        main_window.properties_layout.insertWidget( 7, grid_size_widget )
-
-        main_window.canvas_properties_visible = True
+def generate_auto_tag(main_window, current_shape):
+    """Generiše automatski tag za novi widget"""
+    all_tags = []
+    for shape in main_window.all_shapes:
+        if hasattr(shape, 'tag') and shape != current_shape:  # Isključi trenutni shape
+            all_tags.append(shape.tag)
     
-def update_canvas_color(main_window, color):
-    """Ažurira boju canvasa"""
-    if hasattr(main_window, 'canvas'):
-        main_window.canvas.set_canvas_color(color.name())
-
-def toggle_canvas_grid(main_window, state):
-    """Uključuje/isključuje mrežu na canvasu"""
-    if hasattr(main_window, 'canvas'):
-        main_window.canvas.set_grid_enabled(state == Qt.CheckState.Checked.value)
-
-def update_canvas_grid_color(main_window, color):
-    """Ažurira boju mreže"""
-    if hasattr(main_window, 'canvas'):
-        main_window.canvas.set_grid_color(color.name())
-
-def update_canvas_grid_size(main_window, value):
-    """Ažurira veličinu mreže"""
-    if hasattr(main_window, 'canvas'):
-        main_window.canvas.set_grid_size(value)
-
-def update_canvas_grid_type(main_window, text):
-    """Ažurira tip mreže"""
-    if hasattr(main_window, 'canvas'):
-        grid_type = "lines" if text == "Lines" else "dots"
-        main_window.canvas.set_grid_type(grid_type)
-           
+    # Pronađi prvi slobodan tag od 0 do 255
+    for i in range(256):
+        if i not in all_tags:
+            return i
+    
+    return 0  # Ako su svi zauzeti, vrati 0
 
 #-------------------------------------------------------------------------------------------------------------------------------
-
 
 def sort_widgets_by_stack_order(main_window):
     """Sortira widget-e po stack_order i ažurira njihov z-order"""
@@ -6837,6 +6972,7 @@ def sort_widgets_by_stack_order(main_window):
     # Ako postoji trenutno selektovani widget, podigni ga na vrh
     if hasattr(main_window, 'current_shape') and main_window.current_shape:
         main_window.current_shape.raise_()
+
 
 
 def renumberAllWidgets(main_window):
