@@ -885,31 +885,28 @@ class MainWindow( QMainWindow ):
             self.sortWidgetsByStackOrder()
 
     def sortWidgetsByStackOrder(self):
-        """Sortira widget-e po stack_order i ažurira njihov z-order - JEDINA IMPLEMENTACIJA"""
+        """Sortira widget-e po stack_order (manji broj = niže, veći broj = više)"""
         if not self.all_shapes:
             return
-
+    
         # Sortiraj widget-e po stack_order (manji broj = niže, veći = više)
-        sorted_widgets = sorted(self.all_shapes, key=lambda x: x.stack_order, reverse=True)
-
-        # Debug ispis
-        print(f"\n[MainWindow] Sortiranje widget-a po stack_order:")
+        # Sortiramo RASTUĆE - widget sa NAJMANJIM stack_order ide PRVI
+        sorted_widgets = sorted(self.all_shapes, key=lambda x: x.stack_order)
+    
+        # Postavi sve widget-e na dno
+        for widget in self.all_shapes:
+            widget.lower()
+    
+        # Sada podižemo widget-e REDOM - prvo onaj sa najmanjim stack_order
+        # a na kraju onaj sa najvećim stack_order (koji će biti NA VRHU)
+        for widget in sorted_widgets:
+            widget.raise_()
+    
+        # Debug ispis za verifikaciju
+        print(f"\n[MainWindow] Z-order (od donjeg ka gornjem):")
         for i, widget in enumerate(sorted_widgets):
             widget_name = widget.custom_name if hasattr(widget, 'custom_name') else 'Unknown'
             print(f"  {i+1}. {widget_name}: stack_order={widget.stack_order}")
-
-        # Postavi Z-order: prvo sve spusti na dno
-        for widget in self.all_shapes:
-            widget.lower()
-
-        # Sada podigni widget-e redom (veći stack_order = više)
-        # Obilazimo obrnutim redosledom jer lower()/raise() radi na steku
-        for widget in reversed(sorted_widgets):
-            widget.raise_()
-
-        # Osiguraj da je selektovani widget na vrhu (za interakciju)
-        if self.current_shape:
-            self.current_shape.raise_()
 
     def updateShapePosition( self ):
         if self.current_shape:

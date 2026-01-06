@@ -929,22 +929,6 @@ def showCircleProperties(main_window, current_index):
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
     current_index += 1
 
-    
-    # Pronađi indeks circle-a u listi svih shape-ova
-    if main_window.current_shape in main_window.all_shapes:
-        index = main_window.all_shapes.index(main_window.current_shape) + 1
-        main_window.stack_order_spin_circle.setValue(index)
-    else:
-        main_window.stack_order_spin_circle.setValue(1)
-    
-    main_window.stack_order_spin_circle.valueChanged.connect(lambda value: update_circle_stack_order(main_window, value))
-    main_window.stack_order_spin_circle.setStyleSheet("color: black; background-color: white;")
-    main_window.stack_order_spin_circle.setFixedWidth(60)
-    stack_order_layout.addWidget(main_window.stack_order_spin_circle)
-    stack_order_widget = QWidget()
-    stack_order_widget.setLayout(stack_order_layout)
-    main_window.properties_layout.insertWidget(current_index, stack_order_widget)
-    current_index += 1
 
     # 3. GEOMETRY SECTION
     geometry_label = QLabel("Geometry")
@@ -959,13 +943,13 @@ def showCircleProperties(main_window, current_index):
     pos_x_label.setStyleSheet("color: white; font-size: 14px;")
     pos_x_layout.addWidget(pos_x_label)
     pos_x_layout.addStretch(1)
-    main_window.pos_x_spin = QSpinBox()
-    main_window.pos_x_spin.setRange(0, 480)
-    main_window.pos_x_spin.setValue(main_window.current_shape.center_x)
-    main_window.pos_x_spin.valueChanged.connect(lambda value: update_circle_position(main_window))
-    main_window.pos_x_spin.setStyleSheet("color: black; background-color: white;")
-    main_window.pos_x_spin.setFixedWidth(60)
-    pos_x_layout.addWidget(main_window.pos_x_spin)
+    main_window.pos_x_spin_circle = QSpinBox()
+    main_window.pos_x_spin_circle.setRange(0, 480)
+    main_window.pos_x_spin_circle.setValue(main_window.current_shape.center_x)
+    main_window.pos_x_spin_circle.valueChanged.connect(lambda value: update_circle_position(main_window))
+    main_window.pos_x_spin_circle.setStyleSheet("color: black; background-color: white;")
+    main_window.pos_x_spin_circle.setFixedWidth(60)
+    pos_x_layout.addWidget(main_window.pos_x_spin_circle)
     pos_x_widget = QWidget()
     pos_x_widget.setLayout(pos_x_layout)
     main_window.properties_layout.insertWidget(current_index, pos_x_widget)
@@ -978,13 +962,13 @@ def showCircleProperties(main_window, current_index):
     pos_y_label.setStyleSheet("color: white; font-size: 14px;")
     pos_y_layout.addWidget(pos_y_label)
     pos_y_layout.addStretch(1)
-    main_window.pos_y_spin = QSpinBox()
-    main_window.pos_y_spin.setRange(0, 272)
-    main_window.pos_y_spin.setValue(main_window.current_shape.center_y)
-    main_window.pos_y_spin.valueChanged.connect(lambda value: update_circle_position(main_window))
-    main_window.pos_y_spin.setStyleSheet("color: black; background-color: white;")
-    main_window.pos_y_spin.setFixedWidth(60)
-    pos_y_layout.addWidget(main_window.pos_y_spin)
+    main_window.pos_y_spin_circle  = QSpinBox()
+    main_window.pos_y_spin_circle.setRange(0, 272)
+    main_window.pos_y_spin_circle.setValue(main_window.current_shape.center_y)
+    main_window.pos_y_spin_circle.valueChanged.connect(lambda value: update_circle_position(main_window))
+    main_window.pos_y_spin_circle.setStyleSheet("color: black; background-color: white;")
+    main_window.pos_y_spin_circle.setFixedWidth(60)
+    pos_y_layout.addWidget(main_window.pos_y_spin_circle)
     pos_y_widget = QWidget()
     pos_y_widget.setLayout(pos_y_layout)
     main_window.properties_layout.insertWidget(current_index, pos_y_widget)
@@ -997,13 +981,13 @@ def showCircleProperties(main_window, current_index):
     diameter_label.setStyleSheet("color: white; font-size: 14px;")
     diameter_layout.addWidget(diameter_label)
     diameter_layout.addStretch(1)
-    main_window.width_spin = QSpinBox()
-    main_window.width_spin.setRange(10, 480)
-    main_window.width_spin.setValue(main_window.current_shape.diameter)
-    main_window.width_spin.valueChanged.connect(lambda value: updateCircleSize(main_window))
-    main_window.width_spin.setStyleSheet("color: black; background-color: white;")
-    main_window.width_spin.setFixedWidth(60)
-    diameter_layout.addWidget(main_window.width_spin)
+    main_window.diameter_spin_circle = QSpinBox()
+    main_window.diameter_spin_circle.setRange(10, 480)
+    main_window.diameter_spin_circle.setValue(main_window.current_shape.diameter)
+    main_window.diameter_spin_circle.valueChanged.connect(lambda value: updateCircleSize(main_window))
+    main_window.diameter_spin_circle.setStyleSheet("color: black; background-color: white;")
+    main_window.diameter_spin_circle.setFixedWidth(60)
+    diameter_layout.addWidget(main_window.diameter_spin_circle)
     diameter_widget = QWidget()
     diameter_widget.setLayout(diameter_layout)
     main_window.properties_layout.insertWidget(current_index, diameter_widget)
@@ -1395,22 +1379,6 @@ def showRectangleProperties(main_window, current_index):
     main_window.stack_order_spin_rect.setFixedWidth(60)
     stack_order_layout.addWidget(main_window.stack_order_spin_rect)
     
-    stack_order_widget = QWidget()
-    stack_order_widget.setLayout(stack_order_layout)
-    main_window.properties_layout.insertWidget(current_index, stack_order_widget)
-    current_index += 1
-    
-    # Pronađi indeks rectangle-a u listi svih shape-ova
-    if main_window.current_shape in main_window.all_shapes:
-        index = main_window.all_shapes.index(main_window.current_shape) + 1
-        main_window.stack_order_spin_rect.setValue(index)
-    else:
-        main_window.stack_order_spin_rect.setValue(1)
-    
-    main_window.stack_order_spin_rect.valueChanged.connect(lambda value: update_rectangle_stack_order(main_window, value))
-    main_window.stack_order_spin_rect.setStyleSheet("color: black; background-color: white;")
-    main_window.stack_order_spin_rect.setFixedWidth(60)
-    stack_order_layout.addWidget(main_window.stack_order_spin_rect)
     stack_order_widget = QWidget()
     stack_order_widget.setLayout(stack_order_layout)
     main_window.properties_layout.insertWidget(current_index, stack_order_widget)
@@ -3277,7 +3245,7 @@ def showToggleProperties(main_window, current_index):
     width_widget.setLayout(width_layout)
     main_window.properties_layout.insertWidget(current_index, width_widget)
     current_index += 1
-    
+
     # 4. COLOR ADJUST SECTION
     color_label = QLabel("Color Adjust")
     color_label.setStyleSheet("color: white; font-size: 12px; font-weight: bold; margin-top: 10px;")
@@ -3367,14 +3335,6 @@ def updateTogglePosition(main_window):
             # Ažuriraj rečnik
             main_window.current_shape.update_properties_dict()
 
-def updateToggleSize(main_window, value):
-    """Ažurira veličinu toggle-a kada se promeni u properties baru"""
-    if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
-        # ToggleWidget ima fiksnu visinu od 30
-        main_window.current_shape.set_size(value, 30)
-        # Ažuriraj rečnik
-        main_window.current_shape.update_properties_dict()
-
 # Ostatak callback funkcija za toggle ostaje isti...
 
 def updateToggleActive(main_window, state):
@@ -3416,13 +3376,13 @@ def updateToggleName(main_window, text):
                 main_window.all_toggle_dicts[text] = main_window.current_shape.get_properties_dict()
 
 def update_toggle_stack_order(main_window, value):
-    """Ažurira stack order za button"""
+    """Ažurira stack order za toggle"""
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         main_window.current_shape.stack_order = value
         
         # Ažuriraj rečnik
-        if hasattr(main_window, 'all_button_dicts'):
-            main_window.all_button_dicts[main_window.current_shape.custom_name] = \
+        if hasattr(main_window, 'all_toggle_dicts'):
+            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = \
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
@@ -3482,8 +3442,6 @@ def updateToggleSize(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         # ToggleWidget ima fiksnu visinu od 30
         main_window.current_shape.set_size(value, 30)
-        if hasattr(main_window, 'all_toggle_dicts'):
-            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 #-------------------------------------------------------------------------------------------------------------------------------
 
     # LABEL METHODS
@@ -3834,15 +3792,17 @@ def updateLabelSize(self):
         update_position_spins(self)
         self.current_shape.update_properties_dict()
 
-def updateLabelPosition(self):
+def updateLabelPosition(main_window):
     """Ažurira poziciju label-a"""
-    if self.current_shape and isinstance(self.current_shape, LabelWidget):
-        if hasattr(self, 'pos_x_spin_label') and hasattr(self, 'pos_y_spin_label'):
-            x = self.pos_x_spin_label.value()
-            y = self.pos_y_spin_label.value()
-            self.current_shape.move(x, y)
-            if hasattr(self, 'all_label_dicts'):
-                self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.get_properties_dict()
+    if main_window.current_shape and isinstance(main_window.current_shape, LabelWidget):
+        if hasattr(main_window, 'pos_x_spin_label') and hasattr(main_window, 'pos_y_spin_label'):
+            x = main_window.pos_x_spin_label.value()
+            y = main_window.pos_y_spin_label.value()
+            
+            # OVO ĆE POZVATI OVERRIDE MOVE METODU KOJA ĆE AŽURIRATI SPIN BOX-OVE
+            main_window.current_shape.move(x, y)
+            
+            # Rečnik će se ažurirati unutar move metode
 
 
 #-------------------------------------------------------------------------------------------------------------------------------
@@ -4697,7 +4657,7 @@ def showProgressBarProperties(main_window, current_index):
     active_layout.addStretch(1)
     main_window.progress_active_checkbox = QCheckBox()
     main_window.progress_active_checkbox.setChecked(main_window.current_shape.active)
-    main_window.progress_active_checkbox.stateChanged.connect(lambda state: updateProgressBarActive(main_window))
+    main_window.progress_active_checkbox.stateChanged.connect(lambda state: updateProgressBarActive(main_window, state))
     main_window.progress_active_checkbox.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
     active_layout.addWidget(main_window.progress_active_checkbox)
     active_widget = QWidget()
@@ -4714,7 +4674,7 @@ def showProgressBarProperties(main_window, current_index):
     visible_layout.addStretch(1)
     main_window.progress_visible_checkbox = QCheckBox()
     main_window.progress_visible_checkbox.setChecked(main_window.current_shape.visible)
-    main_window.progress_visible_checkbox.stateChanged.connect(lambda state: updateProgressBarVisible(main_window))
+    main_window.progress_visible_checkbox.stateChanged.connect(lambda state: updateProgressBarVisible(main_window, state))
     main_window.progress_visible_checkbox.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
     visible_layout.addWidget(main_window.progress_visible_checkbox)
     visible_widget = QWidget()
@@ -4731,7 +4691,7 @@ def showProgressBarProperties(main_window, current_index):
     static_layout.addStretch(1)
     main_window.progress_static_checkbox = QCheckBox()
     main_window.progress_static_checkbox.setChecked(main_window.current_shape.static)
-    main_window.progress_static_checkbox.stateChanged.connect(lambda state: updateProgressBarStatic(main_window))
+    main_window.progress_static_checkbox.stateChanged.connect(lambda state: updateProgressBarStatic(main_window, state))
     main_window.progress_static_checkbox.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
     static_layout.addWidget(main_window.progress_static_checkbox)
     static_widget = QWidget()
@@ -4911,7 +4871,7 @@ def showProgressBarProperties(main_window, current_index):
     _3d_layout.addStretch(1)
     main_window.progress_3d_checkbox = QCheckBox()
     main_window.progress_3d_checkbox.setChecked(main_window.current_shape._3d)
-    main_window.progress_3d_checkbox.stateChanged.connect(lambda state: updateProgressBarThreeD(main_window))
+    main_window.progress_3d_checkbox.stateChanged.connect(lambda state: updateProgressBarThreeD(main_window, state))
     main_window.progress_3d_checkbox.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
     _3d_layout.addWidget(main_window.progress_3d_checkbox)
     _3d_widget = QWidget()
@@ -4977,19 +4937,32 @@ def showProgressBarProperties(main_window, current_index):
 
     return current_index
 
-def updateProgressBarActive(main_window):
+def updateProgressBarActive(main_window, state):
+    """Ažurira active status za progress bar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
-        main_window.current_shape.set_active(main_window.progress_active_checkbox.isChecked())
+        active = (state == Qt.CheckState.Checked.value)
+        main_window.current_shape.set_active(active)
         main_window.current_shape.update_properties_dict()
 
-def updateProgressBarVisible(main_window):
+def updateProgressBarVisible(main_window, state):
+    """Ažurira visible status za progress bar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
-        main_window.current_shape.set_visible(main_window.progress_visible_checkbox.isChecked())
+        visible = (state == Qt.CheckState.Checked.value)
+        main_window.current_shape.set_visible(visible)
         main_window.current_shape.update_properties_dict()
 
-def updateProgressBarStatic(main_window):
+def updateProgressBarStatic(main_window, state):
+    """Ažurira static status za progress bar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
-        main_window.current_shape.set_static(main_window.progress_static_checkbox.isChecked())
+        static = (state == Qt.CheckState.Checked.value)
+        main_window.current_shape.set_static(static)
+        main_window.current_shape.update_properties_dict()
+
+def updateProgressBarThreeD(main_window, state):
+    """Ažurira 3D status za progress bar"""
+    if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
+        _3d = (state == Qt.CheckState.Checked.value)
+        main_window.current_shape.set_3d(_3d)
         main_window.current_shape.update_properties_dict()
 
 def updateProgressBarName(main_window):
@@ -5011,18 +4984,24 @@ def update_progress_bar_stack_order(main_window, value):
         main_window.sortWidgetsByStackOrder()
 
 def updateProgressBarPosition(main_window):
+    """Ažurira poziciju progress bar-a kada se promeni u properties baru"""
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
-        x = main_window.progress_pos_x_spin.value()
-        y = main_window.progress_pos_y_spin.value()
-        main_window.current_shape.move(x, y)
-        main_window.current_shape.update_properties_dict()
+        if hasattr(main_window, 'progress_pos_x_spin') and hasattr(main_window, 'progress_pos_y_spin'):
+            x = main_window.progress_pos_x_spin.value()
+            y = main_window.progress_pos_y_spin.value()
+            # OVO ĆE POZVATI OVERRIDE MOVE METODU KOJA ĆE AŽURIRATI SPIN BOX-OVE
+            main_window.current_shape.move(x, y)
+            main_window.current_shape.update_properties_dict()
 
 def updateProgressBarSize(main_window):
+    """Ažurira veličinu progress bar-a kada se promeni u properties baru"""
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
-        width = main_window.progress_width_spin.value()
-        height = main_window.progress_height_spin.value()
-        main_window.current_shape.set_size(width, height)
-        main_window.current_shape.update_properties_dict()
+        if hasattr(main_window, 'progress_width_spin') and hasattr(main_window, 'progress_height_spin'):
+            width = main_window.progress_width_spin.value()
+            height = main_window.progress_height_spin.value()
+            # OVO ĆE POZVATI SET_SIZE METODU KOJA ĆE AŽURIRATI SPIN BOX-OVE
+            main_window.current_shape.set_size(width, height)
+            # Rečnik će se ažurirati unutar set_size
 
 def changeProgressBarProgressColor(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
@@ -5039,11 +5018,6 @@ def changeProgressBarBackgroundColor(main_window):
             main_window.current_shape.set_bar_color(color)
             main_window.progress_background_color_rect.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             main_window.current_shape.update_properties_dict()
-
-def updateProgressBarThreeD(main_window):
-    if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
-        main_window.current_shape.set_3d(main_window.progress_3d_checkbox.isChecked())
-        main_window.current_shape.update_properties_dict()
 
 def updateProgressBarRange(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
@@ -5602,14 +5576,13 @@ def showImageProperties(main_window, current_index):
     stack_order_layout.addWidget(stack_order_label)
     stack_order_layout.addStretch(1)
     
-    main_window.stack_order_spin = QSpinBox()  # ← button specifično
-    main_window.stack_order_spin.setRange(1, 100)
-    main_window.stack_order_spin.setValue(main_window.current_shape.stack_order)
-    main_window.stack_order_spin.valueChanged.connect(
-        lambda value: update_image_stack_order(main_window, value))
-    main_window.stack_order_spin.setStyleSheet("color: black; background-color: white;")
-    main_window.stack_order_spin.setFixedWidth(60)
-    stack_order_layout.addWidget(main_window.stack_order_spin)
+    main_window.stack_order_spin_image = QSpinBox()  # ← button specifično
+    main_window.stack_order_spin_image.setRange(1, 100)
+    main_window.stack_order_spin_image.setValue(main_window.current_shape.stack_order)
+    main_window.stack_order_spin_image.valueChanged.connect(lambda value: update_image_stack_order(main_window, value))
+    main_window.stack_order_spin_image.setStyleSheet("color: black; background-color: white;")
+    main_window.stack_order_spin_image.setFixedWidth(60)
+    stack_order_layout.addWidget(main_window.stack_order_spin_image)
     
     stack_order_widget = QWidget()
     stack_order_widget.setLayout(stack_order_layout)
@@ -5629,13 +5602,13 @@ def showImageProperties(main_window, current_index):
     pos_x_label.setStyleSheet("color: white; font-size: 14px;")
     pos_x_layout.addWidget(pos_x_label)
     pos_x_layout.addStretch(1)
-    main_window.pos_x_spin = QSpinBox()
-    main_window.pos_x_spin.setRange(0, 480)
-    main_window.pos_x_spin.setValue(main_window.current_shape.x())
-    main_window.pos_x_spin.valueChanged.connect(lambda value: updateImagePosition(main_window))
-    main_window.pos_x_spin.setStyleSheet("color: black; background-color: white;")
-    main_window.pos_x_spin.setFixedWidth(60)
-    pos_x_layout.addWidget(main_window.pos_x_spin)
+    main_window.pos_x_spin_image = QSpinBox()
+    main_window.pos_x_spin_image.setRange(0, 480)
+    main_window.pos_x_spin_image.setValue(main_window.current_shape.x())
+    main_window.pos_x_spin_image.valueChanged.connect(lambda value: updateImagePosition(main_window))
+    main_window.pos_x_spin_image.setStyleSheet("color: black; background-color: white;")
+    main_window.pos_x_spin_image.setFixedWidth(60)
+    pos_x_layout.addWidget(main_window.pos_x_spin_image)
     pos_x_widget = QWidget()
     pos_x_widget.setLayout(pos_x_layout)
     main_window.properties_layout.insertWidget(current_index, pos_x_widget)
@@ -5648,13 +5621,13 @@ def showImageProperties(main_window, current_index):
     pos_y_label.setStyleSheet("color: white; font-size: 14px;")
     pos_y_layout.addWidget(pos_y_label)
     pos_y_layout.addStretch(1)
-    main_window.pos_y_spin = QSpinBox()
-    main_window.pos_y_spin.setRange(0, 272)
-    main_window.pos_y_spin.setValue(main_window.current_shape.y())
-    main_window.pos_y_spin.valueChanged.connect(lambda value: updateImagePosition(main_window))
-    main_window.pos_y_spin.setStyleSheet("color: black; background-color: white;")
-    main_window.pos_y_spin.setFixedWidth(60)
-    pos_y_layout.addWidget(main_window.pos_y_spin)
+    main_window.pos_y_spin_image = QSpinBox()
+    main_window.pos_y_spin_image.setRange(0, 272)
+    main_window.pos_y_spin_image.setValue(main_window.current_shape.y())
+    main_window.pos_y_spin_image.valueChanged.connect(lambda value: updateImagePosition(main_window))
+    main_window.pos_y_spin_image.setStyleSheet("color: black; background-color: white;")
+    main_window.pos_y_spin_image.setFixedWidth(60)
+    pos_y_layout.addWidget(main_window.pos_y_spin_image)
     pos_y_widget = QWidget()
     pos_y_widget.setLayout(pos_y_layout)
     main_window.properties_layout.insertWidget(current_index, pos_y_widget)
@@ -5667,13 +5640,13 @@ def showImageProperties(main_window, current_index):
     width_label.setStyleSheet("color: white; font-size: 14px;")
     width_layout.addWidget(width_label)
     width_layout.addStretch(1)
-    main_window.width_spin = QSpinBox()
-    main_window.width_spin.setRange(100, 480)
-    main_window.width_spin.setValue(main_window.current_shape.get_width())
-    main_window.width_spin.valueChanged.connect(lambda value: updateImageSize(main_window, value))
-    main_window.width_spin.setStyleSheet("color: black; background-color: white;")
-    main_window.width_spin.setFixedWidth(60)
-    width_layout.addWidget(main_window.width_spin)
+    main_window.width_spin_image = QSpinBox()
+    main_window.width_spin_image.setRange(100, 480)
+    main_window.width_spin_image.setValue(main_window.current_shape.get_width())
+    main_window.width_spin_image.valueChanged.connect(lambda: updateImageSize(main_window))
+    main_window.width_spin_image.setStyleSheet("color: black; background-color: white;")
+    main_window.width_spin_image.setFixedWidth(60)
+    width_layout.addWidget(main_window.width_spin_image)
     width_widget = QWidget()
     width_widget.setLayout(width_layout)
     main_window.properties_layout.insertWidget(current_index, width_widget)
@@ -5686,13 +5659,13 @@ def showImageProperties(main_window, current_index):
     height_label.setStyleSheet("color: white; font-size: 14px;")
     height_layout.addWidget(height_label)
     height_layout.addStretch(1)
-    main_window.height_spin = QSpinBox()
-    main_window.height_spin.setRange(80, 272)
-    main_window.height_spin.setValue(main_window.current_shape.get_height())
-    main_window.height_spin.valueChanged.connect(lambda value: updateImageSize(main_window, value))
-    main_window.height_spin.setStyleSheet("color: black; background-color: white;")
-    main_window.height_spin.setFixedWidth(60)
-    height_layout.addWidget(main_window.height_spin)
+    main_window.height_spin_image = QSpinBox()
+    main_window.height_spin_image.setRange(80, 272)
+    main_window.height_spin_image.setValue(main_window.current_shape.get_height())
+    main_window.height_spin_image.valueChanged.connect(lambda: updateImageSize(main_window))
+    main_window.height_spin_image.setStyleSheet("color: black; background-color: white;")
+    main_window.height_spin_image.setFixedWidth(60)
+    height_layout.addWidget(main_window.height_spin_image)
     height_widget = QWidget()
     height_widget.setLayout(height_layout)
     main_window.properties_layout.insertWidget(current_index, height_widget)
@@ -5808,19 +5781,28 @@ def update_image_static(main_window, state):
 def update_image_name(main_window, text):
     """Ažurira ime image widget-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
+        # Sačuvaj staro ime pre promene
+        old_name = main_window.current_shape.custom_name
+        
+        # Postavi novo ime
         main_window.current_shape.custom_name = text
+        
         if hasattr(main_window, 'all_image_dicts'):
-            old_name = main_window.current_shape.custom_name
-            main_window.all_image_dicts[old_name] = main_window.current_shape.get_properties_dict()
+            # Ako je staro ime bilo u rečniku, izbriši ga
+            if old_name in main_window.all_image_dicts:
+                main_window.all_image_dicts.pop(old_name)
+            
+            # Dodaj pod novim imenom
+            main_window.all_image_dicts[text] = main_window.current_shape.get_properties_dict()
 
 def update_image_stack_order(main_window, value):
-    """Ažurira stack order za button"""
+    """Ažurira stack order za image"""
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
         main_window.current_shape.stack_order = value
         
-        # Ažuriraj rečnik
-        if hasattr(main_window, 'all_button_dicts'):
-            main_window.all_button_dicts[main_window.current_shape.custom_name] = \
+        # Ažuriraj rečnik - ISPRAVLJENO: all_image_dicts umesto all_button_dicts
+        if hasattr(main_window, 'all_image_dicts'):
+            main_window.all_image_dicts[main_window.current_shape.custom_name] = \
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
@@ -5834,7 +5816,11 @@ def select_image_file(main_window):
             main_window,
             "Select Image File",
             "",
-            "Image Files (*.bmp *.png);;BMP Files (*.bmp);;PNG Files (*.png)"
+            "Image Files (*.bmp *.png *.jpg *.jpeg *.jpe);;"
+            "BMP Files (*.bmp);;"
+            "PNG Files (*.png);;"
+            "JPEG Files (*.jpg *.jpeg *.jpe);;"
+            "All Files (*.*)"
         )
 
         if file_path:
@@ -5870,8 +5856,8 @@ def change_image_frame_color(main_window):
 def updateImageSize(main_window):
     """Ažurira veličinu image widget-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
-        width = main_window.width_spin.value()
-        height = main_window.height_spin.value()
+        width = main_window.width_spin_image.value()
+        height = main_window.height_spin_image.value()
         main_window.current_shape.set_size(width, height)
         
         # Ažuriraj rečnik
@@ -5879,12 +5865,14 @@ def updateImageSize(main_window):
             main_window.current_shape.update_properties_dict()
 
 def updateImagePosition(main_window):
-    """Ažurira poziciju keys-a"""
+    """Ažurira poziciju image-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
-        if hasattr(main_window, 'pos_x_spin') and hasattr(main_window, 'pos_y_spin'):
-            main_window.current_shape.move(main_window.pos_x_spin.value(), main_window.pos_y_spin.value())
-            if hasattr(main_window, 'all_keys_dicts'):
-                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+        if hasattr(main_window, 'pos_x_spin_image') and hasattr(main_window, 'pos_y_spin_image'):
+            main_window.current_shape.move(main_window.pos_x_spin_image.value(), main_window.pos_y_spin_image.value())
+            
+            # Ažuriraj rečnik - ISPRAVLJENO: all_image_dicts umesto all_keys_dicts
+            if hasattr(main_window, 'all_image_dicts'):
+                main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 #-------------------------------------------------------------------------------------------------------------------------------
 
@@ -6685,6 +6673,141 @@ def updateNumericNumberAlignment(main_window, text):
         main_window.current_shape.set_number_alignment(text)
         if hasattr(main_window, 'all_numeric_dicts'):
             main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Canvas callback funkcije
+def showCanvasProperties(main_window, current_index):
+        if main_window.canvas_properties_visible or main_window.current_shape:
+            return
+        
+        properties_name = QLabel( "Main screen properties" )
+        properties_name.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+        main_window.properties_layout.insertWidget( 1, properties_name )
+
+        background_color_properties_layout = QHBoxLayout()
+        background_color_properties_layout.setContentsMargins( 20, 5, 10, 5 )
+        
+        background_color_label = QLabel( "Background color" )
+        background_color_label.setStyleSheet( "color: white; font-size: 14px" )
+        background_color_properties_layout.addWidget( background_color_label )
+        background_color_properties_layout.addStretch( 1 )
+
+        main_window.canvas_color_rect = ColorRectangle( main_window.canvas_color )
+        main_window.canvas_color_rect.mousePressEvent = lambda e: main_window.changeCanvasColor()
+        background_color_properties_layout.addWidget( main_window.canvas_color_rect )
+
+        background_color_widget = QWidget()
+        background_color_widget.setLayout( background_color_properties_layout )
+        main_window.properties_layout.insertWidget( 2, background_color_widget )
+
+        grid_main_label = QLabel( "Grid" )
+        grid_main_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+        main_window.properties_layout.insertWidget( 3, grid_main_label )
+        
+        checkbox_layout = QHBoxLayout()
+        checkbox_layout.setContentsMargins( 20, 5, 10, 5 )
+        
+        checkbox_enable_label = QLabel( "Enable grid" )
+        checkbox_enable_label.setStyleSheet( "color: white; font-size: 14px;" )
+        checkbox_layout.addWidget( checkbox_enable_label )
+        
+        checkbox_layout.addStretch( 1 )
+        
+        main_window.grid_checkbox = QCheckBox()
+        main_window.grid_checkbox.stateChanged.connect( main_window.toggleGrid )
+        main_window.grid_checkbox.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
+        checkbox_layout.addWidget( main_window.grid_checkbox )
+        
+        checkbox_widget = QWidget()
+        checkbox_widget.setLayout( checkbox_layout )
+        main_window.properties_layout.insertWidget( 4, checkbox_widget )
+        
+        grid_color_layout = QHBoxLayout()
+        grid_color_layout.setContentsMargins( 20, 5, 10, 5 )
+
+        grid_color_label = QLabel( "Grid color" )
+        grid_color_label.setStyleSheet("color: white; font-size: 14px;")
+        grid_color_layout.addWidget(grid_color_label)
+        grid_color_layout.addStretch( 1 )
+
+        main_window.grid_color_rect = ColorRectangle( main_window.grid_color ) 
+        main_window.grid_color_rect.mousePressEvent = lambda e: main_window.changeGridColor()
+        grid_color_layout.addWidget( main_window.grid_color_rect )
+
+        grid_color_widget = QWidget()
+        grid_color_widget.setLayout( grid_color_layout )
+        main_window.properties_layout.insertWidget( 5, grid_color_widget )
+
+        grid_type_layout = QHBoxLayout()
+        grid_type_layout.setContentsMargins( 20, 5, 10, 5 )
+
+        grid_type_label = QLabel( "Grid type:" )
+        grid_type_label.setStyleSheet( "color: white; font-size: 14px" )
+        grid_type_layout.addWidget( grid_type_label )
+
+        grid_type_layout.addStretch( 1 )
+
+        main_window.grid_type_combobox = QComboBox()
+        main_window.grid_type_combobox.addItems( [ "Lines", "Dots" ] )
+        main_window.grid_type_combobox.setCurrentText( "Lines" if main_window.grid_type == "lines" else "Dots" )
+        main_window.grid_type_combobox.currentTextChanged.connect( main_window.changeGridType )
+        main_window.grid_type_combobox.setStyleSheet( "color: white; background-color: #383838;" )
+        main_window.grid_type_combobox.setFixedWidth( 50 )
+        grid_type_layout.addWidget( main_window.grid_type_combobox )
+
+        grid_type_widget = QWidget()
+        grid_type_widget.setLayout( grid_type_layout )
+        main_window.properties_layout.insertWidget( 6, grid_type_widget )
+
+        grid_size_layout = QHBoxLayout()
+        grid_size_layout.setContentsMargins( 20, 5, 10, 5 )
+
+        grid_size_label = QLabel( "Grid size" )
+        grid_size_label.setStyleSheet( "color: white; font-size: 14px" )
+        grid_size_layout.addWidget( grid_size_label )
+
+        grid_size_layout.addStretch(1)
+
+        main_window.grid_size_spinbox = QSpinBox()
+        main_window.grid_size_spinbox.setRange( 5, 100 )
+        main_window.grid_size_spinbox.setValue( main_window.grid_size )
+        main_window.grid_size_spinbox.valueChanged.connect( main_window.changeGridSize )
+        main_window.grid_size_spinbox.setStyleSheet( "color: white; background-color: 383838;" )
+        main_window.grid_size_spinbox.setFixedWidth( 50 )
+        grid_size_layout.addWidget( main_window.grid_size_spinbox )
+
+        grid_size_widget = QWidget()
+        grid_size_widget.setLayout( grid_size_layout )
+        main_window.properties_layout.insertWidget( 7, grid_size_widget )
+
+        main_window.canvas_properties_visible = True
+    
+def update_canvas_color(main_window, color):
+    """Ažurira boju canvasa"""
+    if hasattr(main_window, 'canvas'):
+        main_window.canvas.set_canvas_color(color.name())
+
+def toggle_canvas_grid(main_window, state):
+    """Uključuje/isključuje mrežu na canvasu"""
+    if hasattr(main_window, 'canvas'):
+        main_window.canvas.set_grid_enabled(state == Qt.CheckState.Checked.value)
+
+def update_canvas_grid_color(main_window, color):
+    """Ažurira boju mreže"""
+    if hasattr(main_window, 'canvas'):
+        main_window.canvas.set_grid_color(color.name())
+
+def update_canvas_grid_size(main_window, value):
+    """Ažurira veličinu mreže"""
+    if hasattr(main_window, 'canvas'):
+        main_window.canvas.set_grid_size(value)
+
+def update_canvas_grid_type(main_window, text):
+    """Ažurira tip mreže"""
+    if hasattr(main_window, 'canvas'):
+        grid_type = "lines" if text == "Lines" else "dots"
+        main_window.canvas.set_grid_type(grid_type)
            
 
 #-------------------------------------------------------------------------------------------------------------------------------
