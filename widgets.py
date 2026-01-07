@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QApplication, QFrame, QColorDialog, QMainWindow
+from PyQt6.QtWidgets import QWidget, QLabel, QApplication, QFrame, QColorDialog, QMainWindow, QVBoxLayout
 from PyQt6.QtCore import Qt, QPoint, QRect, QPointF, pyqtSignal, QSize, QRectF
 from PyQt6.QtGui import QPainter, QPen, QColor, QLinearGradient, QFont, QBrush, QPixmap,  QCursor, QPalette, QFontMetrics
 import math
@@ -7622,3 +7622,129 @@ class NumericWidget(QWidget):
         # Ako je selektovan, nacrtaj selekcioni okvir
         if self.selected:
             self._draw_selection_border(painter)
+
+class Canvas(QWidget):
+    clicked = pyqtSignal(object)
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setup_properties()
+        self.setup_ui()
+        
+    def setup_ui(self):
+        """Postavlja UI elemente canvasa"""
+        # Koristimo apsolutno pozicioniranje umesto layout-a
+        self.setFixedSize(480, 272)
+        
+        # Glavni container za canvas
+        self.container = QWidget(self)
+        self.container.setGeometry(0, 0, 480, 272)
+        self.container.setStyleSheet("background-color: white; border: 1px solid #ccc;")
+        
+        # Widget container - BITNO: ovo mora biti iznad canvas_label
+        self.widget_container = QWidget(self.container)
+        self.widget_container.setGeometry(0, 0, 480, 272)
+        self.widget_container.setStyleSheet("background-color: transparent;")
+        
+        # Canvas label - za crtanje grid-a, ISPOD widget containera
+        self.canvas_label = QLabel(self.container)
+        self.canvas_label.setGeometry(0, 0, 480, 272)
+        self.canvas_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # Postavi canvas_label ISPOD widget containera
+        self.canvas_label.lower()
+        
+    def setup_properties(self):
+        """Postavlja podrazumevane vrednosti za canvas"""
+        self.canvas_grid_enable = False
+        self.canvas_color = "white"
+        self.grid_color = "black"
+        self.grid_size = 20
+        self.grid_type = "lines"
+        
+    def mousePressEvent(self, event):
+        """Handler za klik na canvas"""
+        if event.button() == Qt.MouseButton.LeftButton:
+            # Emituj signal sa informacijama o kliku
+            self.clicked.emit(event)
+        super().mousePressEvent(event)
+            
+    def get_widget_container(self):
+        """Vraća container za widget-e"""
+        return self.widget_container
+    
+    def get_canvas_container(self):
+        """Vraća glavni container"""
+        return self.container
+    
+    def draw_canvas(self):
+        """Crtanje canvasa sa grid-om"""
+        pixmap = QPixmap(480, 272)
+
+        if self.canvas_color == "white":
+            pixmap.fill(Qt.GlobalColor.white)
+        else:
+            color = QColor(self.canvas_color)
+            pixmap.fill(color)
+
+        if self.canvas_grid_enable:
+            painter = QPainter(pixmap)
+            grid_color = QColor(self.grid_color)
+            painter.setPen(QPen(grid_color, 1))
+            
+            if self.grid_type == "lines":
+                for x in range(0, 481, self.grid_size):
+                    painter.drawLine(x, 0, x, 272)
+                for y in range(0, 273, self.grid_size):
+                    painter.drawLine(0, y, 480, y)
+
+            elif self.grid_type == "dots":
+                dot_size = 2
+                for x in range(self.grid_size // 2, 481, self.grid_size):
+                    for y in range(self.grid_size // 2, 273, self.grid_size):
+                        painter.drawEllipse(x - dot_size // 2, y - dot_size // 2, dot_size, dot_size)
+            painter.end()
+        
+        self.canvas_label.setPixmap(pixmap)
+        # Osiguraj da je canvas_label ispod widget containera
+        self.canvas_label.lower()
+    
+    def set_background_color(self, color):
+        """Postavlja boju pozadine"""
+        self.canvas_color = color
+        self.draw_canvas()
+    
+    def set_grid_enabled(self, enabled):
+        """Uključuje/isključuje grid"""
+        self.canvas_grid_enable = enabled
+        self.draw_canvas()
+    
+    def set_grid_color(self, color):
+        """Postavlja boju grid-a"""
+        self.grid_color = color
+        if self.canvas_grid_enable:
+            self.draw_canvas()
+    
+    def set_grid_type(self, grid_type):
+        """Postavlja tip grid-a (lines/dots)"""
+        self.grid_type = grid_type
+        if self.canvas_grid_enable:
+            self.draw_canvas()
+    
+    def set_grid_size(self, size):
+        """Postavlja veličinu grid-a"""
+        self.grid_size = size
+        if self.canvas_grid_enable:
+            self.draw_canvas()
+    
+    def get_canvas_properties(self):
+        """Vraća sve propertije canvasa kao rečnik"""
+        return {
+            'background_color': self.canvas_color,
+            'grid_enabled': self.canvas_grid_enable,
+            'grid_color': self.grid_color,
+            'grid_type': self.grid_type,
+            'grid_size': self.grid_size,
+            'width': 480,
+            'height': 272
+        }

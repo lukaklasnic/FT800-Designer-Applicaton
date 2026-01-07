@@ -400,7 +400,7 @@ def update_button_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 
 # Dodajte ovu funkciju u callback.py
@@ -828,7 +828,7 @@ def update_line_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def update_line_points(main_window):
     """Ažurira pozicije tačaka linije"""
@@ -1224,7 +1224,7 @@ def update_circle_stack_order(main_window, value):
             main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def update_circle_position(main_window):
     """Ažurira poziciju centra circle-a"""
@@ -1354,7 +1354,7 @@ def update_circle_stack_order(main_window, value):
         main_window.current_shape.stack_order = value
         
         # Sortiraj sve widget-e - koristi metodu iz MainWindow
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
         
         if hasattr(main_window, 'all_circle_dicts'):
             main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
@@ -1776,7 +1776,7 @@ def update_rectangle_stack_order(main_window, value):
             main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def update_rectangle_position(main_window):
     """Ažurira poziciju rectangle-a"""
@@ -2392,7 +2392,7 @@ def update_clock_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def update_clock_position(main_window):
     """Ažurira poziciju clock-a"""
@@ -2806,7 +2806,7 @@ def update_gauge_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def update_gauge_position(main_window):
     """Ažurira poziciju gauge-a"""
@@ -3182,7 +3182,7 @@ def update_dial_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def update_dial_position(main_window):
     """Ažurira poziciju dial-a"""
@@ -3241,7 +3241,7 @@ def showToggleProperties(main_window, current_index):
     active_layout.addStretch(1)
     main_window.active_checkbox_toggle = QCheckBox()
     main_window.active_checkbox_toggle.setChecked(main_window.current_shape.active)
-    main_window.active_checkbox_toggle.stateChanged.connect(lambda state: updateToggleActive(main_window))
+    main_window.active_checkbox_toggle.stateChanged.connect(lambda state: updateToggleActive(main_window,state))
     active_layout.addWidget(main_window.active_checkbox_toggle)
     active_widget = QWidget()
     active_widget.setLayout(active_layout)
@@ -3257,7 +3257,7 @@ def showToggleProperties(main_window, current_index):
     visible_layout.addStretch(1)
     main_window.visible_checkbox_toggle = QCheckBox()
     main_window.visible_checkbox_toggle.setChecked(main_window.current_shape.visible)
-    main_window.visible_checkbox_toggle.stateChanged.connect(lambda state: updateToggleVisible(main_window))
+    main_window.visible_checkbox_toggle.stateChanged.connect(lambda state: updateToggleVisible(main_window, state))
     visible_layout.addWidget(main_window.visible_checkbox_toggle)
     visible_widget = QWidget()
     visible_widget.setLayout(visible_layout)
@@ -3273,7 +3273,7 @@ def showToggleProperties(main_window, current_index):
     static_layout.addStretch(1)
     main_window.static_checkbox_toggle = QCheckBox()
     main_window.static_checkbox_toggle.setChecked(main_window.current_shape.static)
-    main_window.static_checkbox_toggle.stateChanged.connect(lambda state: updateToggleStatic(main_window))
+    main_window.static_checkbox_toggle.stateChanged.connect(lambda state: updateToggleStatic(main_window,state))
     static_layout.addWidget(main_window.static_checkbox_toggle)
     static_widget = QWidget()
     static_widget.setLayout(static_layout)
@@ -3557,7 +3557,7 @@ def update_toggle_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def changeToggleKnobColor(main_window):
     """Menja boju knob-a toggle-a"""
@@ -3912,7 +3912,7 @@ def update_label_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def changeLabelTextColor(self):
     """Menja boju teksta label-a"""
@@ -4385,7 +4385,7 @@ def update_slider_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def update_slider_position(main_window):
     """Ažurira poziciju slider-a"""
@@ -4804,7 +4804,7 @@ def update_scroll_bar_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def update_scrollbar_position(main_window):
     """Ažurira poziciju scrollbar-a"""
@@ -5208,7 +5208,7 @@ def update_progress_bar_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def updateProgressBarPosition(main_window):
     """Ažurira poziciju progress bar-a kada se promeni u properties baru"""
@@ -5675,7 +5675,7 @@ def update_keys_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def update_keys_position(main_window):
     """Ažurira poziciju keys-a"""
@@ -6033,7 +6033,7 @@ def update_image_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def select_image_file(main_window):
     """Otvara dijalog za odabir slike"""
@@ -6533,7 +6533,7 @@ def update_ellipse_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def updateEllipsePosition(main_window):
     """Ažurira poziciju ellipse-a"""
@@ -6886,7 +6886,7 @@ def update_numeric_stack_order(main_window, value):
                 main_window.current_shape.get_properties_dict()
         
         # Sortiraj widget-e
-        main_window.sortWidgetsByStackOrder()
+        main_window.sort_widgets_by_stack_order()
 
 def updateNumericPosition(main_window):
     """Ažurira poziciju numeric widget-a"""
@@ -6945,6 +6945,168 @@ def generate_auto_tag(main_window, current_shape):
             return i
     
     return 0  # Ako su svi zauzeti, vrati 0
+
+#-------------------------------------------------------------------------------------------------------------------------------
+
+# DODAJTE OVO U callback.py
+
+def show_canvas_properties(main_window, canvas, start_index=0):
+    """Prikazuje propertije canvasa u properties panelu"""
+    
+    # Obriši sve postoječe widget-e
+    for i in reversed(range(main_window.properties_layout.count())):
+        widget = main_window.properties_layout.itemAt(i).widget()
+        if widget:
+            widget.hide()
+            main_window.properties_layout.removeWidget(widget)
+            widget.deleteLater()
+    
+    # Dodaj naslov
+    properties_name = QLabel("Main screen properties")
+    properties_name.setStyleSheet("color: white; font-size: 14px; font-weight: bold; margin-top: 10px;")
+    main_window.properties_layout.insertWidget(start_index, properties_name)
+    start_index += 1
+    
+    # Background color
+    background_color_layout = QHBoxLayout()
+    background_color_layout.setContentsMargins(20, 5, 10, 5)
+    
+    background_color_label = QLabel("Background color")
+    background_color_label.setStyleSheet("color: white; font-size: 14px")
+    background_color_layout.addWidget(background_color_label)
+    background_color_layout.addStretch(1)
+    
+    canvas_color_rect = ColorRectangle(canvas.canvas_color)
+    canvas_color_rect.mousePressEvent = lambda e: change_canvas_color(main_window, canvas, canvas_color_rect)
+    background_color_layout.addWidget(canvas_color_rect)
+    
+    background_color_widget = QWidget()
+    background_color_widget.setLayout(background_color_layout)
+    main_window.properties_layout.insertWidget(start_index, background_color_widget)
+    start_index += 1
+    
+    # Grid section
+    grid_main_label = QLabel("Grid")
+    grid_main_label.setStyleSheet("color: white; font-size: 14px; font-weight: bold; margin-top: 10px;")
+    main_window.properties_layout.insertWidget(start_index, grid_main_label)
+    start_index += 1
+    
+    # Enable grid checkbox
+    checkbox_layout = QHBoxLayout()
+    checkbox_layout.setContentsMargins(20, 5, 10, 5)
+    
+    checkbox_enable_label = QLabel("Enable grid")
+    checkbox_enable_label.setStyleSheet("color: white; font-size: 14px;")
+    checkbox_layout.addWidget(checkbox_enable_label)
+    checkbox_layout.addStretch(1)
+    
+    grid_checkbox = QCheckBox()
+    grid_checkbox.setChecked(canvas.canvas_grid_enable)
+    grid_checkbox.stateChanged.connect(lambda state: toggle_grid(main_window, canvas, state))
+    grid_checkbox.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
+    checkbox_layout.addWidget(grid_checkbox)
+    
+    checkbox_widget = QWidget()
+    checkbox_widget.setLayout(checkbox_layout)
+    main_window.properties_layout.insertWidget(start_index, checkbox_widget)
+    start_index += 1
+    
+    # Grid color
+    grid_color_layout = QHBoxLayout()
+    grid_color_layout.setContentsMargins(20, 5, 10, 5)
+    
+    grid_color_label = QLabel("Grid color")
+    grid_color_label.setStyleSheet("color: white; font-size: 14px;")
+    grid_color_layout.addWidget(grid_color_label)
+    grid_color_layout.addStretch(1)
+    
+    grid_color_rect = ColorRectangle(canvas.grid_color)
+    grid_color_rect.mousePressEvent = lambda e: change_grid_color(main_window, canvas, grid_color_rect)
+    grid_color_layout.addWidget(grid_color_rect)
+    
+    grid_color_widget = QWidget()
+    grid_color_widget.setLayout(grid_color_layout)
+    main_window.properties_layout.insertWidget(start_index, grid_color_widget)
+    start_index += 1
+    
+    # Grid type
+    grid_type_layout = QHBoxLayout()
+    grid_type_layout.setContentsMargins(20, 5, 10, 5)
+    
+    grid_type_label = QLabel("Grid type:")
+    grid_type_label.setStyleSheet("color: white; font-size: 14px")
+    grid_type_layout.addWidget(grid_type_label)
+    grid_type_layout.addStretch(1)
+    
+    grid_type_combobox = QComboBox()
+    grid_type_combobox.addItems(["Lines", "Dots"])
+    grid_type_combobox.setCurrentText("Lines" if canvas.grid_type == "lines" else "Dots")
+    grid_type_combobox.currentTextChanged.connect(lambda text: change_grid_type(main_window, canvas, text))
+    grid_type_combobox.setStyleSheet("color: white; background-color: #383838;")
+    grid_type_combobox.setFixedWidth(50)
+    grid_type_layout.addWidget(grid_type_combobox)
+    
+    grid_type_widget = QWidget()
+    grid_type_widget.setLayout(grid_type_layout)
+    main_window.properties_layout.insertWidget(start_index, grid_type_widget)
+    start_index += 1
+    
+    # Grid size
+    grid_size_layout = QHBoxLayout()
+    grid_size_layout.setContentsMargins(20, 5, 10, 5)
+    
+    grid_size_label = QLabel("Grid size")
+    grid_size_label.setStyleSheet("color: white; font-size: 14px")
+    grid_size_layout.addWidget(grid_size_label)
+    grid_size_layout.addStretch(1)
+    
+    grid_size_spinbox = QSpinBox()
+    grid_size_spinbox.setRange(5, 100)
+    grid_size_spinbox.setValue(canvas.grid_size)
+    grid_size_spinbox.valueChanged.connect(lambda value: change_grid_size(main_window, canvas, value))
+    grid_size_spinbox.setStyleSheet("color: white; background-color: #383838;")
+    grid_size_spinbox.setFixedWidth(50)
+    grid_size_layout.addWidget(grid_size_spinbox)
+    
+    grid_size_widget = QWidget()
+    grid_size_widget.setLayout(grid_size_layout)
+    main_window.properties_layout.insertWidget(start_index, grid_size_widget)
+    
+    return start_index + 1
+
+
+def change_canvas_color(main_window, canvas, color_rect):
+    """Menja boju canvasa"""
+    color = QColorDialog.getColor(QColor(canvas.canvas_color))
+    if color.isValid():
+        canvas.set_background_color(color.name())
+        color_rect.color = color.name()
+        color_rect.update()
+
+
+def toggle_grid(main_window, canvas, state):
+    """Uključuje/isključuje grid"""
+    canvas.set_grid_enabled(state == Qt.CheckState.Checked.value)
+
+
+def change_grid_color(main_window, canvas, color_rect):
+    """Menja boju grid-a"""
+    color = QColorDialog.getColor(QColor(canvas.grid_color))
+    if color.isValid():
+        canvas.set_grid_color(color.name())
+        color_rect.color = color.name()
+        color_rect.update()
+
+
+def change_grid_type(main_window, canvas, text):
+    """Menja tip grid-a"""
+    grid_type = "lines" if text == "Lines" else "dots"
+    canvas.set_grid_type(grid_type)
+
+
+def change_grid_size(main_window, canvas, value):
+    """Menja veličinu grid-a"""
+    canvas.set_grid_size(value)
 
 #-------------------------------------------------------------------------------------------------------------------------------
 
