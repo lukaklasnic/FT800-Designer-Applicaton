@@ -7625,15 +7625,18 @@ class NumericWidget(QWidget):
 
 class Canvas(QWidget):
     clicked = pyqtSignal(object)
+    properties_changed = pyqtSignal()  # Novi signal za promenu propertija
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, canvas_id=0):
         super().__init__(parent)
+        self.canvas_id = canvas_id
         self.setup_properties()
         self.setup_ui()
+        self.draw_canvas()  # Nacrtaj inicijalni canvas
         
     def setup_ui(self):
         """Postavlja UI elemente canvasa"""
-        # Koristimo apsolutno pozicioniranje umesto layout-a
+        # Koristimo apsolutno pozicioniranje
         self.setFixedSize(480, 272)
         
         # Glavni container za canvas
@@ -7662,10 +7665,15 @@ class Canvas(QWidget):
         self.grid_size = 20
         self.grid_type = "lines"
         
+        # Nova svojstva
+        self.name = f"Screen_{self.canvas_id}"
+        self.active = True
+        self.visible = True
+        self.static = False
+        
     def mousePressEvent(self, event):
         """Handler za klik na canvas"""
         if event.button() == Qt.MouseButton.LeftButton:
-            # Emituj signal sa informacijama o kliku
             self.clicked.emit(event)
         super().mousePressEvent(event)
             
@@ -7706,45 +7714,76 @@ class Canvas(QWidget):
             painter.end()
         
         self.canvas_label.setPixmap(pixmap)
-        # Osiguraj da je canvas_label ispod widget containera
         self.canvas_label.lower()
     
     def set_background_color(self, color):
         """Postavlja boju pozadine"""
         self.canvas_color = color
         self.draw_canvas()
+        self.properties_changed.emit()
     
     def set_grid_enabled(self, enabled):
         """Uključuje/isključuje grid"""
         self.canvas_grid_enable = enabled
         self.draw_canvas()
+        self.properties_changed.emit()
     
     def set_grid_color(self, color):
         """Postavlja boju grid-a"""
         self.grid_color = color
         if self.canvas_grid_enable:
             self.draw_canvas()
+        self.properties_changed.emit()
     
     def set_grid_type(self, grid_type):
         """Postavlja tip grid-a (lines/dots)"""
         self.grid_type = grid_type
         if self.canvas_grid_enable:
             self.draw_canvas()
+        self.properties_changed.emit()
     
     def set_grid_size(self, size):
         """Postavlja veličinu grid-a"""
         self.grid_size = size
         if self.canvas_grid_enable:
             self.draw_canvas()
+        self.properties_changed.emit()
+    
+    def set_name(self, name):
+        """Postavlja ime canvasa"""
+        self.name = name
+        self.properties_changed.emit()
+    
+    def set_active(self, active):
+        """Postavlja active status"""
+        self.active = active
+        self.properties_changed.emit()
+    
+    def set_visible(self, visible):
+        """Postavlja visible status"""
+        self.visible = visible
+        self.setVisible(visible)
+        self.properties_changed.emit()
+    
+    def set_static(self, static):
+        """Postavlja static status"""
+        self.static = static
+        self.properties_changed.emit()
     
     def get_canvas_properties(self):
         """Vraća sve propertije canvasa kao rečnik"""
         return {
+            'id': self.canvas_id,
+            'name': self.name,
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
             'background_color': self.canvas_color,
             'grid_enabled': self.canvas_grid_enable,
             'grid_color': self.grid_color,
             'grid_type': self.grid_type,
             'grid_size': self.grid_size,
             'width': 480,
-            'height': 272
+            'height': 272,
+            'widgets': []  # Ovo ćemo popuniti kasnije
         }

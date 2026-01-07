@@ -6934,10 +6934,20 @@ def updateNumericNumberAlignment(main_window, text):
 
 def generate_auto_tag(main_window, current_shape):
     """Generiše automatski tag za novi widget"""
-    all_tags = []
-    for shape in main_window.all_shapes:
-        if hasattr(shape, 'tag') and shape != current_shape:  # Isključi trenutni shape
-            all_tags.append(shape.tag)
+    # Proveri da li main_window ima canvas_widgets atribut
+    if hasattr(main_window, 'canvas_widgets'):
+        all_tags = []
+        # Prođi kroz sve widget-e na svim canvas-ima
+        for canvas_id, widgets in main_window.canvas_widgets.items():
+            for widget in widgets:
+                if hasattr(widget, 'tag') and widget != current_shape:
+                    all_tags.append(widget.tag)
+    else:
+        # Stari način
+        all_tags = []
+        for shape in main_window.all_shapes:
+            if hasattr(shape, 'tag') and shape != current_shape:
+                all_tags.append(shape.tag)
     
     # Pronađi prvi slobodan tag od 0 do 255
     for i in range(256):
@@ -6962,9 +6972,103 @@ def show_canvas_properties(main_window, canvas, start_index=0):
             widget.deleteLater()
     
     # Dodaj naslov
-    properties_name = QLabel("Main screen properties")
+    properties_name = QLabel(f"Screen Properties (ID: {canvas.canvas_id})")
     properties_name.setStyleSheet("color: white; font-size: 14px; font-weight: bold; margin-top: 10px;")
     main_window.properties_layout.insertWidget(start_index, properties_name)
+    start_index += 1
+    
+    # Status label
+    status_label = QLabel("Status")
+    status_label.setStyleSheet("color: white; font-size: 14px; font-weight: bold; margin-top: 10px;")
+    main_window.properties_layout.insertWidget(start_index, status_label)
+    start_index += 1
+    
+    # Active checkbox
+    active_layout = QHBoxLayout()
+    active_layout.setContentsMargins(20, 5, 10, 5)
+    
+    active_label = QLabel("Active")
+    active_label.setStyleSheet("color: white; font-size: 14px;")
+    active_layout.addWidget(active_label)
+    active_layout.addStretch(1)
+    
+    active_checkbox = QCheckBox()
+    active_checkbox.setChecked(canvas.active)
+    active_checkbox.stateChanged.connect(lambda state: change_canvas_active(main_window, canvas, state))
+    active_checkbox.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
+    active_layout.addWidget(active_checkbox)
+    
+    active_widget = QWidget()
+    active_widget.setLayout(active_layout)
+    main_window.properties_layout.insertWidget(start_index, active_widget)
+    start_index += 1
+    
+    # Visible checkbox
+    visible_layout = QHBoxLayout()
+    visible_layout.setContentsMargins(20, 5, 10, 5)
+    
+    visible_label = QLabel("Visible")
+    visible_label.setStyleSheet("color: white; font-size: 14px;")
+    visible_layout.addWidget(visible_label)
+    visible_layout.addStretch(1)
+    
+    visible_checkbox = QCheckBox()
+    visible_checkbox.setChecked(canvas.visible)
+    visible_checkbox.stateChanged.connect(lambda state: change_canvas_visible(main_window, canvas, state))
+    visible_checkbox.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
+    visible_layout.addWidget(visible_checkbox)
+    
+    visible_widget = QWidget()
+    visible_widget.setLayout(visible_layout)
+    main_window.properties_layout.insertWidget(start_index, visible_widget)
+    start_index += 1
+    
+    # Static checkbox
+    static_layout = QHBoxLayout()
+    static_layout.setContentsMargins(20, 5, 10, 5)
+    
+    static_label = QLabel("Static")
+    static_label.setStyleSheet("color: white; font-size: 14px;")
+    static_layout.addWidget(static_label)
+    static_layout.addStretch(1)
+    
+    static_checkbox = QCheckBox()
+    static_checkbox.setChecked(canvas.static)
+    static_checkbox.stateChanged.connect(lambda state: change_canvas_static(main_window, canvas, state))
+    static_checkbox.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
+    static_layout.addWidget(static_checkbox)
+    
+    static_widget = QWidget()
+    static_widget.setLayout(static_layout)
+    main_window.properties_layout.insertWidget(start_index, static_widget)
+    start_index += 1
+    
+    # Name label
+    name_main_label = QLabel("Name")
+    name_main_label.setStyleSheet("color: white; font-size: 14px; font-weight: bold; margin-top: 10px;")
+    main_window.properties_layout.insertWidget(start_index, name_main_label)
+    start_index += 1
+    
+    # Name edit
+    name_layout = QHBoxLayout()
+    name_layout.setContentsMargins(20, 5, 10, 5)
+    
+    name_edit_label = QLabel("Name:")
+    name_edit_label.setStyleSheet("color: white; font-size: 14px;")
+    name_layout.addWidget(name_edit_label)
+    
+    name_layout.addStretch(1)
+    
+    name_edit = QLineEdit()
+    name_edit.setText(canvas.name)
+    name_edit.textChanged.connect(lambda text: change_canvas_name(main_window, canvas, text))
+    name_edit.setStyleSheet("color: white; background-color: #383838;")
+    name_edit.setFixedWidth(100)
+    name_layout.addWidget(name_edit)
+    
+    name_widget = QWidget()
+    name_widget.setLayout(name_layout)
+    main_window.properties_layout.insertWidget(start_index, name_widget)
     start_index += 1
     
     # Background color
@@ -7072,6 +7176,14 @@ def show_canvas_properties(main_window, canvas, start_index=0):
     grid_size_widget.setLayout(grid_size_layout)
     main_window.properties_layout.insertWidget(start_index, grid_size_widget)
     
+    # Sačuvaj reference za kasnije ažuriranje
+    main_window.current_canvas_properties = {
+        'active_checkbox': active_checkbox,
+        'visible_checkbox': visible_checkbox,
+        'static_checkbox': static_checkbox,
+        'name_edit': name_edit
+    }
+    
     return start_index + 1
 
 
@@ -7082,12 +7194,12 @@ def change_canvas_color(main_window, canvas, color_rect):
         canvas.set_background_color(color.name())
         color_rect.color = color.name()
         color_rect.update()
-
+        update_canvas_dict(main_window, canvas)
 
 def toggle_grid(main_window, canvas, state):
     """Uključuje/isključuje grid"""
     canvas.set_grid_enabled(state == Qt.CheckState.Checked.value)
-
+    update_canvas_dict(main_window, canvas)
 
 def change_grid_color(main_window, canvas, color_rect):
     """Menja boju grid-a"""
@@ -7096,17 +7208,55 @@ def change_grid_color(main_window, canvas, color_rect):
         canvas.set_grid_color(color.name())
         color_rect.color = color.name()
         color_rect.update()
-
+        update_canvas_dict(main_window, canvas)
 
 def change_grid_type(main_window, canvas, text):
     """Menja tip grid-a"""
     grid_type = "lines" if text == "Lines" else "dots"
     canvas.set_grid_type(grid_type)
-
+    update_canvas_dict(main_window, canvas)
 
 def change_grid_size(main_window, canvas, value):
     """Menja veličinu grid-a"""
     canvas.set_grid_size(value)
+    update_canvas_dict(main_window, canvas)
+
+def change_canvas_active(main_window, canvas, state):
+    """Menja active status canvasa"""
+    canvas.set_active(state == Qt.CheckState.Checked.value)
+    update_canvas_dict(main_window, canvas)
+
+def change_canvas_visible(main_window, canvas, state):
+    """Menja visible status canvasa"""
+    canvas.set_visible(state == Qt.CheckState.Checked.value)
+    update_canvas_dict(main_window, canvas)
+
+def change_canvas_static(main_window, canvas, state):
+    """Menja static status canvasa"""
+    canvas.set_static(state == Qt.CheckState.Checked.value)
+    update_canvas_dict(main_window, canvas)
+
+def change_canvas_name(main_window, canvas, text):
+    """Menja ime canvasa"""
+    canvas.set_name(text)
+    update_canvas_dict(main_window, canvas)
+
+def update_canvas_dict(main_window, canvas):
+    """Ažurira rečnik za canvas"""
+    if hasattr(main_window, 'all_canvas_dicts'):
+        canvas_id = canvas.canvas_id
+        canvas_props = canvas.get_canvas_properties()
+        
+        # Dodaj widget liste ako postoje
+        if hasattr(main_window, 'canvas_widgets'):
+            widgets = main_window.canvas_widgets.get(canvas_id, [])
+            canvas_props['widgets'] = [
+                widget.get_properties_dict() 
+                for widget in widgets
+                if hasattr(widget, 'get_properties_dict')
+            ]
+        
+        main_window.all_canvas_dicts[canvas_id] = canvas_props
 
 #-------------------------------------------------------------------------------------------------------------------------------
 
@@ -7138,116 +7288,95 @@ def sort_widgets_by_stack_order(main_window):
 
 
 def renumberAllWidgets(main_window):
-    """Renumera sve widget-e na canvas-u po tipu (zamenjuje obe metode)"""
-    from widgets import ButtonWidget, LineWidget, RectangleWidget, CircleWidget, GaugeWidget, ClockWidget, ProgressBarWidget, ScrollBarWidget, DialWidget, SliderWidget, ToggleWidget, LabelWidget, ImageWidget, KeysWidget
-    
-    # Grupiši widget-e po tipu
-    widgets_by_type = {
-        'Button': [],
-        'Line': [],
-        'Rectangle': [],
-        'Circle': [],
-        'Gauge': [],
-        'Clock': [],
-        'ProgressBar': [],
-        'ScrollBar': [],
-        'Dial': [],
-        'Slider': [],
-        'Toggle': [],
-        'Label': [],
-        'Image': [],
-        'Keys': []
-    }
-    
-    # Grupiši widget-e
-    for shape in main_window.all_shapes:
-        if isinstance(shape, ButtonWidget):
-            widgets_by_type['Button'].append(shape)
-        elif isinstance(shape, LineWidget):
-            widgets_by_type['Line'].append(shape)
-        elif isinstance(shape, RectangleWidget):
-            widgets_by_type['Rectangle'].append(shape)
-        elif isinstance(shape, CircleWidget):
-            widgets_by_type['Circle'].append(shape)
-        elif isinstance(shape, GaugeWidget):
-            widgets_by_type['Gauge'].append(shape)
-        elif isinstance(shape, ClockWidget):
-            widgets_by_type['Clock'].append(shape)
-        elif isinstance(shape, ProgressBarWidget):
-            widgets_by_type['ProgressBar'].append(shape)
-        elif isinstance(shape, ScrollBarWidget):
-            widgets_by_type['ScrollBar'].append(shape)
-        elif isinstance(shape, DialWidget):
-            widgets_by_type['Dial'].append(shape)
-        elif isinstance(shape, SliderWidget):
-            widgets_by_type['Slider'].append(shape)
-        elif isinstance(shape, ToggleWidget):
-            widgets_by_type['Toggle'].append(shape)
-        elif isinstance(shape, LabelWidget):
-            widgets_by_type['Label'].append(shape)
-        elif isinstance(shape, ImageWidget):
-            widgets_by_type['Image'].append(shape)
-        elif isinstance(shape, KeysWidget):
-            widgets_by_type['Keys'].append(shape)
-    
-    # Renumeriši svaki tip posebno
-    for widget_type, widgets in widgets_by_type.items():
-        if widgets:  # Ako ima widget-a ovog tipa
-            # Sortiraj po poziciji (Y pa X)
-            widgets.sort(key=lambda w: (w.y(), w.x()))
+    """Renumeriše sve widget-e u aplikaciji"""
+    # Proveri da li main_window ima canvas_widgets atribut (nova struktura)
+    if hasattr(main_window, 'canvas_widgets'):
+        # Renumeriši widget-e za svaki canvas
+        for canvas_id, widgets in main_window.canvas_widgets.items():
+            # Sortiraj widget-e po trenutnom stack_order
+            sorted_widgets = sorted(widgets, key=lambda x: x.stack_order)
             
-            # Dodeli nove brojeve
-            for i, widget in enumerate(widgets, 1):
-                if hasattr(widget, 'custom_name'):
-                    widget.custom_name = f"{widget_type}_{i}"
-                elif hasattr(widget, 'set_custom_name'):
-                    widget.set_custom_name(f"{widget_type}_{i}")
-    
-    # Ažuriraj properties ako je nešto selektovano
-    if main_window.current_shape:
-        main_window.showShapeProperties()
+            # Renumeriši
+            for i, widget in enumerate(sorted_widgets, 1):
+                widget.stack_order = i
+            
+            # Ažuriraj Z-order
+            for widget in widgets:
+                widget.lower()
+            for widget in sorted_widgets:
+                widget.raise_()
+    else:
+        # Stari način - za kompatibilnost
+        if not hasattr(main_window, 'all_shapes'):
+            return
+        
+        # Renumeriši sve widget-e
+        for i, shape in enumerate(main_window.all_shapes, 1):
+            shape.stack_order = i
+        
+        # Sortiraj widget-e po stack_order
+        sorted_widgets = sorted(main_window.all_shapes, key=lambda x: x.stack_order)
+        for widget in main_window.all_shapes:
+            widget.lower()
+        for widget in sorted_widgets:
+            widget.raise_()
 
 def generateWidgetName(main_window, widget_type):
-    """Generiše automatsko ime za bilo koji tip widget-a"""
-    type_count = 0
-    existing_names = []
-    
-    # Proveri koje klase pripadaju ovom tipu
-    type_classes = {
-        'Button': [ButtonWidget],
-        'Line': [LineWidget],
-        'Rectangle': [RectangleWidget],
-        'Circle': [CircleWidget],
-        'Gauge': [GaugeWidget],
-        'Clock': [ClockWidget],
-        'ProgressBar': [ProgressBarWidget],
-        'ScrollBar': [ScrollBarWidget],
-        'Dial': [DialWidget],
-        'Slider': [SliderWidget],
-        'Toggle': [ToggleWidget],
-        'Label': [LabelWidget],
-        'Image': [ImageWidget],
-        'Keys': [KeysWidget],
-        'Numeric': [NumericWidget],
-        'Ellipse': [EllipseWidget]
-    }
-    
-    # Prikupi postojeća imena za ovaj tip
-    if widget_type in type_classes:
+    """Generiše jedinstveno ime za widget na osnovu tipa"""
+    # Proveri da li main_window ima canvas_widgets atribut (nova struktura)
+    if hasattr(main_window, 'canvas_widgets'):
+        # Uzmi sve widget-e iz trenutnog canvasa
+        current_canvas = main_window.get_current_canvas()
+        if current_canvas:
+            current_widgets = main_window.canvas_widgets.get(current_canvas.canvas_id, [])
+        else:
+            current_widgets = []
+        
+        # Proveri da li imamo widget-e tog tipa
+        same_type_count = 0
+        for widget in current_widgets:
+            if type(widget).__name__.replace("Widget", "") == widget_type.replace(" ", ""):
+                same_type_count += 1
+        
+        base_name = widget_type.replace(" ", "_")
+        name = f"{base_name}_{same_type_count + 1}"
+        
+        # Proveri da li je ime već zauzeto
+        existing_names = []
+        for widget in current_widgets:
+            if hasattr(widget, 'custom_name'):
+                existing_names.append(widget.custom_name)
+        
+        counter = same_type_count + 1
+        while name in existing_names:
+            name = f"{base_name}_{counter}"
+            counter += 1
+        
+        return name
+    else:
+        # Stari način - za kompatibilnost
+        if not hasattr(main_window, 'all_shapes'):
+            main_window.all_shapes = []
+        
+        same_type_count = 0
         for shape in main_window.all_shapes:
-            for widget_class in type_classes[widget_type]:
-                if isinstance(shape, widget_class) and hasattr(shape, 'custom_name'):
-                    existing_names.append(shape.custom_name)
-    
-    # Pronađi sledeći slobodan broj
-    while True:
-        candidate_name = f"{widget_type}_{type_count}"
-        if candidate_name not in existing_names:
-            return candidate_name
-        type_count += 1
-
-# Onda možete ukloniti generateButtonName i generateLineName
-# i koristiti ovu jednu metodu za sve
+            if type(shape).__name__.replace("Widget", "") == widget_type.replace(" ", ""):
+                same_type_count += 1
+        
+        base_name = widget_type.replace(" ", "_")
+        name = f"{base_name}_{same_type_count + 1}"
+        
+        existing_names = []
+        for shape in main_window.all_shapes:
+            if hasattr(shape, 'custom_name'):
+                existing_names.append(shape.custom_name)
+        
+        counter = same_type_count + 1
+        while name in existing_names:
+            name = f"{base_name}_{counter}"
+            counter += 1
+        
+        return name
 
 
 

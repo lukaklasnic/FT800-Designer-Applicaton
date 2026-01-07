@@ -24,6 +24,9 @@ from pathlib import Path
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        # PRVO inicijalizuj multiple canvas sistem
+        self.init_multiple_canvas()
+        # ONDA postavi UI
         self.set_title_bar()
         self.set_scroll_area()
         self.set_main_layouts()
@@ -53,7 +56,7 @@ class MainWindow(QMainWindow):
         self.properties_widget = QWidget()
         self.properties_widget.setMinimumWidth(248)
         
-        # Centralni panel sa canvasom
+        # Centralni panel sa canvasima
         self.central_widget = QWidget()
         
         # Widgets panel (desno)
@@ -95,7 +98,54 @@ class MainWindow(QMainWindow):
         self.object_attached = False
         self.selected_shape = None
         self.current_shape = None
-        self.all_shapes = []
+        
+    def init_multiple_canvas(self):
+        """Inicijalizuje sistem za više canvas-a"""
+        self.canvases = []  # Lista svih canvas-a
+        self.current_canvas_index = 0  # Trenutno prikazani canvas
+        self.all_canvas_dicts = {}  # Rečnik svih canvas-a
+        self.canvas_widgets = {}  # Rečnik: canvas_id -> lista widget-a na tom canvas-u
+        
+        # Kreiraj prvi canvas
+        self.create_new_canvas()
+        
+    def create_new_canvas(self):
+        """Kreira novi canvas"""
+        canvas_id = len(self.canvases)
+        canvas = Canvas(canvas_id=canvas_id)
+        canvas.clicked.connect(self.on_canvas_clicked)
+        canvas.properties_changed.connect(lambda: self.update_canvas_dict(canvas))
+        
+        self.canvases.append(canvas)
+        self.canvas_widgets[canvas_id] = []  # Prazna lista za widget-e ovog canvasa
+        self.all_canvas_dicts[canvas_id] = canvas.get_canvas_properties()
+        
+        return canvas_id
+        
+    def show_canvas(self, canvas_index):
+        """Prikazuje određeni canvas"""
+        if 0 <= canvas_index < len(self.canvases):
+            self.current_canvas_index = canvas_index
+            
+            # Sakrij sve canvas-e
+            for canvas in self.canvases:
+                canvas.hide()
+            
+            # Prikaži trenutni canvas
+            current_canvas = self.canvases[canvas_index]
+            current_canvas.show()
+            
+            # Ažuriraj navigacione dugmiće
+            if hasattr(self, 'prev_btn'):
+                self.prev_btn.setEnabled(canvas_index > 0)
+            if hasattr(self, 'next_btn'):
+                self.next_btn.setEnabled(canvas_index < len(self.canvases) - 1)
+            
+            # Ažuriraj labelu sa brojem canvasa
+            if hasattr(self, 'canvas_counter_label'):
+                self.canvas_counter_label.setText(f"Canvas {canvas_index + 1}/{len(self.canvases)}")
+            
+            print(f"Switched to canvas {canvas_index}")
 
     def add_widgets_to_properties_bar(self, properties_widget):
         self.properties_layout = QVBoxLayout(properties_widget)
@@ -136,22 +186,303 @@ class MainWindow(QMainWindow):
         top_layout.addWidget(generate_button)
         top_layout.addStretch(1)
 
+        # Dodaj dugme "+" za novi canvas
+        add_canvas_btn = QPushButton("+")
+        add_canvas_btn.setFixedSize(30, 30)
+        add_canvas_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                font-weight: bold;
+                border-radius: 15px;
+                font-size: 16px;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton:pressed {
+                background-color: #3d8b40;
+            }
+        """)
+        add_canvas_btn.clicked.connect(self.add_new_canvas)
+        add_canvas_btn.setToolTip("Add new canvas")
+        top_layout.addWidget(add_canvas_btn)
+
+        # Dodaj dugme "-" za brisanje canvasa
+        self.delete_canvas_btn = QPushButton("-")
+        self.delete_canvas_btn.setFixedSize(30, 30)
+        self.delete_canvas_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #f44336;
+                color: white;
+                font-weight: bold;
+                border-radius: 15px;
+                font-size: 16px;
+            }
+            QPushButton:hover {
+                background-color: #d32f2f;
+            }
+            QPushButton:pressed {
+                background-color: #b71c1c;
+            }
+            QPushButton:disabled {
+                background-color: #666666;
+                color: #888888;
+            }
+        """)
+        self.delete_canvas_btn.clicked.connect(self.delete_current_canvas)
+        self.delete_canvas_btn.setToolTip("Delete current canvas")
+        self.delete_canvas_btn.setEnabled(len(self.canvases) > 1)  # Ne dozvoli brisanje poslednjeg canvasa
+        top_layout.addWidget(self.delete_canvas_btn)
+
         central_layout.addLayout(top_layout)
         central_layout.addStretch(1)
 
-        # Canvas - SAMO Canvas objekat, bez dodatnog containera
-        self.canvas = Canvas()
-        self.canvas.clicked.connect(self.on_canvas_clicked)
+        # ... ostatak metode ostaje isti ...
 
-        canvas_outer_container = QWidget()
-        canvas_layout = QHBoxLayout(canvas_outer_container)
-        canvas_layout.addStretch(1)
-        canvas_layout.addWidget(self.canvas)
-        canvas_layout.addStretch(1)
-
-        central_layout.addWidget(canvas_outer_container)
+        central_layout.addLayout(top_layout)
         central_layout.addStretch(1)
 
+        # Container za canvas i navigaciju
+        self.canvas_nav_container = QWidget()
+        canvas_nav_layout = QVBoxLayout(self.canvas_nav_container)
+        canvas_nav_layout.setContentsMargins(0, 0, 0, 0)
+        canvas_nav_layout.setSpacing(10)
+        
+        # Horizontalni layout za canvas i navigacione strelice
+        canvas_horizontal_layout = QHBoxLayout()
+        canvas_horizontal_layout.setContentsMargins(0, 0, 0, 0)
+        canvas_horizontal_layout.setSpacing(10)
+        
+        # Levi navigacioni dugmić
+        self.prev_btn = QPushButton("←")
+        self.prev_btn.setFixedSize(30, 30)
+        self.prev_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #666666;
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            QPushButton:hover:enabled {
+                background-color: #888888;
+            }
+            QPushButton:disabled {
+                background-color: #444444;
+                color: #888888;
+            }
+        """)
+        self.prev_btn.clicked.connect(self.prev_canvas)
+        self.prev_btn.setEnabled(False)
+        canvas_horizontal_layout.addWidget(self.prev_btn)
+        
+        # Container za canvas (svi canvas-i će biti ovde)
+        self.canvas_display_container = QWidget()
+        self.canvas_display_container.setFixedSize(500, 300)  # Malo veći za padding
+        canvas_horizontal_layout.addWidget(self.canvas_display_container)
+        
+        # Desni navigacioni dugmić
+        self.next_btn = QPushButton("→")
+        self.next_btn.setFixedSize(30, 30)
+        self.next_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #666666;
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            QPushButton:hover:enabled {
+                background-color: #888888;
+            }
+            QPushButton:disabled {
+                background-color: #444444;
+                color: #888888;
+            }
+        """)
+        self.next_btn.clicked.connect(self.next_canvas)
+        self.next_btn.setEnabled(False)
+        canvas_horizontal_layout.addWidget(self.next_btn)
+        
+        canvas_nav_layout.addLayout(canvas_horizontal_layout)
+        
+        # Labela za prikaz trenutnog canvasa
+        self.canvas_counter_label = QLabel("Canvas 1/1")
+        self.canvas_counter_label.setStyleSheet("color: white; font-size: 12px;")
+        self.canvas_counter_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        canvas_nav_layout.addWidget(self.canvas_counter_label)
+        
+        central_layout.addWidget(self.canvas_nav_container)
+        central_layout.addStretch(1)
+        
+        # Postavi sve canvas-e u canvas_display_container
+        self.setup_canvases_in_container()
+        
+        # Prikaži prvi canvas
+        if self.canvases:
+            self.show_canvas(0)
+
+    def delete_current_canvas(self):
+        """Briše trenutni canvas"""
+        if len(self.canvases) <= 1:
+            print("Cannot delete the last canvas!")
+            return
+
+        current_canvas = self.get_current_canvas()
+        if not current_canvas:
+            return
+
+        current_canvas_id = current_canvas.canvas_id
+
+        # Pitanje za potvrdu
+        from PyQt6.QtWidgets import QMessageBox
+        reply = QMessageBox.question(
+            self, 'Confirm Delete',
+            f'Are you sure you want to delete canvas {current_canvas_id}?\nAll widgets on this canvas will be lost.',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.No:
+            return
+
+        # Sakrij propertije ako su prikazani za ovaj canvas
+        if self.canvas_properties_visible:
+            self.hide_canvas_properties()
+
+        # Deselektuj sve widget-e
+        self.deselect_all_shapes()
+        self.hide_shape_properties()
+
+        # Obriši sve widget-e sa ovog canvasa
+        if current_canvas_id in self.canvas_widgets:
+            widgets = self.canvas_widgets[current_canvas_id]
+            for widget in widgets:
+                # Obriši iz odgovarajućih rečnika
+                self.delete_widget_from_dicts(widget)
+                widget.deleteLater()
+            del self.canvas_widgets[current_canvas_id]
+
+        # Obriši canvas iz liste
+        canvas_to_delete = self.canvases.pop(self.current_canvas_index)
+        canvas_to_delete.deleteLater()
+
+        # Obriši iz rečnika
+        if current_canvas_id in self.all_canvas_dicts:
+            del self.all_canvas_dicts[current_canvas_id]
+
+        # Preimenuj preostale canvas-e da bi ID-evi bili sekvencijalni
+        self.renumber_canvases()
+
+        # Postavi novi trenutni canvas (ako je obrisan poslednji, idi na prethodni)
+        if self.current_canvas_index >= len(self.canvases):
+            self.current_canvas_index = len(self.canvases) - 1
+
+        # Prikaži novi trenutni canvas
+        if self.canvases:
+            self.show_canvas(self.current_canvas_index)
+
+        # Ažuriraj dugme za brisanje (ne dozvoli brisanje poslednjeg canvasa)
+        self.delete_canvas_btn.setEnabled(len(self.canvases) > 1)
+
+        print(f"Deleted canvas {current_canvas_id}")
+
+    def delete_widget_from_dicts(self, widget):
+        """Briše widget iz svih rečnika"""
+        if isinstance(widget, ButtonWidget) and hasattr(self, 'all_button_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_button_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, LineWidget) and hasattr(self, 'all_line_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_line_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, CircleWidget) and hasattr(self, 'all_circle_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_circle_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, ClockWidget) and hasattr(self, 'all_clock_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_clock_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, GaugeWidget) and hasattr(self, 'all_gauge_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_gauge_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, DialWidget) and hasattr(self, 'all_dial_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_dial_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, ToggleWidget) and hasattr(self, 'all_toggle_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_toggle_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, LabelWidget) and hasattr(self, 'all_label_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_label_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, ScrollBarWidget) and hasattr(self, 'all_scrollbar_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_scrollbar_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, ProgressBarWidget) and hasattr(self, 'all_progressbar_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_progressbar_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, ImageWidget) and hasattr(self, 'all_image_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_image_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, EllipseWidget) and hasattr(self, 'all_ellipse_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_ellipse_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, NumericWidget) and hasattr(self, 'all_numeric_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_numeric_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, KeysWidget) and hasattr(self, 'all_keys_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_keys_dicts.pop(widget.custom_name, None)
+        elif isinstance(widget, RectangleWidget) and hasattr(self, 'all_rectangle_dicts'):
+            if hasattr(widget, 'custom_name'):
+                self.all_rectangle_dicts.pop(widget.custom_name, None)
+
+    def renumber_canvases(self):
+        """Preimenuje canvas-e da bi ID-evi bili sekvencijalni"""
+        new_canvases = []
+        new_canvas_widgets = {}
+        new_all_canvas_dicts = {}
+
+        for i, canvas in enumerate(self.canvases):
+            # Ažuriraj canvas_id
+            old_id = canvas.canvas_id
+            canvas.canvas_id = i
+
+            # Ažuriraj ime canvasa
+            canvas.name = f"Screen_{i}"
+
+            # Premesti widget-e
+            if old_id in self.canvas_widgets:
+                new_canvas_widgets[i] = self.canvas_widgets[old_id]
+
+            # Premesti rečnik propertija
+            if old_id in self.all_canvas_dicts:
+                canvas_props = self.all_canvas_dicts[old_id]
+                canvas_props['id'] = i
+                canvas_props['name'] = f"Screen_{i}"
+                new_all_canvas_dicts[i] = canvas_props
+
+            new_canvases.append(canvas)
+
+        # Ažuriraj liste i rečnike
+        self.canvases = new_canvases
+        self.canvas_widgets = new_canvas_widgets
+        self.all_canvas_dicts = new_all_canvas_dicts
+        
+    def setup_canvases_in_container(self):
+        """Postavlja sve canvas-e u display container"""
+        if not hasattr(self, 'canvas_display_container') or not hasattr(self, 'canvases'):
+            return
+            
+        # Kreiraj layout za canvas display container
+        container_layout = QVBoxLayout(self.canvas_display_container)
+        container_layout.setContentsMargins(10, 10, 10, 10)
+        container_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # Dodaj sve canvas-e u layout
+        for canvas in self.canvases:
+            container_layout.addWidget(canvas)
+            canvas.hide()
+        
     def add_widgets_to_icons_panel(self, widgets_icon_widget):
         widgets_layout = QVBoxLayout(widgets_icon_widget)
         widgets_layout.setContentsMargins(10, 10, 10, 10)
@@ -182,23 +513,84 @@ class MainWindow(QMainWindow):
                 row += 1
 
         widgets_layout.addWidget(icons_container)
-
+        
+    def add_new_canvas(self):
+        """Dodaje novi canvas"""
+        canvas_id = self.create_new_canvas()
+        
+        # Dodaj novi canvas u display container
+        if hasattr(self, 'canvas_display_container'):
+            self.canvas_display_container.layout().addWidget(self.canvases[-1])
+        
+        # Prikaži novi canvas
+        self.show_canvas(canvas_id)
+        
+        # Ažuriraj dugme za brisanje
+        self.delete_canvas_btn.setEnabled(len(self.canvases) > 1)
+        
+        print(f"Added new canvas with ID: {canvas_id}")
+        
+    def prev_canvas(self):
+        """Prelazi na prethodni canvas"""
+        if self.current_canvas_index > 0:
+            self.show_canvas(self.current_canvas_index - 1)
+            
+    def next_canvas(self):
+        """Prelazi na sledeći canvas"""
+        if self.current_canvas_index < len(self.canvases) - 1:
+            self.show_canvas(self.current_canvas_index + 1)
+            
+    def get_current_canvas(self):
+        """Vraća trenutni canvas"""
+        if 0 <= self.current_canvas_index < len(self.canvases):
+            return self.canvases[self.current_canvas_index]
+        return None
+        
+    def get_current_canvas_widgets(self):
+        """Vraća listu widget-a za trenutni canvas"""
+        current_canvas = self.get_current_canvas()
+        if current_canvas:
+            return self.canvas_widgets.get(current_canvas.canvas_id, [])
+        return []
+        
     def on_canvas_clicked(self, event):
         """Handler za klik na canvas"""
         if event.button() == Qt.MouseButton.LeftButton:
             if not self.current_shape:
-                show_canvas_properties(self, self.canvas)
-                self.canvas_properties_visible = True
-                self.shape_properties_visible = False
-
+                current_canvas = self.get_current_canvas()
+                if current_canvas:
+                    show_canvas_properties(self, current_canvas)
+                    self.canvas_properties_visible = True
+                    self.shape_properties_visible = False
+                    
+    def update_canvas_dict(self, canvas):
+        """Ažurira rečnik za dati canvas"""
+        if hasattr(self, 'all_canvas_dicts'):
+            canvas_id = canvas.canvas_id
+            
+            # Ažuriraj widget liste u canvas propertijima
+            canvas_props = canvas.get_canvas_properties()
+            canvas_props['widgets'] = [
+                widget.get_properties_dict() 
+                for widget in self.canvas_widgets.get(canvas_id, [])
+                if hasattr(widget, 'get_properties_dict')
+            ]
+            
+            self.all_canvas_dicts[canvas_id] = canvas_props
+            
     def on_main_widget_click(self, event):
-        if not hasattr(self, 'canvas'):
+        if not self.canvases:
+            QWidget.mousePressEvent(self.main_widget, event)
+            return
+
+        current_canvas = self.get_current_canvas()
+        if not current_canvas:
             QWidget.mousePressEvent(self.main_widget, event)
             return
 
         # Dobij globalne pozicije
-        canvas_global = self.canvas.frameGeometry()
-        canvas_global.moveTopLeft(self.canvas.mapToGlobal(self.canvas.rect().topLeft()))
+        canvas_global = current_canvas.frameGeometry()
+        canvas_global.moveTopLeft(current_canvas.mapToGlobal(current_canvas.rect().topLeft()))
 
         properties_global = self.properties_widget.frameGeometry()
         properties_global.moveTopLeft(self.properties_widget.mapToGlobal(self.properties_widget.rect().topLeft()))
@@ -206,9 +598,10 @@ class MainWindow(QMainWindow):
         global_pos = event.globalPosition().toPoint()
 
         if canvas_global.contains(global_pos):
-            # Proveri da li je kliknut neki widget
+            # Proveri da li je kliknut neki widget na trenutnom canvas-u
             clicked_on_shape = False
-            for shape in self.all_shapes:
+            current_widgets = self.get_current_canvas_widgets()
+            for shape in current_widgets:
                 global_shape = shape.frameGeometry()
                 global_shape.moveTopLeft(shape.mapToGlobal(shape.rect().topLeft()))
                 if global_shape.contains(global_pos):
@@ -246,7 +639,8 @@ class MainWindow(QMainWindow):
         self.canvas_properties_visible = False
 
     def deselect_all_shapes(self):
-        for shape in self.all_shapes:
+        current_widgets = self.get_current_canvas_widgets()
+        for shape in current_widgets:
             if shape:
                 shape.set_selected(False)
         self.current_shape = None
@@ -259,13 +653,20 @@ class MainWindow(QMainWindow):
     
     def delete_selected_shape(self):
         if self.current_shape:
+            current_canvas = self.get_current_canvas()
+            if not current_canvas:
+                return
+                
+            current_canvas_id = current_canvas.canvas_id
+            current_widgets = self.canvas_widgets.get(current_canvas_id, [])
+            
             was_button = isinstance(self.current_shape, ButtonWidget)
             was_line = isinstance(self.current_shape, LineWidget)
             was_clock = isinstance(self.current_shape, ClockWidget)
             was_gauge = isinstance(self.current_shape, GaugeWidget)
 
-            if self.current_shape in self.all_shapes:
-                self.all_shapes.remove(self.current_shape)
+            if self.current_shape in current_widgets:
+                current_widgets.remove(self.current_shape)
 
             # Ukloni iz odgovarajućeg rečnika
             if was_button and hasattr(self, 'all_button_dicts'):
@@ -319,13 +720,17 @@ class MainWindow(QMainWindow):
             self.renumber_stack_orders()
 
             renumberAllWidgets(self)
+            
+            # Ažuriraj canvas dict
+            self.update_canvas_dict(current_canvas)
 
     def renumber_stack_orders(self):
         """Renumeriše stack_order vrednosti nakon brisanja widget-a"""
-        if not self.all_shapes:
+        current_widgets = self.get_current_canvas_widgets()
+        if not current_widgets:
             return
 
-        sorted_widgets = sorted(self.all_shapes, key=lambda x: x.stack_order)
+        sorted_widgets = sorted(current_widgets, key=lambda x: x.stack_order)
         for i, widget in enumerate(sorted_widgets, 1):
             widget.stack_order = i
 
@@ -354,14 +759,19 @@ class MainWindow(QMainWindow):
         self.show_shape_properties()
 
     def add_shape_to_canvas(self, global_pos):
-        # Mapiraj globalnu poziciju na poziciju u canvas widget container-u
-        widget_container = self.canvas.get_widget_container()
+        # Koristi trenutni canvas
+        current_canvas = self.get_current_canvas()
+        if not current_canvas:
+            print("ERROR: No current canvas!")
+            return
+            
+        widget_container = current_canvas.get_widget_container()
         if not widget_container:
             print("ERROR: Widget container not found!")
             return
         
         # Prvo proveri da li je klik u okviru canvasa
-        canvas_container = self.canvas.get_canvas_container()
+        canvas_container = current_canvas.get_canvas_container()
         if not canvas_container:
             print("ERROR: Canvas container not found!")
             return
@@ -375,16 +785,16 @@ class MainWindow(QMainWindow):
             return
         
         container_pos = widget_container.mapFromGlobal(global_pos)
-        print(f"Adding widget at position: {container_pos}")
+        print(f"Adding widget at position: {container_pos} on canvas {current_canvas.canvas_id}")
         shape = None
 
         if self.selected_shape == "Rectangle":
-            shape = RectangleWidget(100, 80, widget_container)  # widget_container umesto self.canvas
+            shape = RectangleWidget(100, 80, widget_container)
             shape.move(container_pos.x() - 50, container_pos.y() - 40)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Rectangle")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.tag = generate_auto_tag(self, shape)
 
             if not hasattr(self, 'all_rectangle_dicts'):
@@ -392,7 +802,7 @@ class MainWindow(QMainWindow):
             self.all_rectangle_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Line":
-            shape = LineWidget(widget_container)  # widget_container umesto self.canvas
+            shape = LineWidget(widget_container)
 
             # Postavi početne tačke linije
             start_x = container_pos.x() 
@@ -404,7 +814,7 @@ class MainWindow(QMainWindow):
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Line")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.tag = generate_auto_tag(self, shape)
 
             if not hasattr(self, 'all_line_dicts'):
@@ -412,12 +822,12 @@ class MainWindow(QMainWindow):
             self.all_line_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Circle":
-            shape = CircleWidget(100, widget_container)  # widget_container umesto self.canvas
+            shape = CircleWidget(100, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Circle")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.update_center_position()
             shape.tag = generate_auto_tag(self, shape)
 
@@ -426,12 +836,12 @@ class MainWindow(QMainWindow):
             self.all_circle_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Ellipse":
-            shape = EllipseWidget(98, 78, widget_container)  # widget_container umesto self.canvas
+            shape = EllipseWidget(98, 78, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Ellipse")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.tag = generate_auto_tag(self, shape)
 
             if not hasattr(self, 'all_ellipse_dicts'):
@@ -439,25 +849,25 @@ class MainWindow(QMainWindow):
             self.all_ellipse_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Numeric":
-            shape = NumericWidget(100, 40, widget_container)  # widget_container umesto self.canvas
+            shape = NumericWidget(100, 40, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Numeric")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
 
             if not hasattr(self, 'all_numeric_dicts'):
                 self.all_numeric_dicts = {}
             self.all_numeric_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Button":
-            shape = ButtonWidget(100, 50, widget_container)  # widget_container umesto self.canvas
+            shape = ButtonWidget(100, 50, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.custom_name = generateWidgetName(self, "Button")
             shape.clicked.connect(self.select_shape)
             shape.setMouseTracking(True)
             shape.raise_()
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.update_properties_dict()
 
             if not hasattr(self, 'all_button_dicts'):
@@ -467,12 +877,12 @@ class MainWindow(QMainWindow):
             shape.tag = generate_auto_tag(self, shape)
 
         elif self.selected_shape == "Gauge":
-            shape = GaugeWidget(80, widget_container)  # widget_container umesto self.canvas
+            shape = GaugeWidget(80, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Gauge")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.tag = generate_auto_tag(self, shape)
             shape.update_properties_dict()
 
@@ -481,12 +891,12 @@ class MainWindow(QMainWindow):
             self.all_gauge_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Clock":
-            shape = ClockWidget(100, widget_container)  # widget_container umesto self.canvas
+            shape = ClockWidget(100, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Clock")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.update_properties_dict()
 
             if not hasattr(self, 'all_clock_dicts'):
@@ -494,12 +904,12 @@ class MainWindow(QMainWindow):
             self.all_clock_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Progress bar":
-            shape = ProgressBarWidget(150, 10, widget_container)  # widget_container umesto self.canvas
+            shape = ProgressBarWidget(150, 10, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "ProgressBar")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.update_properties_dict()
 
             if not hasattr(self, 'all_progressbar_dicts'):
@@ -507,12 +917,12 @@ class MainWindow(QMainWindow):
             self.all_progressbar_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Scroll bar":
-            shape = ScrollBarWidget(150, 10, widget_container)  # widget_container umesto self.canvas
+            shape = ScrollBarWidget(150, 10, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "ScrollBar")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.tag = generate_auto_tag(self, shape)
 
             if not hasattr(self, 'all_scrollbar_dicts'):
@@ -520,12 +930,12 @@ class MainWindow(QMainWindow):
             self.all_scrollbar_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Dial":
-            shape = DialWidget(80, widget_container)  # widget_container umesto self.canvas
+            shape = DialWidget(80, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Dial")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.tag = generate_auto_tag(self, shape)
 
             if not hasattr(self, 'all_dial_dicts'):
@@ -533,12 +943,12 @@ class MainWindow(QMainWindow):
             self.all_dial_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Slider":
-            shape = SliderWidget(200, 50, widget_container)  # widget_container umesto self.canvas
+            shape = SliderWidget(200, 50, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Slider")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.tag = generate_auto_tag(self, shape)
 
             if not hasattr(self, 'all_slider_dicts'):
@@ -546,12 +956,12 @@ class MainWindow(QMainWindow):
             self.all_slider_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Toggle":
-            shape = ToggleWidget(80, 30, widget_container)  # widget_container umesto self.canvas
+            shape = ToggleWidget(80, 30, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Toggle")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.tag = generate_auto_tag(self, shape)
 
             if not hasattr(self, 'all_toggle_dicts'):
@@ -559,71 +969,76 @@ class MainWindow(QMainWindow):
             self.all_toggle_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Label":
-            shape = LabelWidget(100, 40, widget_container)  # widget_container umesto self.canvas
+            shape = LabelWidget(100, 40, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Label")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
 
             if not hasattr(self, 'all_label_dicts'):
                 self.all_label_dicts = {}
             self.all_label_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Image":
-            shape = ImageWidget(100, 100, widget_container)  # widget_container umesto self.canvas
+            shape = ImageWidget(100, 100, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Image")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
 
             if not hasattr(self, 'all_image_dicts'):
                 self.all_image_dicts = {}
             self.all_image_dicts[shape.custom_name] = shape.get_properties_dict()
 
         elif self.selected_shape == "Keys":
-            shape = KeysWidget(200, 120, widget_container)  # widget_container umesto self.canvas
+            shape = KeysWidget(200, 120, widget_container)
             shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Keys")
-            shape.stack_order = len(self.all_shapes) + 1
+            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
 
             if not hasattr(self, 'all_keys_dicts'):
                 self.all_keys_dicts = {}
             self.all_keys_dicts[shape.custom_name] = shape.get_properties_dict()
 
             shape.show()
-            self.all_shapes.append(shape)
+            self.canvas_widgets[current_canvas.canvas_id].append(shape)
             self.update_widgets_z_order()
             self.select_shape(shape)
             QApplication.restoreOverrideCursor()
             self.object_attached = False
             self.selected_shape = None
+            self.update_canvas_dict(current_canvas)
             return
 
         if shape:
-            if self.all_shapes:
-                max_stack_order = max([s.stack_order for s in self.all_shapes])
-                shape.stack_order = max_stack_order + 1
-            else:
-                shape.stack_order = 1
+            current_widgets_count = len(self.get_current_canvas_widgets())
+            shape.stack_order = current_widgets_count + 1
 
             shape.show()
-            shape.raise_()  # Podigni widget na vrh
-            self.all_shapes.append(shape)
+            shape.raise_()
+            
+            # Dodaj widget u listu za trenutni canvas
+            self.canvas_widgets[current_canvas.canvas_id].append(shape)
             self.sort_widgets_by_stack_order()
             self.select_shape(shape)
+            
             QApplication.restoreOverrideCursor()
             self.object_attached = False
             self.selected_shape = None
+            
+            # Ažuriraj canvas dict
+            self.update_canvas_dict(current_canvas)
 
     def update_widgets_z_order(self):
         """Sortira widget-e po stack_order i postavlja odgovarajući Z-order"""
-        sorted_widgets = sorted(self.all_shapes, key=lambda x: x.stack_order)
+        current_widgets = self.get_current_canvas_widgets()
+        sorted_widgets = sorted(current_widgets, key=lambda x: x.stack_order)
 
-        for widget in sorted_widgets:
+        for widget in current_widgets:
             widget.lower()
 
         for widget in sorted_widgets:
@@ -734,12 +1149,13 @@ class MainWindow(QMainWindow):
 
     def sort_widgets_by_stack_order(self):
         """Sortira widget-e po stack_order"""
-        if not self.all_shapes:
+        current_widgets = self.get_current_canvas_widgets()
+        if not current_widgets:
             return
     
-        sorted_widgets = sorted(self.all_shapes, key=lambda x: x.stack_order)
+        sorted_widgets = sorted(current_widgets, key=lambda x: x.stack_order)
     
-        for widget in self.all_shapes:
+        for widget in current_widgets:
             widget.lower()
     
         for widget in sorted_widgets:
@@ -802,37 +1218,50 @@ class MainWindow(QMainWindow):
                 main_window.all_toggle_dicts[self.custom_name] = self.get_properties_dict()
 
     def print_all_widget_dicts(self):
-        """Ispisuje sve rečnike za sve widget-e"""
-        print("\n" + "="*60)
-        print("              COMPLETE WIDGET REPORT")
-        print("="*60)
+        """Ispisuje sve rečnike za sve widget-e i canvas-e"""
+        print("\n" + "="*80)
+        print("                     COMPLETE PROJECT REPORT")
+        print("="*80)
         
-        widgets_by_type = {}
-        for shape in self.all_shapes:
-            widget_type = type(shape).__name__
-            if widget_type not in widgets_by_type:
-                widgets_by_type[widget_type] = []
-            widgets_by_type[widget_type].append(shape)
+        # Prikaži canvas-e
+        print(f"\nCANVASES ({len(self.canvases)})")
+        print('='*40)
+        for canvas_id, canvas_props in self.all_canvas_dicts.items():
+            print(f"\nCanvas ID: {canvas_id}")
+            for key, value in canvas_props.items():
+                if key != 'widgets':  # widgets ćemo prikazati posebno
+                    print(f"  {key}: {value}")
         
-        for widget_type, widgets in widgets_by_type.items():
-            print(f"\n{'='*30}")
-            print(f"{widget_type.upper()}S ({len(widgets)})")
-            print('='*30)
-            for i, widget in enumerate(widgets, 1):
-                print(f"{widget.custom_name}:")
-                if hasattr(widget, 'get_properties_dict'):
-                    props = widget.get_properties_dict()
-                    for key, value in props.items():
-                        print(f"  {key}: {value}")
-                else:
-                    print(f"  Position: ({widget.x()}, {widget.y()})")
-                    print(f"  Size: {widget.width()}x{widget.height()}")
-                    if hasattr(widget, 'custom_name'):
-                        print(f"  Name: {widget.custom_name}")
+        # Prikaži widget-e po canvas-u
+        print(f"\n\nWIDGETS BY CANVAS")
+        print('='*40)
         
-        print("\n" + "="*60)
-        print(f"TOTAL WIDGETS: {len(self.all_shapes)}")
-        print("="*60 + "\n")
+        total_widgets = 0
+        for canvas_id in range(len(self.canvases)):
+            widgets = self.canvas_widgets.get(canvas_id, [])
+            if widgets:
+                print(f"\nCanvas {canvas_id} ({len(widgets)} widgets):")
+                print('-'*30)
+                
+                widgets_by_type = {}
+                for shape in widgets:
+                    widget_type = type(shape).__name__
+                    if widget_type not in widgets_by_type:
+                        widgets_by_type[widget_type] = []
+                    widgets_by_type[widget_type].append(shape)
+                
+                for widget_type, type_widgets in widgets_by_type.items():
+                    print(f"  {widget_type.upper()}S ({len(type_widgets)}):")
+                    for i, widget in enumerate(type_widgets, 1):
+                        if hasattr(widget, 'custom_name'):
+                            print(f"    {widget.custom_name}")
+                
+                total_widgets += len(widgets)
+        
+        print("\n" + "="*80)
+        print(f"TOTAL CANVASES: {len(self.canvases)}")
+        print(f"TOTAL WIDGETS: {total_widgets}")
+        print("="*80 + "\n")
 
 
 if __name__ == "__main__":
