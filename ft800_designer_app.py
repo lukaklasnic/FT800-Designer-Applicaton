@@ -18,7 +18,7 @@ from callback import (generate_auto_tag, showButtonProperties, updateButtonSize,
                       updateLabelSize, showSliderProperties, showScrollBarProperties, 
                       showProgressBarProperties, showKeysProperties, update_keys_size, 
                       updateImageSize, showImageProperties, showEllipseProperties, 
-                      updateEllipseSize, showNumericProperties, show_canvas_properties)
+                      updateEllipseSize, showNumericProperties, show_canvas_properties, generate_components_c, generate_components_h)
 from pathlib import Path
 
 class MainWindow(QMainWindow):
@@ -181,7 +181,7 @@ class MainWindow(QMainWindow):
                 border: 2px solid #cc5500;
             }
         """)
-        generate_button.clicked.connect(self.print_all_widget_dicts)
+        generate_button.clicked.connect(self.generate_all_files)
 
         top_layout.addWidget(generate_button)
         top_layout.addStretch(1)
@@ -1221,124 +1221,123 @@ class MainWindow(QMainWindow):
         """Generiše resource.c i resource.h fajlove za sve slike"""
         from PyQt6.QtWidgets import QFileDialog, QMessageBox
         from PyQt6.QtGui import QImage
-        
+
         # Prikupi sve slike sa svih canvas-a
         all_images = []
         for canvas_id in range(len(self.canvases)):
-            canvas_widgets = self.canvas_widgets.get(canvas_id, [])
+            canvas_widgets = self.canvases[canvas_id].get_widget_container().children()
             for widget in canvas_widgets:
                 if isinstance(widget, ImageWidget):
                     all_images.append(widget)
-        
+
         if not all_images:
             QMessageBox.warning(self, "Warning", "No images found to generate resources!")
             return
-        
+
         # Zatraži odabir direktorijuma
         out_dir = QFileDialog.getExistingDirectory(
             self,
             "Select output directory for resource files"
         )
-        
+
         if not out_dir:
             return
+
+        # Generiši resource.h - APSOLUTNO PORAVNATO LEVO BEZ INDEMTACIJA
+        h_content = """#ifndef NECTO_DESIGNER_RESOURCE_H
+#define NECTO_DESIGNER_RESOURCE_H
+
+#include "stdint.h"
+
+"""
         
-        # Generiši resource.h
-        h_content = """#ifndef FT800_RESOURCE_H
-    #define FT800_RESOURCE_H
-    
-    #include <stdint.h>
-    
-    """
-        
-        # Generiši resource.c
+        # Generiši resource.c - include SAMO JEDNOM NA POČETKU
         c_content = """#include <stdint.h>
-    #include "resource.h"
-    
-    """
-        
+#include "resource.h"
+
+"""
         generated_count = 0
-        
+
         for img_widget in all_images:
             try:
                 # Proveri da li slika postoji
-                if not img_widget.pixmap or img_widget.pixmap.isNull():
+                if not hasattr(img_widget, 'pixmap') or img_widget.pixmap.isNull():
                     continue
                 
                 # Konvertuj u QImage
                 image = img_widget.pixmap.toImage()
-                
+
                 # Proveri dimenzije - koristi dimenzije widgeta, ne originalne slike
                 width = img_widget.get_width()
                 height = img_widget.get_height()
-                
+
                 # Skaliraj sliku na dimenzije widgeta
                 scaled_image = image.scaled(
                     width, height,
                     Qt.AspectRatioMode.IgnoreAspectRatio,
                     Qt.TransformationMode.SmoothTransformation
                 )
-                
+
                 # Konvertuj u RGB888 format
                 rgb888_image = scaled_image.convertToFormat(QImage.Format.Format_RGB888)
-                
+
                 # Generiši RGB565 podatke
                 rgb565 = bytearray()
-                
+
                 for y in range(height):
                     for x in range(width):
                         c = rgb888_image.pixelColor(x, y)
-                        
+
                         # Konvertuj u RGB565
                         r = min(max(c.red(), 0), 255) >> 3
                         g = min(max(c.green(), 0), 255) >> 2
                         b = min(max(c.blue(), 0), 255) >> 3
-                        
+
                         value = (r << 11) | (g << 5) | b
-                        
+
                         # Little endian
                         rgb565.append(value & 0xFF)
                         rgb565.append((value >> 8) & 0xFF)
-                
+
                 size = len(rgb565)
-                
-                # Kreiraj ime varijable
-                var_name = img_widget.custom_name.replace(' ', '_').replace('-', '_').lower()
-                if not var_name:
-                    var_name = f"image_{generated_count}"
-                
-                # Dodaj u .h fajl
-                h_content += f"extern const uint8_t {var_name}[{size}];\n"
-                h_content += f"extern const uint32_t {var_name}_width;\n"
-                h_content += f"extern const uint32_t {var_name}_height;\n\n"
-                
-                # Dodaj u .c fajl
-                c_content += f"const uint8_t {var_name}[{size}] = {{\n"
-                
+
+                # Kreiraj ime varijable: Name_hex (konkatenacija imena + _hex)
+                if hasattr(img_widget, 'custom_name') and img_widget.custom_name:
+                    # Očisti ime i dodaj _hex
+                    clean_name = img_widget.custom_name.replace(' ', '_').replace('-', '_')
+                    var_name = f"{clean_name}_hex"
+                else:
+                    var_name = f"image_{generated_count}_hex"
+
+                # Dodaj u .h fajl - APSOLUTNO PORAVNATO LEVO
+                h_content += f"extern const code uint8_t {var_name}[{size}];\n\n"
+
+
+                # Dodaj u .c fajl - SAMO HEX NIZ I DIMENZIJE (NE include)
+                c_content += f"const code uint8_t {var_name}[{size}] = {{\n"
+
                 # Formatiraj hex podatke
                 for i in range(0, size, 16):
                     line = ", ".join(f"0x{b:02X}" for b in rgb565[i:i+16])
                     c_content += f"    {line},\n"
-                
+
                 c_content += "};\n\n"
-                c_content += f"const uint32_t {var_name}_width = {width};\n"
-                c_content += f"const uint32_t {var_name}_height = {height};\n\n"
-                
+
                 generated_count += 1
-                
+
             except Exception as e:
-                print(f"Error generating data for image {img_widget.custom_name}: {e}")
-        
-        h_content += "#endif // FT800_RESOURCE_H\n"
-        
+                print(f"Error generating data for image {img_widget.custom_name if hasattr(img_widget, 'custom_name') else 'Unknown'}: {e}")
+
+        h_content += "#endif\n"
+
         # Snimi fajlove
         try:
             with open(f"{out_dir}/resource.h", "w") as h_file:
                 h_file.write(h_content)
-            
+
             with open(f"{out_dir}/resource.c", "w") as c_file:
                 c_file.write(c_content)
-            
+
             if generated_count > 0:
                 QMessageBox.information(
                     self,
@@ -1353,7 +1352,7 @@ class MainWindow(QMainWindow):
                     "Warning",
                     "No valid images found to generate resources!"
                 )
-            
+
         except Exception as e:
             QMessageBox.critical(
                 self,
@@ -1361,6 +1360,182 @@ class MainWindow(QMainWindow):
                 f"Failed to generate resource files:\n{str(e)}"
             )
 
+    def generate_components(self):
+        """Generiše components.c i components.h fajlove"""
+        from PyQt6.QtWidgets import QFileDialog, QMessageBox
+
+        # Prikupi sve podatke o canvas-ima i widget-ima
+        canvas_data = []
+        for canvas_id, canvas_props in self.all_canvas_dicts.items():
+            # Kopiraj podatke o canvas-u
+            canvas_info = canvas_props.copy()
+
+            # Prikupi sve widget-e za ovaj canvas
+            canvas_widgets = []
+            widgets = self.canvas_widgets.get(canvas_id, [])
+
+            for widget in widgets:
+                if hasattr(widget, 'get_properties_dict'):
+                    widget_dict = widget.get_properties_dict()
+                    # Dodaj tip widgeta
+                    widget_type = type(widget).__name__.replace('Widget', '')
+                    if widget_type == 'ScrollBar':
+                        widget_type = 'ScrollBar'
+                    elif widget_type == 'ProgressBar':
+                        widget_type = 'ProgressBar'
+                    widget_dict['type'] = widget_type
+
+                    # Osiguraj da postoje sva potrebna polja sa default vrednostima
+                    # Ovo je bitno jer widget rečnici možda nemaju sva polja
+                    self._ensure_widget_fields(widget_dict)
+
+                    canvas_widgets.append(widget_dict)
+
+            canvas_info['widgets'] = canvas_widgets
+            canvas_data.append(canvas_info)
+
+        # Proveri da li ima podataka za generisanje
+        if not canvas_data:
+            QMessageBox.warning(self, "Warning", "No data available to generate components!")
+            return
+
+        # Zatraži odabir direktorijuma
+        out_dir = QFileDialog.getExistingDirectory(
+            self,
+            "Select output directory for component files"
+        )
+
+        if not out_dir:
+            return
+
+        try:
+            # Generiši components.h
+            h_content = generate_components_h(canvas_data, {})
+
+            # Generiši components.c
+            c_content = generate_components_c(canvas_data, {})
+
+            # Snimi fajlove
+            with open(f"{out_dir}/components.h", "w", encoding='utf-8') as h_file:
+                h_file.write(h_content)
+
+            with open(f"{out_dir}/components.c", "w", encoding='utf-8') as c_file:
+                c_file.write(c_content)
+
+            QMessageBox.information(
+                self,
+                "Success",
+                f"Component files generated successfully!\n\n"
+                f"Canvases: {len(canvas_data)}\n"
+                f"Total widgets: {sum(len(canvas.get('widgets', [])) for canvas in canvas_data)}\n"
+                f"Saved to: {out_dir}"
+            )
+
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Failed to generate component files:\n{str(e)}"
+            )
+
+    def _ensure_widget_fields(self, widget_dict):
+        """Osigurava da widget rečnik ima sva potrebna polja"""
+        widget_type = widget_dict.get('type')
+        
+        # Osnovna polja za sve widget-e
+        if 'visible' not in widget_dict:
+            widget_dict['visible'] = True
+        if 'active' not in widget_dict:
+            widget_dict['active'] = True
+        if 'static' not in widget_dict:
+            widget_dict['static'] = False
+        if 'stack_order' not in widget_dict:
+            widget_dict['stack_order'] = 1
+        
+        # Inicijalizuj defaults kao prazan rečnik
+        defaults = {}
+        
+        # Dodaj specificna polja za svaki tip widgeta
+        if widget_type == 'Line':
+            defaults = {'x1': 0, 'y1': 0, 'x2': 100, 'y2': 0, 'color': 0xFF0000, 'width': 1, 'tag': 1}
+        elif widget_type == 'Rectangle':
+            defaults = {'x': 0, 'y': 0, 'width': 100, 'height': 100, 'edges_color': 0xFF0000, 
+                       'thickness': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 2,
+                       'gradient_enable': False, 'gradient_type': 'left_right',
+                       'gradient_start_color': 0xFF0000, 'gradient_end_color': 0x0000FF}
+        elif widget_type == 'Circle':
+            defaults = {'center_x': 100, 'center_y': 100, 'diameter': 100, 
+                       'line_color': 0xFF0000, 'line_thickness': 1, 'filled': True,
+                       'fill_color': 0x0000FF, 'tag': 3}
+        elif widget_type == 'Ellipse':
+            defaults = {'center_x': 100, 'center_y': 100, 'width': 150, 'height': 75,
+                       'border_color': 0xCA75FE, 'border_width': 1, 'filled': True,
+                       'fill_color': 0x0000FF, 'tag': 4, 'gradient_enable': False,
+                       'gradient_type': 'top_bottom', 'gradient_start_color': 0xFF0000,
+                       'gradient_end_color': 0x0000FF}
+        elif widget_type == 'Button':
+            defaults = {'x': 100, 'y': 100, 'width': 100, 'height': 100,
+                       'start_color': 0xFF0000, 'end_color': 0x00FF00,
+                       '3d_enable': True, 'text': 'Press', 'text_size': 28,
+                       'text_color': 0xFF0000, 'tag': 5}
+        elif widget_type == 'Keys':
+            defaults = {'x': 10, 'y': 10, 'width': 300, 'height': 60,
+                       'key_color_top': 0xFFFF00, 'key_color_bottom': 0xFFFF00,
+                       'text_color': 0x00FF00, '3d_enable': True,
+                       'key_type': 'NUM', 'text_size': 27}
+        elif widget_type == 'Clock':
+            defaults = {'center_x': 240, 'center_y': 136, 'diameter': 100,
+                       'background_color': 0x0000FF, '3d_enable': True,
+                       'hours': 9, 'minutes': 53, 'seconds': 0}
+        elif widget_type == 'Gauge':
+            defaults = {'center_x': 100, 'center_y': 100, 'diameter': 100,
+                       'background_color': 0xFF0000, '3d_enable': True,
+                       'major_subdivision': 6, 'minor_subdivision': 3,
+                       'range_value': 100, 'value': 50}
+        elif widget_type == 'Dial':
+            defaults = {'center_x': 240, 'center_y': 130, 'diameter': 50,
+                       '3d_enable': True, 'value': 0.5, 'tag': 6}
+        elif widget_type == 'Toggle':
+            defaults = {'x': 50, 'y': 50, 'width': 40,
+                       'thumb_color': 0xFF00FF, 'background_color': 0x0000FF,
+                       '3d_enable': True, 'is_on': False, 'tag': 7}
+        elif widget_type == 'ScrollBar':
+            defaults = {'x': 100, 'y': 100, 'width': 100, 'height': 10,
+                       'thumb_color': 0x0000FF, 'track_color': 0xFFFF00,
+                       '3d_enable': True, 'range_value': 65535,
+                       'current_val': 32767, 'knob_size': 1000, 'tag': 8}
+        elif widget_type == 'Slider':
+            defaults = {'x': 100, 'y': 100, 'width': 100, 'height': 10,
+                       'knob_color': 0x00FF00, 'background_left_color': 0xFF0000,
+                       'background_right_color': 0x0000FF, '3d_enable': True,
+                       'range_value': 65535, 'value': 32767, 'tag': 9}
+        elif widget_type == 'ProgressBar':
+            defaults = {'x': 100, 'y': 100, 'width': 100, 'height': 10,
+                       'progress_color': 0xFFFFFF, 'background_color': 0xFF0000,
+                       '3d_enable': True, 'max_value': 100, 'value': 50}
+        elif widget_type == 'Image':
+            defaults = {'x': 50, 'y': 50, 'width': 200, 'height': 100,
+                       'frame_enable': False, 'frame_color': 0xFF0000,
+                       'frame_width': 2}
+        elif widget_type == 'Label':
+            defaults = {'x': 100, 'y': 100, 'text_color': 0x0000FF,
+                       'text': 'Labela', 'text_size': 30, 'alignment': 'right'}
+        elif widget_type == 'Numeric':
+            defaults = {'x': 100, 'y': 100, 'number_color': 0xFF00EF,
+                       'number': 3110, 'number_size': 30, 'alignment': 'right'}
+        
+        # Aplikuj default vrednosti ako polje ne postoji
+        for key, value in defaults.items():
+            if key not in widget_dict:
+                widget_dict[key] = value    
+    
+    def generate_all_files(self):
+        """Generiše sve fajlove (resurse i komponente)"""
+        # Prvo generiši resurse (ako postoje slike)
+        self.generate_resources()
+
+        # Zatim generiši komponente
+        self.generate_components()
 
     def print_all_widget_dicts(self):
         """Ispisuje sve rečnike za sve widget-e i canvas-e i nudi opciju za generisanje resursa"""
