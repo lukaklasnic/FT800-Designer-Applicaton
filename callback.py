@@ -7559,7 +7559,7 @@ def generate_widget_structure(widget_type, name, widget_data):
         content += f"    {name}.range = {widget_data.get('range_value', 65535)};\n"
         content += f"    {name}.val = {widget_data.get('value', 32767)};\n"
         if 'tag' in widget_data:
-            content += f"    {name}.tag = {widget_data['tag']};   //Prosleđuje se broj tag-a {name} widget-a\n"
+            content += f"    {name}.tag = {widget_data['tag']};\n"
     
     elif widget_type == 'ProgressBar':
         content += f"    {name}.visible = {convert_bool(widget_data.get('visible', True))};\n"
@@ -7610,10 +7610,10 @@ def generate_components_h(canvas_data, widgets_data):
     Generiše components.h fajl sa deklaracijama struktura i funkcija
     """
     
-    content = """#ifndef COMPONENTS_H    //Uvek treba ovako da piše
-#define COMPONENTS_H    //Uvek treba ovako da piše
+    content = """#ifndef COMPONENTS_H
+#define COMPONENTS_H
 
-#include "MikroSDK.Ft800"   //Uvek treba ovako da piše
+#include "MikroSDK.Ft800"
 """
     
     # Proveri da li postoje Image widget-i i dodaj resource.h ako ima
@@ -7749,8 +7749,6 @@ void ft800_display_configuration()
         if canvas.get('active', True):
             name = canvas.get('name', f'Screen_{i}')
 
-            content += f"\n    //Popunjavanje strukture za canvas {name}\n"
-
             # Obavezna polja koja uvek treba da postoje
             # 1. background_color - boja pozadine canvasa
             if 'background_color' in canvas:
@@ -7879,7 +7877,7 @@ void ft800_display_configuration()
         widget_type = widget.get('type')
         name = widget.get('name', f'{widget_type}_0')
         
-        content += f"\n    //Popunjavanje strukture za {widget_type.lower()} widget {name}\n"
+        content += f"\n"
         
         # Generiši kod za widget strukturu
         content += generate_widget_structure(widget_type, name, widget)
@@ -7930,7 +7928,7 @@ void ft800_display_task_{i}()
                         if widget_type in draw_functions:
                             # Dodaj komentar ako je komentarisano
                             if widget.get('commented', False):
-                                content += f"    //{draw_functions[widget_type]}(&ctx, &{widget_name});\n"
+                                content += f"\n"
                             else:
                                 content += f"    {draw_functions[widget_type]}(&ctx, &{widget_name});\n"
             
