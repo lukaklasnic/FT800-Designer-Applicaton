@@ -7751,7 +7751,7 @@ void ft800_display_configuration()
 
             # Obavezna polja koja uvek treba da postoje
             # 1. background_color - boja pozadine canvasa
-            if 'background_color' in canvas:
+            if '//Popunjavanje strukture za canvas Screen_0' in canvas:
                 hex_color = convert_color_to_hex(canvas['background_color'])
                 content += f"    {name}.background_color = {hex_color};\n"
             else:

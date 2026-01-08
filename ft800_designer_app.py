@@ -6,7 +6,7 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QIcon, QGuiApplication
 from widgets import (RectangleWidget, LineWidget, CircleWidget, KeysWidget, ButtonWidget, 
                      GaugeWidget, ClockWidget, ProgressBarWidget, ScrollBarWidget, DialWidget, 
-                     SliderWidget, ToggleWidget, LabelWidget, ImageWidget, Widget_icon, 
+                     SliderWidget, ToggleWidget, LabelWidget, ImageWidget, WidgetIcon, 
                      ColorRectangle, EllipseWidget, NumericWidget, Canvas)
 import sys
 from callback import (generate_auto_tag, showButtonProperties, updateButtonSize, 
@@ -505,7 +505,7 @@ class MainWindow(QMainWindow):
         col = 0
 
         for i, shape in enumerate(widgets_shapes):
-            widget_icon = Widget_icon(shape)
+            widget_icon = WidgetIcon(shape)
             icons_layout.addWidget(widget_icon, row, col)
             col += 1
             if col >= 2:
@@ -1441,7 +1441,7 @@ class MainWindow(QMainWindow):
     def _ensure_widget_fields(self, widget_dict):
         """Osigurava da widget rečnik ima sva potrebna polja"""
         widget_type = widget_dict.get('type')
-        
+
         # Osnovna polja za sve widget-e
         if 'visible' not in widget_dict:
             widget_dict['visible'] = True
@@ -1451,10 +1451,10 @@ class MainWindow(QMainWindow):
             widget_dict['static'] = False
         if 'stack_order' not in widget_dict:
             widget_dict['stack_order'] = 1
-        
+
         # Inicijalizuj defaults kao prazan rečnik
         defaults = {}
-        
+
         # Dodaj specificna polja za svaki tip widgeta
         if widget_type == 'Line':
             defaults = {'x1': 0, 'y1': 0, 'x2': 100, 'y2': 0, 'color': 0xFF0000, 'width': 1, 'tag': 1}
@@ -1523,12 +1523,12 @@ class MainWindow(QMainWindow):
         elif widget_type == 'Numeric':
             defaults = {'x': 100, 'y': 100, 'number_color': 0xFF00EF,
                        'number': 3110, 'number_size': 30, 'alignment': 'right'}
-        
+
         # Aplikuj default vrednosti ako polje ne postoji
         for key, value in defaults.items():
             if key not in widget_dict:
                 widget_dict[key] = value    
-    
+
     def generate_all_files(self):
         """Generiše sve fajlove (resurse i komponente)"""
         # Prvo generiši resurse (ako postoje slike)

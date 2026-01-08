@@ -1,239 +1,241 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QApplication, QFrame, QColorDialog, QMainWindow, QVBoxLayout
-from PyQt6.QtCore import Qt, QPoint, QRect, QPointF, pyqtSignal, QSize, QRectF
-from PyQt6.QtGui import QPainter, QPen, QColor, QLinearGradient, QFont, QBrush, QPixmap,  QCursor, QPalette, QFontMetrics
+from PyQt6.QtGui import ( QPainter, QPen, QColor, QLinearGradient, QFont, QBrush, QPixmap,  QCursor, QPalette, QFontMetrics )
+from PyQt6.QtWidgets import ( QWidget, QLabel, QApplication, QFrame, QColorDialog, QMainWindow )
+from PyQt6.QtCore import ( Qt, QPoint, QRect, QPointF, pyqtSignal, QSize, QRectF )
 import math
 
-class Widget_icon(QFrame):
-    def __init__(self, shape):
+class WidgetIcon( QFrame ):
+
+    def __init__( self, shape ):
         super().__init__()
-        self.setFixedSize(100, 100)
-        self.setFrameShape(QFrame.Shape.Box)
-        self.setLineWidth(1)
+        self.setFixedSize( 100, 100 )
+        self.setFrameShape( QFrame.Shape.Box )
+        self.setLineWidth( 1 )
         self.shape = shape
 
-        self.setAutoFillBackground(True)
-        self.default_color = QColor(0, 0, 0, 0)
-        self.hover_color = QColor(202, 230, 232, 255)
+        self.setAutoFillBackground( True )
+        self.default_color = QColor( 0, 0, 0, 0 )
+        self.hover_color = QColor( 202, 230, 232, 255 )
 
         palette = self.palette()
-        palette.setColor(QPalette.ColorRole.Window, self.default_color)
+        palette.setColor( QPalette.ColorRole.Window, self.default_color )
         self.setPalette(palette)
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            main_window = self.window()
-            if getattr(main_window, "object_attached", False):
-                QApplication.restoreOverrideCursor()
-                main_window.object_attached = False
-                main_window.selected_shape = None
-            else:
-                self._create_custom_cursor()
-                main_window.object_attached = True
-                main_window.selected_shape = self.shape
-
-    def _create_custom_cursor(self):
-        pix = QPixmap(100, 100)
-        pix.fill(Qt.GlobalColor.transparent)
-        painter = QPainter(pix)
-        painter.setPen(QPen(QColor(150, 202, 232), 2))
+    def createCustomCursor( self ):
+        pix = QPixmap( 100, 100 )
+        pix.fill( Qt.GlobalColor.transparent )
+        painter = QPainter( pix )
+        painter.setPen( QPen( QColor( 150, 202, 232 ), 2 ) )
         
         cursor_actions = {
-            "Line": lambda: painter.drawLine(10, 10, 80, 80),
-            "Circle": lambda: painter.drawEllipse(QPoint(50, 50), 50, 50),
-            "Gauge": lambda: painter.drawEllipse(QPoint(50, 45), 25, 25),
-            "Clock": lambda: painter.drawEllipse(QPoint(50, 50), 50, 50),
-            "Dial": lambda: painter.drawEllipse(QPoint(50, 45), 25, 25),
-            "Rectangle": lambda: painter.drawRect(0, 0, 60, 50),
-            "Image": lambda: painter.drawRect(0, 0, 60, 50),
-            "Progress bar": lambda: painter.drawRoundedRect(0, 0, 60, 10, 3, 3),
-            "Scroll bar": lambda: painter.drawRoundedRect(0, 0, 60, 10, 3, 3),
-            "Slider": lambda: painter.drawRoundedRect(0, 0, 60, 10, 3, 3),
-            "Button": lambda: painter.drawRoundedRect(0, 0, 100, 50, 5, 5),
-            "Toggle": lambda: painter.drawRoundedRect(0, 0, 40, 20, 10, 10),
-            "Label": lambda: painter.drawRect(0, 0, 50, 20),
-            "Keys": lambda: painter.drawRect(0, 0, 40, 40),
-            "Numeric":lambda: painter.drawRect(0, 0, 50, 50),
-            "Ellipse":lambda: painter.drawEllipse(QPoint(50, 50), 48, 38),
+            "Line": lambda: painter.drawLine( 10, 10, 80, 80 ),
+            "Rectangle": lambda: painter.drawRect( 0, 0, 60, 50 ),
+            "Circle": lambda: painter.drawEllipse( QPoint( 50, 50 ), 50, 50 ),
+            "Ellipse":lambda: painter.drawEllipse( QPoint( 50, 50 ), 48, 38 ),
+            "Button": lambda: painter.drawRoundedRect( 0, 0, 100, 50, 5, 5 ),
+            "Keys": lambda: painter.drawRect( 0, 0, 40, 40 ),
+            "Clock": lambda: painter.drawEllipse( QPoint( 50, 50 ), 50, 50 ),
+            "Gauge": lambda: painter.drawEllipse( QPoint( 50, 45 ), 25, 25 ),
+            "Dial": lambda: painter.drawEllipse( QPoint( 50, 45 ), 25, 25 ),
+            "Toggle": lambda: painter.drawRoundedRect( 0, 0, 40, 20, 10, 10 ),
+            "Scroll bar": lambda: painter.drawRoundedRect( 0, 0, 60, 10, 3, 3 ),
+            "Slider": lambda: painter.drawRoundedRect( 0, 0, 60, 10, 3, 3 ),
+            "Progress bar": lambda: painter.drawRoundedRect( 0, 0, 60, 10, 3, 3 ),
+            "Image": lambda: painter.drawRect( 0, 0, 60, 50 ),
+            "Label": lambda: painter.drawRect( 0, 0, 50, 20 ),
+            "Numeric":lambda: painter.drawRect( 0, 0, 50, 50 ),
         }
         
         if self.shape in cursor_actions:
             cursor_actions[self.shape]()
         
         painter.end()
-        QApplication.setOverrideCursor(QCursor(pix, 16, 16))
+        QApplication.setOverrideCursor( QCursor( pix, 16, 16 ) )
 
-    def enterEvent(self, event):
+    def mousePressEvent( self, event ):
+        if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.window()
+            if getattr( main_window, "object_attached", False ):
+                QApplication.restoreOverrideCursor()
+                main_window.object_attached = False
+                main_window.selected_shape = None
+            else:
+                self.createCustomCursor()
+                main_window.object_attached = True
+                main_window.selected_shape = self.shape
+
+    def enterEvent( self, event ):
+        super().enterEvent( event )
         palette = self.palette()
-        palette.setColor(QPalette.ColorRole.Window, self.hover_color)
-        self.setPalette(palette)
-        super().enterEvent(event)
-
-    def leaveEvent(self, event):
-        palette = self.palette()
-        palette.setColor(QPalette.ColorRole.Window, self.default_color)
-        self.setPalette(palette)
-        super().leaveEvent(event)
-
-    def paintEvent(self, event):
-        super().paintEvent(event)  
-        painter = QPainter(self)
-        pen = QPen(QColor(255, 255, 255))
-        font = QFont("Arial", 10, QFont.Weight.Normal)  
-        painter.setFont(font)
-        painter.setPen(pen)
+        palette.setColor( QPalette.ColorRole.Window, self.hover_color )
+        self.setPalette( palette )
         
-        painter.drawText(self.rect(), Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter, self.shape)
+    def leaveEvent( self, event ):
+        super().leaveEvent( event )
+        palette = self.palette()
+        palette.setColor( QPalette.ColorRole.Window, self.default_color )
+        self.setPalette( palette )
+        
+    def paintEvent( self, event ):
+        super().paintEvent( event )  
+        painter = QPainter( self )
+        pen = QPen( QColor( 255, 255, 255 ) )
+        font = QFont( "Arial", 10, QFont.Weight.Normal )  
+        painter.setFont( font )
+        painter.setPen( pen )
+        
+        painter.drawText( self.rect(), Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter, self.shape )
         
         shape_drawers = {
-            "Button": self._draw_button,
-            "Line": self._draw_line,
-            "Rectangle": self._draw_rectangle,
-            "Circle": self._draw_circle,
-            "Keys": self._draw_keys,
-            "Gauge": self._draw_gauge,
-            "Clock": self._draw_clock,
-            "Progress bar": self._draw_progress_bar,
-            "Scroll bar": self._draw_scroll_bar,
-            "Dial": self._draw_dial,
-            "Slider": self._draw_slider,
-            "Toggle": self._draw_toggle,
-            "Label": self._draw_label,
-            "Image": self._draw_image,
-            "Numeric":self._draw_numeric,
-            "Ellipse":self._draw_ellipse
+            "Line": self.drawLine,
+            "Rectangle": self.drawRectangle,
+            "Circle": self.drawCircle,
+            "Ellipse":self.drawEllipse,
+            "Button": self.drawButton,
+            "Keys": self.drawKeys,
+            "Clock": self.drawClock,
+            "Gauge": self.drawGauge,
+            "Dial": self.drawDial,
+            "Toggle": self.drawToggle,
+            "Scroll bar": self.drawScrollBar,
+            "Slider": self.drawSlider,
+            "Progress bar": self.drawProgressBar,
+            "Image": self.drawImage,
+            "Label": self.drawLabel,
+            "Numeric":self.drawNumeric
         }
         
         if self.shape in shape_drawers:
-            shape_drawers[self.shape](painter)
+            shape_drawers[ self.shape ]( painter )
 
-    def _draw_button(self, painter):
-        painter.drawRoundedRect(20, 30, 60, 30, 5, 5)
-        rect = QRect(20, 30, 60, 30)
-        painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, "Press")
+    def drawLine( self, painter ):
+        painter.drawLine( 20, 20, 80, 60 )
 
-    def _draw_line(self, painter):
-        painter.drawLine(20, 20, 80, 60)
+    def drawRectangle( self, painter ):
+        painter.drawRect( 20, 20, 60, 50 )
 
-    def _draw_rectangle(self, painter):
-        painter.drawRect(20, 20, 60, 50)
+    def drawCircle(self, painter):
+        painter.drawEllipse( QPoint( 50, 45 ), 25, 25 )
 
-    def _draw_circle(self, painter):
-        painter.drawEllipse(QPoint(50, 45), 25, 25)
+    def drawEllipse( self, painter ):
+        painter.drawEllipse( QPoint( 50, 45 ), 35, 25 )
 
-    def _draw_keys(self, painter):
+    def drawButton(self, painter):
+        painter.drawRoundedRect( 20, 30, 60, 30, 5, 5 )
+        rect = QRect( 20, 30, 60, 30 )
+        painter.drawText( rect, Qt.AlignmentFlag.AlignCenter, "Press" )
+
+    def drawKeys( self, painter ):
         x, y = 25, 20
-        for i in range(2):
-            for j in range(4):
-                painter.drawRoundedRect(x, y, 10, 10, 1, 1)
+        for i in range( 2 ):
+            for j in range( 4 ):
+                painter.drawRoundedRect( x, y, 10, 10, 1, 1 )
                 x += 13
             x = 25
             y += 13
-        painter.drawRoundedRect(30, 47, 40, 10, 1, 1)
+        painter.drawRoundedRect( 30, 47, 40, 10, 1, 1 )
 
-    def _draw_gauge(self, painter):
-        painter.drawEllipse(QPoint(50, 45), 20, 20)
-        painter.translate(50, 45)
-        painter.rotate(-135)
-        for i in range(6):  
-            painter.drawLine(0, -15, 0, -12)
-            painter.rotate(54)
-        painter.drawLine(0, 0, 14, 10)
-
-    def _draw_clock(self, painter):
-        painter.drawEllipse(QPoint(50, 45), 20, 20)
-        painter.translate(50, 45)
-        for i in range(12):  
-            painter.drawPoint(0, -15)
-            painter.rotate(30)
+    def drawClock( self, painter ):
+        painter.drawEllipse( QPoint( 50, 45 ), 20, 20 )
+        painter.translate( 50, 45 )
+        for i in range( 12 ):  
+            painter.drawPoint( 0, -15 )
+            painter.rotate( 30 )
         
-        painter.rotate(55) 
-        needle_pen = QPen(QColor(236, 238, 241))
-        needle_pen.setWidth(1)
-        painter.setPen(needle_pen)
-        painter.drawLine(0, 0, -2, 15) 
+        painter.rotate( 55 ) 
+        needle_pen = QPen(QColor( 236, 238, 241 ) )
+        needle_pen.setWidth( 1 )
+        painter.setPen( needle_pen )
+        painter.drawLine( 0, 0, -2, 15 ) 
         
-        painter.rotate(-55)
-        needle_pen.setWidth(2)
-        painter.setPen(needle_pen)
-        painter.drawLine(0, 0, 4, -13)
+        painter.rotate( -55 )
+        needle_pen.setWidth( 2 )
+        painter.setPen( needle_pen )
+        painter.drawLine( 0, 0, 4, -13 )
         
-        painter.rotate(-55)
-        needle_pen.setWidth(3)
-        painter.setPen(needle_pen)
-        painter.drawLine(0, 0, -10, -11)
+        painter.rotate( -55 )
+        needle_pen.setWidth( 3 )
+        painter.setPen( needle_pen )
+        painter.drawLine( 0, 0, -10, -11 )
 
-    def _draw_progress_bar(self, painter):
-        painter.drawLine(25, 40, 75, 40)
-        painter.drawLine(25, 50, 75, 50)
-        painter.drawLine(60, 40, 60, 50)
-        painter.drawArc(20, 40, 10, 10, 90*16, 16*180)
-        painter.drawArc(70, 40, 10, 10, 90*16, -16*180)
-        painter.setBrush(QColor(255, 255, 255))
-        painter.drawPie(22, 42, 6, 6, 90*16, 16*180)
-        painter.drawRect(25, 42, 35, 6)
+    def drawGauge(self, painter):
+        painter.drawEllipse( QPoint( 50, 45 ), 20, 20 )
+        painter.translate( 50, 45 )
+        painter.rotate( -135 )
+        for i in range( 6 ):  
+            painter.drawLine( 0, -15, 0, -12 )
+            painter.rotate( 54 )
+        painter.drawLine( 0, 0, 14, 10 )
 
-    def _draw_scroll_bar(self, painter):
-        painter.drawLine(25, 40, 75, 40)
-        painter.drawLine(25, 50, 75, 50)
-        painter.drawArc(20, 40, 10, 10, 90*16, 16*180)
-        painter.drawArc(70, 40, 10, 10, 90*16, -16*180)
-        painter.setBrush(QColor(255, 255, 255))
-        painter.drawRect(30, 42, 20, 6)
-        painter.drawPie(27, 42, 6, 6, 90*16, 16*180)
-        painter.drawPie(47, 42, 6, 6, 90*16, -16*180)
+    def drawDial( self, painter ):
+        painter.drawEllipse( QPoint( 50, 40 ), 20, 20 )
+        painter.drawLine( 50, 25, 50, 30 )
 
-    def _draw_dial(self, painter):
-        painter.drawEllipse(QPoint(50, 40), 20, 20)
-        painter.drawLine(50, 25, 50, 30)
+    def drawToggle( self, painter ):
+        painter.drawLine( 35, 40, 65, 40 )
+        painter.drawLine( 35, 60, 65, 60 )
+        painter.drawArc( 25, 40, 20, 20, 90*16, 16*180 )
+        painter.drawArc( 55, 40, 20, 20, 90*16, -16*180 )
+        painter.setBrush( QColor( 255, 255, 255 ) )
+        painter.drawEllipse( QPoint( 63, 50 ), 8, 8 )
+        rect = QRect( 25, 40, 30, 20 )
+        painter.setFont( QFont( "Arial", 8, QFont.Weight.Normal ) )
+        painter.drawText( rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter, "ON" )
 
-    def _draw_slider(self, painter):
-        painter.drawLine(20, 42, 80, 42)
-        painter.drawLine(20, 48, 80, 48)
-        painter.drawArc(15, 42, 6, 6, 90*16, 16*180)
-        painter.drawArc(75, 42, 6, 6, 90*16, -16*180)
-        painter.setBrush(QColor(255, 255, 255))
-        painter.drawEllipse(QPoint(50, 45), 6, 6)
+    def drawScrollBar( self, painter ):
+        painter.drawLine( 25, 40, 75, 40 )
+        painter.drawLine( 25, 50, 75, 50 )
+        painter.drawArc( 20, 40, 10, 10, 90*16, 16*180 )
+        painter.drawArc( 70, 40, 10, 10, 90*16, -16*180 )
+        painter.setBrush( QColor( 255, 255, 255 ) )
+        painter.drawRect( 30, 42, 20, 6 )
+        painter.drawPie( 27, 42, 6, 6, 90*16, 16*180 )
+        painter.drawPie( 47, 42, 6, 6, 90*16, -16*180 )
 
-    def _draw_toggle(self, painter):
-        painter.drawLine(35, 40, 65, 40)
-        painter.drawLine(35, 60, 65, 60)
-        painter.drawArc(25, 40, 20, 20, 90*16, 16*180)
-        painter.drawArc(55, 40, 20, 20, 90*16, -16*180)
-        painter.setBrush(QColor(255, 255, 255))
-        painter.drawEllipse(QPoint(63, 50), 8, 8)
-        rect = QRect(25, 40, 30, 20)
-        painter.setFont(QFont("Arial", 8, QFont.Weight.Normal))
-        painter.drawText(rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter, "ON")
+    def drawSlider( self, painter ):
+        painter.drawLine( 20, 42, 80, 42 )
+        painter.drawLine( 20, 48, 80, 48 )
+        painter.drawArc( 15, 42, 6, 6, 90*16, 16*180 )
+        painter.drawArc( 75, 42, 6, 6, 90*16, -16*180 )
+        painter.setBrush( QColor( 255, 255, 255 ) )
+        painter.drawEllipse( QPoint( 50, 45 ), 6, 6 )
 
-    def _draw_label(self, painter):
-        painter.drawLine(20, 40, 65, 40)
-        painter.drawLine(20, 60, 65, 60)
-        painter.drawLine(20, 40, 20, 60)
-        painter.drawLine(65, 40, 80, 50)
-        painter.drawLine(65, 60, 80, 50)
-        painter.setFont(QFont("Arial", 8, QFont.Weight.Normal))
-        rect = QRect(30, 40, 30, 20)
-        painter.drawText(rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter, "Text")
+    def drawProgressBar( self, painter ):
+        painter.drawLine( 25, 40, 75, 40 )
+        painter.drawLine( 25, 50, 75, 50 )
+        painter.drawLine( 60, 40, 60, 50 )
+        painter.drawArc( 20, 40, 10, 10, 90*16, 16*180 )
+        painter.drawArc( 70, 40, 10, 10, 90*16, -16*180 )
+        painter.setBrush( QColor( 255, 255, 255 ) )
+        painter.drawPie( 22, 42, 6, 6, 90*16, 16*180 )
+        painter.drawRect( 25, 42, 35, 6 )
 
-    def _draw_image(self, painter):
-        painter.drawRoundedRect(25, 20, 50, 50, 5, 5)
-        painter.drawLine(27, 68, 45, 45)
-        painter.drawLine(45, 45, 65, 70)
-        painter.drawLine(55, 55, 65, 45)
-        painter.drawLine(65, 45, 75, 58)
-        painter.drawArc(15, 10, 25, 25, 0*16, -16*90)
-        painter.translate(25, 20)
-        painter.rotate(110)
-        for i in range(3):  
-            painter.drawLine(0, -20, 0, -17)
-            painter.rotate(25)
-    def _draw_numeric( self, painter):
-        rect = QRect(25, 20, 50, 50)
-        painter.drawText(rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter, "123")
-        painter.drawRoundedRect(rect, 5, 5)
-    def _draw_ellipse( self, painter):
-        painter.drawEllipse(QPoint(50, 45), 35, 25)
+    def drawImage( self, painter ):
+        painter.drawRoundedRect( 25, 20, 50, 50, 5, 5 )
+        painter.drawLine( 27, 68, 45, 45 )
+        painter.drawLine( 45, 45, 65, 70 )
+        painter.drawLine( 55, 55, 65, 45 )
+        painter.drawLine( 65, 45, 75, 58 )
+        painter.drawArc( 15, 10, 25, 25, 0*16, -16*90 )
+        painter.translate( 25, 20 )
+        painter.rotate( 110 )
+        for i in range( 3 ):  
+            painter.drawLine( 0, -20, 0, -17 )
+            painter.rotate( 25 )
 
+    def drawLabel( self, painter ):
+        painter.drawLine( 20, 40, 65, 40 )
+        painter.drawLine( 20, 60, 65, 60 )
+        painter.drawLine( 20, 40, 20, 60 )
+        painter.drawLine( 65, 40, 80, 50 )
+        painter.drawLine( 65, 60, 80, 50 )
+        painter.setFont( QFont( "Arial", 8, QFont.Weight.Normal ) )
+        rect = QRect( 30, 40, 30, 20 )
+        painter.drawText( rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter, "Text" )
+
+    def drawNumeric( self, painter ):
+        rect = QRect( 25, 20, 50, 50 )
+        painter.drawText( rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter, "123" )
+        painter.drawRoundedRect( rect, 5, 5 )
 
 class ColorRectangle( QLabel ):
     
@@ -244,9 +246,8 @@ class ColorRectangle( QLabel ):
         self.update_display()
         self.setCursor( Qt.CursorShape.PointingHandCursor )
         
-        
     def update_display( self ):
-        self.setStyleSheet( f"background-color: {self._color}; border: 1px solid #ccc;" )
+        self.setStyleSheet( f"background-color: { self._color }; border: 1px solid #ccc;" )
         
     @property
     def color( self ):
@@ -258,6 +259,7 @@ class ColorRectangle( QLabel ):
         self.update_display()
         
     def mousePressEvent( self, event ):
+        super().mousePressEvent( event )
         if event.button() == Qt.MouseButton.LeftButton:
             new_color = QColorDialog.getColor( QColor( self._color ) )
             if new_color.isValid():
@@ -265,8 +267,7 @@ class ColorRectangle( QLabel ):
                 self.update_display()
                 if hasattr( self, 'colorChanged' ):
                     self.colorChanged.emit( self._color )
-        super().mousePressEvent( event )
-
+        
 class RectangleWidget(QWidget):
     clicked = pyqtSignal(object)
     
