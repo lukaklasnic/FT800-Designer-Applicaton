@@ -6056,17 +6056,19 @@ def select_image_file(main_window):
                 main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def update_image_frame_enabled(main_window, state):
-    """Ažurira enable status za frame"""
+    """Ažurira enable status za frame i resizuje sliku"""
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
         is_enabled = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.set_frame_enabled(is_enabled)
+        
         if hasattr(main_window, 'all_image_dicts'):
             main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def update_image_frame_width(main_window, value):
-    """Ažurira debljinu frame-a"""
+    """Ažurira debljinu frame-a i resizuje sliku"""
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
         main_window.current_shape.set_frame_width(value)
+        
         if hasattr(main_window, 'all_image_dicts'):
             main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
@@ -6077,14 +6079,17 @@ def change_image_frame_color(main_window):
         if color.isValid():
             main_window.current_shape.set_frame_color(color)
             main_window.frame_color_rect.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
+            
             if hasattr(main_window, 'all_image_dicts'):
                 main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
 
 def updateImageSize(main_window):
-    """Ažurira veličinu image widget-a"""
+    """Ažurira veličinu image widget-a i automatski resizuje sliku"""
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
         width = main_window.width_spin_image.value()
         height = main_window.height_spin_image.value()
+        
+        # Postavi veličinu (ovo će automatski resizovati sliku)
         main_window.current_shape.set_size(width, height)
         
         # Ažuriraj rečnik

@@ -6498,7 +6498,7 @@ class ImageWidget(QWidget):
         self._width = width
         self._height = height
         
-        # Status properties (konzistentno sa drugim widget-ima)
+        # Status properties
         self.active = True
         self.visible = True
         self.static = False
@@ -6511,16 +6511,16 @@ class ImageWidget(QWidget):
         
         # Frame properties
         self.frame_enabled = False
-        self.frame_color = QColor(255, 0, 0)  # Crna boja okvira
-        self.frame_width = 3
+        self.frame_color = QColor(0, 0, 0)
+        self.frame_width = 1
         
-        # Background color (za slučaj kad nema slike)
-        self.background_color = QColor(255, 255, 255)  # Svetlo siva
+        # Background color
+        self.background_color = QColor(240, 240, 240)
         
         # Image properties
         self.image_path = ""
-        self.pixmap = QPixmap()
-        self.scale_to_fit = True
+        self.original_pixmap = QPixmap()  # Originalna učitana slika
+        self.pixmap = QPixmap()  # Trenutno prikazana slika (resizovana)
         
         # Selection
         self.selected = False
@@ -6536,27 +6536,46 @@ class ImageWidget(QWidget):
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         
-        # Rečnik za properties (konzistentno sa drugim widget-ima)
         self.update_properties_dict()
     
     def set_size(self, width, height):
-        """Postavlja veličinu widgeta"""
-        self._width = max(20, width)  # Minimum 20px
-        self._height = max(20, height)  # Minimum 20px
+        """Postavlja veličinu widgeta i resizuje sliku"""
+        self._width = max(20, width)
+        self._height = max(20, height)
+        
         self.setFixedSize(self._width, self._height)
+        
+        # Ako postoji originalna slika, resizuj je
+        if not self.original_pixmap.isNull():
+            self._resize_pixmap()
+        
         self.update()
     
+    def _resize_pixmap(self):
+        """Resizuje originalnu sliku na trenutne dimenzije widgeta"""
+        if self.original_pixmap.isNull():
+            return
+        
+        # Resizuj sliku da popuni celu dostupnu površinu (bez frame-a)
+        margin = self.frame_width if self.frame_enabled else 0
+        content_width = max(1, self._width - 2 * margin)
+        content_height = max(1, self._height - 2 * margin)
+        
+        self.pixmap = self.original_pixmap.scaled(
+            content_width, content_height,
+            Qt.AspectRatioMode.IgnoreAspectRatio,  # Ignoriši aspect ratio da popuni celu površinu
+            Qt.TransformationMode.SmoothTransformation
+        )
+
     def get_width(self):
-        """Getter za width"""
         return self._width
     
     def get_height(self):
-        """Getter za height"""
         return self._height
     
     def set_frame_enabled(self, enabled):
-        """Postavlja da li je okvir omogućen"""
         self.frame_enabled = enabled
+        self._resize_pixmap()
         self.update()
     
     def set_frame_color(self, color):
@@ -6565,39 +6584,47 @@ class ImageWidget(QWidget):
         self.update()
     
     def set_frame_width(self, width):
-        """Postavlja debljinu okvira"""
-        self.frame_width = max(0, min(20, width))  # Ograniči na 0-20
+        self.frame_width = max(0, min(20, width))
+        self._resize_pixmap()
         self.update()
     
     def set_background_color(self, color):
-        """Postavlja boju pozadine"""
         self.background_color = color
         self.update()
     
     def set_image_path(self, path):
-        """Postavlja putanju do slike i učitava je"""
+        """Učitava sliku i automatski je resizuje na trenutne dimenzije"""
         supported_formats = ['.bmp', '.png', '.jpg', '.jpeg', '.jpe']
         
         if path:
-            # Proveri ekstenziju
             file_extension = path.lower()
             has_supported_extension = any(file_extension.endswith(ext) for ext in supported_formats)
             
             if has_supported_extension:
                 self.image_path = path
-                self.pixmap = QPixmap(path)
+                self.original_pixmap = QPixmap(path)
                 
-                if self.pixmap.isNull():
+                if self.original_pixmap.isNull():
                     print(f"Greška: Ne mogu da učitam sliku iz {path}")
+                    self.original_pixmap = QPixmap()
                     self.pixmap = QPixmap()
                     return False
                 
+                # Automatski resizuj sliku na trenutne dimenzije widgeta
+                self._resize_pixmap()
+                
+                # Postavi default ime ako nije postavljeno
+                if not self.custom_name:
+                    # Koristi ime fajla bez ekstenzije
+                    import os
+                    filename = os.path.basename(path)
+                    self.custom_name = f"Image_{os.path.splitext(filename)[0]}"
+                
                 self.update()
                 return True
+            
             else:
-                supported_exts = ", ".join(supported_formats)
-                print(f"Greška: Podržani formati su: {supported_exts}")
-                print(f"Pokušali ste: {path}")
+                print(f"Greška: Nepodržan format fajla: {path}")
                 return False
         
         return False
@@ -6650,7 +6677,7 @@ class ImageWidget(QWidget):
             'frame_width': self.frame_width,
             'background_color': self.background_color.name(),
             'image_path': self.image_path,
-            'scale_to_fit': self.scale_to_fit,
+            'scale_to_fit': self.get_scale_to_fit,
             'active': getattr(self, 'active', True),
             'visible': getattr(self, 'visible', True),
             'static': getattr(self, 'static', False)
@@ -6805,7 +6832,7 @@ class ImageWidget(QWidget):
         event.accept()
     
     def _handle_resize(self, global_pos):
-        """Menja veličinu widget-a"""
+        """Menja veličinu widgeta i automatski resizuje sliku"""
         if not self.resize_corner:
             return
 
@@ -6827,7 +6854,18 @@ class ImageWidget(QWidget):
             new_width = max(20, self.resize_start_size.width() - delta.x())
             new_height = max(20, self.resize_start_size.height() - delta.y())
 
-        self.set_size(new_width, new_height)
+        # Postavi novu veličinu
+        self._width = new_width
+        self._height = new_height
+        
+        self.setFixedSize(new_width, new_height)
+        
+        # Automatski resizuj sliku
+        if not self.original_pixmap.isNull():
+            self._resize_pixmap()
+        
+        # Ažuriraj properties bar
+        self._update_properties_size()
     
     def _update_properties_size(self):
         """Ažuriraj veličinu u properties bar-u"""
@@ -6932,50 +6970,21 @@ class ImageWidget(QWidget):
         painter.setPen(Qt.PenStyle.NoPen)
         painter.drawRect(0, 0, self._width, self._height)
         
+        # Crtanje slike ako postoji
+        if not self.pixmap.isNull():
+            margin = self.frame_width if self.frame_enabled else 0
+            
+            # Centriraj sliku
+            x = margin
+            y = margin
+            
+            painter.drawPixmap(x, y, self.pixmap)
+        
         # Crtanje okvira ako je omogućen
         if self.frame_enabled and self.frame_width > 0:
             painter.setPen(QPen(self.frame_color, self.frame_width))
             painter.setBrush(Qt.BrushStyle.NoBrush)
             painter.drawRect(0, 0, self._width, self._height)
-        
-        # Crtanje slike ako postoji
-        if not self.pixmap.isNull():
-            # Izračunaj dimenzije za sliku sa obzirom na okvir
-            margin = self.frame_width if self.frame_enabled else 0
-            content_rect = QRect(
-                margin, 
-                margin, 
-                self._width - 2 * margin, 
-                self._height - 2 * margin
-            )
-            
-            if content_rect.width() > 0 and content_rect.height() > 0:
-                if self.scale_to_fit:
-                    # Skaliranje slike da stane u dostupni prostor
-                    scaled_pixmap = self.pixmap.scaled(
-                        content_rect.size(), 
-                        Qt.AspectRatioMode.KeepAspectRatio, 
-                        Qt.TransformationMode.SmoothTransformation
-                    )
-                    
-                    # Centriranje skalirane slike
-                    x = content_rect.x() + (content_rect.width() - scaled_pixmap.width()) // 2
-                    y = content_rect.y() + (content_rect.height() - scaled_pixmap.height()) // 2
-                    painter.drawPixmap(x, y, scaled_pixmap)
-                else:
-                    # Prikaz originalne slike (može biti isečena)
-                    painter.drawPixmap(content_rect, self.pixmap)
-        
-        # Ako nema slike, prikaži placeholder tekst
-        elif self.image_path:
-            painter.setPen(QColor(128, 128, 128))
-            font = QFont("Arial", 8)
-            painter.setFont(font)
-            painter.drawText(
-                self.rect(), 
-                Qt.AlignmentFlag.AlignCenter, 
-                "Slika nije učitana"
-            )
         
         # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
         if self.selected:

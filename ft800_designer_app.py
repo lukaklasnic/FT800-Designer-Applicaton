@@ -1217,12 +1217,158 @@ class MainWindow(QMainWindow):
             elif isinstance(self, ToggleWidget) and hasattr(main_window, 'all_toggle_dicts'):
                 main_window.all_toggle_dicts[self.custom_name] = self.get_properties_dict()
 
+    def generate_resources(self):
+        """Generiše resource.c i resource.h fajlove za sve slike"""
+        from PyQt6.QtWidgets import QFileDialog, QMessageBox
+        from PyQt6.QtGui import QImage
+        
+        # Prikupi sve slike sa svih canvas-a
+        all_images = []
+        for canvas_id in range(len(self.canvases)):
+            canvas_widgets = self.canvas_widgets.get(canvas_id, [])
+            for widget in canvas_widgets:
+                if isinstance(widget, ImageWidget):
+                    all_images.append(widget)
+        
+        if not all_images:
+            QMessageBox.warning(self, "Warning", "No images found to generate resources!")
+            return
+        
+        # Zatraži odabir direktorijuma
+        out_dir = QFileDialog.getExistingDirectory(
+            self,
+            "Select output directory for resource files"
+        )
+        
+        if not out_dir:
+            return
+        
+        # Generiši resource.h
+        h_content = """#ifndef FT800_RESOURCE_H
+    #define FT800_RESOURCE_H
+    
+    #include <stdint.h>
+    
+    """
+        
+        # Generiši resource.c
+        c_content = """#include <stdint.h>
+    #include "resource.h"
+    
+    """
+        
+        generated_count = 0
+        
+        for img_widget in all_images:
+            try:
+                # Proveri da li slika postoji
+                if not img_widget.pixmap or img_widget.pixmap.isNull():
+                    continue
+                
+                # Konvertuj u QImage
+                image = img_widget.pixmap.toImage()
+                
+                # Proveri dimenzije - koristi dimenzije widgeta, ne originalne slike
+                width = img_widget.get_width()
+                height = img_widget.get_height()
+                
+                # Skaliraj sliku na dimenzije widgeta
+                scaled_image = image.scaled(
+                    width, height,
+                    Qt.AspectRatioMode.IgnoreAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation
+                )
+                
+                # Konvertuj u RGB888 format
+                rgb888_image = scaled_image.convertToFormat(QImage.Format.Format_RGB888)
+                
+                # Generiši RGB565 podatke
+                rgb565 = bytearray()
+                
+                for y in range(height):
+                    for x in range(width):
+                        c = rgb888_image.pixelColor(x, y)
+                        
+                        # Konvertuj u RGB565
+                        r = min(max(c.red(), 0), 255) >> 3
+                        g = min(max(c.green(), 0), 255) >> 2
+                        b = min(max(c.blue(), 0), 255) >> 3
+                        
+                        value = (r << 11) | (g << 5) | b
+                        
+                        # Little endian
+                        rgb565.append(value & 0xFF)
+                        rgb565.append((value >> 8) & 0xFF)
+                
+                size = len(rgb565)
+                
+                # Kreiraj ime varijable
+                var_name = img_widget.custom_name.replace(' ', '_').replace('-', '_').lower()
+                if not var_name:
+                    var_name = f"image_{generated_count}"
+                
+                # Dodaj u .h fajl
+                h_content += f"extern const uint8_t {var_name}[{size}];\n"
+                h_content += f"extern const uint32_t {var_name}_width;\n"
+                h_content += f"extern const uint32_t {var_name}_height;\n\n"
+                
+                # Dodaj u .c fajl
+                c_content += f"const uint8_t {var_name}[{size}] = {{\n"
+                
+                # Formatiraj hex podatke
+                for i in range(0, size, 16):
+                    line = ", ".join(f"0x{b:02X}" for b in rgb565[i:i+16])
+                    c_content += f"    {line},\n"
+                
+                c_content += "};\n\n"
+                c_content += f"const uint32_t {var_name}_width = {width};\n"
+                c_content += f"const uint32_t {var_name}_height = {height};\n\n"
+                
+                generated_count += 1
+                
+            except Exception as e:
+                print(f"Error generating data for image {img_widget.custom_name}: {e}")
+        
+        h_content += "#endif // FT800_RESOURCE_H\n"
+        
+        # Snimi fajlove
+        try:
+            with open(f"{out_dir}/resource.h", "w") as h_file:
+                h_file.write(h_content)
+            
+            with open(f"{out_dir}/resource.c", "w") as c_file:
+                c_file.write(c_content)
+            
+            if generated_count > 0:
+                QMessageBox.information(
+                    self,
+                    "Success",
+                    f"Resource files generated successfully!\n\n"
+                    f"Images processed: {generated_count}\n"
+                    f"Saved to: {out_dir}"
+                )
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Warning",
+                    "No valid images found to generate resources!"
+                )
+            
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Failed to generate resource files:\n{str(e)}"
+            )
+
+
     def print_all_widget_dicts(self):
-        """Ispisuje sve rečnike za sve widget-e i canvas-e"""
+        """Ispisuje sve rečnike za sve widget-e i canvas-e i nudi opciju za generisanje resursa"""
+        # Prvo ispiši widget report
         print("\n" + "="*80)
         print("                     COMPLETE PROJECT REPORT")
         print("="*80)
-        
+
         # Prikaži canvas-e
         print(f"\nCANVASES ({len(self.canvases)})")
         print('='*40)
@@ -1231,37 +1377,62 @@ class MainWindow(QMainWindow):
             for key, value in canvas_props.items():
                 if key != 'widgets':  # widgets ćemo prikazati posebno
                     print(f"  {key}: {value}")
-        
+
         # Prikaži widget-e po canvas-u
         print(f"\n\nWIDGETS BY CANVAS")
         print('='*40)
-        
+
         total_widgets = 0
         for canvas_id in range(len(self.canvases)):
             widgets = self.canvas_widgets.get(canvas_id, [])
             if widgets:
                 print(f"\nCanvas {canvas_id} ({len(widgets)} widgets):")
                 print('-'*30)
-                
+
                 widgets_by_type = {}
                 for shape in widgets:
                     widget_type = type(shape).__name__
                     if widget_type not in widgets_by_type:
                         widgets_by_type[widget_type] = []
                     widgets_by_type[widget_type].append(shape)
-                
+
                 for widget_type, type_widgets in widgets_by_type.items():
                     print(f"  {widget_type.upper()}S ({len(type_widgets)}):")
                     for i, widget in enumerate(type_widgets, 1):
                         if hasattr(widget, 'custom_name'):
                             print(f"    {widget.custom_name}")
-                
+
                 total_widgets += len(widgets)
-        
+
         print("\n" + "="*80)
         print(f"TOTAL CANVASES: {len(self.canvases)}")
         print(f"TOTAL WIDGETS: {total_widgets}")
         print("="*80 + "\n")
+
+        # Proveri da li postoje slike
+        has_images = False
+        for canvas_id in range(len(self.canvases)):
+            canvas_widgets = self.canvas_widgets.get(canvas_id, [])
+            for widget in canvas_widgets:
+                if isinstance(widget, ImageWidget) and widget.pixmap and not widget.pixmap.isNull():
+                    has_images = True
+                    break
+            if has_images:
+                break
+            
+        # Ponudi opciju za generisanje resursa
+        if has_images:
+            from PyQt6.QtWidgets import QMessageBox
+            reply = QMessageBox.question(
+                self,
+                "Generate Resources",
+                "Do you also want to generate resource.c and resource.h files for images?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No
+            )
+
+            if reply == QMessageBox.StandardButton.Yes:
+                self.generate_resources()
 
 
 if __name__ == "__main__":
