@@ -6,8 +6,8 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QIcon, QGuiApplication
 from widgets import (RectangleWidget, LineWidget, CircleWidget, KeysWidget, ButtonWidget, 
                      GaugeWidget, ClockWidget, ProgressBarWidget, ScrollBarWidget, DialWidget, 
-                     SliderWidget, ToggleWidget, LabelWidget, ImageWidget, WidgetIcon, 
-                     ColorRectangle, EllipseWidget, NumericWidget, Canvas)
+                     SliderWidget, ToggleWidget, LabelWidget, ImageWidget,
+                    EllipseWidget, NumericWidget)
 import sys
 from callback import (generate_auto_tag, showButtonProperties, updateButtonSize, 
                       showLineProperties, generateWidgetName, renumberAllWidgets, 
@@ -20,6 +20,8 @@ from callback import (generate_auto_tag, showButtonProperties, updateButtonSize,
                       updateImageSize, showImageProperties, showEllipseProperties, 
                       updateEllipseSize, showNumericProperties, show_canvas_properties, generate_components_c, generate_components_h)
 from pathlib import Path
+
+from ui_components import Canvas, WidgetIcon
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -118,7 +120,7 @@ class MainWindow(QMainWindow):
         
         self.canvases.append(canvas)
         self.canvas_widgets[canvas_id] = []  # Prazna lista za widget-e ovog canvasa
-        self.all_canvas_dicts[canvas_id] = canvas.get_canvas_properties()
+        self.all_canvas_dicts[canvas_id] = canvas.getCanvasProperties()
         
         return canvas_id
         
@@ -569,11 +571,11 @@ class MainWindow(QMainWindow):
             canvas_id = canvas.canvas_id
             
             # Ažuriraj widget liste u canvas propertijima
-            canvas_props = canvas.get_canvas_properties()
+            canvas_props = canvas.getCanvasProperties()
             canvas_props['widgets'] = [
-                widget.get_properties_dict() 
+                widget.getPropertiesDict() 
                 for widget in self.canvas_widgets.get(canvas_id, [])
-                if hasattr(widget, 'get_properties_dict')
+                if hasattr(widget, 'getPropertiesDict')
             ]
             
             self.all_canvas_dicts[canvas_id] = canvas_props
@@ -642,7 +644,7 @@ class MainWindow(QMainWindow):
         current_widgets = self.get_current_canvas_widgets()
         for shape in current_widgets:
             if shape:
-                shape.set_selected(False)
+                shape.setSelected(False)
         self.current_shape = None
 
     def keyPressEvent(self, event):
@@ -751,7 +753,7 @@ class MainWindow(QMainWindow):
 
     def select_shape(self, shape):
         self.deselect_all_shapes()
-        shape.set_selected(True)
+        shape.setSelected(True)
         self.current_shape = shape
 
         self.main_widget.setFocus()
@@ -765,13 +767,13 @@ class MainWindow(QMainWindow):
             print("ERROR: No current canvas!")
             return
             
-        widget_container = current_canvas.get_widget_container()
+        widget_container = current_canvas.getWidgetContainer()
         if not widget_container:
             print("ERROR: Widget container not found!")
             return
         
         # Prvo proveri da li je klik u okviru canvasa
-        canvas_container = current_canvas.get_canvas_container()
+        canvas_container = current_canvas.getCanvasContainer()
         if not canvas_container:
             print("ERROR: Canvas container not found!")
             return
@@ -799,7 +801,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_rectangle_dicts'):
                 self.all_rectangle_dicts = {}
-            self.all_rectangle_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_rectangle_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Line":
             shape = LineWidget(widget_container)
@@ -810,7 +812,7 @@ class MainWindow(QMainWindow):
             end_x = container_pos.x() + 100
             end_y = container_pos.y()
 
-            shape.set_line_points(start_x, start_y, end_x, end_y)
+            shape.setLinePoints(start_x, start_y, end_x, end_y)
             shape.clicked.connect(self.select_shape)
 
             shape.custom_name = generateWidgetName(self, "Line")
@@ -819,7 +821,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_line_dicts'):
                 self.all_line_dicts = {}
-            self.all_line_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_line_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Circle":
             shape = CircleWidget(100, widget_container)
@@ -828,12 +830,12 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "Circle")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.update_center_position()
+            shape.updateCenterPosition()
             shape.tag = generate_auto_tag(self, shape)
 
             if not hasattr(self, 'all_circle_dicts'):
                 self.all_circle_dicts = {}
-            self.all_circle_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_circle_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Ellipse":
             shape = EllipseWidget(98, 78, widget_container)
@@ -846,7 +848,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_ellipse_dicts'):
                 self.all_ellipse_dicts = {}
-            self.all_ellipse_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_ellipse_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Numeric":
             shape = NumericWidget(100, 40, widget_container)
@@ -858,7 +860,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_numeric_dicts'):
                 self.all_numeric_dicts = {}
-            self.all_numeric_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_numeric_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Button":
             shape = ButtonWidget(100, 50, widget_container)
@@ -868,11 +870,11 @@ class MainWindow(QMainWindow):
             shape.setMouseTracking(True)
             shape.raise_()
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.update_properties_dict()
+            shape.updatePropertiesDict()
 
             if not hasattr(self, 'all_button_dicts'):
                 self.all_button_dicts = {}
-            self.all_button_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_button_dicts[shape.custom_name] = shape.getPropertiesDict()
 
             shape.tag = generate_auto_tag(self, shape)
 
@@ -884,11 +886,11 @@ class MainWindow(QMainWindow):
             shape.custom_name = generateWidgetName(self, "Gauge")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.tag = generate_auto_tag(self, shape)
-            shape.update_properties_dict()
+            shape.updatePropertiesDict()
 
             if not hasattr(self, 'all_gauge_dicts'):
                 self.all_gauge_dicts = {}
-            self.all_gauge_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_gauge_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Clock":
             shape = ClockWidget(100, widget_container)
@@ -897,11 +899,11 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "Clock")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.update_properties_dict()
+            shape.updatePropertiesDict()
 
             if not hasattr(self, 'all_clock_dicts'):
                 self.all_clock_dicts = {}
-            self.all_clock_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_clock_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Progress bar":
             shape = ProgressBarWidget(150, 10, widget_container)
@@ -910,11 +912,11 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "ProgressBar")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.update_properties_dict()
+            shape.updatePropertiesDict()
 
             if not hasattr(self, 'all_progressbar_dicts'):
                 self.all_progressbar_dicts = {}
-            self.all_progressbar_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_progressbar_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Scroll bar":
             shape = ScrollBarWidget(150, 10, widget_container)
@@ -927,7 +929,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_scrollbar_dicts'):
                 self.all_scrollbar_dicts = {}
-            self.all_scrollbar_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_scrollbar_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Dial":
             shape = DialWidget(80, widget_container)
@@ -940,7 +942,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_dial_dicts'):
                 self.all_dial_dicts = {}
-            self.all_dial_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_dial_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Slider":
             shape = SliderWidget(200, 50, widget_container)
@@ -953,7 +955,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_slider_dicts'):
                 self.all_slider_dicts = {}
-            self.all_slider_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_slider_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Toggle":
             shape = ToggleWidget(80, 30, widget_container)
@@ -966,7 +968,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_toggle_dicts'):
                 self.all_toggle_dicts = {}
-            self.all_toggle_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_toggle_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Label":
             shape = LabelWidget(100, 40, widget_container)
@@ -978,7 +980,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_label_dicts'):
                 self.all_label_dicts = {}
-            self.all_label_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_label_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Image":
             shape = ImageWidget(100, 100, widget_container)
@@ -990,7 +992,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_image_dicts'):
                 self.all_image_dicts = {}
-            self.all_image_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_image_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Keys":
             shape = KeysWidget(200, 120, widget_container)
@@ -1002,7 +1004,7 @@ class MainWindow(QMainWindow):
 
             if not hasattr(self, 'all_keys_dicts'):
                 self.all_keys_dicts = {}
-            self.all_keys_dicts[shape.custom_name] = shape.get_properties_dict()
+            self.all_keys_dicts[shape.custom_name] = shape.getPropertiesDict()
 
             shape.show()
             self.canvas_widgets[current_canvas.canvas_id].append(shape)
@@ -1182,40 +1184,40 @@ class MainWindow(QMainWindow):
 
             color = QColorDialog.getColor(current_color)
             if color.isValid():
-                self.current_shape.set_color(color)
+                self.current_shape.setColor(color)
                 self.color_rect.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
 
     def update_shape_border_width(self):
         if (self.current_shape and not isinstance(self.current_shape, (GaugeWidget, ClockWidget, ProgressBarWidget)) and 
-            hasattr(self.current_shape, 'set_border_width')):
-            self.current_shape.set_border_width(self.border_width_spin.value())
+            hasattr(self.current_shape, 'setBorderWidth')):
+            self.current_shape.setBorderWidth(self.border_width_spin.value())
 
     def set_tag(self, tag_value):
         """Postavlja tag vrednost za widget"""
         self.tag = tag_value
-        self.update_properties_dict()
+        self.updatePropertiesDict()
 
         # Ažuriraj odgovarajući rečnik u MainWindow
-        main_window = self._find_main_window()
+        main_window = self.findMainWindow()
         if main_window:
             if isinstance(self, RectangleWidget) and hasattr(main_window, 'all_rectangle_dicts'):
-                main_window.all_rectangle_dicts[self.custom_name] = self.get_properties_dict()
+                main_window.all_rectangle_dicts[self.custom_name] = self.getPropertiesDict()
             elif isinstance(self, CircleWidget) and hasattr(main_window, 'all_circle_dicts'):
-                main_window.all_circle_dicts[self.custom_name] = self.get_properties_dict()
+                main_window.all_circle_dicts[self.custom_name] = self.getPropertiesDict()
             elif isinstance(self, LineWidget) and hasattr(main_window, 'all_line_dicts'):
-                main_window.all_line_dicts[self.custom_name] = self.get_properties_dict()
+                main_window.all_line_dicts[self.custom_name] = self.getPropertiesDict()
             elif isinstance(self, ButtonWidget) and hasattr(main_window, 'all_button_dicts'):
-                main_window.all_button_dicts[self.custom_name] = self.get_properties_dict()
+                main_window.all_button_dicts[self.custom_name] = self.getPropertiesDict()
             elif isinstance(self, EllipseWidget) and hasattr(main_window, 'all_ellipse_dicts'):
-                main_window.all_ellipse_dicts[self.custom_name] = self.get_properties_dict()
+                main_window.all_ellipse_dicts[self.custom_name] = self.getPropertiesDict()
             elif isinstance(self, DialWidget) and hasattr(main_window, 'all_dial_dicts'):
-                main_window.all_dial_dicts[self.custom_name] = self.get_properties_dict()
+                main_window.all_dial_dicts[self.custom_name] = self.getPropertiesDict()
             elif isinstance(self, ScrollBarWidget) and hasattr(main_window, 'all_scroll_bar_dicts'):
-                main_window.all_scroll_bar_dicts[self.custom_name] = self.get_properties_dict()
+                main_window.all_scroll_bar_dicts[self.custom_name] = self.getPropertiesDict()
             elif isinstance(self, SliderWidget) and hasattr(main_window, 'all_slider_dicts'):
-                main_window.all_slider_dicts[self.custom_name] = self.get_properties_dict()
+                main_window.all_slider_dicts[self.custom_name] = self.getPropertiesDict()
             elif isinstance(self, ToggleWidget) and hasattr(main_window, 'all_toggle_dicts'):
-                main_window.all_toggle_dicts[self.custom_name] = self.get_properties_dict()
+                main_window.all_toggle_dicts[self.custom_name] = self.getPropertiesDict()
 
     def generate_resources(self):
         """Generiše resource.c i resource.h fajlove za sve slike"""
@@ -1225,7 +1227,7 @@ class MainWindow(QMainWindow):
         # Prikupi sve slike sa svih canvas-a
         all_images = []
         for canvas_id in range(len(self.canvases)):
-            canvas_widgets = self.canvases[canvas_id].get_widget_container().children()
+            canvas_widgets = self.canvases[canvas_id].getWidgetContainer().children()
             for widget in canvas_widgets:
                 if isinstance(widget, ImageWidget):
                     all_images.append(widget)
@@ -1268,8 +1270,8 @@ class MainWindow(QMainWindow):
                 image = img_widget.pixmap.toImage()
 
                 # Proveri dimenzije - koristi dimenzije widgeta, ne originalne slike
-                width = img_widget.get_width()
-                height = img_widget.get_height()
+                width = img_widget.getWidth()
+                height = img_widget.getHeight()
 
                 # Skaliraj sliku na dimenzije widgeta
                 scaled_image = image.scaled(
@@ -1375,8 +1377,8 @@ class MainWindow(QMainWindow):
             widgets = self.canvas_widgets.get(canvas_id, [])
 
             for widget in widgets:
-                if hasattr(widget, 'get_properties_dict'):
-                    widget_dict = widget.get_properties_dict()
+                if hasattr(widget, 'getPropertiesDict'):
+                    widget_dict = widget.getPropertiesDict()
                     # Dodaj tip widgeta
                     widget_type = type(widget).__name__.replace('Widget', '')
                     if widget_type == 'ScrollBar':

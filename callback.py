@@ -2,8 +2,8 @@
 from PyQt6.QtWidgets import (QLabel, QHBoxLayout, QWidget, QSpinBox, QLineEdit, QColorDialog, QCheckBox, QComboBox, QFileDialog, QPushButton, QDialog, QVBoxLayout )
 from PyQt6.QtGui import QCursor, QLinearGradient, QBrush, QColor
 from PyQt6.QtCore import Qt
-from widgets import  ( ColorRectangle, RectangleWidget, LineWidget, CircleWidget, KeysWidget, ButtonWidget, GaugeWidget, ClockWidget, ProgressBarWidget, ScrollBarWidget, DialWidget, SliderWidget, ToggleWidget, LabelWidget, ImageWidget, EllipseWidget, NumericWidget )
-
+from widgets import  ( RectangleWidget, LineWidget, CircleWidget, KeysWidget, ButtonWidget, GaugeWidget, ClockWidget, ProgressBarWidget, ScrollBarWidget, DialWidget, SliderWidget, ToggleWidget, LabelWidget, ImageWidget, EllipseWidget, NumericWidget )
+from ui_components import ColorRectangle
 button_counter = 0  # Globalni brojač za button-e
 _show_ellipse_warning = True
 
@@ -15,10 +15,10 @@ def updateButtonSize( main_window ):
         main_window.current_shape.setFixedSize( main_window.width_spin.value(), main_window.height_spin.value() )
         # Ažuriraj gradient kada se promeni veličina
         updateButtonGradient( main_window )
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.updatePropertiesDict()
         
         if hasattr( main_window, 'all_button_dicts' ):
-            main_window.all_button_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_button_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def showButtonProperties( main_window, current_index ):
     """Prikazuje properties za ButtonWidget"""
@@ -387,7 +387,7 @@ def update_button_tag(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, ButtonWidget):
         main_window.current_shape.tag = value
         if hasattr(main_window, 'all_button_dicts'):
-            main_window.all_button_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_button_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_button_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -397,7 +397,7 @@ def update_button_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -409,11 +409,11 @@ def updateButtonPosition( main_window ):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
         if hasattr( main_window, 'pos_x_spin' ) and hasattr( main_window, 'pos_y_spin' ):
             main_window.current_shape.move( main_window.pos_x_spin.value(), main_window.pos_y_spin.value() )
-            main_window.current_shape.update_properties_dict()
+            main_window.current_shape.updatePropertiesDict()
             
             # Ažuriraj globalni rečnik
             if hasattr( main_window, 'all_button_dicts' ):
-                main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.get_properties_dict()
+                main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
 
 
 def updateButtonGradient( main_window ):
@@ -424,10 +424,10 @@ def updateButtonGradient( main_window ):
         gradient.setColorAt( 1, main_window.current_shape.end_color )
         main_window.current_shape.set_bg_gradient( gradient )
         main_window.current_shape.update()
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.updatePropertiesDict()
         
         if hasattr( main_window, 'all_button_dicts' ):
-            main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.get_properties_dict()
+            main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
 
 def changeStartColor( main_window ):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
@@ -437,10 +437,10 @@ def changeStartColor( main_window ):
             main_window.current_shape.start_color = color
             main_window.start_color_rect.setStyleSheet( f"background-color: {color.name()}; border: 1px solid #ccc;" )
             updateButtonGradient( main_window )
-            main_window.current_shape.update_properties_dict()
+            main_window.current_shape.updatePropertiesDict()
         
             if hasattr( main_window, 'all_button_dicts' ):
-                main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.get_properties_dict()
+                main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
 
 def changeEndColor( main_window ):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
@@ -450,19 +450,19 @@ def changeEndColor( main_window ):
             main_window.current_shape.end_color = color
             main_window.end_color_rect.setStyleSheet( f"background-color: {color.name()}; border: 1px solid #ccc;" )
             updateButtonGradient( main_window )
-            main_window.current_shape.update_properties_dict()
+            main_window.current_shape.updatePropertiesDict()
         
             if hasattr( main_window, 'all_button_dicts' ):
-                main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.get_properties_dict()
+                main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
 
 def toggle3dEffect( main_window, state ):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
         main_window.current_shape.use_3d = ( state == Qt.CheckState.Checked.value )
         main_window.current_shape.update()
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.updatePropertiesDict()
         
         if hasattr( main_window, 'all_button_dicts' ):
-            main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.get_properties_dict()
+            main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
 
 def updateButtonName( main_window, text ):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
@@ -472,31 +472,31 @@ def updateButtonName( main_window, text ):
             for shape in main_window.all_shapes:
                 if shape == main_window.current_shape and hasattr( shape, 'custom_name' ):
                     # Ažuriraj rečnik
-                    shape.update_properties_dict()
-                    main_window.all_button_dicts[ text ] = shape.get_properties_dict()
+                    shape.updatePropertiesDict()
+                    main_window.all_button_dicts[ text ] = shape.getPropertiesDict()
 
 def updateStackOrder( main_window, value ):
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.updatePropertiesDict()
         
         if hasattr( main_window, 'all_button_dicts' ):
-            main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.get_properties_dict()
+            main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
     
 
 def updateButtonText( main_window, text ):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
         main_window.current_shape.set_button_text( text )
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.updatePropertiesDict()
         
         if hasattr( main_window, 'all_button_dicts' ):
-            main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.get_properties_dict()
+            main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
 
 def updateButtonTextSize(main_window, value):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
         main_window.current_shape.set_text_size( value )
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.updatePropertiesDict()
         
         if hasattr( main_window, 'all_button_dicts' ):
-            main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.get_properties_dict()
+            main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
 
 def changeButtonTextColor( main_window ):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
@@ -504,10 +504,10 @@ def changeButtonTextColor( main_window ):
         if color.isValid():
             main_window.current_shape.set_text_color( color )
             main_window.text_color_rect.setStyleSheet( f"background-color: {color.name()}; border: 1px solid #ccc;" )
-            main_window.current_shape.update_properties_dict()
+            main_window.current_shape.updatePropertiesDict()
         
             if hasattr( main_window, 'all_button_dicts' ):
-                main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.get_properties_dict()
+                main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
 
 #----------------------------------------------------------------LINE----------------------------------------------------------------
 
@@ -657,7 +657,7 @@ def showLineProperties(main_window, current_index):
     start_x_layout.addStretch(1)
     main_window.start_x_spin_line = QSpinBox()
     main_window.start_x_spin_line.setRange(0, 480)
-    start_x, start_y, end_x, end_y = main_window.current_shape.get_line_points()
+    start_x, start_y, end_x, end_y = main_window.current_shape.getLinePoints()
     main_window.start_x_spin_line.setValue(start_x)
     main_window.start_x_spin_line.valueChanged.connect(lambda value: update_line_points(main_window))
     main_window.start_x_spin_line.setStyleSheet("color: black; background-color: white;")
@@ -774,7 +774,7 @@ def update_line_tag(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, LineWidget):
         main_window.current_shape.tag = value
         if hasattr(main_window, 'all_line_dicts'):
-            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_line_active(main_window, state):
     """Ažurira active status za line"""
@@ -782,15 +782,15 @@ def update_line_active(main_window, state):
         active = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.active = active
         if hasattr(main_window, 'all_line_dicts'):
-            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_line_visible(main_window, state):
     """Ažurira visible status za line"""
     if main_window.current_shape and isinstance(main_window.current_shape, LineWidget):
         visible = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_visible(visible)
+        main_window.current_shape.setVisibleLine(visible)
         if hasattr(main_window, 'all_line_dicts'):
-            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_line_static(main_window, state):
     """Ažurira static status za line"""
@@ -798,7 +798,7 @@ def update_line_static(main_window, state):
         static = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.static = static
         if hasattr(main_window, 'all_line_dicts'):
-            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_line_name(main_window, text):
     """Ažurira ime line-a"""
@@ -807,15 +807,15 @@ def update_line_name(main_window, text):
         if hasattr(main_window, 'all_line_dicts'):
             old_name = None
             for name, props in list(main_window.all_line_dicts.items()):
-                if (props.get('start_x') == main_window.current_shape.get_line_points()[0] and 
-                    props.get('start_y') == main_window.current_shape.get_line_points()[1]):
+                if (props.get('start_x') == main_window.current_shape.getLinePoints()[0] and 
+                    props.get('start_y') == main_window.current_shape.getLinePoints()[1]):
                     old_name = name
                     break
             
             if old_name and old_name != text:
                 main_window.all_line_dicts[text] = main_window.all_line_dicts.pop(old_name)
             else:
-                main_window.all_line_dicts[text] = main_window.current_shape.get_properties_dict()
+                main_window.all_line_dicts[text] = main_window.current_shape.getPropertiesDict()
 
 def update_line_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -825,7 +825,7 @@ def update_line_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_line_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -843,10 +843,10 @@ def update_line_points(main_window):
             end_x = main_window.end_x_spin_line.value()
             end_y = main_window.end_y_spin_line.value()
             
-            main_window.current_shape.set_line_points(start_x, start_y, end_x, end_y)
+            main_window.current_shape.setLinePoints(start_x, start_y, end_x, end_y)
             
             if hasattr(main_window, 'all_line_dicts'):
-                main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 
 def change_line_color(main_window):
@@ -854,17 +854,17 @@ def change_line_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, LineWidget):
         color = QColorDialog.getColor(main_window.current_shape.line_color)
         if color.isValid():
-            main_window.current_shape.set_line_color(color)
+            main_window.current_shape.setLineColor(color)
             main_window.color_rect_line.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_line_dicts'):
-                main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_line_thickness(main_window, value):
     """Ažurira debljinu linije"""
     if main_window.current_shape and isinstance(main_window.current_shape, LineWidget):
-        main_window.current_shape.set_line_width(value)
+        main_window.current_shape.setLineWidth(value)
         if hasattr(main_window, 'all_line_dicts'):
-            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_position_spins(main_window):
     """Ažurira spinbox-ove za poziciju"""
@@ -876,7 +876,7 @@ def update_position_spins(main_window):
         main_window.pos_x_spin.blockSignals(False)
         main_window.pos_y_spin.blockSignals(False)
         if hasattr(main_window, 'all_line_dicts'):
-            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_line_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 #----------------------------------------------------------------CIRCLE----------------------------------------------------------------
 
@@ -1184,35 +1184,35 @@ def update_circle_tag(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, CircleWidget):
         main_window.current_shape.tag = value
         if hasattr(main_window, 'all_circle_dicts'):
-            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_circle_active(main_window, state):
     """Ažurira active status za circle"""
     if main_window.current_shape and isinstance(main_window.current_shape, CircleWidget):
-        main_window.current_shape.set_active(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setActive(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_circle_dicts'):
-            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_circle_visible(main_window, state):
     """Ažurira visible status za circle"""
     if main_window.current_shape and isinstance(main_window.current_shape, CircleWidget):
-        main_window.current_shape.set_visible(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setVisibleCircle(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_circle_dicts'):
-            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_circle_static(main_window, state):
     """Ažurira static status za circle"""
     if main_window.current_shape and isinstance(main_window.current_shape, CircleWidget):
-        main_window.current_shape.set_static(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setStatic(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_circle_dicts'):
-            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_circle_name(main_window, text):
     """Ažurira ime circle-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, CircleWidget):
-        main_window.current_shape.set_custom_name(text)
+        main_window.current_shape.setCustomName(text)
         if hasattr(main_window, 'all_circle_dicts'):
-            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_circle_stack_order(main_window, value):
     """Ažurira stack order za circle i sortira widget-e"""
@@ -1221,7 +1221,7 @@ def update_circle_stack_order(main_window, value):
         
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_circle_dicts'):
-            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -1238,17 +1238,17 @@ def update_circle_position(main_window):
             y = center_y - main_window.current_shape.diameter // 2
             
             main_window.current_shape.move(x, y)
-            main_window.current_shape.update_center_position()
+            main_window.current_shape.updateCenterPosition()
             
             if hasattr(main_window, 'all_circle_dicts'):
-                main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateCircleSize(main_window):
     """Ažurira veličinu circle-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, CircleWidget):
         if hasattr(main_window, 'diameter_spin_circle'):
             diameter = main_window.diameter_spin_circle.value()
-            main_window.current_shape.set_diameter(diameter)
+            main_window.current_shape.setDiameter(diameter)
             
             # Ažuriraj poziciju centra
             if hasattr(main_window, 'pos_x_spin_circle') and hasattr(main_window, 'pos_y_spin_circle'):
@@ -1260,7 +1260,7 @@ def updateCircleSize(main_window):
                 main_window.pos_y_spin_circle.blockSignals(False)
             
             if hasattr(main_window, 'all_circle_dicts'):
-                main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_circle_line_color(main_window):
     """Menja boju ivice circle-a"""
@@ -1268,27 +1268,27 @@ def change_circle_line_color(main_window):
         current_color = main_window.current_shape.line_color
         color = QColorDialog.getColor(current_color)
         if color.isValid():
-            main_window.current_shape.set_color(color)
+            main_window.current_shape.setColor(color)
             main_window.edges_color_rect_circle.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_circle_dicts'):
-                main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_circle_thickness(main_window, value):
     """Ažurira debljinu ivice circle-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, CircleWidget):
-        main_window.current_shape.set_line_thickness(value)
+        main_window.current_shape.setLineThickness(value)
         if hasattr(main_window, 'all_circle_dicts'):
-            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_circle_filled(main_window, state):
     """Ažurira filled property za CircleWidget - samo boolean"""
     if main_window.current_shape and isinstance(main_window.current_shape, CircleWidget):
         filled = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_filled(filled)  # SAMO SETUJE BOOLEAN
+        main_window.current_shape.setFilled(filled)  # SAMO SETUJE BOOLEAN
         
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_circle_dicts'):
-            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 def update_circle_fill_color_appearance(main_window):
     """Ažurira izgled Fill Color rectangle-a na osnovu stanja"""
     if not hasattr(main_window, 'current_shape') or not main_window.current_shape:
@@ -1335,7 +1335,7 @@ def change_circle_fill_color(main_window):
 
         if color.isValid():
             # BEZ ALPHA KANALA - samo RGB
-            main_window.current_shape.set_fill_color(color)
+            main_window.current_shape.setFillColor(color)
             
             # Ažuriraj izgled ColorRectangle-a
             if hasattr(main_window, 'fill_color_rect_circle'):
@@ -1346,7 +1346,7 @@ def change_circle_fill_color(main_window):
             
             # Ažuriraj rečnik
             if hasattr(main_window, 'all_circle_dicts'):
-                main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_circle_stack_order(main_window, value):
     """Ažurira stack order za circle i sortira widget-e"""
@@ -1357,7 +1357,7 @@ def update_circle_stack_order(main_window, value):
         main_window.sort_widgets_by_stack_order()
         
         if hasattr(main_window, 'all_circle_dicts'):
-            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_circle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
     # RECTANGLE METHODS
 #----------------------------------------------------------------RECTANGLE----------------------------------------------------------------
@@ -1735,35 +1735,35 @@ def update_rectangle_tag(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, RectangleWidget):
         main_window.current_shape.tag = value
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_active(main_window, state):
     """Ažurira active status za rectangle"""
     if main_window.current_shape and isinstance(main_window.current_shape, RectangleWidget):
-        main_window.current_shape.set_active(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setActive(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_visible(main_window, state):
     """Ažurira visible status za rectangle"""
     if main_window.current_shape and isinstance(main_window.current_shape, RectangleWidget):
-        main_window.current_shape.set_visible(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setVisibleRectangle(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_static(main_window, state):
     """Ažurira static status za rectangle"""
     if main_window.current_shape and isinstance(main_window.current_shape, RectangleWidget):
-        main_window.current_shape.set_static(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setStatic(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_name(main_window, text):
     """Ažurira ime rectangle-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, RectangleWidget):
-        main_window.current_shape.set_custom_name(text)
+        main_window.current_shape.setCustomName(text)
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_stack_order(main_window, value):
     """Ažurira stack order za rectangle i sortira widget-e"""
@@ -1773,7 +1773,7 @@ def update_rectangle_stack_order(main_window, value):
         
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -1784,7 +1784,7 @@ def update_rectangle_position(main_window):
         if hasattr(main_window, 'pos_x_spin_rect') and hasattr(main_window, 'pos_y_spin_rect'):
             main_window.current_shape.move(main_window.pos_x_spin_rect.value(), main_window.pos_y_spin_rect.value())
             if hasattr(main_window, 'all_rectangle_dicts'):
-                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_size(main_window):
     """Ažurira veličinu rectangle-a"""
@@ -1792,7 +1792,7 @@ def update_rectangle_size(main_window):
         if hasattr(main_window, 'width_spin_rect') and hasattr(main_window, 'height_spin_rect'):
             main_window.current_shape.setFixedSize(main_window.width_spin_rect.value(), main_window.height_spin_rect.value())
             if hasattr(main_window, 'all_rectangle_dicts'):
-                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_rectangle_edge_color(main_window):
     """Menja boju ivice rectangle-a"""
@@ -1800,27 +1800,27 @@ def change_rectangle_edge_color(main_window):
         current_color = main_window.current_shape.color
         color = QColorDialog.getColor(current_color)
         if color.isValid():
-            main_window.current_shape.set_color(color)
+            main_window.current_shape.setColor(color)
             main_window.edges_color_rect_rect.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_rectangle_dicts'):
-                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_thickness(main_window, value):
     """Ažurira debljinu ivice rectangle-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, RectangleWidget):
-        main_window.current_shape.set_border_width(value)
+        main_window.current_shape.setBorderWidth(value)
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_filled(main_window, state):
     """Ažurira filled property za RectangleWidget"""
     if main_window.current_shape and isinstance(main_window.current_shape, RectangleWidget):
         filled = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_filled(filled)
+        main_window.current_shape.setFilled(filled)
         
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_gradient_direction(main_window, text):
     """Ažurira smer gradijenta za rectangle"""
@@ -1834,11 +1834,11 @@ def update_rectangle_gradient_direction(main_window, text):
         }
         
         direction = text_to_direction.get(text, "top_to_bottom")
-        main_window.current_shape.set_gradient_direction(direction)
+        main_window.current_shape.setGradientDirection(direction)
         
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_gradient_appearance(main_window):
     """Ažurira izgled gradient boja na osnovu stanja"""
@@ -1863,28 +1863,28 @@ def change_rectangle_gradient_start_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, RectangleWidget):
         color = QColorDialog.getColor(main_window.current_shape.gradient_color1)
         if color.isValid():
-            main_window.current_shape.set_gradient_color1(color)
+            main_window.current_shape.setGradientColor1(color)
             
             # Ažuriraj izgled
             update_rectangle_gradient_appearance(main_window)
             
             # Ažuriraj rečnik
             if hasattr(main_window, 'all_rectangle_dicts'):
-                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_rectangle_gradient_end_color(main_window):
     """Menja krajnju boju gradijenta rectangle-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, RectangleWidget):
         color = QColorDialog.getColor(main_window.current_shape.gradient_color2)
         if color.isValid():
-            main_window.current_shape.set_gradient_color2(color)
+            main_window.current_shape.setGradientColor2(color)
             
             # Ažuriraj izgled
             update_rectangle_gradient_appearance(main_window)
             
             # Ažuriraj rečnik
             if hasattr(main_window, 'all_rectangle_dicts'):
-                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateRectangleProperties(main_window):
     """Ažurira properties prikaz za RectangleWidget"""
@@ -1992,7 +1992,7 @@ def update_rectangle_gradient_direction(main_window, text):
         
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_rectangle_gradient_start_color(main_window):
     """Menja početnu boju gradijenta rectangle-a"""
@@ -2011,7 +2011,7 @@ def change_rectangle_gradient_start_color(main_window):
             
             # Ažuriraj rečnik
             if hasattr(main_window, 'all_rectangle_dicts'):
-                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_rectangle_gradient_end_color(main_window):
     """Menja krajnju boju gradijenta rectangle-a"""
@@ -2030,7 +2030,7 @@ def change_rectangle_gradient_end_color(main_window):
             
             # Ažuriraj rečnik
             if hasattr(main_window, 'all_rectangle_dicts'):
-                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_filled(main_window, state):
     """Ažurira filled property za RectangleWidget"""
@@ -2041,7 +2041,7 @@ def update_rectangle_filled(main_window, state):
         
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_rectangle_stack_order(main_window, value):
     """Ažurira stack order za rectangle i sortira widget-e"""
@@ -2054,7 +2054,7 @@ def update_rectangle_stack_order(main_window, value):
         
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_rectangle_dicts'):
-            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_rectangle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 def showClockProperties(main_window, current_index):
@@ -2346,28 +2346,28 @@ def updateClockPosition(main_window):
 def update_clock_active(main_window, state):
     """Ažurira active status za clock"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
-        main_window.current_shape.set_active(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setActive(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_clock_dicts'):
-            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_visible(main_window, state):
     """Ažurira visible status za clock"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
-        main_window.current_shape.set_visible(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setVisibleClock(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_clock_dicts'):
-            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_static(main_window, state):
     """Ažurira static status za clock"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
-        main_window.current_shape.set_static(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setStatic(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_clock_dicts'):
-            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_name(main_window, text):
     """Ažurira ime clock-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
-        main_window.current_shape.set_custom_name(text)
+        main_window.current_shape.setCustomName(text)
         if hasattr(main_window, 'all_clock_dicts'):
             # Ažuriraj ključ u rečniku ako se promenilo ime
             old_name = None
@@ -2379,7 +2379,7 @@ def update_clock_name(main_window, text):
             if old_name and old_name != text:
                 main_window.all_clock_dicts[text] = main_window.all_clock_dicts.pop(old_name)
             else:
-                main_window.all_clock_dicts[text] = main_window.current_shape.get_properties_dict()
+                main_window.all_clock_dicts[text] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -2389,7 +2389,7 @@ def update_clock_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -2400,14 +2400,14 @@ def update_clock_position(main_window):
         if hasattr(main_window, 'pos_x_spin_clock') and hasattr(main_window, 'pos_y_spin_clock'):
             main_window.current_shape.move(main_window.pos_x_spin_clock.value(), main_window.pos_y_spin_clock.value())
             if hasattr(main_window, 'all_clock_dicts'):
-                main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_diameter(main_window, value):
     """Ažurira dijametar clock-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
-        main_window.current_shape.set_diameter(value)
+        main_window.current_shape.setDiameter(value)
         if hasattr(main_window, 'all_clock_dicts'):
-            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_clock_background_color(main_window):
     """Menja boju pozadine clock-a"""
@@ -2418,7 +2418,7 @@ def change_clock_background_color(main_window):
             main_window.current_shape.set_background_color(color)
             main_window.bg_color_rect_clock.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_clock_dicts'):
-                main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_use_3d(main_window, state):
     """Ažurira 3D efekat za clock"""
@@ -2426,34 +2426,34 @@ def update_clock_use_3d(main_window, state):
         use_3d = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.set_use_3d(use_3d)
         if hasattr(main_window, 'all_clock_dicts'):
-            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_hours(main_window, value):
     """Ažurira sate za clock"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
         main_window.current_shape.set_hours(value)
         if hasattr(main_window, 'all_clock_dicts'):
-            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_minutes(main_window, value):
     """Ažurira minute za clock"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
         main_window.current_shape.set_minutes(value)
         if hasattr(main_window, 'all_clock_dicts'):
-            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_seconds(main_window, value):
     """Ažurira sekunde za clock"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
         main_window.current_shape.set_seconds(value)
         if hasattr(main_window, 'all_clock_dicts'):
-            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateClockSize(main_window):
     """Ažurira veličinu ClockWidget-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
         if hasattr(main_window, 'diameter_spin_clock'):
-            main_window.current_shape.set_diameter(main_window.diameter_spin_clock.value())
+            main_window.current_shape.setDiameter(main_window.diameter_spin_clock.value())
 #-------------------------------------------------------------------------------------------------------------------------------
 
 # GAUGE METHODS
@@ -2760,28 +2760,28 @@ def showGaugeProperties(main_window, current_index):
 def update_gauge_active(main_window, state):
     """Ažurira active status za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
-        main_window.current_shape.set_active(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setActive(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_gauge_dicts'):
-            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_visible(main_window, state):
     """Ažurira visible status za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
-        main_window.current_shape.set_visible(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setVisibleGauge(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_gauge_dicts'):
-            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_static(main_window, state):
     """Ažurira static status za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
-        main_window.current_shape.set_static(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setStatic(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_gauge_dicts'):
-            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_name(main_window, text):
     """Ažurira ime gauge-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
-        main_window.current_shape.set_custom_name(text)
+        main_window.current_shape.setCustomName(text)
         if hasattr(main_window, 'all_gauge_dicts'):
             # Ažuriraj ključ u rečniku ako se promenilo ime
             old_name = None
@@ -2793,7 +2793,7 @@ def update_gauge_name(main_window, text):
             if old_name and old_name != text:
                 main_window.all_gauge_dicts[text] = main_window.all_gauge_dicts.pop(old_name)
             else:
-                main_window.all_gauge_dicts[text] = main_window.current_shape.get_properties_dict()
+                main_window.all_gauge_dicts[text] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -2803,7 +2803,7 @@ def update_gauge_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -2814,14 +2814,14 @@ def update_gauge_position(main_window):
         if hasattr(main_window, 'pos_x_spin_gauge') and hasattr(main_window, 'pos_y_spin_gauge'):
             main_window.current_shape.move(main_window.pos_x_spin_gauge.value(), main_window.pos_y_spin_gauge.value())
             if hasattr(main_window, 'all_gauge_dicts'):
-                main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_diameter(main_window, value):
     """Ažurira dijametar gauge-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
-        main_window.current_shape.set_diameter(value)
+        main_window.current_shape.setDiameter(value)
         if hasattr(main_window, 'all_gauge_dicts'):
-            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_gauge_background_color(main_window):
     """Menja boju pozadine gauge-a"""
@@ -2832,7 +2832,7 @@ def change_gauge_background_color(main_window):
             main_window.current_shape.set_background_color(color)
             main_window.bg_color_rect_gauge.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_gauge_dicts'):
-                main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_use_3d(main_window, state):
     """Ažurira 3D efekat za gauge"""
@@ -2840,21 +2840,21 @@ def update_gauge_use_3d(main_window, state):
         use_3d = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.set_use_3d(use_3d)
         if hasattr(main_window, 'all_gauge_dicts'):
-            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_major_subdivision(main_window, value):
     """Ažurira broj glavnih podeoka za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
         main_window.current_shape.set_major_subdivision(value)
         if hasattr(main_window, 'all_gauge_dicts'):
-            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_minor_subdivision(main_window, value):
     """Ažurira broj sporednih podeoka za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
         main_window.current_shape.set_minor_subdivision(value)
         if hasattr(main_window, 'all_gauge_dicts'):
-            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_range_value(main_window, value):
     """Ažurira maksimalnu vrednost za gauge"""
@@ -2864,20 +2864,20 @@ def update_gauge_range_value(main_window, value):
         if hasattr(main_window, 'value_spin_gauge'):
             main_window.value_spin_gauge.setRange(0, value)
         if hasattr(main_window, 'all_gauge_dicts'):
-            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_value(main_window, value):
     """Ažurira trenutnu vrednost za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
         main_window.current_shape.set_value(value)
         if hasattr(main_window, 'all_gauge_dicts'):
-            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateGaugeSize(main_window):
     """Ažurira veličinu GaugeWidget-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
         if hasattr(main_window, 'diameter_spin_gauge'):
-            main_window.current_shape.set_diameter(main_window.diameter_spin_gauge.value())
+            main_window.current_shape.setDiameter(main_window.diameter_spin_gauge.value())
 
 #-------------------------------------------------------------------------------------------------------------------------------
 
@@ -3131,33 +3131,33 @@ def update_dial_tag(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, DialWidget):
         main_window.current_shape.tag = value
         if hasattr(main_window, 'all_dial_dicts'):
-            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_dial_active(main_window, state):
     """Ažurira active status za dial"""
     if main_window.current_shape and isinstance(main_window.current_shape, DialWidget):
-        main_window.current_shape.set_active(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setActive(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_dial_dicts'):
-            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_dial_visible(main_window, state):
     """Ažurira visible status za dial"""
     if main_window.current_shape and isinstance(main_window.current_shape, DialWidget):
-        main_window.current_shape.set_visible(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setVisibleDial(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_dial_dicts'):
-            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_dial_static(main_window, state):
     """Ažurira static status za dial"""
     if main_window.current_shape and isinstance(main_window.current_shape, DialWidget):
-        main_window.current_shape.set_static(state == Qt.CheckState.Checked.value)
+        main_window.current_shape.setStatic(state == Qt.CheckState.Checked.value)
         if hasattr(main_window, 'all_dial_dicts'):
-            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_dial_name(main_window, text):
     """Ažurira ime dial-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, DialWidget):
-        main_window.current_shape.set_custom_name(text)
+        main_window.current_shape.setCustomName(text)
         if hasattr(main_window, 'all_dial_dicts'):
             # Ažuriraj ključ u rečniku ako se promenilo ime
             old_name = None
@@ -3169,7 +3169,7 @@ def update_dial_name(main_window, text):
             if old_name and old_name != text:
                 main_window.all_dial_dicts[text] = main_window.all_dial_dicts.pop(old_name)
             else:
-                main_window.all_dial_dicts[text] = main_window.current_shape.get_properties_dict()
+                main_window.all_dial_dicts[text] = main_window.current_shape.getPropertiesDict()
 
 def update_dial_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -3179,7 +3179,7 @@ def update_dial_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -3190,14 +3190,14 @@ def update_dial_position(main_window):
         if hasattr(main_window, 'pos_x_spin_dial') and hasattr(main_window, 'pos_y_spin_dial'):
             main_window.current_shape.move(main_window.pos_x_spin_dial.value(), main_window.pos_y_spin_dial.value())
             if hasattr(main_window, 'all_dial_dicts'):
-                main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_dial_diameter(main_window, value):
     """Ažurira dijametar dial-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, DialWidget):
-        main_window.current_shape.set_diameter(value)
+        main_window.current_shape.setDiameter(value)
         if hasattr(main_window, 'all_dial_dicts'):
-            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_dial_3d(main_window, state):
     """Ažurira 3D efekat za dial"""
@@ -3205,22 +3205,22 @@ def update_dial_3d(main_window, state):
         use_3d = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.set_3d(use_3d)
         if hasattr(main_window, 'all_dial_dicts'):
-            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_dial_value(main_window, value):
     """Ažurira trenutnu vrednost za dial"""
     if main_window.current_shape and isinstance(main_window.current_shape, DialWidget):
         main_window.current_shape.set_value(value)
         if hasattr(main_window, 'all_dial_dicts'):
-            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateDialSize(self):
     """Ažurira veličinu DialWidget-a (zastarelo, za kompatibilnost)"""
     if self.current_shape and isinstance(self.current_shape, DialWidget):
         if hasattr(self, 'width_spin'):
             diameter = self.width_spin.value()
-            self.current_shape.set_diameter(diameter)
-            self.current_shape.update_properties_dict()
+            self.current_shape.setDiameter(diameter)
+            self.current_shape.updatePropertiesDict()
 
 #-------------------------------------------------------------------------------------------------------------------------------
 
@@ -3401,7 +3401,7 @@ def showToggleProperties(main_window, current_index):
     width_layout.addStretch(1)
     main_window.width_spin_toggle = QSpinBox()
     main_window.width_spin_toggle.setRange(80, 480)
-    main_window.width_spin_toggle.setValue(main_window.current_shape.get_width())
+    main_window.width_spin_toggle.setValue(main_window.current_shape.getWidth())
     main_window.width_spin_toggle.valueChanged.connect(lambda value: updateToggleSize(main_window, value))
     main_window.width_spin_toggle.setStyleSheet("color: black; background-color: white;")
     main_window.width_spin_toggle.setFixedWidth(60)
@@ -3493,7 +3493,7 @@ def update_toggle_tag(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         main_window.current_shape.tag = value
         if hasattr(main_window, 'all_toggle_dicts'):
-            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateTogglePosition(main_window):
     """Ažurira poziciju toggle-a kada se promeni u properties baru"""
@@ -3504,7 +3504,7 @@ def updateTogglePosition(main_window):
                 main_window.pos_y_spin_toggle.value()
             )
             # Ažuriraj rečnik
-            main_window.current_shape.update_properties_dict()
+            main_window.current_shape.updatePropertiesDict()
 
 # Ostatak callback funkcija za toggle ostaje isti...
 
@@ -3512,25 +3512,25 @@ def updateToggleActive(main_window, state):
     """Ažurira active status za toggle"""
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         active = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_active(active)
+        main_window.current_shape.setActive(active)
         if hasattr(main_window, 'all_toggle_dicts'):
-            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateToggleVisible(main_window, state):
     """Ažurira visible status za toggle"""
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         visible = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_visible(visible)
+        main_window.current_shape.setVisibleToggle(visible)
         if hasattr(main_window, 'all_toggle_dicts'):
-            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateToggleStatic(main_window, state):
     """Ažurira static status za toggle"""
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         static = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_static(static)
+        main_window.current_shape.setStatic(static)
         if hasattr(main_window, 'all_toggle_dicts'):
-            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateToggleName(main_window, text):
     """Ažurira ime toggle-a"""
@@ -3544,7 +3544,7 @@ def updateToggleName(main_window, text):
             
             main_window.current_shape.custom_name = text
             if hasattr(main_window, 'all_toggle_dicts'):
-                main_window.all_toggle_dicts[text] = main_window.current_shape.get_properties_dict()
+                main_window.all_toggle_dicts[text] = main_window.current_shape.getPropertiesDict()
 
 def update_toggle_stack_order(main_window, value):
     """Ažurira stack order za toggle"""
@@ -3554,7 +3554,7 @@ def update_toggle_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_toggle_dicts'):
             main_window.all_toggle_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -3568,7 +3568,7 @@ def changeToggleKnobColor(main_window):
             if hasattr(main_window, 'knob_color_rect_toggle'):
                 main_window.knob_color_rect_toggle.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_toggle_dicts'):
-                main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def changeToggleBackgroundColor(main_window):
     """Menja boju pozadine toggle-a"""
@@ -3579,7 +3579,7 @@ def changeToggleBackgroundColor(main_window):
             if hasattr(main_window, 'bg_color_rect_toggle'):
                 main_window.bg_color_rect_toggle.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_toggle_dicts'):
-                main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateToggle3D(main_window, state):
     """Ažurira 3D svojstvo toggle-a"""
@@ -3587,7 +3587,7 @@ def updateToggle3D(main_window, state):
         _3d = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.set_3d(_3d)
         if hasattr(main_window, 'all_toggle_dicts'):
-            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateToggleState(main_window, state):
     """Ažurira stanje toggle-a"""
@@ -3595,7 +3595,7 @@ def updateToggleState(main_window, state):
         is_on = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.set_state(is_on)
         if hasattr(main_window, 'all_toggle_dicts'):
-            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateTogglePosition(main_window):
     """Ažurira poziciju toggle-a kada se promeni u properties baru"""
@@ -3606,13 +3606,13 @@ def updateTogglePosition(main_window):
                 main_window.pos_y_spin_toggle.value()
             )
             if hasattr(main_window, 'all_toggle_dicts'):
-                main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateToggleSize(main_window, value):
     """Ažurira veličinu toggle-a kada se promeni u properties baru"""
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         # ToggleWidget ima fiksnu visinu od 30
-        main_window.current_shape.set_size(value, 30)
+        main_window.current_shape.setSize(value, 30)
 #-------------------------------------------------------------------------------------------------------------------------------
 
     # LABEL METHODS
@@ -3873,25 +3873,25 @@ def updateLabelActive(self, state):
     """Ažurira active status za label"""
     if self.current_shape and isinstance(self.current_shape, LabelWidget):
         is_active = (state == Qt.CheckState.Checked.value)
-        self.current_shape.set_active(is_active)
+        self.current_shape.setActive(is_active)
         if hasattr(self, 'all_label_dicts'):
-            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.get_properties_dict()
+            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.getPropertiesDict()
 
 def updateLabelVisible(self, state):
     """Ažurira visible status za label"""
     if self.current_shape and isinstance(self.current_shape, LabelWidget):
         is_visible = (state == Qt.CheckState.Checked.value)
-        self.current_shape.set_visible(is_visible)
+        self.current_shape.setVisibleLabel(is_visible)
         if hasattr(self, 'all_label_dicts'):
-            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.get_properties_dict()
+            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.getPropertiesDict()
 
 def updateLabelStatic(self, state):
     """Ažurira static status za label"""
     if self.current_shape and isinstance(self.current_shape, LabelWidget):
         is_static = (state == Qt.CheckState.Checked.value)
-        self.current_shape.set_static(is_static)
+        self.current_shape.setStatic(is_static)
         if hasattr(self, 'all_label_dicts'):
-            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.get_properties_dict()
+            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.getPropertiesDict()
 
 def updateLabelName(self, text):
     """Ažurira ime label widget-a"""
@@ -3899,7 +3899,7 @@ def updateLabelName(self, text):
         self.current_shape.custom_name = text
         if hasattr(self, 'all_label_dicts'):
             old_name = self.current_shape.custom_name
-            self.all_label_dicts[old_name] = self.current_shape.get_properties_dict()
+            self.all_label_dicts[old_name] = self.current_shape.getPropertiesDict()
 
 def update_label_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -3909,7 +3909,7 @@ def update_label_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -3922,7 +3922,7 @@ def changeLabelTextColor(self):
             self.current_shape.set_text_color(color)
             self.text_color_rect_label.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(self, 'all_label_dicts'):
-                self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.get_properties_dict()
+                self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.getPropertiesDict()
 
 def updateLabelText(self, text):
     """Ažurira tekst label-a"""
@@ -3930,11 +3930,11 @@ def updateLabelText(self, text):
         self.current_shape.set_text(text)
         # Ažuriraj width i height spinbox-ove kada se promeni tekst
         if hasattr(self, 'width_spin_label'):
-            self.width_spin_label.setValue(self.current_shape.get_width())
+            self.width_spin_label.setValue(self.current_shape.getWidth())
         if hasattr(self, 'height_spin_label'):
-            self.height_spin_label.setValue(self.current_shape.get_height())
+            self.height_spin_label.setValue(self.current_shape.getHeight())
         if hasattr(self, 'all_label_dicts'):
-            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.get_properties_dict()
+            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.getPropertiesDict()
 
 
 def updateLabelTextSize(self, value):
@@ -3943,25 +3943,25 @@ def updateLabelTextSize(self, value):
         self.current_shape.set_text_size(value)
         # Ažuriraj width i height spinbox-ove kada se promeni veličina fonta
         if hasattr(self, 'width_spin_label'):
-            self.width_spin_label.setValue(self.current_shape.get_width())
+            self.width_spin_label.setValue(self.current_shape.getWidth())
         if hasattr(self, 'height_spin_label'):
-            self.height_spin_label.setValue(self.current_shape.get_height())
+            self.height_spin_label.setValue(self.current_shape.getHeight())
         if hasattr(self, 'all_label_dicts'):
-            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.get_properties_dict()
+            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.getPropertiesDict()
 
 def updateLabelAlignment(self, text):
     """Ažurira poravnanje teksta za label"""
     if self.current_shape and isinstance(self.current_shape, LabelWidget):
         self.current_shape.set_text_alignment(text)
         if hasattr(self, 'all_label_dicts'):
-            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.get_properties_dict()
+            self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.getPropertiesDict()
 
 def updateLabelSize(self):
     """Ažurira veličinu label-a (veličina se automatski podešava prema tekstu)"""
     if self.current_shape:
         # Veličina se automatski podešava, samo ažuriraj poziciju
         update_position_spins(self)
-        self.current_shape.update_properties_dict()
+        self.current_shape.updatePropertiesDict()
 
 def updateLabelPosition(main_window):
     """Ažurira poziciju label-a"""
@@ -4161,7 +4161,7 @@ def showSliderProperties(main_window, current_index):
     width_layout.addStretch(1)
     main_window.width_spin_slider = QSpinBox()
     main_window.width_spin_slider.setRange(100, 480)
-    main_window.width_spin_slider.setValue(main_window.current_shape.get_width())
+    main_window.width_spin_slider.setValue(main_window.current_shape.getWidth())
     main_window.width_spin_slider.valueChanged.connect(lambda value: update_slider_size(main_window, value))
     main_window.width_spin_slider.setStyleSheet("color: black; background-color: white;")
     main_window.width_spin_slider.setFixedWidth(60)
@@ -4180,7 +4180,7 @@ def showSliderProperties(main_window, current_index):
     height_layout.addStretch(1)
     main_window.height_spin_slider = QSpinBox()
     main_window.height_spin_slider.setRange(50, 272)
-    main_window.height_spin_slider.setValue(main_window.current_shape.get_height())
+    main_window.height_spin_slider.setValue(main_window.current_shape.getHeight())
     main_window.height_spin_slider.valueChanged.connect(lambda value: update_slider_size(main_window, value))
     main_window.height_spin_slider.setStyleSheet("color: black; background-color: white;")
     main_window.height_spin_slider.setFixedWidth(60)
@@ -4311,7 +4311,7 @@ def update_slider_tag(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, SliderWidget):
         main_window.current_shape.tag = value
         if hasattr(main_window, 'all_slider_dicts'):
-            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_slider_background_left_color(main_window):
     """Menja boju pozadine sa leve strane (progress deo) slider-a"""
@@ -4321,7 +4321,7 @@ def change_slider_background_left_color(main_window):
             main_window.current_shape.set_thumb_color(color)
             main_window.bg_left_color_rect_slider.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_slider_dicts'):
-                main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_slider_background_right_color(main_window):
     """Menja boju pozadine sa desne strane (track) slider-a"""
@@ -4331,7 +4331,7 @@ def change_slider_background_right_color(main_window):
             main_window.current_shape.set_track_color(color)
             main_window.bg_right_color_rect_slider.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_slider_dicts'):
-                main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_slider_active(main_window, state):
     """Ažurira active status za slider"""
@@ -4339,15 +4339,15 @@ def update_slider_active(main_window, state):
         active = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.active = active
         if hasattr(main_window, 'all_slider_dicts'):
-            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_slider_visible(main_window, state):
     """Ažurira visible status za slider"""
     if main_window.current_shape and isinstance(main_window.current_shape, SliderWidget):
         visible = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_visible(visible)
+        main_window.current_shape.setVisibleSlider(visible)
         if hasattr(main_window, 'all_slider_dicts'):
-            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_slider_static(main_window, state):
     """Ažurira static status za slider"""
@@ -4355,7 +4355,7 @@ def update_slider_static(main_window, state):
         static = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.static = static
         if hasattr(main_window, 'all_slider_dicts'):
-            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_slider_name(main_window, text):
     """Ažurira ime slider-a"""
@@ -4372,7 +4372,7 @@ def update_slider_name(main_window, text):
             if old_name and old_name != text:
                 main_window.all_slider_dicts[text] = main_window.all_slider_dicts.pop(old_name)
             else:
-                main_window.all_slider_dicts[text] = main_window.current_shape.get_properties_dict()
+                main_window.all_slider_dicts[text] = main_window.current_shape.getPropertiesDict()
 
 def update_slider_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -4382,7 +4382,7 @@ def update_slider_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -4393,15 +4393,15 @@ def update_slider_position(main_window):
         if hasattr(main_window, 'pos_x_spin_slider') and hasattr(main_window, 'pos_y_spin_slider'):
             main_window.current_shape.move(main_window.pos_x_spin_slider.value(), main_window.pos_y_spin_slider.value())
             if hasattr(main_window, 'all_slider_dicts'):
-                main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_slider_size(main_window, value):
     """Ažurira veličinu slider-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, SliderWidget):
         if hasattr(main_window, 'width_spin_slider') and hasattr(main_window, 'height_spin_slider'):
-            main_window.current_shape.set_size(main_window.width_spin_slider.value(), main_window.height_spin_slider.value())
+            main_window.current_shape.setSize(main_window.width_spin_slider.value(), main_window.height_spin_slider.value())
             if hasattr(main_window, 'all_slider_dicts'):
-                main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_slider_knob_color(main_window):
     """Menja boju knob-a (plavi krug) slider-a"""
@@ -4411,7 +4411,7 @@ def change_slider_knob_color(main_window):
             main_window.current_shape.set_progress_color(color)
             main_window.knob_color_rect_slider.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_slider_dicts'):
-                main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 
 def update_slider_3d(main_window, state):
@@ -4420,14 +4420,14 @@ def update_slider_3d(main_window, state):
         use_3d = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.set_3d(use_3d)  # Koristi setter metodu
         if hasattr(main_window, 'all_slider_dicts'):
-            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_slider_value(main_window, value):
     """Ažurira trenutnu vrednost za slider"""
     if main_window.current_shape and isinstance(main_window.current_shape, SliderWidget):
         main_window.current_shape.set_value(value)
         if hasattr(main_window, 'all_slider_dicts'):
-            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 #-------------------------------------------------------------------------------------------------------------------------------
 # SCROLLBAR METHODS - ISPRAVLJENE
@@ -4613,7 +4613,7 @@ def showScrollBarProperties(main_window, current_index):
     width_layout.addStretch(1)
     main_window.width_spin_scrollbar = QSpinBox()
     main_window.width_spin_scrollbar.setRange(100, 480)
-    main_window.width_spin_scrollbar.setValue(main_window.current_shape.get_width())
+    main_window.width_spin_scrollbar.setValue(main_window.current_shape.getWidth())
     main_window.width_spin_scrollbar.valueChanged.connect(lambda value: update_scrollbar_size(main_window))
     main_window.width_spin_scrollbar.setStyleSheet("color: black; background-color: white;")
     main_window.width_spin_scrollbar.setFixedWidth(60)
@@ -4632,7 +4632,7 @@ def showScrollBarProperties(main_window, current_index):
     height_layout.addStretch(1)
     main_window.height_spin_scrollbar = QSpinBox()
     main_window.height_spin_scrollbar.setRange(10, 272)  # Promenjeno min na 10
-    main_window.height_spin_scrollbar.setValue(main_window.current_shape.get_height())
+    main_window.height_spin_scrollbar.setValue(main_window.current_shape.getHeight())
     main_window.height_spin_scrollbar.valueChanged.connect(lambda value: update_scrollbar_size(main_window))
     main_window.height_spin_scrollbar.setStyleSheet("color: black; background-color: white;")
     main_window.height_spin_scrollbar.setFixedWidth(60)
@@ -4767,7 +4767,7 @@ def update_scrollbar_tag(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, ScrollBarWidget):
         main_window.current_shape.tag = value
         if hasattr(main_window, 'all_scrollbar_dicts'):
-            main_window.all_scrollbar_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_scrollbar_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_scrollbar_active(main_window, state):
     """Ažurira active status za scrollbar"""
@@ -4780,7 +4780,7 @@ def update_scrollbar_visible(main_window, state):
     """Ažurira visible status za scrollbar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ScrollBarWidget):
         visible = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_visible(visible)
+        main_window.current_shape.setVisibleScrollBar(visible)
 
 def update_scrollbar_static(main_window, state):
     """Ažurira static status za scrollbar"""
@@ -4801,7 +4801,7 @@ def update_scroll_bar_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -4819,7 +4819,7 @@ def update_scrollbar_size(main_window):
     """Ažurira veličinu scrollbar-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, ScrollBarWidget):
         if hasattr(main_window, 'width_spin_scrollbar') and hasattr(main_window, 'height_spin_scrollbar'):
-            main_window.current_shape.set_size(
+            main_window.current_shape.setSize(
                 main_window.width_spin_scrollbar.value(), 
                 main_window.height_spin_scrollbar.value()
             )
@@ -5022,7 +5022,7 @@ def showProgressBarProperties(main_window, current_index):
     width_layout.addStretch(1)
     main_window.progress_width_spin = QSpinBox()
     main_window.progress_width_spin.setRange(50, 480)
-    main_window.progress_width_spin.setValue(main_window.current_shape.get_width())
+    main_window.progress_width_spin.setValue(main_window.current_shape.getWidth())
     main_window.progress_width_spin.valueChanged.connect(lambda value: updateProgressBarSize(main_window))
     main_window.progress_width_spin.setStyleSheet("color: black; background-color: white;")
     main_window.progress_width_spin.setFixedWidth(60)
@@ -5041,7 +5041,7 @@ def showProgressBarProperties(main_window, current_index):
     height_layout.addStretch(1)
     main_window.progress_height_spin = QSpinBox()
     main_window.progress_height_spin.setRange(1, 272)
-    main_window.progress_height_spin.setValue(main_window.current_shape.get_height())
+    main_window.progress_height_spin.setValue(main_window.current_shape.getHeight())
     main_window.progress_height_spin.valueChanged.connect(lambda value: updateProgressBarSize(main_window))
     main_window.progress_height_spin.setStyleSheet("color: black; background-color: white;")
     main_window.progress_height_spin.setFixedWidth(60)
@@ -5168,34 +5168,34 @@ def updateProgressBarActive(main_window, state):
     """Ažurira active status za progress bar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
         active = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_active(active)
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.setActive(active)
+        main_window.current_shape.updatePropertiesDict()
 
 def updateProgressBarVisible(main_window, state):
     """Ažurira visible status za progress bar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
         visible = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_visible(visible)
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.setVisibleProgressBar(visible)
+        main_window.current_shape.updatePropertiesDict()
 
 def updateProgressBarStatic(main_window, state):
     """Ažurira static status za progress bar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
         static = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_static(static)
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.setStatic(static)
+        main_window.current_shape.updatePropertiesDict()
 
 def updateProgressBarThreeD(main_window, state):
     """Ažurira 3D status za progress bar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
         _3d = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.set_3d(_3d)
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.updatePropertiesDict()
 
 def updateProgressBarName(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
         main_window.current_shape.custom_name = main_window.progress_name_edit.text()
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.updatePropertiesDict()
 
 def update_progress_bar_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -5205,7 +5205,7 @@ def update_progress_bar_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -5218,7 +5218,7 @@ def updateProgressBarPosition(main_window):
             y = main_window.progress_pos_y_spin.value()
             # OVO ĆE POZVATI OVERRIDE MOVE METODU KOJA ĆE AŽURIRATI SPIN BOX-OVE
             main_window.current_shape.move(x, y)
-            main_window.current_shape.update_properties_dict()
+            main_window.current_shape.updatePropertiesDict()
 
 def updateProgressBarSize(main_window):
     """Ažurira veličinu progress bar-a kada se promeni u properties baru"""
@@ -5227,8 +5227,7 @@ def updateProgressBarSize(main_window):
             width = main_window.progress_width_spin.value()
             height = main_window.progress_height_spin.value()
             # OVO ĆE POZVATI SET_SIZE METODU KOJA ĆE AŽURIRATI SPIN BOX-OVE
-            main_window.current_shape.set_size(width, height)
-            # Rečnik će se ažurirati unutar set_size
+            main_window.current_shape.setSize(width, height)
 
 def changeProgressBarProgressColor(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
@@ -5236,7 +5235,7 @@ def changeProgressBarProgressColor(main_window):
         if color.isValid():
             main_window.current_shape.set_progress_color(color)
             main_window.progress_progress_color_rect.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
-            main_window.current_shape.update_properties_dict()
+            main_window.current_shape.updatePropertiesDict()
 
 def changeProgressBarBackgroundColor(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
@@ -5244,7 +5243,7 @@ def changeProgressBarBackgroundColor(main_window):
         if color.isValid():
             main_window.current_shape.set_bar_color(color)
             main_window.progress_background_color_rect.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
-            main_window.current_shape.update_properties_dict()
+            main_window.current_shape.updatePropertiesDict()
 
 def updateProgressBarRange(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
@@ -5254,12 +5253,12 @@ def updateProgressBarRange(main_window):
             main_window.current_shape.set_range(min_val, max_val)
             # Ažuriraj value spin da bude u opsegu
             main_window.progress_value_spin.setRange(min_val, max_val)
-            main_window.current_shape.update_properties_dict()
+            main_window.current_shape.updatePropertiesDict()
 
 def updateProgressBarValue(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
         main_window.current_shape.set_value(main_window.progress_value_spin.value())
-        main_window.current_shape.update_properties_dict()
+        main_window.current_shape.updatePropertiesDict()
 
 #-------------------------------------------------------------------------------------------------------------------------------
 
@@ -5424,7 +5423,7 @@ def showKeysProperties(main_window, current_index):
     width_layout.addStretch(1)
     main_window.width_spin_keys = QSpinBox()
     main_window.width_spin_keys.setRange(100, 480)
-    main_window.width_spin_keys.setValue(main_window.current_shape.get_width())
+    main_window.width_spin_keys.setValue(main_window.current_shape.getWidth())
     main_window.width_spin_keys.valueChanged.connect(lambda value: update_keys_size(main_window, value))
     main_window.width_spin_keys.setStyleSheet("color: black; background-color: white;")
     main_window.width_spin_keys.setFixedWidth(60)
@@ -5443,7 +5442,7 @@ def showKeysProperties(main_window, current_index):
     height_layout.addStretch(1)
     main_window.height_spin_keys = QSpinBox()
     main_window.height_spin_keys.setRange(80, 272)
-    main_window.height_spin_keys.setValue(main_window.current_shape.get_height())
+    main_window.height_spin_keys.setValue(main_window.current_shape.getHeight())
     main_window.height_spin_keys.valueChanged.connect(lambda value: update_keys_size(main_window, value))
     main_window.height_spin_keys.setStyleSheet("color: black; background-color: white;")
     main_window.height_spin_keys.setFixedWidth(60)
@@ -5574,7 +5573,7 @@ def update_keys_font_size(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, KeysWidget):
         main_window.current_shape.set_font_size(value)
         if hasattr(main_window, 'all_keys_dicts'):
-            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_keys_start_color(main_window):
     """Menja start boju gradijenta tastera"""
@@ -5584,7 +5583,7 @@ def change_keys_start_color(main_window):
             main_window.current_shape.set_key_colors(color, main_window.current_shape.key_color_bottom)
             main_window.start_color_rect_keys.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_keys_dicts'):
-                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_keys_end_color(main_window):
     """Menja end boju gradijenta tastera"""
@@ -5594,7 +5593,7 @@ def change_keys_end_color(main_window):
             main_window.current_shape.set_key_colors(main_window.current_shape.key_color_top, color)
             main_window.end_color_rect_keys.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_keys_dicts'):
-                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_keys_font_color(main_window):
     """Menja boju fonta za tastere"""
@@ -5604,7 +5603,7 @@ def change_keys_font_color(main_window):
             main_window.current_shape.set_text_color(color)
             main_window.font_color_rect_keys.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_keys_dicts'):
-                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 # Izmeni postojeće funkcije da rade sa novim imenima:
 
@@ -5614,15 +5613,8 @@ def update_keys_3d(main_window, state):
         is_3d = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.set_3d(is_3d)
         if hasattr(main_window, 'all_keys_dicts'):
-            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
-# Ukloni stare funkcije za boje koje više ne koristimo
-# (change_keys_color_top i change_keys_color_bottom)
-
-# Dodaj novi atribut u get_properties_dict u KeysWidget klasi:
-# 'font_size': self.font_size
-
-# CALLBACK METODE ZA KEYS:
 
 def update_keys_active(main_window, state):
     """Ažurira active status za keys"""
@@ -5630,15 +5622,15 @@ def update_keys_active(main_window, state):
         active = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.active = active
         if hasattr(main_window, 'all_keys_dicts'):
-            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_keys_visible(main_window, state):
     """Ažurira visible status za keys"""
     if main_window.current_shape and isinstance(main_window.current_shape, KeysWidget):
         visible = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_visible(visible)
+        main_window.current_shape.setVisibleKeys(visible)
         if hasattr(main_window, 'all_keys_dicts'):
-            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_keys_static(main_window, state):
     """Ažurira static status za keys"""
@@ -5646,7 +5638,7 @@ def update_keys_static(main_window, state):
         static = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.static = static
         if hasattr(main_window, 'all_keys_dicts'):
-            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_keys_name(main_window, text):
     """Ažurira ime keys-a"""
@@ -5662,7 +5654,7 @@ def update_keys_name(main_window, text):
             if old_name and old_name != text:
                 main_window.all_keys_dicts[text] = main_window.all_keys_dicts.pop(old_name)
             else:
-                main_window.all_keys_dicts[text] = main_window.current_shape.get_properties_dict()
+                main_window.all_keys_dicts[text] = main_window.current_shape.getPropertiesDict()
 
 def update_keys_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -5672,7 +5664,7 @@ def update_keys_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -5683,7 +5675,7 @@ def update_keys_position(main_window):
         if hasattr(main_window, 'pos_x_spin_keys') and hasattr(main_window, 'pos_y_spin_keys'):
             main_window.current_shape.move(main_window.pos_x_spin_keys.value(), main_window.pos_y_spin_keys.value())
             if hasattr(main_window, 'all_keys_dicts'):
-                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_keys_size(main_window, value):
     """Ažurira veličinu keys-a"""
@@ -5691,17 +5683,17 @@ def update_keys_size(main_window, value):
         if hasattr(main_window, 'width_spin_keys') and hasattr(main_window, 'height_spin_keys'):
             width = main_window.width_spin_keys.value()
             height = main_window.height_spin_keys.value()
-            main_window.current_shape.set_size(width, height)
+            main_window.current_shape.setSize(width, height)
             
             if hasattr(main_window, 'all_keys_dicts'):
-                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_keys_type(main_window, text):
     """Ažurira tip tastature"""
     if main_window.current_shape and isinstance(main_window.current_shape, KeysWidget):
         main_window.current_shape.set_key_type(text)
         if hasattr(main_window, 'all_keys_dicts'):
-            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_keys_3d(main_window, state):
     """Ažurira 3D efekat za keys"""
@@ -5709,7 +5701,7 @@ def update_keys_3d(main_window, state):
         is_3d = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.set_3d(is_3d)
         if hasattr(main_window, 'all_keys_dicts'):
-            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 
 #-------------------------------------------------------------------------------------------------------------------------------
@@ -5869,7 +5861,7 @@ def showImageProperties(main_window, current_index):
     width_layout.addStretch(1)
     main_window.width_spin_image = QSpinBox()
     main_window.width_spin_image.setRange(100, 480)
-    main_window.width_spin_image.setValue(main_window.current_shape.get_width())
+    main_window.width_spin_image.setValue(main_window.current_shape.getWidth())
     main_window.width_spin_image.valueChanged.connect(lambda: updateImageSize(main_window))
     main_window.width_spin_image.setStyleSheet("color: black; background-color: white;")
     main_window.width_spin_image.setFixedWidth(60)
@@ -5888,7 +5880,7 @@ def showImageProperties(main_window, current_index):
     height_layout.addStretch(1)
     main_window.height_spin_image = QSpinBox()
     main_window.height_spin_image.setRange(80, 272)
-    main_window.height_spin_image.setValue(main_window.current_shape.get_height())
+    main_window.height_spin_image.setValue(main_window.current_shape.getHeight())
     main_window.height_spin_image.valueChanged.connect(lambda: updateImageSize(main_window))
     main_window.height_spin_image.setStyleSheet("color: black; background-color: white;")
     main_window.height_spin_image.setFixedWidth(60)
@@ -5987,15 +5979,15 @@ def update_image_active(main_window, state):
         is_active = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.active = is_active
         if hasattr(main_window, 'all_image_dicts'):
-            main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_image_visible(main_window, state):
     """Ažurira visible status za image"""
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
         is_visible = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_visible(is_visible)
+        main_window.current_shape.setVisibleImage(is_visible)
         if hasattr(main_window, 'all_image_dicts'):
-            main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_image_static(main_window, state):
     """Ažurira static status za image"""
@@ -6003,7 +5995,7 @@ def update_image_static(main_window, state):
         is_static = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.static = is_static
         if hasattr(main_window, 'all_image_dicts'):
-            main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_image_name(main_window, text):
     """Ažurira ime image widget-a"""
@@ -6020,7 +6012,7 @@ def update_image_name(main_window, text):
                 main_window.all_image_dicts.pop(old_name)
             
             # Dodaj pod novim imenom
-            main_window.all_image_dicts[text] = main_window.current_shape.get_properties_dict()
+            main_window.all_image_dicts[text] = main_window.current_shape.getPropertiesDict()
 
 def update_image_stack_order(main_window, value):
     """Ažurira stack order za image"""
@@ -6030,7 +6022,7 @@ def update_image_stack_order(main_window, value):
         # Ažuriraj rečnik - ISPRAVLJENO: all_image_dicts umesto all_button_dicts
         if hasattr(main_window, 'all_image_dicts'):
             main_window.all_image_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -6053,7 +6045,7 @@ def select_image_file(main_window):
         if file_path:
             success = main_window.current_shape.set_image_path(file_path)
             if success and hasattr(main_window, 'all_image_dicts'):
-                main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_image_frame_enabled(main_window, state):
     """Ažurira enable status za frame i resizuje sliku"""
@@ -6062,7 +6054,7 @@ def update_image_frame_enabled(main_window, state):
         main_window.current_shape.set_frame_enabled(is_enabled)
         
         if hasattr(main_window, 'all_image_dicts'):
-            main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_image_frame_width(main_window, value):
     """Ažurira debljinu frame-a i resizuje sliku"""
@@ -6070,7 +6062,7 @@ def update_image_frame_width(main_window, value):
         main_window.current_shape.set_frame_width(value)
         
         if hasattr(main_window, 'all_image_dicts'):
-            main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def change_image_frame_color(main_window):
     """Menja boju frame-a"""
@@ -6081,7 +6073,7 @@ def change_image_frame_color(main_window):
             main_window.frame_color_rect.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             
             if hasattr(main_window, 'all_image_dicts'):
-                main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateImageSize(main_window):
     """Ažurira veličinu image widget-a i automatski resizuje sliku"""
@@ -6090,11 +6082,11 @@ def updateImageSize(main_window):
         height = main_window.height_spin_image.value()
         
         # Postavi veličinu (ovo će automatski resizovati sliku)
-        main_window.current_shape.set_size(width, height)
+        main_window.current_shape.setSize(width, height)
         
         # Ažuriraj rečnik
-        if hasattr(main_window.current_shape, 'update_properties_dict'):
-            main_window.current_shape.update_properties_dict()
+        if hasattr(main_window.current_shape, 'updatePropertiesDict'):
+            main_window.current_shape.updatePropertiesDict()
 
 def updateImagePosition(main_window):
     """Ažurira poziciju image-a"""
@@ -6104,7 +6096,7 @@ def updateImagePosition(main_window):
             
             # Ažuriraj rečnik - ISPRAVLJENO: all_image_dicts umesto all_keys_dicts
             if hasattr(main_window, 'all_image_dicts'):
-                main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 #-------------------------------------------------------------------------------------------------------------------------------
 
@@ -6285,7 +6277,7 @@ def showEllipseProperties(main_window, current_index):
     width_layout.addStretch(1)
     main_window.width_spin_ellipse = QSpinBox()
     main_window.width_spin_ellipse.setRange(20, 480)
-    main_window.width_spin_ellipse.setValue(main_window.current_shape.get_width())
+    main_window.width_spin_ellipse.setValue(main_window.current_shape.getWidth())
     main_window.width_spin_ellipse.valueChanged.connect(lambda: updateEllipseSize(main_window))
     main_window.width_spin_ellipse.setStyleSheet("color: black; background-color: white;")
     main_window.width_spin_ellipse.setFixedWidth(60)
@@ -6304,7 +6296,7 @@ def showEllipseProperties(main_window, current_index):
     height_layout.addStretch(1)
     main_window.height_spin_ellipse = QSpinBox()
     main_window.height_spin_ellipse.setRange(20, 272)
-    main_window.height_spin_ellipse.setValue(main_window.current_shape.get_height())
+    main_window.height_spin_ellipse.setValue(main_window.current_shape.getHeight())
     main_window.height_spin_ellipse.valueChanged.connect(lambda: updateEllipseSize(main_window))
     main_window.height_spin_ellipse.setStyleSheet("color: black; background-color: white;")
     main_window.height_spin_ellipse.setFixedWidth(60)
@@ -6430,7 +6422,7 @@ def update_ellipse_tag(main_window, value):
     if main_window.current_shape and isinstance(main_window.current_shape, EllipseWidget):
         main_window.current_shape.tag = value
         if hasattr(main_window, 'all_ellipse_dicts'):
-            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def showFilledWarning(main_window, state):
     """Prikazuje upozorenje kada se enabluje Filled opcija"""
@@ -6475,7 +6467,7 @@ def showFilledWarning(main_window, state):
             _show_ellipse_warning = False
 
     if main_window.current_shape and isinstance(main_window.current_shape, EllipseWidget):
-        main_window.current_shape.set_fill_enabled(is_filled)
+        main_window.current_shape.setFillEnabled(is_filled)
     
     # Ažuriraj enable status drugih kontrola
     if hasattr(main_window, 'gradient_combo_ellipse'):
@@ -6489,7 +6481,7 @@ def showFilledWarning(main_window, state):
     
     # Ažuriraj rečnik
     if hasattr(main_window, 'all_ellipse_dicts'):
-        main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+        main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
     
     # OBAVEZNO pozovi update() da bi se nacrtao ponovo
     main_window.current_shape.update()
@@ -6501,15 +6493,15 @@ def updateEllipseActive(main_window, state):
         is_active = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.active = is_active
         if hasattr(main_window, 'all_ellipse_dicts'):
-            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateEllipseVisible(main_window, state):
     """Ažurira visible status za ellipse"""
     if main_window.current_shape and isinstance(main_window.current_shape, EllipseWidget):
         is_visible = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_visible(is_visible)
+        main_window.current_shape.setVisibleEllipse(is_visible)
         if hasattr(main_window, 'all_ellipse_dicts'):
-            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateEllipseStatic(main_window, state):
     """Ažurira static status za ellipse"""
@@ -6517,7 +6509,7 @@ def updateEllipseStatic(main_window, state):
         is_static = (state == Qt.CheckState.Checked.value)
         main_window.current_shape.static = is_static
         if hasattr(main_window, 'all_ellipse_dicts'):
-            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateEllipseName(main_window, text):
     """Ažurira ime ellipse widget-a"""
@@ -6525,7 +6517,7 @@ def updateEllipseName(main_window, text):
         main_window.current_shape.custom_name = text
         if hasattr(main_window, 'all_ellipse_dicts'):
             old_name = main_window.current_shape.custom_name
-            main_window.all_ellipse_dicts[old_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_ellipse_dicts[old_name] = main_window.current_shape.getPropertiesDict()
 
 def update_ellipse_stack_order(main_window, value):
     """Ažurira stack order za button"""
@@ -6535,7 +6527,7 @@ def update_ellipse_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -6549,7 +6541,7 @@ def updateEllipsePosition(main_window):
                 main_window.pos_y_spin_ellipse.value()
             )
             if hasattr(main_window, 'all_ellipse_dicts'):
-                main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateEllipseSize(main_window):
     """Ažurira veličinu ellipse-a - ovo se poziva direktno iz properties"""
@@ -6557,56 +6549,56 @@ def updateEllipseSize(main_window):
         if hasattr(main_window, 'width_spin_ellipse') and hasattr(main_window, 'height_spin_ellipse'):
             width = main_window.width_spin_ellipse.value()
             height = main_window.height_spin_ellipse.value()
-            main_window.current_shape.set_size(width, height)
+            main_window.current_shape.setSize(width, height)
             
             if hasattr(main_window, 'all_ellipse_dicts'):
-                main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def changeEllipseEdgesColor(main_window):
     """Menja boju ivica ellipse-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, EllipseWidget):
         color = QColorDialog.getColor(main_window.current_shape.border_color)
         if color.isValid():
-            main_window.current_shape.set_border_color(color)
+            main_window.current_shape.setBorderColor(color)
             main_window.edges_color_rect_ellipse.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_ellipse_dicts'):
-                main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateEllipseThickness(main_window, value):
     """Ažurira debljinu ivica ellipse-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, EllipseWidget):
-        main_window.current_shape.set_border_width(value)
+        main_window.current_shape.setBorderWidth(value)
         if hasattr(main_window, 'all_ellipse_dicts'):
-            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 
 
 def updateEllipseGradientType(main_window, text):
     """Ažurira tip gradijenta za ellipse"""
     if main_window.current_shape and isinstance(main_window.current_shape, EllipseWidget):
-        main_window.current_shape.set_gradient_type(text)
+        main_window.current_shape.setGradientType(text)
         if hasattr(main_window, 'all_ellipse_dicts'):
-            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def changeEllipseStartColor(main_window):
     """Menja start boju gradijenta ellipse-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, EllipseWidget):
         color = QColorDialog.getColor(main_window.current_shape.gradient_start_color)
         if color.isValid():
-            main_window.current_shape.set_gradient_colors(color, main_window.current_shape.gradient_end_color)
+            main_window.current_shape.setGradientColors(color, main_window.current_shape.gradient_end_color)
             main_window.start_color_rect_ellipse.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_ellipse_dicts'):
-                main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def changeEllipseEndColor(main_window):
     """Menja end boju gradijenta ellipse-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, EllipseWidget):
         color = QColorDialog.getColor(main_window.current_shape.gradient_end_color)
         if color.isValid():
-            main_window.current_shape.set_gradient_colors(main_window.current_shape.gradient_start_color, color)
+            main_window.current_shape.setGradientColors(main_window.current_shape.gradient_start_color, color)
             main_window.end_color_rect_ellipse.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_ellipse_dicts'):
-                main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_ellipse_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 #-------------------------------------------------------------------------------------------------------------------------------
 
@@ -6848,25 +6840,25 @@ def updateNumericActive(main_window, state):
     """Ažurira active status za numeric widget"""
     if main_window.current_shape and isinstance(main_window.current_shape, NumericWidget):
         is_active = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_active(is_active)
+        main_window.current_shape.setActive(is_active)
         if hasattr(main_window, 'all_numeric_dicts'):
-            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateNumericVisible(main_window, state):
     """Ažurira visible status za numeric widget"""
     if main_window.current_shape and isinstance(main_window.current_shape, NumericWidget):
         is_visible = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_visible(is_visible)
+        main_window.current_shape.setVisibleNumeric(is_visible)
         if hasattr(main_window, 'all_numeric_dicts'):
-            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateNumericStatic(main_window, state):
     """Ažurira static status za numeric widget"""
     if main_window.current_shape and isinstance(main_window.current_shape, NumericWidget):
         is_static = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_static(is_static)
+        main_window.current_shape.setStatic(is_static)
         if hasattr(main_window, 'all_numeric_dicts'):
-            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateNumericName(main_window, text):
     """Ažurira ime numeric widget-a"""
@@ -6888,7 +6880,7 @@ def update_numeric_stack_order(main_window, value):
         # Ažuriraj rečnik
         if hasattr(main_window, 'all_button_dicts'):
             main_window.all_button_dicts[main_window.current_shape.custom_name] = \
-                main_window.current_shape.get_properties_dict()
+                main_window.current_shape.getPropertiesDict()
         
         # Sortiraj widget-e
         main_window.sort_widgets_by_stack_order()
@@ -6902,7 +6894,7 @@ def updateNumericPosition(main_window):
                 main_window.pos_y_spin_numeric.value()
             )
             if hasattr(main_window, 'all_numeric_dicts'):
-                main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def changeNumericNumberColor(main_window):
     """Menja boju brojeva za numeric widget"""
@@ -6912,28 +6904,28 @@ def changeNumericNumberColor(main_window):
             main_window.current_shape.set_number_color(color)
             main_window.number_color_rect_numeric.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_numeric_dicts'):
-                main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+                main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateNumericNumber(main_window, value):
     """Ažurira broj koji se prikazuje"""
     if main_window.current_shape and isinstance(main_window.current_shape, NumericWidget):
         main_window.current_shape.set_number(value)
         if hasattr(main_window, 'all_numeric_dicts'):
-            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateNumericNumberSize(main_window, value):
     """Ažurira veličinu broja"""
     if main_window.current_shape and isinstance(main_window.current_shape, NumericWidget):
         main_window.current_shape.set_number_size(value)
         if hasattr(main_window, 'all_numeric_dicts'):
-            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateNumericNumberAlignment(main_window, text):
     """Ažurira poravnanje broja"""
     if main_window.current_shape and isinstance(main_window.current_shape, NumericWidget):
         main_window.current_shape.set_number_alignment(text)
         if hasattr(main_window, 'all_numeric_dicts'):
-            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.get_properties_dict()
+            main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -7196,21 +7188,21 @@ def change_canvas_color(main_window, canvas, color_rect):
     """Menja boju canvasa"""
     color = QColorDialog.getColor(QColor(canvas.canvas_color))
     if color.isValid():
-        canvas.set_background_color(color.name())
+        canvas.setBackgroundColor(color.name())
         color_rect.color = color.name()
         color_rect.update()
         update_canvas_dict(main_window, canvas)
 
 def toggle_grid(main_window, canvas, state):
     """Uključuje/isključuje grid"""
-    canvas.set_grid_enabled(state == Qt.CheckState.Checked.value)
+    canvas.setGridEnabled(state == Qt.CheckState.Checked.value)
     update_canvas_dict(main_window, canvas)
 
 def change_grid_color(main_window, canvas, color_rect):
     """Menja boju grid-a"""
     color = QColorDialog.getColor(QColor(canvas.grid_color))
     if color.isValid():
-        canvas.set_grid_color(color.name())
+        canvas.setGridColor(color.name())
         color_rect.color = color.name()
         color_rect.update()
         update_canvas_dict(main_window, canvas)
@@ -7218,47 +7210,47 @@ def change_grid_color(main_window, canvas, color_rect):
 def change_grid_type(main_window, canvas, text):
     """Menja tip grid-a"""
     grid_type = "lines" if text == "Lines" else "dots"
-    canvas.set_grid_type(grid_type)
+    canvas.setGridType(grid_type)
     update_canvas_dict(main_window, canvas)
 
 def change_grid_size(main_window, canvas, value):
     """Menja veličinu grid-a"""
-    canvas.set_grid_size(value)
+    canvas.setGridSize(value)
     update_canvas_dict(main_window, canvas)
 
 def change_canvas_active(main_window, canvas, state):
     """Menja active status canvasa"""
-    canvas.set_active(state == Qt.CheckState.Checked.value)
+    canvas.setActive(state == Qt.CheckState.Checked.value)
     update_canvas_dict(main_window, canvas)
 
 def change_canvas_visible(main_window, canvas, state):
     """Menja visible status canvasa"""
-    canvas.set_visible(state == Qt.CheckState.Checked.value)
+    canvas.setVisibleCanvas(state == Qt.CheckState.Checked.value)
     update_canvas_dict(main_window, canvas)
 
 def change_canvas_static(main_window, canvas, state):
     """Menja static status canvasa"""
-    canvas.set_static(state == Qt.CheckState.Checked.value)
+    canvas.setStatic(state == Qt.CheckState.Checked.value)
     update_canvas_dict(main_window, canvas)
 
 def change_canvas_name(main_window, canvas, text):
     """Menja ime canvasa"""
-    canvas.set_name(text)
+    canvas.setName(text)
     update_canvas_dict(main_window, canvas)
 
 def update_canvas_dict(main_window, canvas):
     """Ažurira rečnik za canvas"""
     if hasattr(main_window, 'all_canvas_dicts'):
         canvas_id = canvas.canvas_id
-        canvas_props = canvas.get_canvas_properties()
+        canvas_props = canvas.getCanvasProperties()
         
         # Dodaj widget liste ako postoje
         if hasattr(main_window, 'canvas_widgets'):
             widgets = main_window.canvas_widgets.get(canvas_id, [])
             canvas_props['widgets'] = [
-                widget.get_properties_dict() 
+                widget.getPropertiesDict() 
                 for widget in widgets
-                if hasattr(widget, 'get_properties_dict')
+                if hasattr(widget, 'getPropertiesDict')
             ]
         
         main_window.all_canvas_dicts[canvas_id] = canvas_props
