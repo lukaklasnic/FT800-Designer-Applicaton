@@ -422,7 +422,7 @@ def updateButtonGradient( main_window ):
         gradient = QLinearGradient( 0, 0, 0, main_window.current_shape.height() )
         gradient.setColorAt( 0, main_window.current_shape.start_color )
         gradient.setColorAt( 1, main_window.current_shape.end_color )
-        main_window.current_shape.set_bg_gradient( gradient )
+        main_window.current_shape.setBackgroundGradient( gradient )
         main_window.current_shape.update()
         main_window.current_shape.updatePropertiesDict()
         
@@ -484,7 +484,7 @@ def updateStackOrder( main_window, value ):
 
 def updateButtonText( main_window, text ):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        main_window.current_shape.set_button_text( text )
+        main_window.current_shape.setButtonText( text )
         main_window.current_shape.updatePropertiesDict()
         
         if hasattr( main_window, 'all_button_dicts' ):
@@ -492,7 +492,7 @@ def updateButtonText( main_window, text ):
 
 def updateButtonTextSize(main_window, value):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        main_window.current_shape.set_text_size( value )
+        main_window.current_shape.setTextSize( value )
         main_window.current_shape.updatePropertiesDict()
         
         if hasattr( main_window, 'all_button_dicts' ):
@@ -502,7 +502,7 @@ def changeButtonTextColor( main_window ):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
         color = QColorDialog.getColor( main_window.current_shape.text_color )
         if color.isValid():
-            main_window.current_shape.set_text_color( color )
+            main_window.current_shape.setTextColor( color )
             main_window.text_color_rect.setStyleSheet( f"background-color: {color.name()}; border: 1px solid #ccc;" )
             main_window.current_shape.updatePropertiesDict()
         
@@ -3919,7 +3919,7 @@ def changeLabelTextColor(self):
     if self.current_shape and isinstance(self.current_shape, LabelWidget):
         color = QColorDialog.getColor(self.current_shape.text_color)
         if color.isValid():
-            self.current_shape.set_text_color(color)
+            self.current_shape.setTextColor(color)
             self.text_color_rect_label.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(self, 'all_label_dicts'):
                 self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.getPropertiesDict()
@@ -3940,7 +3940,7 @@ def updateLabelText(self, text):
 def updateLabelTextSize(self, value):
     """Ažurira veličinu fonta za label"""
     if self.current_shape and isinstance(self.current_shape, LabelWidget):
-        self.current_shape.set_text_size(value)
+        self.current_shape.setTextSize(value)
         # Ažuriraj width i height spinbox-ove kada se promeni veličina fonta
         if hasattr(self, 'width_spin_label'):
             self.width_spin_label.setValue(self.current_shape.getWidth())
@@ -5600,7 +5600,7 @@ def change_keys_font_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, KeysWidget):
         color = QColorDialog.getColor(main_window.current_shape.text_color)
         if color.isValid():
-            main_window.current_shape.set_text_color(color)
+            main_window.current_shape.setTextColor(color)
             main_window.font_color_rect_keys.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_keys_dicts'):
                 main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()

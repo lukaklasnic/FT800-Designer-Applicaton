@@ -389,10 +389,10 @@ class LineWidget( QWidget ):
         
         event.accept()
 
-class RectangleWidget(QWidget):
+class RectangleWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, w=100, h=80, parent = None ):
+    def __init__( self, w = 100, h = 80, parent = None ):
         super().__init__( parent )
 
         self.setFixedSize( w, h )
@@ -1052,7 +1052,7 @@ class CircleWidget( QWidget ):
 
             if main_window:
                 self.updateCenterPosition()
-                
+
                 if hasattr( main_window, 'pos_x_spin_circle' ) and main_window.pos_x_spin_circle:
                     main_window.pos_x_spin_circle.blockSignals( True )
                     main_window.pos_x_spin_circle.setValue( self.center_x )
@@ -1068,7 +1068,7 @@ class CircleWidget( QWidget ):
 class EllipseWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, width=98, height=78, parent = None ):
+    def __init__( self, width = 98, height = 78, parent = None ):
         super().__init__( parent )
         self._width = width
         self._height = height
@@ -1407,18 +1407,17 @@ class EllipseWidget( QWidget ):
         
         event.accept()
     
-class ButtonWidget(QWidget):
-    clicked = pyqtSignal(object)
+class ButtonWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def __init__(self, w=100, h=50, parent=None):
-        super().__init__(parent)
-        self.setFixedSize(w, h)
+    def __init__( self, w = 100, h = 50, parent = None ):
+        super().__init__( parent )
+        self.setFixedSize( w, h )
         
-        # Svojstva
-        self.start_color = QColor(0, 0, 255)
-        self.end_color = QColor(0, 0, 136)
-        self.text_color = QColor(255, 255, 255)
-        self.border_color = QColor(0, 0, 0)
+        self.start_color = QColor( 0, 0, 255 )
+        self.end_color = QColor( 0, 0, 136 )
+        self.text_color = QColor( 255, 255, 255 )
+        self.border_color = QColor( 0, 0, 0 )
         self.border_width = 1
         self.button_text = "Press"
         self.text_size = 20
@@ -1426,30 +1425,25 @@ class ButtonWidget(QWidget):
         self.use_3d = True
         self.custom_name = ""
         
-        # Postavi atribute za mouse events
-        #self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        #self.setStyleSheet("background-color: transparent;")
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
-        # Resize i drag varijable - DODAJTE OVO!
         self.resizing = False
-        self.dragging = False  # DODAJTE OVO!
+        self.dragging = False 
         self.resize_start_pos = QPoint()
         self.resize_start_size = QSize()
         self.resize_corner = None
-        self.drag_start_pos = QPoint()  # DODAJTE OVO!
-                # Svojstva
-        self.start_color = QColor(0, 0, 255)
-        self.end_color = QColor(0, 0, 136)
-        self.text_color = QColor(255, 255, 255)
+        self.drag_start_pos = QPoint()
+
+        self.start_color = QColor( 0, 0, 255 )
+        self.end_color = QColor( 0, 0, 136 )
+        self.text_color = QColor( 255, 255, 255 )
         self.button_text = "Press"
         self.text_size = 4
         self.is_selected = False
         self.use_3d = True
         self.custom_name = ""
         
-        # DODAJTE OVE ATRIBUTE:
         self.active = True
         self.visible = True
         self.static = False
@@ -1457,13 +1451,9 @@ class ButtonWidget(QWidget):
 
         self.tag = 0
         
-        # Postavi atribute za mouse events
-        #self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        #self.setStyleSheet("background-color: transparent;")
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
-        # Resize i drag varijable
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
@@ -1471,12 +1461,10 @@ class ButtonWidget(QWidget):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        # INICIJALIZUJTE REČNIK:
         self.properties_dict = {}
-        self.updatePropertiesDict()  # Popuni rečnik sa početnim vrednostima
+        self.updatePropertiesDict()
 
     def updatePropertiesDict(self):
-        """Ažurira rečnik sa trenutnim vrednostima svojstava"""
         self.properties_dict = {
             'active': self.active,
             'visible': self.visible,
@@ -1488,335 +1476,282 @@ class ButtonWidget(QWidget):
             'position_y': self.y(),
             'width': self.width(),
             'height': self.height(),
-            'start_color': self.start_color.name(),  # U heksadecimalnom formatu
+            'start_color': self.start_color.name(),
             'end_color': self.end_color.name(),
             '3d': self.use_3d,
             'text': self.button_text,
             'text_size': self.text_size+25,
             'text_color': self.text_color.name(),
-            #'corner_radius': self.r
         }
 
     def getPropertiesDict(self):
-        """Vraća kopiju rečnika sa svojstvima"""
-        self.updatePropertiesDict()  # Osveži vrednosti pre vraćanja
+        self.updatePropertiesDict()
         return self.properties_dict.copy()
 
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
-        # Gradient pozadina
-        gradient = QLinearGradient(0, 0, 0, self.height())
-        gradient.setColorAt(0.0, self.start_color)    # 0% - start color
-        gradient.setColorAt(0.3, self.end_color)      # 10% - prelaz na end color
-        gradient.setColorAt(1.0, self.end_color) 
-        painter.setBrush(QBrush(gradient))
-        painter.setPen(Qt.PenStyle.NoPen)
+        gradient = QLinearGradient( 0, 0, 0, self.height() )
+        gradient.setColorAt( 0.0, self.start_color )
+        gradient.setColorAt( 0.3, self.end_color )   
+        gradient.setColorAt( 1.0, self.end_color ) 
+        painter.setBrush( QBrush( gradient ) )
+        painter.setPen( Qt.PenStyle.NoPen )
         
-        r=int((7/5)*self.text_size+8/5)
+        r = int( ( 7 / 5 ) * self.text_size + 8 / 5 )
 
-        painter.drawRoundedRect(0, 0, self.width(), self.height(), r, r)
+        painter.drawRoundedRect( 0, 0, self.width(), self.height(), r, r )
 
-        # 3D efekat
         if self.use_3d:
-            painter.setPen(QPen(QColor(0, 0, 0), 2))
-            painter.drawLine(r, self.height()-1, self.width()-r, self.height()-1)
-            painter.drawLine(self.width()-1, r, self.width()-1, self.height()-r)
-            painter.drawArc(self.width() - 2*r-1, self.height() - 2*r-1, 2*r, 2*r, 270*16, 90*16)
+            painter.setPen( QPen( QColor( 0, 0, 0 ), 2 ) )
+            painter.drawLine( r, self.height() - 1, self.width() - r, self.height() - 1 )
+            painter.drawLine( self.width() - 1, r, self.width() - 1, self.height() - r )
+            painter.drawArc( self.width() - 2 * r - 1, self.height() - 2 * r - 1, 2 * r, 2 * r, 270 * 16, 90 * 16 )
 
-        # TEKST
-        painter.setPen(QPen(self.text_color))
+        painter.setPen( QPen( self.text_color ) )
         font = QFont()
-        font.setPointSize(int((23/5)*self.text_size+17/5))
-        painter.setFont(font)
-        painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self.button_text)
+        font.setPointSize( int( ( 23 / 5 ) * self.text_size + 17 / 5 ) )
+        painter.setFont( font )
+        painter.drawText( self.rect(), Qt.AlignmentFlag.AlignCenter, self.button_text )
 
-        # Selekcija (handle-ovi)
         if self.is_selected:
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
             
-
-    def drawSelectionHandles(self, painter):
-        """Crtanje resize handle-ova na uglovima - VEĆE TAČKE"""
-        handle_size = 8  # POVEĆAJTE SA 6 NA 8
+    def drawSelectionHandles( self, painter ):
+        handle_size = 8
         half_size = handle_size // 2
 
-        # Svetlo plava boja za tačke sa tamno plavim okvirom
-        painter.setBrush(QColor(0, 255, 0))  # Svetlo plava
-        painter.setPen(QPen(QColor(0, 80, 200), 1))  # Tamno plavi okvir
+        painter.setBrush( QColor( 0, 255, 0 ) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-        # 4 ugla - KORISTITE ELIPSE ZA OKRUGLE TAČKE
-        corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-            QPoint(4, self.height()-4),  # donji levi
-            QPoint(self.width()-4, self.height()-4)  # donji desni
-        ]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
-            # Koristite drawEllipse za okrugle tačke
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
-                              handle_size, handle_size)
-
-            # Dodajte mali beli centar za bolju vidljivost
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))  # Vratite boju
-            painter.setPen(QPen(QColor(0, 80, 200), 1))  # Vratite okvir
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
             
     def drawSelectionBorder(self, painter):
-        """Crtanje plavog isprekidanog okvira oko selektovanog button-a sa razmakom"""
-        # Kreiraj pravougaonik sa razmakom od 2 piksela sa svih strana
-        margin = 2  # Razmak od button-a
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+        margin = 2
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
 
-        # Svetlija plava boja sa većom debljinom
-        selection_pen = QPen(QColor(255, 0, 0))  # Svetlija plava boja
-        selection_pen.setWidth(3)  # POVEĆAJTE SA 1 NA 2
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])  # Dužina crte: 4px, razmak: 2px
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
 
-    def mousePressEvent(self, event):
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
-
-            # Proveri da li je kliknut resize handle
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
-                # Počni resize
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+
             else:
-                # Počni dragovanje ili selektuj
                 self.dragging = True
-                self.drag_start_pos = mouse_pos  # OVO JE VEĆ DODATO, SAMO PROVERITE
+                self.drag_start_pos = mouse_pos 
                 self.clicked.emit(self)
 
         event.accept()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent( self, event ):
         mouse_pos = event.pos()
-        
-        # Proveri da li je miš preko resize handle-a
-        corner = self.getCornerAt(mouse_pos)
+        corner = self.getCornerAt( mouse_pos )
+
         if corner:
-            # Postavi odgovarajući kursor
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
+
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
         else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
+            self.setCursor( Qt.CursorShape.ArrowCursor )
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
+            self.handleResize( event.globalPosition().toPoint() )
+
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
             delta = mouse_pos - self.drag_start_pos
-            
-            # IZMENJENO: Koristite dva argumenta (x, y) umesto QPoint
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
+
             self.move(new_x, new_y)
-            
-            # Ažuriraj properties bar ako postoji
-            self._update_properties_position()
+            self.updatePropertiesPosition()
         
         event.accept()
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
 
-            # Ažuriraj properties bar
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
 
         event.accept()
 
-    def getCornerAt(self, pos):
-        """Proverava da li je miš preko nekog od uglova za resize"""
-        handle_size = 12  # Veća zona za lakše hvatanje
+    def getCornerAt( self, pos ):
+        handle_size = 12 
         half_size = handle_size // 2
         
         corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
         }
         
         for corner_name, corner_pos in corners.items():
-            # Kreiraj pravougaonik oko ugla
-            corner_rect = QRect(
-                corner_pos.x() - half_size,
-                corner_pos.y() - half_size,
-                handle_size,
-                handle_size
-            )
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
             
-            if corner_rect.contains(pos):
+            if corner_rect.contains( pos ):
                 return corner_name
         
         return None
 
-    def handleResize(self, global_pos):
-            """Jednostavnija verzija - menja samo veličinu, ne poziciju"""
+    def handleResize( self, global_pos ):
             if not self.resize_corner:
                 return
 
-            # Računaj promenu u veličini
             delta = global_pos - self.resize_start_pos
-
             new_width = self.resize_start_size.width()
             new_height = self.resize_start_size.height()
 
-            # Samo donji desni ugao menja veličinu
             if self.resize_corner == "bottom_right":
-                new_width = max(50, self.resize_start_size.width() + delta.x())
-                new_height = max(30, self.resize_start_size.height() + delta.y())
+                new_width = max( 50, self.resize_start_size.width() + delta.x() )
+                new_height = max( 30, self.resize_start_size.height() + delta.y() )
+
             elif self.resize_corner == "top_right":
-                new_width = max(50, self.resize_start_size.width() + delta.x())
-                new_height = max(30, self.resize_start_size.height() - delta.y())
+                new_width = max( 50, self.resize_start_size.width() + delta.x() )
+                new_height = max( 30, self.resize_start_size.height() - delta.y() )
+
             elif self.resize_corner == "bottom_left":
-                new_width = max(50, self.resize_start_size.width() - delta.x())
-                new_height = max(30, self.resize_start_size.height() + delta.y())
+                new_width = max( 50, self.resize_start_size.width() - delta.x() )
+                new_height = max( 30, self.resize_start_size.height() + delta.y() )
+
             elif self.resize_corner == "top_left":
-                new_width = max(50, self.resize_start_size.width() - delta.x())
-                new_height = max(30, self.resize_start_size.height() - delta.y())
+                new_width = max( 50, self.resize_start_size.width() - delta.x() )
+                new_height = max( 30, self.resize_start_size.height() - delta.y() )
 
-            # Ažuriraj samo veličinu (bez promene pozicije)
-            self.setFixedSize(new_width, new_height)
+            self.setFixedSize( new_width, new_height )
             self.update()
+            self.updatePropertiesSize()
 
-            # Ažuriraj properties bar
-            self._update_properties_size()
-
-    def _update_properties_size(self):
-        """Ažuriraj veličinu u properties bar-u"""
-        # Pronađi glavni prozor
+    def updatePropertiesSize( self ):
         main_window = self.findMainWindow()
+
         if not main_window:
             return
         
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self and
-            hasattr(main_window, 'width_spin') and 
-            hasattr(main_window, 'height_spin')):
-            
-            main_window.width_spin.setValue(self.width())
-            main_window.height_spin.setValue(self.height())
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'width_spin' ) and hasattr(main_window, 'height_spin' ) ):
+            main_window.width_spin.setValue( self.width() )
+            main_window.height_spin.setValue( self.height() )
 
-    def _update_properties_position(self):
-        """Ažuriraj poziciju u properties bar-u"""
+    def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
+
         if not main_window:
             return
         
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self and
-            hasattr(main_window, 'pos_x_spin') and 
-            hasattr(main_window, 'pos_y_spin')):
-            
-            main_window.pos_x_spin.setValue(self.x())
-            main_window.pos_y_spin.setValue(self.y())
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'pos_x_spin' ) and hasattr( main_window, 'pos_y_spin' ) ):
+            main_window.pos_x_spin.setValue( self.x() )
+            main_window.pos_y_spin.setValue( self.y() )
 
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
+    def findMainWindow( self ):
         parent = self.parent()
+
         while parent:
-            if isinstance(parent, QMainWindow):
+            if isinstance( parent, QMainWindow ):
                 return parent
             parent = parent.parent()
+
         return None
 
-    # Ostale metode ostaju iste
-    def setSelected(self, selected):
+    def setSelected( self, selected ):
         self.is_selected = selected
         self.update()
 
-    def set_bg_gradient(self, gradient):
+    def setBackgroundGradient( self, gradient ):
         if gradient.stops():
-            self.start_color = gradient.stops()[0][1]
-            if len(gradient.stops()) > 1:
-                self.end_color = gradient.stops()[-1][1]
-        self.update()
-        self.updatePropertiesDict()  # DODAJTE OVO
+            self.start_color = gradient.stops()[ 0 ][ 1 ]
 
-    def set_text_color(self, color):
+            if len( gradient.stops() ) > 1:
+                self.end_color = gradient.stops()[ -1 ][ 1 ]
+
+        self.update()
+        self.updatePropertiesDict()
+
+    def setTextColor( self, color ):
         self.text_color = color
         self.update()
-        self.updatePropertiesDict()  # DODAJTE OVO
+        self.updatePropertiesDict() 
 
-    def setBorderColor(self, color):
+    def setBorderColor( self, color ):
         self.border_color = color
         self.update()
 
-    def setBorderWidth(self, width):
+    def setBorderWidth( self, width ):
         self.border_width = width
         self.update()
 
-    def set_button_text(self, text):
+    def setButtonText( self, text ):
         self.button_text = text
         self.update()
-        self.updatePropertiesDict()  # DODAJTE OVO
+        self.updatePropertiesDict()
 
-    def set_text_size(self, size):
+    def setTextSize( self, size ):
         self.text_size = size
         self.update()
-        self.updatePropertiesDict()  # DODAJTE OVO
+        self.updatePropertiesDict()
 
-    def set_radius(self, radius):
+    def setRadius( self, radius ):
         self.r = radius
         self.update()
-        self.updatePropertiesDict()  # DODAJTE OVO
+        self.updatePropertiesDict()
 
-    
-    def setActive(self, active):
+    def setActive( self, active ):
         self.active = active
-        self.updatePropertiesDict()  # DODAJTE OVO
+        self.updatePropertiesDict()
 
-    def setVisibleButton(self, visible):
+    def setVisibleButton( self, visible ):
         self.visible = visible
-        self.setVisible(visible)  # Ovo će sakriti/prikazati widget
-        self.updatePropertiesDict()  # DODAJTE OVO
+        self.setVisible( visible )
+        self.updatePropertiesDict()
 
-    def setStatic(self, static):
+    def setStatic( self, static ):
         self.static = static
-        self.updatePropertiesDict()  # DODAJTE OVO
+        self.updatePropertiesDict()
 
-    def setStackOrder(self, order):
+    def setStackOrder( self, order ):
         self.stack_order = order
-        self.updatePropertiesDict()  # DODAJTE OVO
+        self.updatePropertiesDict() 
 
-    # Dodajte i za move i resize:
-    def move(self, x, y):
-        super().move(x, y)
-        self.updatePropertiesDict()  # DODAJTE OVO
+    def move( self, x, y ):
+        super().move( x, y )
+        self.updatePropertiesDict()
 
-    def resize(self, width, height):
-        super().resize(width, height)
-        self.updatePropertiesDict()  # DODAJTE OVO
+    def resize( self, width, height ):
+        super().resize( width, height )
+        self.updatePropertiesDict()
 
-    @property
-    def color(self):
+    def getColor( self ):
         return self.start_color
 
-    def setColor(self, color):
+    def setColor( self, color ):
         self.start_color = color
         self.update()
 
@@ -1921,7 +1856,7 @@ class KeysWidget(QWidget):
         self.key_color_bottom = bottom_color
         self.update()
     
-    def set_text_color(self, color):
+    def setTextColor(self, color):
         """Postavlja boju teksta"""
         self.text_color = color
         self.update()
@@ -2063,8 +1998,8 @@ class KeysWidget(QWidget):
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize(event.globalPosition().toPoint())
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             # Dragovanje widgeta
             delta = mouse_pos - self.drag_start_pos
@@ -2073,7 +2008,7 @@ class KeysWidget(QWidget):
             new_y = self.y() + delta.y()
             super().move(new_x, new_y)
             
-            self._update_properties_position()
+            self.updatePropertiesPosition()
         
         event.accept()
     
@@ -2083,8 +2018,8 @@ class KeysWidget(QWidget):
             self.dragging = False
             self.resize_corner = None
 
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
             self.updatePropertiesDict()
 
         event.accept()
@@ -2359,7 +2294,7 @@ class KeysWidget(QWidget):
             parent = parent.parent()
         return None
     
-    def _update_properties_size(self):
+    def updatePropertiesSize(self):
         """Ažuriraj veličinu u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -2378,7 +2313,7 @@ class KeysWidget(QWidget):
                 main_window.height_spin_keys.setValue(self._height)
                 main_window.height_spin_keys.blockSignals(False)
     
-    def _update_properties_position(self):
+    def updatePropertiesPosition(self):
         """Ažuriraj poziciju u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -2399,8 +2334,8 @@ class KeysWidget(QWidget):
     
     def update_all_properties(self):
         """Ažurira sve properties u properties baru"""
-        self._update_properties_size()
-        self._update_properties_position()
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
 
         main_window = self.findMainWindow()
         if not main_window:
@@ -2564,9 +2499,9 @@ class ClockWidget(QWidget):
     def move(self, x, y):
         super().move(x, y)
         # Ažuriraj properties bar ako postoji
-        self._update_properties_position()
+        self.updatePropertiesPosition()
 
-    def _update_properties_position(self):
+    def updatePropertiesPosition(self):
         """Ažuriraj poziciju u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -2789,7 +2724,7 @@ class ClockWidget(QWidget):
             super().move(new_x, new_y)
             
             # Ažuriraj properties bar ako postoji
-            self._update_properties_position()
+            self.updatePropertiesPosition()
         
         event.accept()
 
@@ -2800,8 +2735,8 @@ class ClockWidget(QWidget):
             self.resize_corner = None
 
             # Ažuriraj properties bar
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
 
         event.accept()
 
@@ -2865,9 +2800,9 @@ class ClockWidget(QWidget):
         self.update()
 
         # Ažuriraj properties bar
-        self._update_properties_size()
+        self.updatePropertiesSize()
         
-    def _update_properties_size(self):
+    def updatePropertiesSize(self):
         """Ažuriraj veličinu u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -2881,7 +2816,7 @@ class ClockWidget(QWidget):
             main_window.diameter_spin_clock.setValue(self.diameter)
             main_window.diameter_spin_clock.blockSignals(False)
 
-    def _update_properties_position(self):
+    def updatePropertiesPosition(self):
         """Ažuriraj poziciju u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -3256,7 +3191,7 @@ class GaugeWidget(QWidget):
             super().move(new_x, new_y)
             
             # Ažuriraj properties bar ako postoji
-            self._update_properties_position()
+            self.updatePropertiesPosition()
         
         event.accept()
 
@@ -3267,8 +3202,8 @@ class GaugeWidget(QWidget):
             self.resize_corner = None
 
             # Ažuriraj properties bar
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
 
         event.accept()
 
@@ -3332,9 +3267,9 @@ class GaugeWidget(QWidget):
         self.update()
 
         # Ažuriraj properties bar
-        self._update_properties_size()
+        self.updatePropertiesSize()
 
-    def _update_properties_size(self):
+    def updatePropertiesSize(self):
         """Ažuriraj veličinu u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -3348,7 +3283,7 @@ class GaugeWidget(QWidget):
             main_window.diameter_spin_gauge.setValue(self.diameter)
             main_window.diameter_spin_gauge.blockSignals(False)
 
-    def _update_properties_position(self):
+    def updatePropertiesPosition(self):
         """Ažuriraj poziciju u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -3696,7 +3631,7 @@ class DialWidget(QWidget):
             super().move(new_x, new_y)
             
             # Ažuriraj properties bar U TOKU draganja (real-time)
-            self._update_properties_position()
+            self.updatePropertiesPosition()
         
         event.accept()
 
@@ -3708,8 +3643,8 @@ class DialWidget(QWidget):
             self.resize_corner = None
 
             # Ažuriraj properties bar NAKON što se završi drag ili resize
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
             
             # Ažuriraj rečnik
             self.updatePropertiesDict()
@@ -3776,10 +3711,10 @@ class DialWidget(QWidget):
         self.update()
 
         # Ažuriraj properties bar U TOKU resize-a (real-time)
-        self._update_properties_size()
-        self._update_properties_position()  # Ovo je važno jer se pozicija menja ako resize-ujemo sa leve/gornje strane
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()  # Ovo je važno jer se pozicija menja ako resize-ujemo sa leve/gornje strane
 
-    def _update_properties_size(self):
+    def updatePropertiesSize(self):
         """Ažuriraj veličinu u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -3795,7 +3730,7 @@ class DialWidget(QWidget):
                 main_window.diameter_spin_dial.setValue(self.diameter)
                 main_window.diameter_spin_dial.blockSignals(False)
 
-    def _update_properties_position(self):
+    def updatePropertiesPosition(self):
         """Ažuriraj poziciju u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -3818,8 +3753,8 @@ class DialWidget(QWidget):
 
     def update_all_properties(self):
         """Ažurira sve properties u properties baru"""
-        self._update_properties_size()
-        self._update_properties_position()
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
         # Ažuriraj ostale properties ako su prikazane
         main_window = self.findMainWindow()
         if not main_window:
@@ -4080,7 +4015,7 @@ class ToggleWidget(QWidget):
         self.white_border_color = color
         self.update()
 
-    def set_text_color(self, color):
+    def setTextColor(self, color):
         self.text_color = color
         self.update()
 
@@ -4669,7 +4604,7 @@ class ScrollBarWidget(QWidget):
             super().move(new_x, new_y)
             
             # Ažuriraj properties bar U TOKU draganja (real-time)
-            self._update_properties_position()
+            self.updatePropertiesPosition()
         
         event.accept()
 
@@ -4681,8 +4616,8 @@ class ScrollBarWidget(QWidget):
             self.resize_corner = None
 
             # Ažuriraj properties bar NAKON što se završi drag ili resize
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
             
             # Ažuriraj rečnik
             self.updatePropertiesDict()
@@ -4743,8 +4678,8 @@ class ScrollBarWidget(QWidget):
         self.setSize(new_width, new_height)
         
         # Ažuriraj properties bar U TOKU resize-a
-        self._update_properties_size()
-        self._update_properties_position()
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
 
     def findMainWindow(self):
         """Pronađi glavni prozor u hijerarhiji"""
@@ -4755,7 +4690,7 @@ class ScrollBarWidget(QWidget):
             parent = parent.parent()
         return None
 
-    def _update_properties_size(self):
+    def updatePropertiesSize(self):
         """Ažuriraj veličinu u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -4776,7 +4711,7 @@ class ScrollBarWidget(QWidget):
                 main_window.height_spin_scrollbar.setValue(self._height)
                 main_window.height_spin_scrollbar.blockSignals(False)
 
-    def _update_properties_position(self):
+    def updatePropertiesPosition(self):
         """Ažuriraj poziciju u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -4820,8 +4755,8 @@ class ScrollBarWidget(QWidget):
 
     def update_all_properties(self):
         """Ažurira sve properties u properties baru"""
-        self._update_properties_size()
-        self._update_properties_position()
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
         self._update_properties_value()
         
         # Ažuriraj ostale properties ako su prikazane
@@ -5179,7 +5114,7 @@ class SliderWidget(QWidget):
             parent = parent.parent()
         return None
 
-    def _update_properties_size(self):
+    def updatePropertiesSize(self):
         """Ažuriraj veličinu u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -5200,7 +5135,7 @@ class SliderWidget(QWidget):
                 main_window.height_spin_slider.setValue(self._height)
                 main_window.height_spin_slider.blockSignals(False)
 
-    def _update_properties_position(self):
+    def updatePropertiesPosition(self):
         """Ažuriraj poziciju u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -5223,8 +5158,8 @@ class SliderWidget(QWidget):
 
     def update_all_properties(self):
         """Ažurira sve properties u properties baru"""
-        self._update_properties_size()
-        self._update_properties_position()
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
         
         # Ažuriraj ostale properties ako su prikazane
         main_window = self.findMainWindow()
@@ -5390,8 +5325,8 @@ class SliderWidget(QWidget):
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize(event.globalPosition().toPoint())
             # Ažuriraj properties bar U TOKU resize-a
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             # Dragovanje widgeta
             delta = mouse_pos - self.drag_start_pos
@@ -5401,7 +5336,7 @@ class SliderWidget(QWidget):
             super().move(new_x, new_y)
             
             # Ažuriraj properties bar U TOKU draganja (real-time)
-            self._update_properties_position()
+            self.updatePropertiesPosition()
         
         event.accept()
 
@@ -5412,8 +5347,8 @@ class SliderWidget(QWidget):
             self.resize_corner = None
 
             # Ažuriraj properties bar NAKON što se završi drag ili resize
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
             
             # Ažuriraj rečnik
             self.updatePropertiesDict()
@@ -6444,8 +6379,8 @@ class ImageWidget(QWidget):
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize(event.globalPosition().toPoint())
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             # Dragovanje widgeta
             delta = mouse_pos - self.drag_start_pos
@@ -6454,7 +6389,7 @@ class ImageWidget(QWidget):
             new_y = self.y() + delta.y()
             super().move(new_x, new_y)
             
-            self._update_properties_position()
+            self.updatePropertiesPosition()
         
         event.accept()
     
@@ -6464,8 +6399,8 @@ class ImageWidget(QWidget):
             self.dragging = False
             self.resize_corner = None
 
-            self._update_properties_size()
-            self._update_properties_position()
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
             self.updatePropertiesDict()
 
         event.accept()
@@ -6504,9 +6439,9 @@ class ImageWidget(QWidget):
             self._resize_pixmap()
         
         # Ažuriraj properties bar
-        self._update_properties_size()
+        self.updatePropertiesSize()
     
-    def _update_properties_size(self):
+    def updatePropertiesSize(self):
         """Ažuriraj veličinu u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -6525,7 +6460,7 @@ class ImageWidget(QWidget):
                 main_window.height_spin.setValue(self._height)
                 main_window.height_spin.blockSignals(False)
     
-    def _update_properties_position(self):
+    def updatePropertiesPosition(self):
         """Ažuriraj poziciju u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
@@ -6766,7 +6701,7 @@ class LabelWidget(QWidget):
         """Getter za height"""
         return self._height
 
-    def set_text_color(self, color):
+    def setTextColor(self, color):
         self.text_color = color
         self.update()
 
@@ -6775,7 +6710,7 @@ class LabelWidget(QWidget):
         self.set_size_based_on_text()
         self.update()
 
-    def set_text_size(self, size):
+    def setTextSize(self, size):
         self.text_size = size
         self.set_size_based_on_text()
         self.update()
@@ -7040,7 +6975,7 @@ class NumericWidget(QWidget):
             super().move(new_x, new_y)
             
             # Ažuriraj properties bar ako postoji
-            self._update_properties_position()
+            self.updatePropertiesPosition()
         
         event.accept()
 
@@ -7048,12 +6983,12 @@ class NumericWidget(QWidget):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = False
             # Ažuriraj properties bar
-            self._update_properties_position()
+            self.updatePropertiesPosition()
             # Ažuriraj rečnik
             self.updatePropertiesDict()
         event.accept()
 
-    def _update_properties_position(self):
+    def updatePropertiesPosition(self):
         """Ažuriraj poziciju u properties bar-u"""
         main_window = self.findMainWindow()
         if not main_window:
