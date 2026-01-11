@@ -2,6 +2,7 @@ from PyQt6.QtGui import ( QPainter, QPen, QColor, QLinearGradient, QFont, QBrush
 from PyQt6.QtCore import ( Qt, QPoint, QRect, QPointF, pyqtSignal, QSize, QRectF )
 from PyQt6.QtWidgets import ( QWidget, QMainWindow )
 import math
+import os
         
 class LineWidget( QWidget ):
     clicked = pyqtSignal( object )
@@ -319,10 +320,12 @@ class LineWidget( QWidget ):
 
     def findMainWindow( self ):
         parent = self.parent()
+
         while parent:
             if isinstance( parent, QMainWindow ):
                 return parent
             parent = parent.parent()
+
         return None
 
     def mousePressEvent( self, event ):
@@ -990,10 +993,12 @@ class CircleWidget( QWidget ):
 
     def findMainWindow( self ):
         parent = self.parent()
+
         while parent:
             if isinstance( parent, QMainWindow ):
                 return parent
             parent = parent.parent()
+
         return None
 
     def mousePressEvent( self, event ):
@@ -1353,10 +1358,12 @@ class EllipseWidget( QWidget ):
 
     def findMainWindow( self ):
         parent = self.parent()
+
         while parent:
             if isinstance( parent, QMainWindow ):
                 return parent
             parent = parent.parent()
+
         return None
     
     def mousePressEvent( self, event ):
@@ -1464,31 +1471,6 @@ class ButtonWidget( QWidget ):
         self.properties_dict = {}
         self.updatePropertiesDict()
 
-    def updatePropertiesDict(self):
-        self.properties_dict = {
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'name': self.custom_name,
-            'stack_order': self.stack_order,
-            'tag': self.tag,
-            'position_x': self.x(),
-            'position_y': self.y(),
-            'width': self.width(),
-            'height': self.height(),
-            'start_color': self.start_color.name(),
-            'end_color': self.end_color.name(),
-            '3d': self.use_3d,
-            'text': self.button_text,
-            'text_size': self.text_size+25,
-            'text_color': self.text_color.name(),
-        }
-
-    def getPropertiesDict(self):
-        self.updatePropertiesDict()
-        return self.properties_dict.copy()
-
-
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
@@ -1550,79 +1532,6 @@ class ButtonWidget( QWidget ):
         painter.setBrush( Qt.BrushStyle.NoBrush )
         painter.drawRect( border_rect )
 
-    def mousePressEvent( self, event ):
-        if event.button() == Qt.MouseButton.LeftButton:
-            mouse_pos = event.pos()
-            self.resize_corner = self.getCornerAt( mouse_pos )
-
-            if self.resize_corner:
-                self.resizing = True
-                self.resize_start_pos = event.globalPosition().toPoint()
-                self.resize_start_size = self.size()
-
-            else:
-                self.dragging = True
-                self.drag_start_pos = mouse_pos 
-                self.clicked.emit(self)
-
-        event.accept()
-
-    def mouseMoveEvent( self, event ):
-        mouse_pos = event.pos()
-        corner = self.getCornerAt( mouse_pos )
-
-        if corner:
-            if corner in [ "top_left", "bottom_right" ]:
-                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
-
-            elif corner in [ "top_right", "bottom_left" ]:
-                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
-        else:
-            self.setCursor( Qt.CursorShape.ArrowCursor )
-        
-        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize( event.globalPosition().toPoint() )
-
-        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            delta = mouse_pos - self.drag_start_pos
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-
-            self.move(new_x, new_y)
-            self.updatePropertiesPosition()
-        
-        event.accept()
-
-    def mouseReleaseEvent( self, event ):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.resizing = False
-            self.dragging = False
-            self.resize_corner = None
-
-            self.updatePropertiesSize()
-            self.updatePropertiesPosition()
-
-        event.accept()
-
-    def getCornerAt( self, pos ):
-        handle_size = 12 
-        half_size = handle_size // 2
-        
-        corners = {
-            "top_left": QPoint( 0, 0 ),
-            "top_right": QPoint( self.width(), 0 ),
-            "bottom_left": QPoint( 0, self.height() ),
-            "bottom_right": QPoint( self.width(), self.height() )
-        }
-        
-        for corner_name, corner_pos in corners.items():
-            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
-            
-            if corner_rect.contains( pos ):
-                return corner_name
-        
-        return None
-
     def handleResize( self, global_pos ):
             if not self.resize_corner:
                 return
@@ -1651,35 +1560,39 @@ class ButtonWidget( QWidget ):
             self.update()
             self.updatePropertiesSize()
 
-    def updatePropertiesSize( self ):
-        main_window = self.findMainWindow()
+    def resize( self, width, height ):
+        super().resize( width, height )
+        self.updatePropertiesDict()
 
-        if not main_window:
-            return
+    def move( self, x, y ):
+        super().move( x, y )
+        self.updatePropertiesDict()
+
+    def getPropertiesDict(self):
+        self.updatePropertiesDict()
+        return self.properties_dict.copy()
+
+    def getCornerAt( self, pos ):
+        handle_size = 12 
+        half_size = handle_size // 2
         
-        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'width_spin' ) and hasattr(main_window, 'height_spin' ) ):
-            main_window.width_spin.setValue( self.width() )
-            main_window.height_spin.setValue( self.height() )
-
-    def updatePropertiesPosition( self ):
-        main_window = self.findMainWindow()
-
-        if not main_window:
-            return
+        corners = {
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
+        }
         
-        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'pos_x_spin' ) and hasattr( main_window, 'pos_y_spin' ) ):
-            main_window.pos_x_spin.setValue( self.x() )
-            main_window.pos_y_spin.setValue( self.y() )
-
-    def findMainWindow( self ):
-        parent = self.parent()
-
-        while parent:
-            if isinstance( parent, QMainWindow ):
-                return parent
-            parent = parent.parent()
-
+        for corner_name, corner_pos in corners.items():
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
+            
+            if corner_rect.contains( pos ):
+                return corner_name
+        
         return None
+    
+    def getColor( self ):
+        return self.start_color
 
     def setSelected( self, selected ):
         self.is_selected = selected
@@ -1740,59 +1653,144 @@ class ButtonWidget( QWidget ):
         self.stack_order = order
         self.updatePropertiesDict() 
 
-    def move( self, x, y ):
-        super().move( x, y )
-        self.updatePropertiesDict()
-
-    def resize( self, width, height ):
-        super().resize( width, height )
-        self.updatePropertiesDict()
-
-    def getColor( self ):
-        return self.start_color
-
     def setColor( self, color ):
         self.start_color = color
         self.update()
 
-class KeysWidget(QWidget):
-    clicked = pyqtSignal(object)
-    
-    def __init__(self, width=200, height=120, parent=None):
-        super().__init__(parent)
+    def updatePropertiesDict(self):
+        self.properties_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'width': self.width(),
+            'height': self.height(),
+            'start_color': self.start_color.name(),
+            'end_color': self.end_color.name(),
+            '3d': self.use_3d,
+            'text': self.button_text,
+            'text_size': self.text_size+25,
+            'text_color': self.text_color.name(),
+        }
+
+    def updatePropertiesSize( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
         
-        # Početne dimenzije
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'width_spin' ) and hasattr(main_window, 'height_spin' ) ):
+            main_window.width_spin.setValue( self.width() )
+            main_window.height_spin.setValue( self.height() )
+
+    def updatePropertiesPosition( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'pos_x_spin' ) and hasattr( main_window, 'pos_y_spin' ) ):
+            main_window.pos_x_spin.setValue( self.x() )
+            main_window.pos_y_spin.setValue( self.y() )
+
+    def findMainWindow( self ):
+        parent = self.parent()
+
+        while parent:
+            if isinstance( parent, QMainWindow ):
+                return parent
+            parent = parent.parent()
+
+        return None
+
+    def mousePressEvent( self, event ):
+        if event.button() == Qt.MouseButton.LeftButton:
+            mouse_pos = event.pos()
+            self.resize_corner = self.getCornerAt( mouse_pos )
+
+            if self.resize_corner:
+                self.resizing = True
+                self.resize_start_pos = event.globalPosition().toPoint()
+                self.resize_start_size = self.size()
+
+            else:
+                self.dragging = True
+                self.drag_start_pos = mouse_pos 
+                self.clicked.emit(self)
+
+        event.accept()
+
+    def mouseReleaseEvent( self, event ):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.resizing = False
+            self.dragging = False
+            self.resize_corner = None
+
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
+
+        event.accept()
+
+    def mouseMoveEvent( self, event ):
+        mouse_pos = event.pos()
+        corner = self.getCornerAt( mouse_pos )
+
+        if corner:
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
+
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
+        else:
+            self.setCursor( Qt.CursorShape.ArrowCursor )
+        
+        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
+            self.handleResize( event.globalPosition().toPoint() )
+
+        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            delta = mouse_pos - self.drag_start_pos
+            new_x = self.x() + delta.x()
+            new_y = self.y() + delta.y()
+
+            self.move(new_x, new_y)
+            self.updatePropertiesPosition()
+        
+        event.accept()
+
+class KeysWidget( QWidget ):
+    clicked = pyqtSignal( object )
+    
+    def __init__( self, width = 200, height = 120, parent = None ):
+        super().__init__( parent )
+        
         self._width = width
         self._height = height
         
-        # Svojstva za keys
-        self.key_type = "QUERTZ"  # QUERTZ ili NUM
+        self.key_type = "QUERTZ"
         self.is_3d = True
-        self.font_size = 12  # Dodajemo font size
+        self.font_size = 12
         
-        # Dimenzije pojedinačnih tastera
         self.key_width = 20
         self.key_height = 20
         
-        # Boje
-        self.key_color_top = QColor(0, 0, 255)  # Gornja boja gradijenta (Start Color)
-        self.key_color_bottom = QColor(0, 0, 136)  # Donja boja gradijenta (End Color)
-        self.text_color = QColor(255, 255, 255)  # Bela boja teksta (Font Color)
-        self.border_color = QColor(0, 0, 0)  # Crni border
+        self.key_color_top = QColor( 0, 0, 255 ) 
+        self.key_color_bottom = QColor( 0, 0, 136 )
+        self.text_color = QColor( 255, 255, 255 ) 
+        self.border_color = QColor( 0, 0, 0 ) 
         
-        # Dodatna svojstva (kao kod drugih widget-a)
         self.active = True
         self.visible = True
         self.static = False
         self.custom_name = None
         
-        # Selekcija
         self.selected = False
         
-        # Postavi fiksnu veličinu
-        self.setFixedSize(self._width, self._height)
+        self.setFixedSize( self._width, self._height )
         
-        # Resize i drag varijable (kao kod drugih widget-a)
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
@@ -1800,219 +1798,489 @@ class KeysWidget(QWidget):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         self.stack_order = 1
-    
-    def setSize(self, width, height):
-        """Postavlja veličinu widgeta"""
-        self._width = max(100, width)  # Minimum 100px
-        self._height = max(80, height)  # Minimum 80px
+
+    def paintEvent( self, event ):
+            painter = QPainter( self )
+            painter.setRenderHint( QPainter.RenderHint.Antialiasing )
+            painter.setPen( self.text_color )
+
+            font = QFont( "Arial", self.font_size, QFont.Weight.Bold )
+            painter.setFont( font )
+
+            margin_x = 10
+            margin_y = 10
+
+            current_x = margin_x
+            current_y = margin_y
+
+            if self.key_type == "NUM":
+                number = 1
+                for i in range( 3 ):
+                    for j in range( 3 ):
+                        gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
+                        gradient.setColorAt( 0, self.key_color_top )
+                        gradient.setColorAt( 1, self.key_color_bottom ) 
+
+                        painter.setBrush( gradient )
+                        painter.setPen( QPen( self.border_color, 1 ) )
+                        painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, 5, 5 )
+
+                        if self.is_3d:
+                            self.draw3dEffect( painter, current_x, current_y, self.key_width, self.key_height )
+
+                        text = str( number )
+                        text_rect = painter.boundingRect( current_x, current_y, self.key_width, self.key_height, Qt.AlignmentFlag.AlignCenter, text )
+                        painter.drawText( text_rect, Qt.AlignmentFlag.AlignCenter, text )
+
+                        current_x += self.key_width + 4
+                        number += 1
+
+                    current_x = margin_x
+                    current_y += self.key_height + 4
+
+                key_width_0 = self.key_width * 2 + 4 
+
+                gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
+                gradient.setColorAt( 0, self.key_color_top )
+                gradient.setColorAt( 1, self.key_color_bottom )
+
+                painter.setBrush( gradient )
+                painter.setPen( QPen( self.border_color, 1 ) )
+                painter.drawRoundedRect( current_x, current_y, key_width_0, self.key_height, 5, 5 )
+
+                if self.is_3d:
+                    self.draw3dEffect( painter, current_x, current_y, key_width_0, self.key_height )
+
+                text = "0"
+                text_rect = painter.boundingRect( current_x, current_y, key_width_0, self.key_height, Qt.AlignmentFlag.AlignCenter, text )
+                painter.drawText( text_rect, Qt.AlignmentFlag.AlignCenter, text )
+
+                current_x += key_width_0 + 4
+
+                gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
+                gradient.setColorAt( 0, self.key_color_top )
+                gradient.setColorAt( 1, self.key_color_bottom )
+
+                painter.setBrush( gradient )
+                painter.setPen( QPen( self.border_color, 1 ) )
+                painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, 5, 5 )
+
+                if self.is_3d:
+                    self.draw3dEffect( painter, current_x, current_y, self.key_width, self.key_height )
+
+                text = "."
+                text_rect = painter.boundingRect( current_x, current_y, self.key_width, self.key_height, Qt.AlignmentFlag.AlignCenter, text )
+                painter.drawText( text_rect, Qt.AlignmentFlag.AlignCenter, text )
+
+            elif self.key_type == "QUERTZ":
+                keys_row_1 = "QWERTZUIOP"
+
+                for key in keys_row_1:
+                    gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
+                    gradient.setColorAt( 0, self.key_color_top )
+                    gradient.setColorAt( 1, self.key_color_bottom )
+
+                    painter.setBrush( gradient )
+                    painter.setPen( QPen( self.border_color, 1 ) )
+                    painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, 5, 5 )
+
+                    if self.is_3d:
+                        self.draw3dEffect( painter, current_x, current_y, self.key_width, self.key_height )
+
+                    text_rect = painter.boundingRect( current_x, current_y, self.key_width, self.key_height, Qt.AlignmentFlag.AlignCenter, key )
+                    painter.drawText( text_rect, Qt.AlignmentFlag.AlignCenter, key )
+
+                    current_x += self.key_width + 4
+
+                current_x = margin_x + self.key_width // 2
+                current_y += self.key_height + 4
+                keys_row_2 = "ASDFGHJKL"
+                for key in keys_row_2:
+                    gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
+                    gradient.setColorAt( 0, self.key_color_top )
+                    gradient.setColorAt( 1, self.key_color_bottom )
+
+                    painter.setBrush( gradient )
+                    painter.setPen( QPen( self.border_color, 1 ) )
+                    painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, 5, 5 )
+
+                    if self.is_3d:
+                        self.draw3dEffect(painter, current_x, current_y, self.key_width, self.key_height )
+
+                    text_rect = painter.boundingRect( current_x, current_y, self.key_width, self.key_height, Qt.AlignmentFlag.AlignCenter, key )
+                    painter.drawText( text_rect, Qt.AlignmentFlag.AlignCenter, key )
+
+                    current_x += self.key_width + 4
+
+                current_x = margin_x
+                current_y += self.key_height + 4
+                keys_row_3 = [ "Ent", "Y", "X", "C", "V", "B", "N", "M", "Del" ]
+
+                for i, key in enumerate( keys_row_3 ):
+                    if key in [ "Ent", "Del" ]:
+                        key_width = int( self.key_width * 1.5 )
+                    else:
+                        key_width = self.key_width
+
+                    gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
+                    gradient.setColorAt( 0, self.key_color_top )
+                    gradient.setColorAt( 1, self.key_color_bottom )
+
+                    painter.setBrush( gradient )
+                    painter.setPen( QPen( self.border_color, 1 ) )
+                    painter.drawRoundedRect( current_x, current_y, key_width, self.key_height, 5, 5 )
+
+                    if self.is_3d:
+                        self.draw3dEffect( painter, current_x, current_y, key_width, self.key_height )
+
+                    if key in [ "Ent", "Del" ]:
+                        small_font = QFont("Arial", max( 6, self.font_size - 2 ), QFont.Weight.Bold )
+                        painter.setFont( small_font )
+
+                    text_rect = painter.boundingRect( current_x, current_y, key_width, self.key_height, Qt.AlignmentFlag.AlignCenter, key )
+                    painter.drawText( text_rect, Qt.AlignmentFlag.AlignCenter, key )
+
+                    painter.setFont( font )
+
+                    current_x += key_width + 4
+
+                current_x = margin_x
+                current_y += self.key_height + 4
+                space_width = self._width - 2 * margin_x
+
+                gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
+                gradient.setColorAt( 0, self.key_color_top )
+                gradient.setColorAt( 1, self.key_color_bottom )
+
+                painter.setBrush( gradient )
+                painter.setPen( QPen( self.border_color, 1 ) )
+                painter.drawRoundedRect( current_x, current_y, space_width, self.key_height, 5, 5 )
+
+                if self.is_3d:
+                    self.draw3dEffect( painter, current_x, current_y, space_width, self.key_height )
+
+                space_font = QFont( "Arial", max( 10, self.font_size ), QFont.Weight.Bold )
+                painter.setFont( space_font )
+
+                text_rect = painter.boundingRect( current_x, current_y, space_width, self.key_height, Qt.AlignmentFlag.AlignCenter, "SPACE" )
+                painter.drawText( text_rect, Qt.AlignmentFlag.AlignCenter, "SPACE")
+
+            if self.selected:
+                self.drawSelectionBorder( painter )
+                self.drawSelectionHandles( painter )
+
+    def draw3dEffect( self, painter, x, y, width, height ):
+        painter.setPen( QPen( QColor( 255, 255, 255 ), 2 ) )
+        painter.drawLine( x, y, x + width, y )
+        painter.drawLine( x, y, x, y + height )
         
-        # Prilagodi dimenzije tastera na osnovu nove veličine
-        self._adjust_key_dimensions()
-        
-        self.setFixedSize(self._width, self._height)
-        self.update()
-    
-    def getWidth(self):
-        """Getter za width"""
-        return self._width
-    
-    def getHeight(self):
-        """Getter za height"""
-        return self._height
-    
-    def _adjust_key_dimensions(self):
-        """Prilagođava dimenzije tastera na osnovu veličine widgeta"""
-        if self.key_type == "NUM":
-            # Za numeričku tastaturu (3x4 - dodajemo donji red sa 0 i .)
-            self.key_width = max(15, self._width // 3 - 10)
-            self.key_height = max(15, self._height // 4 - 8)  # 4 reda sada
-        else:  # QUERTZ
-            # Za QUERTZ tastaturu (najširi red ima 10 tastera)
-            self.key_width = max(12, self._width // 10 - 6)
-            self.key_height = max(15, self._height // 5 - 8)
-    
-    def set_key_type(self, key_type):
-        """Postavlja tip tastature"""
-        self.key_type = key_type
-        self._adjust_key_dimensions()
-        self.update()
-    
-    def set_3d(self, is_3d):
-        """Postavlja 3D efekat"""
-        self.is_3d = is_3d
-        self.update()
-    
-    def set_font_size(self, size):
-        """Postavlja veličinu fonta"""
-        self.font_size = max(6, min(30, size))  # Ograniči na 6-30
-        self.update()
-    
-    def set_key_colors(self, top_color, bottom_color):
-        """Postavlja boje tastera (gradijent)"""
-        self.key_color_top = top_color
-        self.key_color_bottom = bottom_color
-        self.update()
-    
-    def setTextColor(self, color):
-        """Postavlja boju teksta"""
-        self.text_color = color
-        self.update()
-    
-    def setSelected(self, selected):
-        """Postavlja selektovani status"""
-        self.selected = selected
-        self.update()
-    
-    def setVisibleKeys(self, visible):
-        """Postavlja visible status"""
-        self.visible = visible
-        self.setVisible(visible)
-        self.update()
-    
-    # Metode za resize i drag (konzistentne sa drugim widget-ima)
-    
-    def drawSelectionHandles(self, painter):
-        """Crtanje resize handle-ova na uglovima"""
+        painter.setPen( QPen( QColor( 0, 0, 0 ), 2 ) )
+        painter.drawLine( x, y + height, x + width, y + height )
+        painter.drawLine( x + width, y, x + width, y + height )
+
+    def drawSelectionHandles( self, painter ):
         if not self.selected:
             return
-            
+        
         handle_size = 8
         half_size = handle_size // 2
 
-        # Zeleni handle-ovi
-        painter.setBrush(QColor(0, 255, 0))
-        painter.setPen(QPen(QColor(0, 80, 200), 1))
+        painter.setBrush( QColor( 0, 255, 0) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-        # 4 ugla
-        corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-            QPoint(4, self.height()-4),  # donji levi
-            QPoint(self.width()-4, self.height()-4)  # donji desni
-        ]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
-                              handle_size, handle_size)
-
-            # Mali beli centar
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))
-            painter.setPen(QPen(QColor(0, 80, 200), 1))
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
     
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira"""
+    def drawSelectionBorder( self, painter ):
         if not self.selected:
             return
             
         margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
     
-    def getCornerAt(self, pos):
-        """Proverava da li je miš preko resize handle-a"""
+    def handleResize( self, global_pos ):
+        if not self.resize_corner:
+            return
+
+        delta = global_pos - self.resize_start_pos
+
+        new_width = self.resize_start_size.width()
+        new_height = self.resize_start_size.height()
+
+        if self.resize_corner == "bottom_right":
+            new_width = max( 100, self.resize_start_size.width() + delta.x() )
+            new_height = max( 80, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_right":
+            new_width = max( 100, self.resize_start_size.width() + delta.x() )
+            new_height = max( 80, self.resize_start_size.height() - delta.y() )
+
+        elif self.resize_corner == "bottom_left":
+            new_width = max( 100, self.resize_start_size.width() - delta.x() )
+            new_height = max( 80, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_left":
+            new_width = max( 100, self.resize_start_size.width() - delta.x() )
+            new_height = max( 80, self.resize_start_size.height() - delta.y() )
+
+        self.setSize( new_width, new_height )
+    
+    def adjustKeyDimensions( self ):
+        if self.key_type == "NUM":
+            self.key_width = max( 15, self._width // 3 - 10 )
+            self.key_height = max( 15, self._height // 4 - 8 )
+
+        else:
+            self.key_width = max( 12, self._width // 10 - 6 )
+            self.key_height = max( 15, self._height // 5 - 8 )
+
+    def getWidth( self ):
+        return self._width
+    
+    def getHeight( self ):
+        return self._height
+
+    def getCornerAt( self, pos ):
         handle_size = 12
         half_size = handle_size // 2
         
         corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
         }
         
         for corner_name, corner_pos in corners.items():
-            corner_rect = QRect(
-                corner_pos.x() - half_size,
-                corner_pos.y() - half_size,
-                handle_size,
-                handle_size
-            )
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
             
-            if corner_rect.contains(pos):
+            if corner_rect.contains( pos ):
                 return corner_name
         
         return None
+
+    def getPropertiesDict( self ):
+        return {
+            'type': 'Keys',
+            'name': getattr( self, 'custom_name', 'Keys_0' ),
+            'stack_order': getattr( self, 'stack_order', 0 ),
+            'position': ( self.x(), self.y() ),
+            'width': self._width,
+            'height': self._height,
+            'key_type': self.key_type,
+            'is_3d': self.is_3d,
+            'font_size': self.font_size,
+            'key_color_top': self.key_color_top.name(),
+            'key_color_bottom': self.key_color_bottom.name(),
+            'text_color': self.text_color.name(),
+            'border_color': self.border_color.name(),
+            'active': getattr( self, 'active', True ),
+            'visible': getattr( self, 'visible', True ),
+            'static': getattr( self, 'static', False )
+        }
+
+    def setSize( self, width, height ):
+        self._width = max( 100, width )
+        self._height = max( 80, height )
+        
+        self.adjustKeyDimensions()
+        
+        self.setFixedSize( self._width, self._height )
+        self.update()
+
+    def set_key_type( self, key_type ):
+        self.key_type = key_type
+        self.adjustKeyDimensions()
+        self.update()
     
-    def mousePressEvent(self, event):
+    def set3d( self, is_3d ):
+        self.is_3d = is_3d
+        self.update()
+    
+    def setFontSize( self, size ):
+        self.font_size = max( 6, min( 30, size ) )
+        self.update()
+    
+    def setKeyColors( self, top_color, bottom_color ):
+        self.key_color_top = top_color
+        self.key_color_bottom = bottom_color
+        self.update()
+    
+    def setTextColor( self, color ):
+        self.text_color = color
+        self.update()
+    
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
+    
+    def setVisibleKeys( self, visible ):
+        self.visible = visible
+        self.setVisible( visible )
+        self.update()
+
+    def updatePropertiesSize( self ):
+        main_window = self.findMainWindow()
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and  main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'width_spin_keys' ):
+                main_window.width_spin_keys.blockSignals( True )
+                main_window.width_spin_keys.setValue( self._width )
+                main_window.width_spin_keys.blockSignals( False )
+                
+            if hasattr( main_window, 'height_spin_keys' ):
+                main_window.height_spin_keys.blockSignals( True )
+                main_window.height_spin_keys.setValue( self._height )
+                main_window.height_spin_keys.blockSignals( False )
+    
+    def updatePropertiesPosition( self ):
+        main_window = self.findMainWindow()
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'pos_x_spin_keys' ):
+                main_window.pos_x_spin_keys.blockSignals( True )
+                main_window.pos_x_spin_keys.setValue( self.x() )
+                main_window.pos_x_spin_keys.blockSignals( False )
+                
+            if hasattr( main_window, 'pos_y_spin_keys' ):
+                main_window.pos_y_spin_keys.blockSignals( True )
+                main_window.pos_y_spin_keys.setValue( self.y() )
+                main_window.pos_y_spin_keys.blockSignals( False )
+    
+    def updateAllProperties( self ):
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
+
+        main_window = self.findMainWindow()
+        if not main_window:
+            return
+
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'active_checkbox_keys' ):
+                main_window.active_checkbox_keys.blockSignals( True )
+                main_window.active_checkbox_keys.setChecked( self.active )
+                main_window.active_checkbox_keys.blockSignals( False )
+                
+            if hasattr( main_window, 'visible_checkbox_keys' ):
+                main_window.visible_checkbox_keys.blockSignals( True )
+                main_window.visible_checkbox_keys.setChecked( self.visible )
+                main_window.visible_checkbox_keys.blockSignals( False )
+                
+            if hasattr( main_window, 'static_checkbox_keys' ):
+                main_window.static_checkbox_keys.blockSignals( True )
+                main_window.static_checkbox_keys.setChecked( self.static )
+                main_window.static_checkbox_keys.blockSignals( False )
+            
+            if hasattr( main_window, 'name_edit_keys' ):
+                main_window.name_edit_keys.blockSignals( True )
+                main_window.name_edit_keys.setText( self.custom_name )
+                main_window.name_edit_keys.blockSignals( False )
+            
+            if hasattr( main_window, 'stack_order_spin_keys' ):
+                main_window.stack_order_spin_keys.blockSignals( True )
+
+                if main_window.current_shape in main_window.all_shapes:
+                    index = main_window.all_shapes.index( main_window.current_shape ) + 1
+                    main_window.stack_order_spin_keys.setValue( index )
+
+                main_window.stack_order_spin_keys.blockSignals( False )
+            
+            if hasattr( main_window, 'type_combo_keys' ):
+                main_window.type_combo_keys.blockSignals( True )
+                main_window.type_combo_keys.setCurrentText( self.key_type )
+                main_window.type_combo_keys.blockSignals( False )
+            
+            if hasattr( main_window, '_3d_checkbox_keys' ):
+                main_window._3d_checkbox_keys.blockSignals( True )
+                main_window._3d_checkbox_keys.setChecked( self.is_3d )
+                main_window._3d_checkbox_keys.blockSignals( False )
+            
+            if hasattr( main_window, 'color_top_rect_keys' ):
+                main_window.color_top_rect_keys.setStyleSheet( f"background-color: { self.key_color_top.name() }; border: 1px solid #ccc;")
+            
+            if hasattr( main_window, 'color_bottom_rect_keys' ):
+                main_window.color_bottom_rect_keys.setStyleSheet( f"background-color: { self.key_color_bottom.name() }; border: 1px solid #ccc;" )
+
+            if hasattr( main_window, 'font_size_spin_keys' ):
+                main_window.font_size_spin_keys.blockSignals( True )
+                main_window.font_size_spin_keys.setValue( self.font_size )
+                main_window.font_size_spin_keys.blockSignals( False )
+        
+            if hasattr( main_window, 'start_color_rect_keys' ):
+                main_window.start_color_rect_keys.setStyleSheet( f"background-color: { self.key_color_top.name() }; border: 1px solid #ccc;" )
+
+            if hasattr( main_window, 'end_color_rect_keys' ):
+                main_window.end_color_rect_keys.setStyleSheet( f"background-color: { self.key_color_bottom.name() }; border: 1px solid #ccc;" )
+
+            if hasattr( main_window, 'font_color_rect_keys' ):
+                main_window.font_color_rect_keys.setStyleSheet( f"background-color: { self.text_color.name() }; border: 1px solid #ccc;" )
+
+    def updatePropertiesDict( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+            
+        if hasattr( main_window, 'all_keys_dicts' ):
+            if self.custom_name in main_window.all_keys_dicts:
+                main_window.all_keys_dicts[ self.custom_name ] = self.getPropertiesDict()
+
+    def findMainWindow( self ):
+        parent = self.parent()
+
+        while parent:
+            if isinstance( parent, QMainWindow ):
+                return parent
+            parent = parent.parent()
+
+        return None
+
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
 
-            # Proveri da li je kliknut resize handle
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
-                # Počni resize
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+
             else:
-                # Proveri da li je klik na taster
-                clicked_key = self._get_key_at_position(mouse_pos)
-                if clicked_key:
-                    print(f"Key pressed: {clicked_key}")
-                else:
-                    # Počni dragovanje
-                    self.dragging = True
-                    self.drag_start_pos = mouse_pos
-                
-                self.clicked.emit(self)
-                # Ažuriraj properties kada se selektuje
-                self.update_all_properties()
+                self.dragging = True
+                self.drag_start_pos = mouse_pos
+                self.clicked.emit( self )
+                self.updateAllProperties()
 
         event.accept()
-    
-    def _get_key_at_position(self, pos):
-        """Pronalazi na koji taster je kliknuto"""
-        # Ovde bi se implementirala logika za detekciju tastera
-        # Za sada vraća None jer je kompleksno implementirati
-        return None
-    
-    def mouseMoveEvent(self, event):
-        mouse_pos = event.pos()
-        
-        # Proveri da li je miš preko resize handle-a
-        corner = self.getCornerAt(mouse_pos)
-        if corner:
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
-        
-        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
-            self.updatePropertiesSize()
-            self.updatePropertiesPosition()
-        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
-            delta = mouse_pos - self.drag_start_pos
-            
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-            super().move(new_x, new_y)
-            
-            self.updatePropertiesPosition()
-        
-        event.accept()
-    
-    def mouseReleaseEvent(self, event):
+
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
@@ -2024,445 +2292,51 @@ class KeysWidget(QWidget):
 
         event.accept()
     
-    def handleResize(self, global_pos):
-        """Menja veličinu widget-a"""
-        if not self.resize_corner:
-            return
-
-        delta = global_pos - self.resize_start_pos
-
-        new_width = self.resize_start_size.width()
-        new_height = self.resize_start_size.height()
-
-        if self.resize_corner == "bottom_right":
-            new_width = max(100, self.resize_start_size.width() + delta.x())
-            new_height = max(80, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_right":
-            new_width = max(100, self.resize_start_size.width() + delta.x())
-            new_height = max(80, self.resize_start_size.height() - delta.y())
-        elif self.resize_corner == "bottom_left":
-            new_width = max(100, self.resize_start_size.width() - delta.x())
-            new_height = max(80, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_left":
-            new_width = max(100, self.resize_start_size.width() - delta.x())
-            new_height = max(80, self.resize_start_size.height() - delta.y())
-
-        self.setSize(new_width, new_height)
-    
-    def _draw_3d_effect(self, painter, x, y, width, height):
-        """Crtanje 3D efekta za taster"""
-        # Svetli ivice (gornja i leva)
-        painter.setPen(QPen(QColor(255, 255, 255), 2))
-        painter.drawLine(x, y, x + width, y)  # Gornja ivica
-        painter.drawLine(x, y, x, y + height)  # Leva ivica
+    def mouseMoveEvent( self, event ):
+        mouse_pos = event.pos()
         
-        # Tamne ivice (donja i desna)
-        painter.setPen(QPen(QColor(0, 0, 0), 2))
-        painter.drawLine(x, y + height, x + width, y + height)  # Donja ivica
-        painter.drawLine(x + width, y, x + width, y + height)  # Desna ivica
-    
-    def paintEvent(self, event):
-            painter = QPainter(self)
-            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        corner = self.getCornerAt( mouse_pos )
+        if corner:
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
 
-            # Postavi boju teksta
-            painter.setPen(self.text_color)
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
 
-            # Font za brojeve/slova - koristi postavljeni font_size
-            font = QFont("Arial", self.font_size, QFont.Weight.Bold)
-            painter.setFont(font)
-
-            # Margin za tastaturu
-            margin_x = 10
-            margin_y = 10
-
-            current_x = margin_x
-            current_y = margin_y
-
-            if self.key_type == "NUM":
-                # Numerička tastatura (3x3 + donji red sa 0 i .)
-                number = 1
-                for i in range(3):
-                    for j in range(3):
-                        # Kreiraj gradijent
-                        gradient = QLinearGradient(current_x, current_y, 
-                                                  current_x, current_y + self.key_height)
-                        gradient.setColorAt(0, self.key_color_top)
-                        gradient.setColorAt(1, self.key_color_bottom)
-
-                        painter.setBrush(gradient)
-                        painter.setPen(QPen(self.border_color, 1))
-                        painter.drawRoundedRect(current_x, current_y, 
-                                              self.key_width, self.key_height, 5, 5)
-
-                        # 3D efekat
-                        if self.is_3d:
-                            self._draw_3d_effect(painter, current_x, current_y, 
-                                               self.key_width, self.key_height)
-
-                        # Tekst (broj)
-                        text = str(number)
-                        text_rect = painter.boundingRect(current_x, current_y, 
-                                                        self.key_width, self.key_height, 
-                                                        Qt.AlignmentFlag.AlignCenter, text)
-                        painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, text)
-
-                        current_x += self.key_width + 4
-                        number += 1
-
-                    current_x = margin_x
-                    current_y += self.key_height + 4
-
-                # Četvrti red za NUM tastaturu (0 i .)
-                # Taster 0 (zauzima širinu kao 2 obična tastera)
-                key_width_0 = self.key_width * 2 + 4  # 2 tastera + spacing
-
-                gradient = QLinearGradient(current_x, current_y, 
-                                          current_x, current_y + self.key_height)
-                gradient.setColorAt(0, self.key_color_top)
-                gradient.setColorAt(1, self.key_color_bottom)
-
-                painter.setBrush(gradient)
-                painter.setPen(QPen(self.border_color, 1))
-                painter.drawRoundedRect(current_x, current_y, 
-                                      key_width_0, self.key_height, 5, 5)
-
-                if self.is_3d:
-                    self._draw_3d_effect(painter, current_x, current_y, 
-                                       key_width_0, self.key_height)
-
-                text = "0"
-                text_rect = painter.boundingRect(current_x, current_y, 
-                                                key_width_0, self.key_height, 
-                                                Qt.AlignmentFlag.AlignCenter, text)
-                painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, text)
-
-                # Taster . (tacka) - pomakni za širinu tastera 0 + spacing
-                current_x += key_width_0 + 4
-
-                gradient = QLinearGradient(current_x, current_y, 
-                                          current_x, current_y + self.key_height)
-                gradient.setColorAt(0, self.key_color_top)
-                gradient.setColorAt(1, self.key_color_bottom)
-
-                painter.setBrush(gradient)
-                painter.setPen(QPen(self.border_color, 1))
-                painter.drawRoundedRect(current_x, current_y, 
-                                      self.key_width, self.key_height, 5, 5)
-
-                if self.is_3d:
-                    self._draw_3d_effect(painter, current_x, current_y, 
-                                       self.key_width, self.key_height)
-
-                text = "."
-                text_rect = painter.boundingRect(current_x, current_y, 
-                                                self.key_width, self.key_height, 
-                                                Qt.AlignmentFlag.AlignCenter, text)
-                painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, text)
-
-            elif self.key_type == "QUERTZ":
-                # QUERTZ tastatura - ostaje isto kao prethodno
-                # Prvi red (10 tastera)
-                keys_row_1 = "QWERTZUIOP"
-                for key in keys_row_1:
-                    gradient = QLinearGradient(current_x, current_y, 
-                                              current_x, current_y + self.key_height)
-                    gradient.setColorAt(0, self.key_color_top)
-                    gradient.setColorAt(1, self.key_color_bottom)
-
-                    painter.setBrush(gradient)
-                    painter.setPen(QPen(self.border_color, 1))
-                    painter.drawRoundedRect(current_x, current_y, 
-                                          self.key_width, self.key_height, 5, 5)
-
-                    if self.is_3d:
-                        self._draw_3d_effect(painter, current_x, current_y, 
-                                           self.key_width, self.key_height)
-
-                    text_rect = painter.boundingRect(current_x, current_y, 
-                                                    self.key_width, self.key_height, 
-                                                    Qt.AlignmentFlag.AlignCenter, key)
-                    painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, key)
-
-                    current_x += self.key_width + 4
-
-                # Drugi red (9 tastera, pomeren za pola tastera)
-                current_x = margin_x + self.key_width // 2
-                current_y += self.key_height + 4
-                keys_row_2 = "ASDFGHJKL"
-                for key in keys_row_2:
-                    gradient = QLinearGradient(current_x, current_y, 
-                                              current_x, current_y + self.key_height)
-                    gradient.setColorAt(0, self.key_color_top)
-                    gradient.setColorAt(1, self.key_color_bottom)
-
-                    painter.setBrush(gradient)
-                    painter.setPen(QPen(self.border_color, 1))
-                    painter.drawRoundedRect(current_x, current_y, 
-                                          self.key_width, self.key_height, 5, 5)
-
-                    if self.is_3d:
-                        self._draw_3d_effect(painter, current_x, current_y, 
-                                           self.key_width, self.key_height)
-
-                    text_rect = painter.boundingRect(current_x, current_y, 
-                                                    self.key_width, self.key_height, 
-                                                    Qt.AlignmentFlag.AlignCenter, key)
-                    painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, key)
-
-                    current_x += self.key_width + 4
-
-                # Treći red (posebni tasteri)
-                current_x = margin_x
-                current_y += self.key_height + 4
-                keys_row_3 = ["Ent", "Y", "X", "C", "V", "B", "N", "M", "Del"]
-
-                for i, key in enumerate(keys_row_3):
-                    if key in ["Ent", "Del"]:
-                        key_width = int(self.key_width * 1.5)
-                    else:
-                        key_width = self.key_width
-
-                    gradient = QLinearGradient(current_x, current_y, 
-                                              current_x, current_y + self.key_height)
-                    gradient.setColorAt(0, self.key_color_top)
-                    gradient.setColorAt(1, self.key_color_bottom)
-
-                    painter.setBrush(gradient)
-                    painter.setPen(QPen(self.border_color, 1))
-                    painter.drawRoundedRect(current_x, current_y, 
-                                          key_width, self.key_height, 5, 5)
-
-                    if self.is_3d:
-                        self._draw_3d_effect(painter, current_x, current_y, 
-                                           key_width, self.key_height)
-
-                    # Manji font za duge tastere
-                    if key in ["Ent", "Del"]:
-                        small_font = QFont("Arial", max(6, self.font_size - 2), QFont.Weight.Bold)
-                        painter.setFont(small_font)
-
-                    text_rect = painter.boundingRect(current_x, current_y, 
-                                                    key_width, self.key_height, 
-                                                    Qt.AlignmentFlag.AlignCenter, key)
-                    painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, key)
-
-                    # Vrati font za sledeći taster
-                    painter.setFont(font)
-
-                    current_x += key_width + 4
-
-                # Space bar
-                current_x = margin_x
-                current_y += self.key_height + 4
-                space_width = self._width - 2 * margin_x
-
-                gradient = QLinearGradient(current_x, current_y, 
-                                          current_x, current_y + self.key_height)
-                gradient.setColorAt(0, self.key_color_top)
-                gradient.setColorAt(1, self.key_color_bottom)
-
-                painter.setBrush(gradient)
-                painter.setPen(QPen(self.border_color, 1))
-                painter.drawRoundedRect(current_x, current_y, 
-                                      space_width, self.key_height, 5, 5)
-
-                if self.is_3d:
-                    self._draw_3d_effect(painter, current_x, current_y, 
-                                       space_width, self.key_height)
-
-                # Veći font za SPACE
-                space_font = QFont("Arial", max(10, self.font_size), QFont.Weight.Bold)
-                painter.setFont(space_font)
-
-                text_rect = painter.boundingRect(current_x, current_y, 
-                                                space_width, self.key_height, 
-                                                Qt.AlignmentFlag.AlignCenter, "SPACE")
-                painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, "SPACE")
-
-            # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-            if self.selected:
-                self.drawSelectionBorder(painter)
-                self.drawSelectionHandles(painter)
-
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
-        parent = self.parent()
-        while parent:
-            if isinstance(parent, QMainWindow):
-                return parent
-            parent = parent.parent()
-        return None
-    
-    def updatePropertiesSize(self):
-        """Ažuriraj veličinu u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
+        else:
+            self.setCursor( Qt.CursorShape.ArrowCursor )
         
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
+        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
+            self.handleResize( event.globalPosition().toPoint() )
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
+
+        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            delta = mouse_pos - self.drag_start_pos
             
-            if hasattr(main_window, 'width_spin_keys'):
-                main_window.width_spin_keys.blockSignals(True)
-                main_window.width_spin_keys.setValue(self._width)
-                main_window.width_spin_keys.blockSignals(False)
-                
-            if hasattr(main_window, 'height_spin_keys'):
-                main_window.height_spin_keys.blockSignals(True)
-                main_window.height_spin_keys.setValue(self._height)
-                main_window.height_spin_keys.blockSignals(False)
-    
-    def updatePropertiesPosition(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
+            new_x = self.x() + delta.x()
+            new_y = self.y() + delta.y()
+
+            super().move( new_x, new_y )
+            
+            self.updatePropertiesPosition()
         
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            if hasattr(main_window, 'pos_x_spin_keys'):
-                main_window.pos_x_spin_keys.blockSignals(True)
-                main_window.pos_x_spin_keys.setValue(self.x())
-                main_window.pos_x_spin_keys.blockSignals(False)
-                
-            if hasattr(main_window, 'pos_y_spin_keys'):
-                main_window.pos_y_spin_keys.blockSignals(True)
-                main_window.pos_y_spin_keys.setValue(self.y())
-                main_window.pos_y_spin_keys.blockSignals(False)
+        event.accept()
+
+class ClockWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def update_all_properties(self):
-        """Ažurira sve properties u properties baru"""
-        self.updatePropertiesSize()
-        self.updatePropertiesPosition()
+    def __init__( self, diameter, parent = None ):
+        super().__init__( parent )
 
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj checkbox-ove
-            if hasattr(main_window, 'active_checkbox_keys'):
-                main_window.active_checkbox_keys.blockSignals(True)
-                main_window.active_checkbox_keys.setChecked(self.active)
-                main_window.active_checkbox_keys.blockSignals(False)
-                
-            if hasattr(main_window, 'visible_checkbox_keys'):
-                main_window.visible_checkbox_keys.blockSignals(True)
-                main_window.visible_checkbox_keys.setChecked(self.visible)
-                main_window.visible_checkbox_keys.blockSignals(False)
-                
-            if hasattr(main_window, 'static_checkbox_keys'):
-                main_window.static_checkbox_keys.blockSignals(True)
-                main_window.static_checkbox_keys.setChecked(self.static)
-                main_window.static_checkbox_keys.blockSignals(False)
-            
-            # Ažuriraj ime
-            if hasattr(main_window, 'name_edit_keys'):
-                main_window.name_edit_keys.blockSignals(True)
-                main_window.name_edit_keys.setText(self.custom_name)
-                main_window.name_edit_keys.blockSignals(False)
-            
-            # Ažuriraj stack order
-            if hasattr(main_window, 'stack_order_spin_keys'):
-                main_window.stack_order_spin_keys.blockSignals(True)
-                if main_window.current_shape in main_window.all_shapes:
-                    index = main_window.all_shapes.index(main_window.current_shape) + 1
-                    main_window.stack_order_spin_keys.setValue(index)
-                main_window.stack_order_spin_keys.blockSignals(False)
-            
-            # Ažuriraj tip tastature
-            if hasattr(main_window, 'type_combo_keys'):
-                main_window.type_combo_keys.blockSignals(True)
-                main_window.type_combo_keys.setCurrentText(self.key_type)
-                main_window.type_combo_keys.blockSignals(False)
-            
-            # Ažuriraj 3D checkbox
-            if hasattr(main_window, '_3d_checkbox_keys'):
-                main_window._3d_checkbox_keys.blockSignals(True)
-                main_window._3d_checkbox_keys.setChecked(self.is_3d)
-                main_window._3d_checkbox_keys.blockSignals(False)
-            
-            # Ažuriraj boje
-            if hasattr(main_window, 'color_top_rect_keys'):
-                main_window.color_top_rect_keys.setStyleSheet(
-                    f"background-color: {self.key_color_top.name()}; border: 1px solid #ccc;"
-                )
-            
-            if hasattr(main_window, 'color_bottom_rect_keys'):
-                main_window.color_bottom_rect_keys.setStyleSheet(
-                    f"background-color: {self.key_color_bottom.name()}; border: 1px solid #ccc;"
-                )
-            if hasattr(main_window, 'font_size_spin_keys'):
-                main_window.font_size_spin_keys.blockSignals(True)
-                main_window.font_size_spin_keys.setValue(self.font_size)
-                main_window.font_size_spin_keys.blockSignals(False)
-        
-            # Ažuriraj boje sa novim imenima
-            if hasattr(main_window, 'start_color_rect_keys'):
-                main_window.start_color_rect_keys.setStyleSheet(
-                    f"background-color: {self.key_color_top.name()}; border: 1px solid #ccc;"
-                )
-
-            if hasattr(main_window, 'end_color_rect_keys'):
-                main_window.end_color_rect_keys.setStyleSheet(
-                    f"background-color: {self.key_color_bottom.name()}; border: 1px solid #ccc;"
-                )
-
-            if hasattr(main_window, 'font_color_rect_keys'):
-                main_window.font_color_rect_keys.setStyleSheet(
-                    f"background-color: {self.text_color.name()}; border: 1px solid #ccc;"
-                )
-    
-    def getPropertiesDict(self):
-        """Vraća rečnik sa svim svojstvima tastature"""
-        return {
-            'type': 'Keys',
-            'name': getattr(self, 'custom_name', 'Keys_0'),
-            'stack_order': getattr(self, 'stack_order', 0),
-            'position': (self.x(), self.y()),
-            'width': self._width,
-            'height': self._height,
-            'key_type': self.key_type,
-            'is_3d': self.is_3d,
-            'font_size': self.font_size,  # DODAJ OVO
-            'key_color_top': self.key_color_top.name(),
-            'key_color_bottom': self.key_color_bottom.name(),
-            'text_color': self.text_color.name(),
-            'border_color': self.border_color.name(),
-            'active': getattr(self, 'active', True),
-            'visible': getattr(self, 'visible', True),
-            'static': getattr(self, 'static', False)
-        }
-    
-    def updatePropertiesDict(self):
-        """Ažurira rečnik svojstava"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-            
-        if hasattr(main_window, 'all_keys_dicts'):
-            if self.custom_name in main_window.all_keys_dicts:
-                main_window.all_keys_dicts[self.custom_name] = self.getPropertiesDict()
-
-class ClockWidget(QWidget):
-    clicked = pyqtSignal(object)
-    
-    def __init__(self, diameter, parent=None):
-        super().__init__(parent)
         self.diameter = diameter
-        self.setFixedSize(diameter, diameter)
+        self.setFixedSize( diameter, diameter )
         
-        # Svojstva za clock
-        self.outer_color = QColor(0, 32, 64)
-        self.inner_color = QColor(117, 117, 115)
-        self.needle_color = QColor(0, 0, 0)
-        self.background_color = QColor(0, 32, 64)
+        self.outer_color = QColor( 0, 32, 64 )
+        self.inner_color = QColor( 117, 117, 115 )
+        self.needle_color = QColor( 0, 0, 0 )
+        self.background_color = QColor( 0, 32, 64 )
         
-        # Novi atributi
         self.active = True
         self.visible = True
         self.static = False
@@ -2473,11 +2347,9 @@ class ClockWidget(QWidget):
         self.minutes = 0
         self.seconds = 0
         
-        # Selekcija
         self.selected = False
-        self.selection_color = QColor(255, 0, 0)
+        self.selection_color = QColor( 255, 0, 0 )
         
-        # Resize i drag varijable - DODAJ OVO!
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
@@ -2485,175 +2357,171 @@ class ClockWidget(QWidget):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        
-        # Resize handle
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
 
-        self.setMouseTracking(True)
+        self.setMouseTracking( True )
         self.dragging = False
         self.resizing = False
         self.drag_start_position = QPoint()
         self.original_geometry = QRect()
 
-    def move(self, x, y):
-        super().move(x, y)
-        # Ažuriraj properties bar ako postoji
-        self.updatePropertiesPosition()
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
-    def updatePropertiesPosition(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self and
-            hasattr(main_window, 'pos_x_spin_clock') and 
-            hasattr(main_window, 'pos_y_spin_clock')):
-            
-            main_window.pos_x_spin_clock.blockSignals(True)
-            main_window.pos_x_spin_clock.setValue(self.x())
-            main_window.pos_x_spin_clock.blockSignals(False)
-            
-            main_window.pos_y_spin_clock.blockSignals(True)
-            main_window.pos_y_spin_clock.setValue(self.y())
-            main_window.pos_y_spin_clock.blockSignals(False)
+        r = self.diameter
+        center_x = r // 2
+        center_y = r // 2
 
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
-        parent = self.parent()
-        while parent:
-            if isinstance(parent, QMainWindow):
-                return parent
-            parent = parent.parent()
-        return None
+        base_line_width = max( 1, self.getScaledValue( 3 ) )
+        big_mark_width = max( 1, self.getScaledValue( 15 ) )
+        needle1_width = max( 1, self.getScaledValue( 6 ) )
+        needle2_width = max( 1, self.getScaledValue( 8 ) )
+        needle3_width = max( 1, self.getScaledValue( 12 ) )
 
-    def get_scaled_value(self, original_value):
-        """Vraća vrednost skaliranu u odnosu na originalni dijametar od 720"""
-        scale_factor = self.diameter / 720.0
-        return int(original_value * scale_factor)
+        radius = self.getScaledValue( 360 )
+        point_radius = self.getScaledValue( 290 )
 
-    def update_resize_handle(self):
-        handle_size = 8
-        self.resize_handle.setGeometry(
-            self.width() - handle_size, 
-            self.height() - handle_size, 
-            handle_size, 
-            handle_size
-        )
+        needle1_length = self.getScaledValue( 290 )
+        needle2_length = self.getScaledValue( 220 )
+        needle3_length = self.getScaledValue( 150 )
 
-    def setSelected(self, selected):
-        self.selected = selected
-        self.update() 
+        pen = QPen( self.background_color )
+        pen.setWidth( base_line_width )
+        painter.setPen( pen )
+        painter.setBrush( self.background_color )
+        painter.drawEllipse( QPointF( center_x, center_y ), radius, radius )
 
-    def drawSelectionHandles(self, painter):
-        """Crtanje resize handle-ova na uglovima kada je selektovano"""
+        if self.use_3d:
+            pen = QPen( self.inner_color )
+            pen.setWidth( base_line_width )
+            painter.setPen( pen )
+            painter.drawArc( center_x - radius, center_y - radius, radius * 2, radius * 2, 16 * 35, -16 * 175 )
+
+            pen = QPen( QColor( 0, 0, 0 ) )
+            pen.setWidth( base_line_width )
+            painter.setPen( pen )
+            painter.drawArc( center_x - radius, center_y - radius, radius * 2, radius * 2, 35 * 16, 16 * 185 )
+
+        painter.translate(center_x, center_y)
+
+        seconds_angle = ( self.seconds * 6 ) 
+        minutes_angle = ( self.minutes * 6 ) + ( self.seconds * 0.1 )  
+        hours_angle = ( ( self.hours % 12 ) * 30 ) + ( self.minutes * 0.5 ) 
+
+        big_pen = QPen( self.inner_color )
+        big_pen.setWidth( big_mark_width )
+        painter.setPen( big_pen )
+        painter.rotate(-180)
+
+        for i in range( 12 ):  
+            painter.drawPoint( 0, -point_radius )
+            painter.rotate( 30 )
+
+        painter.rotate(-360 + 180)
+
+        painter.rotate( hours_angle )
+        needle_pen = QPen( self.needle_color )
+        needle_pen.setWidth( needle3_width )
+        painter.setPen( needle_pen )
+        painter.drawLine( 0, 0, 0, -needle3_length )
+        painter.rotate( -hours_angle )
+
+        painter.rotate( minutes_angle )
+        needle_pen.setWidth( needle2_width )
+        painter.setPen( needle_pen )
+        painter.drawLine( 0, 0, 0, -needle2_length )
+        painter.rotate( -minutes_angle )
+
+        painter.rotate( seconds_angle )
+        needle_pen.setWidth( needle1_width )
+        painter.setPen( needle_pen )
+        painter.drawLine(0, 0, 0, -needle1_length)
+
+        if self.selected:
+            painter.resetTransform()
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
+
+    def drawSelectionHandles( self, painter ):
         if not self.selected:
             return
             
         handle_size = 8
         half_size = handle_size // 2
 
-        # Zeleni handle-ovi
-        painter.setBrush(QColor(0, 255, 0))
-        painter.setPen(QPen(QColor(0, 80, 200), 1))
+        painter.setBrush( QColor( 0, 255, 0 ) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-        # 4 ugla
-        corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-            QPoint(4, self.height()-4),  # donji levi
-            QPoint(self.width()-4, self.height()-4)  # donji desni
-        ]
+        corners = [ QPoint(4, 4), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
-                              handle_size, handle_size)
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-            # Mali beli centar
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))
-            painter.setPen(QPen(QColor(0, 80, 200), 1))
-
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira kada je selektovano"""
+    def drawSelectionBorder( self, painter ):
         if not self.selected:
             return
             
         margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
 
-    def setDiameter(self, diameter):
-        self.diameter = diameter
-        self.setFixedSize(diameter, diameter)
+    def handleResize( self, global_pos ):
+        if not self.resize_corner:
+            return
+
+        delta = global_pos - self.resize_start_pos
+
+        new_width = self.resize_start_size.width()
+        new_height = self.resize_start_size.height()
+
+        if self.resize_corner == "bottom_right":
+            new_width = max( 50, self.resize_start_size.width() + delta.x() )
+            new_height = max( 50, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_right":
+            new_width = max( 50, self.resize_start_size.width() + delta.x() )
+            new_height = max( 50, self.resize_start_size.height() - delta.y() )
+
+        elif self.resize_corner == "bottom_left":
+            new_width = max( 50, self.resize_start_size.width() - delta.x() )
+            new_height = max( 50, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_left":
+            new_width = max( 50, self.resize_start_size.width() - delta.x() )
+            new_height = max( 50, self.resize_start_size.height() - delta.y() )
+
+        size = min( new_width, new_height )
+        
+        self.setFixedSize( size, size )
+        self.diameter = size
         self.update()
 
-    def set_outer_color(self, color):
-        self.outer_color = color
-        self.update()
+        self.updatePropertiesSize()
 
-    def set_inner_color(self, color):
-        self.inner_color = color
-        self.update()
+    def move( self, x, y ):
+        super().move( x, y )
+        self.updatePropertiesPosition()
 
-    def set_needle_color(self, color):
-        self.needle_color = color
-        self.update()
+    def getScaledValue( self, original_value ):
+        scale_factor = self.diameter / 720.0
+        return int( original_value * scale_factor )
 
-    def set_background_color(self, color):
-        self.background_color = color
-        self.update()
-
-    def setActive(self, active):
-        self.active = active
-        self.update()
-
-    def setVisibleClock(self, visible):
-        self.visible = visible
-        self.setVisible(visible)
-
-    def setStatic(self, static):
-        self.static = static
-        self.update()
-
-    def setCustomName(self, name):
-        self.custom_name = name
-
-    def setStackOrder(self, order):
-        self.stack_order = order
-
-    def set_use_3d(self, use_3d):
-        self.use_3d = use_3d
-        self.update()
-
-    def set_hours(self, hours):
-        self.hours = hours % 12  # Obezbedi da bude u opsegu 0-11
-        self.update()
-
-    def set_minutes(self, minutes):
-        self.minutes = minutes % 60  # Obezbedi da bude u opsegu 0-59
-        self.update()
-
-    def set_seconds(self, seconds):
-        self.seconds = seconds % 60  # Obezbedi da bude u opsegu 0-59
-        self.update()
-
-    def getPropertiesDict(self):
-        """Vraća rečnik sa svim properties-ima clock-a"""
+    def getPropertiesDict( self ):
         return {
             'type': 'Clock',
             'active': self.active,
@@ -2674,300 +2542,212 @@ class ClockWidget(QWidget):
             'needle_color': self.needle_color.name()
         }
 
-    def updatePropertiesDict(self):
-        """Ažurira properties rečnik"""
+    def getCornerAt( self, pos ):
+        handle_size = 12
+        half_size = handle_size // 2
+        
+        corners = {
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
+        }
+        
+        for corner_name, corner_pos in corners.items():
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
+            
+            if corner_rect.contains( pos ):
+                return corner_name
+        
+        return None
+
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update() 
+
+    def setDiameter( self, diameter ):
+        self.diameter = diameter
+        self.setFixedSize( diameter, diameter )
+        self.update()
+
+    def setOuterColor( self, color ):
+        self.outer_color = color
+        self.update()
+
+    def setInnerColor( self, color ):
+        self.inner_color = color
+        self.update()
+
+    def setNeedleColor( self, color ):
+        self.needle_color = color
+        self.update()
+
+    def setBackgroundColor( self, color ):
+        self.background_color = color
+        self.update()
+
+    def setActive( self, active ):
+        self.active = active
+        self.update()
+
+    def setVisibleClock( self, visible ):
+        self.visible = visible
+        self.setVisible( visible )
+
+    def setStatic( self, static ):
+        self.static = static
+        self.update()
+
+    def setCustomName( self, name ):
+        self.custom_name = name
+
+    def setStackOrder( self, order ):
+        self.stack_order = order
+
+    def set3d( self, use_3d ):
+        self.use_3d = use_3d
+        self.update()
+
+    def setHours( self, hours ):
+        self.hours = hours % 12
+        self.update()
+
+    def setMinutes( self, minutes ):
+        self.minutes = minutes % 60
+        self.update()
+
+    def setSeconds( self, seconds ):
+        self.seconds = seconds % 60 
+        self.update()
+
+    def updatePropertiesPosition( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'pos_x_spin_clock' ) and hasattr( main_window, 'pos_y_spin_clock' ) ):
+            main_window.pos_x_spin_clock.blockSignals( True )
+            main_window.pos_x_spin_clock.setValue( self.x() )
+            main_window.pos_x_spin_clock.blockSignals( False )
+            
+            main_window.pos_y_spin_clock.blockSignals( True )
+            main_window.pos_y_spin_clock.setValue( self.y() )
+            main_window.pos_y_spin_clock.blockSignals( False )
+
+    def updateResizeHandle( self ):
+        handle_size = 8
+        self.resize_handle.setGeometry( self.width() - handle_size, self.height() - handle_size, handle_size, handle_size )
+
+    def updatePropertiesSize( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr(main_window, 'diameter_spin_clock' ) ):
+            main_window.diameter_spin_clock.blockSignals( True )
+            main_window.diameter_spin_clock.setValue( self.diameter )
+            main_window.diameter_spin_clock.blockSignals( False )
+
+    def updatePropertiesPosition( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'pos_x_spin_clock' ) and hasattr( main_window, 'pos_y_spin_clock' ) ):
+            main_window.pos_x_spin_clock.blockSignals( True )
+            main_window.pos_x_spin_clock.setValue( self.x() )
+            main_window.pos_x_spin_clock.blockSignals( False )
+            
+            main_window.pos_y_spin_clock.blockSignals( True )
+            main_window.pos_y_spin_clock.setValue( self.y() )
+            main_window.pos_y_spin_clock.blockSignals( False )
+
+    def updatePropertiesDict( self ):
         pass
 
-    def mousePressEvent(self, event):
+    def findMainWindow( self ):
+        parent = self.parent()
+
+        while parent:
+            if isinstance( parent, QMainWindow ):
+                return parent
+            parent = parent.parent()
+
+        return None
+
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
 
-            # Proveri da li je kliknut resize handle
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
-                # Počni resize
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
             else:
-                # Počni dragovanje ili selektuj
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                self.clicked.emit(self)
+                self.clicked.emit( self )
 
         event.accept()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent( self, event ):
         mouse_pos = event.pos()
         
-        # Proveri da li je miš preko resize handle-a
-        corner = self.getCornerAt(mouse_pos)
+        corner = self.getCornerAt( mouse_pos )
+
         if corner:
-            # Postavi odgovarajući kursor
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
+
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
+
         else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
+            self.setCursor( Qt.CursorShape.ArrowCursor )
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
+            self.handleResize( event.globalPosition().toPoint() )
+
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
             delta = mouse_pos - self.drag_start_pos
             
-            # Koristite dva argumenta (x, y) umesto QPoint
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-            super().move(new_x, new_y)
             
-            # Ažuriraj properties bar ako postoji
             self.updatePropertiesPosition()
-        
+            super().move( new_x, new_y )
         event.accept()
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
 
-            # Ažuriraj properties bar
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
 
         event.accept()
 
-    def getCornerAt(self, pos):
-        """Proverava da li je miš preko nekog od uglova za resize"""
-        handle_size = 12  # Veća zona za lakše hvatanje
-        half_size = handle_size // 2
-        
-        corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
-        }
-        
-        for corner_name, corner_pos in corners.items():
-            # Kreiraj pravougaonik oko ugla
-            corner_rect = QRect(
-                corner_pos.x() - half_size,
-                corner_pos.y() - half_size,
-                handle_size,
-                handle_size
-            )
-            
-            if corner_rect.contains(pos):
-                return corner_name
-        
-        return None
+class GaugeWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def handleResize(self, global_pos):
-        """Menja veličinu ClockWidget-a - slično CircleWidget"""
-        if not self.resize_corner:
-            return
+    def __init__( self, diameter, parent = None ):
+        super().__init__( parent )
 
-        # Računaj promenu u veličini
-        delta = global_pos - self.resize_start_pos
-
-        new_width = self.resize_start_size.width()
-        new_height = self.resize_start_size.height()
-
-        # Svi uglovi mogu da menjaju veličinu
-        if self.resize_corner == "bottom_right":
-            new_width = max(50, self.resize_start_size.width() + delta.x())
-            new_height = max(50, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_right":
-            new_width = max(50, self.resize_start_size.width() + delta.x())
-            new_height = max(50, self.resize_start_size.height() - delta.y())
-        elif self.resize_corner == "bottom_left":
-            new_width = max(50, self.resize_start_size.width() - delta.x())
-            new_height = max(50, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_left":
-            new_width = max(50, self.resize_start_size.width() - delta.x())
-            new_height = max(50, self.resize_start_size.height() - delta.y())
-
-        # Za clock, width i height moraju biti isti (krug je uvek kvadrat)
-        size = min(new_width, new_height)
-        
-        # Ažuriraj samo veličinu (bez promene pozicije)
-        self.setFixedSize(size, size)
-        self.diameter = size
-        self.update()
-
-        # Ažuriraj properties bar
-        self.updatePropertiesSize()
-        
-    def updatePropertiesSize(self):
-        """Ažuriraj veličinu u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self and
-            hasattr(main_window, 'diameter_spin_clock')):
-            
-            main_window.diameter_spin_clock.blockSignals(True)
-            main_window.diameter_spin_clock.setValue(self.diameter)
-            main_window.diameter_spin_clock.blockSignals(False)
-
-    def updatePropertiesPosition(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self and
-            hasattr(main_window, 'pos_x_spin_clock') and 
-            hasattr(main_window, 'pos_y_spin_clock')):
-            
-            main_window.pos_x_spin_clock.blockSignals(True)
-            main_window.pos_x_spin_clock.setValue(self.x())
-            main_window.pos_x_spin_clock.blockSignals(False)
-            
-            main_window.pos_y_spin_clock.blockSignals(True)
-            main_window.pos_y_spin_clock.setValue(self.y())
-            main_window.pos_y_spin_clock.blockSignals(False)
-
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
-        parent = self.parent()
-        while parent:
-            if isinstance(parent, QMainWindow):
-                return parent
-            parent = parent.parent()
-        return None
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        # ... postojeći kod za crtanje clock-a ...
-        
-        # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-        if self.selected:
-            painter.resetTransform()
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        r = self.diameter
-        center_x = r // 2
-        center_y = r // 2
-
-        # Širine linija skalirane prema veličini
-        base_line_width = max(1, self.get_scaled_value(3))
-        big_mark_width = max(1, self.get_scaled_value(15))
-        needle1_width = max(1, self.get_scaled_value(6))
-        needle2_width = max(1, self.get_scaled_value(8))
-        needle3_width = max(1, self.get_scaled_value(12))
-
-        # Dimenzije skalirane prema veličini
-        radius = self.get_scaled_value(360)
-        point_radius = self.get_scaled_value(290)
-
-        # Dužine kazaljki
-        needle1_length = self.get_scaled_value(290)
-        needle2_length = self.get_scaled_value(220)
-        needle3_length = self.get_scaled_value(150)
-
-        # --- Krug ---
-        pen = QPen(self.background_color)
-        pen.setWidth(base_line_width)
-        painter.setPen(pen)
-        painter.setBrush(self.background_color)
-        painter.drawEllipse(QPointF(center_x, center_y), radius, radius)
-
-        # --- 3D efekat ---
-        if self.use_3d:
-            pen = QPen(self.inner_color)
-            pen.setWidth(base_line_width)
-            painter.setPen(pen)
-            painter.drawArc(center_x - radius, center_y - radius, radius * 2, radius * 2, 16*35, -16*175)
-
-            pen = QPen(QColor(0, 0, 0))
-            pen.setWidth(base_line_width)
-            painter.setPen(pen)
-            painter.drawArc(center_x - radius, center_y - radius, radius * 2, radius * 2, 35*16, 16*185)
-
-
-
-        # --- Pomeraj koordinatni sistem u centar ---
-        painter.translate(center_x, center_y)
-
-        # --- Računanje ugla za kazaljke na osnovu vremena ---
-        # Qt: 0° = desno, 90° = dole, 180° = levo, 270° = gore
-        # Da bi 0° bio na vrhu, treba -180° (jer počinje sa 9 sati)
-
-        seconds_angle = (self.seconds * 6) 
-        minutes_angle = (self.minutes * 6) + (self.seconds * 0.1)  
-        hours_angle = ((self.hours % 12) * 30) + (self.minutes * 0.5) 
-
-        # --- Velike tačke (brojevi na satu) ---
-        big_pen = QPen(self.inner_color)
-        big_pen.setWidth(big_mark_width)
-        painter.setPen(big_pen)
-
-        # Crtaj tačke počevši od vrha (12 sati)
-        painter.rotate(-180)  # Rotiraj za -180 da bi prva tačka bila na vrhu
-        for i in range(12):  
-            painter.drawPoint(0, -point_radius)
-            painter.rotate(30)
-
-        # Vrati na početni položaj
-        painter.rotate(-360 + 180)
-
-        # --- Satna kazaljka (najkraća) ---
-        painter.rotate(hours_angle)
-        needle_pen = QPen(self.needle_color)
-        needle_pen.setWidth(needle3_width)
-        painter.setPen(needle_pen)
-        painter.drawLine(0, 0, 0, -needle3_length)
-        painter.rotate(-hours_angle)
-
-        # --- Minutna kazaljka (srednja) ---
-        painter.rotate(minutes_angle)
-        needle_pen.setWidth(needle2_width)
-        painter.setPen(needle_pen)
-        painter.drawLine(0, 0, 0, -needle2_length)
-        painter.rotate(-minutes_angle)
-
-        # --- Sekundna kazaljka (najduža) ---
-        painter.rotate(seconds_angle)
-        needle_pen.setWidth(needle1_width)
-        painter.setPen(needle_pen)
-        painter.drawLine(0, 0, 0, -needle1_length)
-
-        # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-        if self.selected:
-            painter.resetTransform()
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
-
-class GaugeWidget(QWidget):
-    clicked = pyqtSignal(object)
-    
-    def __init__(self, diameter, parent=None):
-        super().__init__(parent)
         self.diameter = diameter
-        self.setFixedSize(diameter, diameter)
+        self.setFixedSize( diameter, diameter )
         
-        # Svojstva za gauge
-        self.outer_color = QColor(0, 32, 64)
-        self.inner_color = QColor(0, 0, 0)
-        self.needle_color = QColor(0, 0, 0)
-        self.background_color = QColor(0, 32, 64)
+        self.outer_color = QColor( 0, 32, 64 )
+        self.inner_color = QColor( 0, 0, 0 )
+        self.needle_color = QColor( 0, 0, 0 )
+        self.background_color = QColor( 0, 32, 64 )
         
-        # Novi atributi za properties
         self.active = True
         self.visible = True
         self.static = False
@@ -2975,17 +2755,14 @@ class GaugeWidget(QWidget):
         self.stack_order = 1
         self.use_3d = True
         
-        # Atributi za vrednosti gauge-a
-        self.major_subdivision = 6  # Broj glavnih podeoka (default 6)
-        self.minor_subdivision = 4  # Broj sporednih podeoka između glavnih (default 4)
-        self.range_value = 100      # Maksimalna vrednost (default 100)
-        self.value = 50             # Trenutna vrednost (default 50)
+        self.major_subdivision = 6 
+        self.minor_subdivision = 4
+        self.range_value = 100 
+        self.value = 50
         
-        # Selekcija
         self.selected = False
-        self.selection_color = QColor(255, 0, 0)
+        self.selection_color = QColor( 255, 0, 0 )
         
-        # Resize i drag varijable - DODAJ OVO!
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
@@ -2993,82 +2770,178 @@ class GaugeWidget(QWidget):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
 
-    def get_scaled_value(self, original_value):
-        """Vraća vrednost skaliranu u odnosu na originalni dijametar od 500"""
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
+        
+        r = self.diameter
+        
+        base_line_width = max( 1, self.getScaledValue( 3 ) )
+        big_mark_width = max( 1, self.getScaledValue( 7 ) )
+        small_mark_width = max( 1, self.getScaledValue( 3 ) )
+        needle_width = max( 1, self.getScaledValue( 5 ) )
+        
+        pen = QPen( self.background_color )
+        pen.setWidth( base_line_width )
+        painter.setPen( pen )
+        painter.setBrush( self.background_color )
+        painter.drawEllipse( 0, 0, r, r )
+        
+        if self.use_3d:
+            pen = QPen( QColor( 255, 255, 255 ) )
+            pen.setWidth( base_line_width )
+            painter.setPen( pen )
+            painter.drawArc( 0, 0, r, r, 16 * 35, - 16 * 175 )
+
+            pen = QPen( QColor( 0, 0, 0 ) )
+            pen.setWidth( base_line_width )
+            painter.setPen( pen )
+            painter.drawArc( 0, 0, r, r, 35 * 16, 16 * 185 )
+        
+        painter.translate( r // 2, r // 2 )
+        
+        total_divisions = self.major_subdivision * ( self.minor_subdivision + 1 )
+        angle_per_division = 270.0 / total_divisions
+        
+        painter.rotate(-135)
+
+        big_mark_start = self.getScaledValue( - 210 )
+        big_mark_end = self.getScaledValue( - 190 )
+        
+        small_mark_start = self.getScaledValue( - 205 )
+        small_mark_end = self.getScaledValue( - 195 )
+        
+        needle_length = self.getScaledValue( - 210 )
+
+        for i in range( total_divisions + 1 ):
+            if i % ( self.minor_subdivision + 1 ) == 0:
+                big_pen = QPen( self.inner_color )
+                big_pen.setWidth( big_mark_width )
+                painter.setPen( big_pen )
+                painter.drawLine( 0, big_mark_start, 0, big_mark_end )
+
+            else:
+                small_pen = QPen( self.inner_color )
+                small_pen.setWidth( small_mark_width )
+                painter.setPen( small_pen )
+                painter.drawLine( 0, small_mark_start, 0, small_mark_end )
+            
+            if i < total_divisions:
+                painter.rotate( angle_per_division )
+
+        painter.rotate( - ( total_divisions * angle_per_division ) )
+
+        if self.range_value > 0:
+            needle_angle = ( 270 * self.value / self.range_value ) 
+        else:
+            needle_angle = - 135
+
+        painter.rotate( needle_angle )
+        needle_pen = QPen( self.needle_color )
+        needle_pen.setWidth( needle_width )
+        painter.setPen( needle_pen )
+        painter.drawLine( 0, 0, 0, needle_length )
+
+        if self.selected:
+            painter.resetTransform()
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
+
+    def drawSelectionHandles( self, painter ):
+        if not self.selected:
+            return
+            
+        handle_size = 8
+        half_size = handle_size // 2
+
+        painter.setBrush( QColor( 0, 255, 0 ) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
+
+        for corner in corners:
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+
+    def drawSelectionBorder( self, painter ):
+        if not self.selected:
+            return
+            
+        margin = 2
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
+
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
+
+    def handleResize( self, global_pos ):
+        if not self.resize_corner:
+            return
+
+        delta = global_pos - self.resize_start_pos
+
+        new_width = self.resize_start_size.width()
+        new_height = self.resize_start_size.height()
+
+        if self.resize_corner == "bottom_right":
+            new_width = max( 50, self.resize_start_size.width() + delta.x() )
+            new_height = max( 50, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_right":
+            new_width = max( 50, self.resize_start_size.width() + delta.x() )
+            new_height = max( 50, self.resize_start_size.height() - delta.y() )
+
+        elif self.resize_corner == "bottom_left":
+            new_width = max( 50, self.resize_start_size.width() - delta.x() )
+            new_height = max( 50, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_left":
+            new_width = max( 50, self.resize_start_size.width() - delta.x() )
+            new_height = max( 50, self.resize_start_size.height() - delta.y() )
+
+        size = min(new_width, new_height)
+        self.setFixedSize(size, size)
+        self.diameter = size
+
+        self.update()
+        self.updatePropertiesSize()
+
+    def getCornerAt( self, pos ):
+        handle_size = 12 
+        half_size = handle_size // 2
+        
+        corners = {
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
+        }
+        
+        for corner_name, corner_pos in corners.items():
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
+            
+            if corner_rect.contains( pos ):
+                return corner_name
+        
+        return None
+
+    def getScaledValue( self, original_value ):
         scale_factor = self.diameter / 500.0
-        return int(original_value * scale_factor)
+        return int( original_value * scale_factor )
 
-    def setSelected(self, selected):
-        self.selected = selected
-        self.update()
-
-    def setDiameter(self, diameter):
-        self.diameter = diameter
-        self.setFixedSize(diameter, diameter)
-        self.update()
-
-    def set_outer_color(self, color):
-        self.outer_color = color
-        self.update()
-
-    def set_inner_color(self, color):
-        self.inner_color = color
-        self.update()
-
-    def set_needle_color(self, color):
-        self.needle_color = color
-        self.update()
-
-    def set_background_color(self, color):
-        self.background_color = color
-        self.update()
-
-    # Novi setter metodi
-    def setActive(self, active):
-        self.active = active
-        self.update()
-
-    def setVisibleGauge(self, visible):
-        self.visible = visible
-        self.setVisible(visible)
-
-    def setStatic(self, static):
-        self.static = static
-        self.update()
-
-    def setCustomName(self, name):
-        self.custom_name = name
-
-    def setStackOrder(self, order):
-        self.stack_order = order
-
-    def set_use_3d(self, use_3d):
-        self.use_3d = use_3d
-        self.update()
-
-    def set_major_subdivision(self, count):
-        self.major_subdivision = max(1, count)  # Minimum 1
-        self.update()
-
-    def set_minor_subdivision(self, count):
-        self.minor_subdivision = max(0, count)  # Minimum 0
-        self.update()
-
-    def set_range_value(self, value):
-        self.range_value = max(1, value)  # Minimum 1
-        if self.value > self.range_value:
-            self.value = self.range_value
-        self.update()
-
-    def set_value(self, value):
-        self.value = max(0, min(value, self.range_value))  # Clamp između 0 i range_value
-        self.update()
-
-    def getPropertiesDict(self):
-        """Vraća rečnik sa svim properties-ima gauge-a"""
+    def getPropertiesDict( self ):
         return {
             'type': 'Gauge',
             'active': self.active,
@@ -3089,350 +2962,192 @@ class GaugeWidget(QWidget):
             'inner_color': self.inner_color.name(),
             'needle_color': self.needle_color.name()
         }
+    
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
 
-    def updatePropertiesDict(self):
-        """Ažurira properties rečnik"""
+    def setDiameter( self, diameter ):
+        self.diameter = diameter
+        self.setFixedSize( diameter, diameter )
+        self.update()
+
+    def setOuterColor( self, color ):
+        self.outer_color = color
+        self.update()
+
+    def setInnerColor( self, color ):
+        self.inner_color = color
+        self.update()
+
+    def setNeedleColor( self, color ):
+        self.needle_color = color
+        self.update()
+
+    def setBackgroundColor( self, color ):
+        self.background_color = color
+        self.update()
+
+    def setActive( self, active ):
+        self.active = active
+        self.update()
+
+    def setVisibleGauge( self, visible ):
+        self.visible = visible
+        self.setVisible( visible )
+
+    def setStatic( self, static ):
+        self.static = static
+        self.update()
+
+    def setCustomName( self, name ):
+        self.custom_name = name
+
+    def setStackOrder( self, order ):
+        self.stack_order = order
+
+    def set3d( self, use_3d ):
+        self.use_3d = use_3d
+        self.update()
+
+    def setMajorSubdivision( self, count ):
+        self.major_subdivision = max( 1, count )
+        self.update()
+
+    def setMinorSubdivision( self, count ):
+        self.minor_subdivision = max( 0, count )
+        self.update()
+
+    def setRangeValue( self, value ):
+        self.range_value = max( 1, value )
+
+        if self.value > self.range_value:
+            self.value = self.range_value
+
+        self.update()
+
+    def setValue( self, value ):
+        self.value = max( 0, min( value, self.range_value ) )
+        self.update()
+
+    def updatePropertiesDict( self ):
         pass
 
-    # Metode za resize i drag (kao ClockWidget)
-    def drawSelectionHandles(self, painter):
-        """Crtanje resize handle-ova na uglovima kada je selektovano"""
-        if not self.selected:
+    def updatePropertiesSize( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
             return
-            
-        handle_size = 8
-        half_size = handle_size // 2
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'diameter_spin_gauge' ) ):
+            main_window.diameter_spin_gauge.blockSignals( True )
+            main_window.diameter_spin_gauge.setValue( self.diameter )
+            main_window.diameter_spin_gauge.blockSignals( False )
 
-        # Zeleni handle-ovi
-        painter.setBrush(QColor(0, 255, 0))
-        painter.setPen(QPen(QColor(0, 80, 200), 1))
+    def updatePropertiesPosition( self ):
+        main_window = self.findMainWindow()
 
-        # 4 ugla
-        corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-            QPoint(4, self.height()-4),  # donji levi
-            QPoint(self.width()-4, self.height()-4)  # donji desni
-        ]
-
-        for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
-                              handle_size, handle_size)
-
-            # Mali beli centar
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))
-            painter.setPen(QPen(QColor(0, 80, 200), 1))
-
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira kada je selektovano"""
-        if not self.selected:
+        if not main_window:
             return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'pos_x_spin_gauge' ) and hasattr( main_window, 'pos_y_spin_gauge' ) ):
+            main_window.pos_x_spin_gauge.blockSignals( True )
+            main_window.pos_x_spin_gauge.setValue( self.x() )
+            main_window.pos_x_spin_gauge.blockSignals( False )
             
-        margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+            main_window.pos_y_spin_gauge.blockSignals( True )
+            main_window.pos_y_spin_gauge.setValue( self.y() )
+            main_window.pos_y_spin_gauge.blockSignals( False )
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+    def findMainWindow( self ):
+        parent = self.parent()
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
+        while parent:
+            if isinstance( parent, QMainWindow ):
+                return parent
+            
+            parent = parent.parent()
+        return None
 
-    def mousePressEvent(self, event):
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
-
-            # Proveri da li je kliknut resize handle
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
-                # Počni resize
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+
             else:
-                # Počni dragovanje ili selektuj
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                self.clicked.emit(self)
+                self.clicked.emit( self )
 
         event.accept()
 
-    def mouseMoveEvent(self, event):
-        mouse_pos = event.pos()
-        
-        # Proveri da li je miš preko resize handle-a
-        corner = self.getCornerAt(mouse_pos)
-        if corner:
-            # Postavi odgovarajući kursor
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
-        
-        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
-        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
-            delta = mouse_pos - self.drag_start_pos
-            
-            # Koristite dva argumenta (x, y) umesto QPoint
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-            super().move(new_x, new_y)
-            
-            # Ažuriraj properties bar ako postoji
-            self.updatePropertiesPosition()
-        
-        event.accept()
-
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
 
-            # Ažuriraj properties bar
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
 
         event.accept()
 
-    def getCornerAt(self, pos):
-        """Proverava da li je miš preko nekog od uglova za resize"""
-        handle_size = 12  # Veća zona za lakše hvatanje
-        half_size = handle_size // 2
+    def mouseMoveEvent( self, event ):
+        mouse_pos = event.pos()
         
-        corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
-        }
-        
-        for corner_name, corner_pos in corners.items():
-            # Kreiraj pravougaonik oko ugla
-            corner_rect = QRect(
-                corner_pos.x() - half_size,
-                corner_pos.y() - half_size,
-                handle_size,
-                handle_size
-            )
-            
-            if corner_rect.contains(pos):
-                return corner_name
-        
-        return None
+        corner = self.getCornerAt( mouse_pos )
+        if corner:
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
 
-    def handleResize(self, global_pos):
-        """Menja veličinu GaugeWidget-a"""
-        if not self.resize_corner:
-            return
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
 
-        # Računaj promenu u veličini
-        delta = global_pos - self.resize_start_pos
-
-        new_width = self.resize_start_size.width()
-        new_height = self.resize_start_size.height()
-
-        # Svi uglovi mogu da menjaju veličinu
-        if self.resize_corner == "bottom_right":
-            new_width = max(50, self.resize_start_size.width() + delta.x())
-            new_height = max(50, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_right":
-            new_width = max(50, self.resize_start_size.width() + delta.x())
-            new_height = max(50, self.resize_start_size.height() - delta.y())
-        elif self.resize_corner == "bottom_left":
-            new_width = max(50, self.resize_start_size.width() - delta.x())
-            new_height = max(50, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_left":
-            new_width = max(50, self.resize_start_size.width() - delta.x())
-            new_height = max(50, self.resize_start_size.height() - delta.y())
-
-        # Za gauge, width i height moraju biti isti (krug je uvek kvadrat)
-        size = min(new_width, new_height)
-        
-        # Ažuriraj samo veličinu (bez promene pozicije)
-        self.setFixedSize(size, size)
-        self.diameter = size
-        self.update()
-
-        # Ažuriraj properties bar
-        self.updatePropertiesSize()
-
-    def updatePropertiesSize(self):
-        """Ažuriraj veličinu u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self and
-            hasattr(main_window, 'diameter_spin_gauge')):
-            
-            main_window.diameter_spin_gauge.blockSignals(True)
-            main_window.diameter_spin_gauge.setValue(self.diameter)
-            main_window.diameter_spin_gauge.blockSignals(False)
-
-    def updatePropertiesPosition(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self and
-            hasattr(main_window, 'pos_x_spin_gauge') and 
-            hasattr(main_window, 'pos_y_spin_gauge')):
-            
-            main_window.pos_x_spin_gauge.blockSignals(True)
-            main_window.pos_x_spin_gauge.setValue(self.x())
-            main_window.pos_x_spin_gauge.blockSignals(False)
-            
-            main_window.pos_y_spin_gauge.blockSignals(True)
-            main_window.pos_y_spin_gauge.setValue(self.y())
-            main_window.pos_y_spin_gauge.blockSignals(False)
-
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
-        parent = self.parent()
-        while parent:
-            if isinstance(parent, QMainWindow):
-                return parent
-            parent = parent.parent()
-        return None
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        r = self.diameter
-        
-        # Širine linija skalirane prema veličini
-        base_line_width = max(1, self.get_scaled_value(3))
-        big_mark_width = max(1, self.get_scaled_value(7))
-        small_mark_width = max(1, self.get_scaled_value(3))
-        needle_width = max(1, self.get_scaled_value(5))
-        
-        # Crtanje osnovnog kruga
-        pen = QPen(self.background_color)
-        pen.setWidth(base_line_width)
-        painter.setPen(pen)
-        painter.setBrush(self.background_color)
-        painter.drawEllipse(0, 0, r, r)
-        
-        # --- 3D efekat ---
-        if self.use_3d:
-            
-            pen = QPen(QColor(255,255,255))
-            pen.setWidth(base_line_width)
-            painter.setPen(pen)
-            painter.drawArc(0, 0, r, r, 16*35, -16*175)
-
-            pen = QPen(QColor(0, 0, 0))
-            pen.setWidth(base_line_width)
-            painter.setPen(pen)
-            painter.drawArc(0, 0, r, r, 35*16, 16*185)
-        
-        # Crtanje luka
-
-
-        # Translacija za oznake i iglu
-        painter.translate(r // 2, r // 2)
-        
-        # Računanje broja ukupnih podeoka
-        total_divisions = self.major_subdivision * (self.minor_subdivision + 1)
-        angle_per_division = 270.0 / total_divisions  # Ukupno 270 stepeni
-        
-        # Rotacija za početnu poziciju
-        painter.rotate(-135)
-
-        # Dimenzije oznaka skalirane prema veličini
-        big_mark_start = self.get_scaled_value(-210)
-        big_mark_end = self.get_scaled_value(-190)
-        
-        small_mark_start = self.get_scaled_value(-205)
-        small_mark_end = self.get_scaled_value(-195)
-        
-        needle_length = self.get_scaled_value(-210)
-
-        # Crtanje podeoka
-        for i in range(total_divisions + 1):  # +1 da uključimo i poslednji podeok
-            if i % (self.minor_subdivision + 1) == 0:
-                # Glavni podeoci
-                big_pen = QPen(self.inner_color)
-                big_pen.setWidth(big_mark_width)
-                painter.setPen(big_pen)
-                painter.drawLine(0, big_mark_start, 0, big_mark_end)
-            else:
-                # Sporedni podeoci
-                small_pen = QPen(self.inner_color)
-                small_pen.setWidth(small_mark_width)
-                painter.setPen(small_pen)
-                painter.drawLine(0, small_mark_start, 0, small_mark_end)
-            
-            # Rotiraj za sledeći podeok
-            if i < total_divisions:
-                painter.rotate(angle_per_division)
-
-        # Vratimo na početni položaj za kazaljku
-        painter.rotate(-(total_divisions * angle_per_division))
-        
-        # Računanje ugla za kazaljku na osnovu vrednosti
-        # 0 vrednost = -135°, max vrednost = 135° (ukupno 270°)
-        if self.range_value > 0:
-            needle_angle =   (270 * self.value / self.range_value)
         else:
-            needle_angle = -135
+            self.setCursor( Qt.CursorShape.ArrowCursor )
         
-        # Crtanje igle
-        painter.rotate(needle_angle)
-        needle_pen = QPen(self.needle_color)
-        needle_pen.setWidth(needle_width)
-        painter.setPen(needle_pen)
-        painter.drawLine(0, 0, 0, needle_length)
+        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
+            self.handleResize( event.globalPosition().toPoint() )
 
-        # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-        if self.selected:
-            painter.resetTransform()
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
+        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            delta = mouse_pos - self.drag_start_pos
+            
+            new_x = self.x() + delta.x()
+            new_y = self.y() + delta.y()
+            super().move( new_x, new_y )
+            
+            self.updatePropertiesPosition()
+        
+        event.accept()
 
-class DialWidget(QWidget):
-    clicked = pyqtSignal(object)
+class DialWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def __init__(self, diameter, parent=None):
-        super().__init__(parent)
+    def __init__( self, diameter, parent = None ):
+        super().__init__( parent )
         self.diameter = diameter
-        self.setFixedSize(diameter, diameter)
+        self.setFixedSize( diameter, diameter )
         
-        # Svojstva za dial
-        self.dial_color = QColor(32, 64, 128)  # Fiksna boja kao što je navedeno
-        self.arc_color = QColor(0, 0, 0)       # Crni luk
-        self.line_color = QColor(0, 0, 0)  # Siva linija (kazaljka)
-        self.background_color = QColor(32, 64, 128)   # Plava pozadina (fiksna)
+        self.dial_color = QColor( 32, 64, 128 )
+        self.arc_color = QColor( 0, 0, 0 )   
+        self.line_color = QColor( 0, 0, 0 )
+        self.background_color = QColor( 32, 64, 128 )
         
-        # Dodatna svojstva
         self.active = True
         self.visible = True
         self.static = False
         self._3d = True
-        self.value = 0  # Vrednost od 0-100
+        self.value = 0 
         
-        # Selekcija
         self.selected = False
-        self.selection_color = QColor(255, 0, 0)
+        self.selection_color = QColor( 255, 0, 0 )
         
-        # Resize i drag varijable - DODAJ OVO!
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
@@ -3440,79 +3155,156 @@ class DialWidget(QWidget):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
-        # Za rečnik
         self.custom_name = None
         self.stack_order = 1
 
         self.tag = 0
 
-    def get_scaled_value(self, original_value):
-        """Vraća vrednost skaliranu u odnosu na originalni dijametar"""
-        scale_factor = self.diameter / 100.0  # Originalni dijametar je 100
-        return int(original_value * scale_factor)
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
+        
+        r = self.diameter
+        
+        base_line_width = max( 1, int( r / 100 ) )
+        arc_line_width = max( 1, self.getScaledValue( 3 ) )
+        line_width = max( 1, self.getScaledValue( 3 ) )
+        
+        margin = 3 
+        adjusted_r = r - 2 * margin
+ 
+        if self._3d:
+            pen = QPen( self.arc_color )
+            pen.setWidth( arc_line_width )
+            painter.setPen( pen )
+            painter.drawArc( margin, margin, adjusted_r, adjusted_r, 16 * 35, - 16 * 175 )
+    
+            pen = QPen( QColor( 255, 255, 255 ) )
+            pen.setWidth( line_width )
+            painter.setPen( pen )
+            painter.drawArc( margin, margin, adjusted_r, adjusted_r, 35 * 16, 16 * 185 )
+        
+        pen = QPen( self.dial_color )
+        pen.setWidth( base_line_width )
+        painter.setPen( pen )
+        painter.setBrush( self.background_color )
+        painter.drawEllipse( margin, margin, adjusted_r, adjusted_r )
+        
+        pen = QPen( self.line_color )
+        pen.setWidth( line_width )
+        painter.setPen( pen )
+        
+        pen.setWidth( max( 1, self.getScaledValue( 4 ) ) )
+        painter.setPen(pen)
 
-    def setSelected(self, selected):
-        self.selected = selected
+        center_x = margin + adjusted_r // 2
+        center_y = margin + adjusted_r // 2
+
+        radius = adjusted_r // 2 - 10
+
+        start_radius_percentage = 0.70 
+        start_radius = radius * start_radius_percentage
+
+        angle = - 90+ ( 360 * self.value / 100 )
+        angle_rad = math.radians( angle )
+
+        start_x = center_x + start_radius * math.cos( angle_rad )
+        start_y = center_y + start_radius * math.sin( angle_rad )
+
+        end_x = center_x + radius * math.cos( angle_rad )
+        end_y = center_y + radius * math.sin( angle_rad )
+
+        painter.drawLine( int( start_x ), int( start_y ), int( end_x ), int( end_y ) )
+    
+        if self.selected:
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
+
+    def drawSelectionHandles( self, painter ):
+
+        if not self.selected:
+            return
+            
+        handle_size = 8
+        half_size = handle_size // 2
+
+        painter.setBrush( QColor( 0, 255, 0 ) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+
+        corners = [ QPoint(4, 4), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
+
+        for corner in corners:
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+
+    def drawSelectionBorder( self, painter ):
+        if not self.selected:
+            return
+            
+        margin = 2
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
+
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
+
+    def handleResize( self, global_pos ):
+        if not self.resize_corner:
+            return
+
+        delta = global_pos - self.resize_start_pos
+
+        new_width = self.resize_start_size.width()
+        new_height = self.resize_start_size.height()
+
+        if self.resize_corner == "bottom_right":
+            new_width = max( 50, self.resize_start_size.width() + delta.x() )
+            new_height = max( 50, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_right":
+            new_width = max( 50, self.resize_start_size.width() + delta.x() )
+            new_height = max( 50, self.resize_start_size.height() - delta.y() )
+
+        elif self.resize_corner == "bottom_left":
+            new_width = max( 50, self.resize_start_size.width() - delta.x() )
+            new_height = max( 50, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_left":
+            new_width = max( 50, self.resize_start_size.width() - delta.x() )
+            new_height = max( 50, self.resize_start_size.height() - delta.y() )
+
+        size = min( new_width, new_height )
+        
+        self.setFixedSize( size, size )
+        self.diameter = size
         self.update()
 
-    def setDiameter(self, diameter):
-        self.diameter = diameter
-        self.setFixedSize(diameter, diameter)
-        self.update()
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
 
-    def set_dial_color(self, color):
-        self.dial_color = color
-        self.update()
+    def getScaledValue( self, original_value ):
+        scale_factor = self.diameter / 100.0
+        return int( original_value * scale_factor )
 
-    def set_arc_color(self, color):
-        self.arc_color = color
-        self.update()
-
-    def setLineColor(self, color):
-        self.line_color = color
-        self.update()
-
-    def set_background_color(self, color):
-        self.background_color = color
-        self.update()
-
-    def setActive(self, active):
-        self.active = active
-        self.update()
-
-    def setVisibleDial(self, visible):
-        self.visible = visible
-        self.setVisible(visible)
-
-    def setStatic(self, static):
-        self.static = static
-        self.update()
-
-    def setCustomName(self, name):
-        self.custom_name = name
-
-    def setStackOrder(self, order):
-        self.stack_order = order
-
-    def set_3d(self, _3d):
-        self._3d = _3d
-        self.update()
-
-    def set_value(self, value):
-        self.value = max(0, min(value, 100))  # Clamp između 0 i 100
-        self.update()
-
-    def getPropertiesDict(self):
-        """Vraća rečnik sa svim svojstvima dial-a"""
+    def getPropertiesDict( self ):
         return {
             'type': 'Dial',
-            'name': getattr(self, 'custom_name', 'Dial_0'),
-            'stack_order': getattr(self, 'stack_order', 0),
+            'name': getattr( self, 'custom_name', 'Dial_0' ),
+            'stack_order': getattr( self, 'stack_order', 0 ),
             'tag': self.tag,
-            'position': (self.x(), self.y()),
+            'position': ( self.x(), self.y() ),
             'diameter': self.diameter,
             'active': self.active,
             'visible': self.visible,
@@ -3525,402 +3317,260 @@ class DialWidget(QWidget):
             'background_color': self.background_color.name()
         }
 
-    def updatePropertiesDict(self):
-        """Ažurira rečnik svojstava"""
-        if hasattr(self, 'custom_name') and hasattr(self.window(), 'all_dial_dicts'):
-            main_window = self.window()
-            if self.custom_name in main_window.all_dial_dicts:
-                main_window.all_dial_dicts[self.custom_name] = self.getPropertiesDict()
-
-    # Metode za resize i drag (kao GaugeWidget)
-    def drawSelectionHandles(self, painter):
-        """Crtanje resize handle-ova na uglovima kada je selektovano"""
-        if not self.selected:
-            return
-            
-        handle_size = 8
+    def getCornerAt( self, pos ):
+        handle_size = 12
         half_size = handle_size // 2
-
-        # Zeleni handle-ovi
-        painter.setBrush(QColor(0, 255, 0))
-        painter.setPen(QPen(QColor(0, 80, 200), 1))
-
-        # 4 ugla
-        corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-            QPoint(4, self.height()-4),  # donji levi
-            QPoint(self.width()-4, self.height()-4)  # donji desni
-        ]
-
-        for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
-                              handle_size, handle_size)
-
-            # Mali beli centar
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))
-            painter.setPen(QPen(QColor(0, 80, 200), 1))
-
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira kada je selektovano"""
-        if not self.selected:
-            return
+        
+        corners = {
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
+        }
+        
+        for corner_name, corner_pos in corners.items():
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
             
-        margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+            if corner_rect.contains( pos ):
+                return corner_name
+        
+        return None
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
+    def setDiameter( self, diameter ):
+        self.diameter = diameter
+        self.setFixedSize( diameter, diameter )
+        self.update()
 
-    def mousePressEvent(self, event):
+    def set_dial_color( self, color ):
+        self.dial_color = color
+        self.update()
+
+    def set_arc_color( self, color ):
+        self.arc_color = color
+        self.update()
+
+    def setLineColor( self, color ):
+        self.line_color = color
+        self.update()
+
+    def setBackgroundColor( self, color ):
+        self.background_color = color
+        self.update()
+
+    def setActive( self, active ):
+        self.active = active
+        self.update()
+
+    def setVisibleDial( self, visible ):
+        self.visible = visible
+        self.setVisible( visible )
+
+    def setStatic( self, static ):
+        self.static = static
+        self.update()
+
+    def setCustomName( self, name ):
+        self.custom_name = name
+
+    def setStackOrder( self, order ):
+        self.stack_order = order
+
+    def set3d( self, _3d ):
+        self._3d = _3d
+        self.update()
+
+    def setValue( self, value ):
+        self.value = max( 0, min( value, 100 ) )
+        self.update()
+
+    def updatePropertiesDict( self ):
+        if hasattr( self, 'custom_name' ) and hasattr( self.window(), 'all_dial_dicts' ):
+            main_window = self.window()
+
+            if self.custom_name in main_window.all_dial_dicts:
+                main_window.all_dial_dicts[ self.custom_name ] = self.getPropertiesDict()
+
+    def updatePropertiesSize( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'diameter_spin_dial' ):
+                main_window.diameter_spin_dial.blockSignals( True )
+                main_window.diameter_spin_dial.setValue( self.diameter )
+                main_window.diameter_spin_dial.blockSignals( False )
+
+    def updatePropertiesPosition( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'pos_x_spin_dial' ):
+                main_window.pos_x_spin_dial.blockSignals( True )
+                main_window.pos_x_spin_dial.setValue( self.x() )
+                main_window.pos_x_spin_dial.blockSignals( False )
+                
+            if hasattr( main_window, 'pos_y_spin_dial' ):
+                main_window.pos_y_spin_dial.blockSignals( True )
+                main_window.pos_y_spin_dial.setValue( self.y() )
+                main_window.pos_y_spin_dial.blockSignals( False )
+
+    def updateAllProperties( self ): 
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
+
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            if hasattr( main_window, 'active_checkbox_dial' ):
+                main_window.active_checkbox_dial.blockSignals( True )
+                main_window.active_checkbox_dial.setChecked( self.active )
+                main_window.active_checkbox_dial.blockSignals( False )
+
+            if hasattr( main_window, 'visible_checkbox_dial' ):
+                main_window.visible_checkbox_dial.blockSignals( True )
+                main_window.visible_checkbox_dial.setChecked( self.visible )
+                main_window.visible_checkbox_dial.blockSignals( False )
+
+            if hasattr( main_window, '_3d_checkbox_dial' ):
+                main_window._3d_checkbox_dial.blockSignals( True )
+                main_window._3d_checkbox_dial.setChecked( self._3d )
+                main_window._3d_checkbox_dial.blockSignals( False )
+
+            if hasattr( main_window, 'value_spin_dial' ):
+                main_window.value_spin_dial.blockSignals( True )
+                main_window.value_spin_dial.setValue( self.value )
+                main_window.value_spin_dial.blockSignals( False )
+
+            if hasattr( main_window, 'name_edit_dial' ):
+                main_window.name_edit_dial.blockSignals( True )
+                main_window.name_edit_dial.setText( self.custom_name )
+                main_window.name_edit_dial.blockSignals( False )
+
+            if hasattr( main_window, 'stack_order_spin_dial' ):
+                main_window.stack_order_spin_dial.blockSignals( True )
+
+                if main_window.current_shape in main_window.all_shapes:
+                    index = main_window.all_shapes.index( main_window.current_shape ) + 1
+                    main_window.stack_order_spin_dial.setValue( index )
+
+                main_window.stack_order_spin_dial.blockSignals( False )            
+
+    def findMainWindow( self ):
+        parent = self.parent()
+
+        while parent:
+            if isinstance( parent, QMainWindow ):
+                return parent
+            
+            parent = parent.parent()
+
+        return None
+
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
 
-            # Proveri da li je kliknut resize handle
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
-                # Počni resize
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+
             else:
-                # Počni dragovanje ili selektuj
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                
-                self.clicked.emit(self)
-                # Ažuriraj sve properties kada se selektuje
-                self.update_all_properties()
+                self.clicked.emit( self )
+
+                self.updateAllProperties()
 
         event.accept()
 
-    def mouseMoveEvent(self, event):
-        mouse_pos = event.pos()
-        
-        # Proveri da li je miš preko resize handle-a
-        corner = self.getCornerAt(mouse_pos)
-        if corner:
-            # Postavi odgovarajući kursor
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
-        
-        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
-        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
-            delta = mouse_pos - self.drag_start_pos
-            
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-            super().move(new_x, new_y)
-            
-            # Ažuriraj properties bar U TOKU draganja (real-time)
-            self.updatePropertiesPosition()
-        
-        event.accept()
-
-    # Izmeni mouseReleaseEvent da ažurira properties
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
 
-            # Ažuriraj properties bar NAKON što se završi drag ili resize
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
-            
-            # Ažuriraj rečnik
             self.updatePropertiesDict()
 
         event.accept()
 
-    def getCornerAt(self, pos):
-        """Proverava da li je miš preko nekog od uglova za resize"""
-        handle_size = 12  # Veća zona za lakše hvatanje
-        half_size = handle_size // 2
+    def mouseMoveEvent( self, event ):
+        mouse_pos = event.pos()
         
-        corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
-        }
+        corner = self.getCornerAt( mouse_pos )
+        if corner:
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
+
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
+
+        else:
+            self.setCursor( Qt.CursorShape.ArrowCursor )
         
-        for corner_name, corner_pos in corners.items():
-            # Kreiraj pravougaonik oko ugla
-            corner_rect = QRect(
-                corner_pos.x() - half_size,
-                corner_pos.y() - half_size,
-                handle_size,
-                handle_size
-            )
+        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
+            self.handleResize( event.globalPosition().toPoint() )
+
+        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            delta = mouse_pos - self.drag_start_pos
             
-            if corner_rect.contains(pos):
-                return corner_name
-        
-        return None
-
-    def handleResize(self, global_pos):
-        """Menja veličinu DialWidget-a"""
-        if not self.resize_corner:
-            return
-
-        # Računaj promenu u veličini
-        delta = global_pos - self.resize_start_pos
-
-        new_width = self.resize_start_size.width()
-        new_height = self.resize_start_size.height()
-
-        # Svi uglovi mogu da menjaju veličinu
-        if self.resize_corner == "bottom_right":
-            new_width = max(50, self.resize_start_size.width() + delta.x())
-            new_height = max(50, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_right":
-            new_width = max(50, self.resize_start_size.width() + delta.x())
-            new_height = max(50, self.resize_start_size.height() - delta.y())
-        elif self.resize_corner == "bottom_left":
-            new_width = max(50, self.resize_start_size.width() - delta.x())
-            new_height = max(50, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_left":
-            new_width = max(50, self.resize_start_size.width() - delta.x())
-            new_height = max(50, self.resize_start_size.height() - delta.y())
-
-        # Za dial, width i height moraju biti isti (krug je uvek kvadrat)
-        size = min(new_width, new_height)
-        
-        # Ažuriraj samo veličinu (bez promene pozicije)
-        self.setFixedSize(size, size)
-        self.diameter = size
-        self.update()
-
-        # Ažuriraj properties bar U TOKU resize-a (real-time)
-        self.updatePropertiesSize()
-        self.updatePropertiesPosition()  # Ovo je važno jer se pozicija menja ako resize-ujemo sa leve/gornje strane
-
-    def updatePropertiesSize(self):
-        """Ažuriraj veličinu u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        # Proveri da li je ovaj widget trenutno selektovan
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
+            new_x = self.x() + delta.x()
+            new_y = self.y() + delta.y()
+            super().move( new_x, new_y )
             
-            # Ažuriraj diameter spin ako postoji u properties baru
-            if hasattr(main_window, 'diameter_spin_dial'):
-                main_window.diameter_spin_dial.blockSignals(True)
-                main_window.diameter_spin_dial.setValue(self.diameter)
-                main_window.diameter_spin_dial.blockSignals(False)
+            self.updatePropertiesPosition()
+        
+        event.accept()
 
-    def updatePropertiesPosition(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        # Proveri da li je ovaj widget trenutno selektovan
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj position spin-ove ako postoje u properties baru
-            if hasattr(main_window, 'pos_x_spin_dial'):
-                main_window.pos_x_spin_dial.blockSignals(True)
-                main_window.pos_x_spin_dial.setValue(self.x())
-                main_window.pos_x_spin_dial.blockSignals(False)
-                
-            if hasattr(main_window, 'pos_y_spin_dial'):
-                main_window.pos_y_spin_dial.blockSignals(True)
-                main_window.pos_y_spin_dial.setValue(self.y())
-                main_window.pos_y_spin_dial.blockSignals(False)
-
-    def update_all_properties(self):
-        """Ažurira sve properties u properties baru"""
-        self.updatePropertiesSize()
-        self.updatePropertiesPosition()
-        # Ažuriraj ostale properties ako su prikazane
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            # Ažuriraj checkbox-ove ako postoje
-            if hasattr(main_window, 'active_checkbox_dial'):
-                main_window.active_checkbox_dial.blockSignals(True)
-                main_window.active_checkbox_dial.setChecked(self.active)
-                main_window.active_checkbox_dial.blockSignals(False)
-            if hasattr(main_window, 'visible_checkbox_dial'):
-                main_window.visible_checkbox_dial.blockSignals(True)
-                main_window.visible_checkbox_dial.setChecked(self.visible)
-                main_window.visible_checkbox_dial.blockSignals(False)
-            if hasattr(main_window, '_3d_checkbox_dial'):
-                main_window._3d_checkbox_dial.blockSignals(True)
-                main_window._3d_checkbox_dial.setChecked(self._3d)
-                main_window._3d_checkbox_dial.blockSignals(False)
-            # Ažuriraj value spin ako postoji
-            if hasattr(main_window, 'value_spin_dial'):
-                main_window.value_spin_dial.blockSignals(True)
-                main_window.value_spin_dial.setValue(self.value)
-                main_window.value_spin_dial.blockSignals(False)
-            # Ažuriraj ime ako postoji
-            if hasattr(main_window, 'name_edit_dial'):
-                main_window.name_edit_dial.blockSignals(True)
-                main_window.name_edit_dial.setText(self.custom_name)
-                main_window.name_edit_dial.blockSignals(False)
-            # Ažuriraj stack order ako postoji
-            if hasattr(main_window, 'stack_order_spin_dial'):
-                main_window.stack_order_spin_dial.blockSignals(True)
-                # Pronađi indeks u listi svih shape-ova
-                if main_window.current_shape in main_window.all_shapes:
-                    index = main_window.all_shapes.index(main_window.current_shape) + 1
-                    main_window.stack_order_spin_dial.setValue(index)
-                main_window.stack_order_spin_dial.blockSignals(False)            
-
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
-        parent = self.parent()
-        while parent:
-            if isinstance(parent, QMainWindow):
-                return parent
-            parent = parent.parent()
-        return None
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        r = self.diameter
-        
-        # Širine linija skalirane prema veličini
-        base_line_width = max(1, int(r / 100))
-        arc_line_width = max(1, self.get_scaled_value(3))
-        line_width = max(1, self.get_scaled_value(3))
-        
-        # KORIGUJEMO: Dodaj marginu da ne bude odsečeno od selekcionog okvira
-        margin = 3  # Dodaj marginu (selekcioni okvir je 2px + 1px sigurnosna margina)
-        adjusted_r = r - 2 * margin
-        
-        # Ako je 3D efekat uključen, dodaj sjene
-        if self._3d:
-            # Crni luk - SA MARGINOM
-            pen = QPen(self.arc_color)
-            pen.setWidth(arc_line_width)
-            painter.setPen(pen)
-            painter.drawArc(margin, margin, adjusted_r, adjusted_r, 16*35, -16*175)
+class ToggleWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-            # Sivi luk i linija - SA MARGINOM
-            pen = QPen(QColor(255, 255, 255))
-            pen.setWidth(line_width)
-            painter.setPen(pen)
-            painter.drawArc(margin, margin, adjusted_r, adjusted_r, 35*16, 16*185)
-        
-        # Glavni krug (plavi) - SA MARGINOM
-        pen = QPen(self.dial_color)
-        pen.setWidth(base_line_width)
-        painter.setPen(pen)
-        painter.setBrush(self.background_color)
-        painter.drawEllipse(margin, margin, adjusted_r, adjusted_r)
-        
-        # Sivi luk i linija
-        pen = QPen(self.line_color)
-        pen.setWidth(line_width)
-        painter.setPen(pen)
-        
- # Kazaljka (linija) - skalirana prema vrednosti
-        pen.setWidth(max(1, self.get_scaled_value(4)))
-        painter.setPen(pen)
-
-        # Centar kazaljke treba da bude u centru kruga (sa marginom)
-        center_x = margin + adjusted_r // 2
-        center_y = margin + adjusted_r // 2
-
-        # Dužina kazaljke
-        radius = adjusted_r // 2 - 10  # Kraj kazaljke
-
-        # START POZICIJA KAZALJKE: pomeri od centra ka obodu
-        # Umesto da počinje od centra (0% radiusa), počinje na 20% radiusa od centra
-        start_radius_percentage = 0.70  # 20% od centra (0.0 = centar, 1.0 = obod)
-        start_radius = radius * start_radius_percentage
-
-        # Izračunaj ugao kazaljke prema vrednosti (0-100 mapirano na -135 do 135 stepeni)
-        angle = -90+ (360 * self.value / 100)
-        angle_rad = math.radians(angle)
-
-        # START kazaljke (pomerena od centra)
-        start_x = center_x + start_radius * math.cos(angle_rad)
-        start_y = center_y + start_radius * math.sin(angle_rad)
-
-        # KRAJ kazaljke (na kraju radiusa)
-        end_x = center_x + radius * math.cos(angle_rad)
-        end_y = center_y + radius * math.sin(angle_rad)
-
-        # Crtanje kazaljke od start pozicije do end pozicije
-        painter.drawLine(int(start_x), int(start_y), int(end_x), int(end_y))
-    
-        # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-        if self.selected:
-            # Ukloni ovo: painter.setPen(QPen(self.selection_color, 2, Qt.PenStyle.DashLine))
-            # Ukloni ovo: painter.setBrush(QBrush(Qt.BrushStyle.NoBrush))
-            # Ukloni ovo: painter.drawRect(0, 0, self.width() - 1, self.height() - 1)
-            
-            # Nacrtaj resize handle-ove (ovo će nacrtati i selekcioni okvir)
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
-
-class ToggleWidget(QWidget):
-    clicked = pyqtSignal(object)
-    
-    def __init__(self, width, height, parent=None):
-        super().__init__(parent)
+    def __init__( self, width, height, parent = None ):
+        super().__init__( parent )
         self._width = width
-        self._height = height  # Fiksna visina 30
-        self.setFixedSize(width, height)
+        self._height = height 
+        self.setFixedSize( width, height )
         
-        # Svojstva za toggle
-        self.track_color = QColor(0, 32, 64)  # Tamnoplava - track
-        self.thumb_color = QColor(0, 64, 128)  # Svetloplava - thumb (knob)
-        self.border_color = QColor(0, 0, 0)    # Crni border
-        self.white_border_color = QColor(236, 238, 241)  # Sivi/beli border
-        self.text_color = QColor(255, 255, 255)  # Bela boja teksta
-        self.background_color = QColor(0, 32, 64)  # Background color
+        self.track_color = QColor( 0, 32, 64 ) 
+        self.thumb_color = QColor( 0, 64, 128 )
+        self.border_color = QColor( 0, 0, 0 ) 
+        self.white_border_color = QColor( 236, 238, 241 )
+        self.text_color = QColor( 255, 255, 255 ) 
+        self.background_color = QColor( 0, 32, 64 )
         
-        # Stanje toggle-a (True = ON, False = OFF)
         self.is_on = True
         
-        # Dodatna svojstva
         self.active = True
         self.visible = True
         self.static = False
         self._3d = True
         
-        # Selekcija
         self.selected = False
-        self.selection_color = QColor(255, 0, 0)
+        self.selection_color = QColor( 255, 0, 0 )
         
-        # Proporcije bazirane na originalu (width=250, height=150)
         self.original_width = 250
         self.original_height = 150
 
         self.tag=0
         
-        # Resize i drag varijable
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
@@ -3928,151 +3578,176 @@ class ToggleWidget(QWidget):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
-        # Za rečnik
         self.custom_name = None
         self.stack_order = 1
 
-    def get_scaled_value(self, original_value, is_width=True):
-        """Vraća vrednost skaliranu u odnosu na originalne dimenzije"""
-        if is_width:
-            scale_factor = self._width / self.original_width
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
+        
+        w = self._width
+        h = self._height
+        
+        pen = QPen( self.track_color )
+        painter.setPen( pen )
+        painter.setBrush( self.background_color )
+        
+        radius = h // 2
+        
+        painter.drawRect( radius, 0, w - 2 * radius, h )
+        painter.drawPie( 0, 0, 2 * radius, 2 * radius, 90 * 16, 180 * 16 )
+        painter.drawPie( w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 180 * 16 )
+        
+        if self._3d:
+            pen = QPen( self.white_border_color )
+            pen.setWidth( 2 )
+            painter.setPen( pen )
+            radius = h // 2
+            
+            painter.drawLine( radius, h, w - radius, h )
+            painter.drawArc( w - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, - 135 * 16 )
+            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 225 * 16, 45 * 16 )
+            
+            pen = QPen( self.border_color )
+            pen.setWidth( 3 )
+            painter.setPen( pen )
+
+            painter.drawLine( radius, 0, w - radius, 0 )
+            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 90 * 16, 135 * 16 )
+            painter.drawArc( w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 45 * 16 )
+        
+        thumb_rect = self.getThumbRect()
+        pen = QPen( self.thumb_color )
+        painter.setPen( pen )
+        painter.setBrush( self.thumb_color )
+        
+        painter.drawEllipse( thumb_rect )
+        
+        font = QFont()
+        font_size = max( 8, h // 2 )
+        font.setPointSize( font_size )
+        painter.setFont( font )
+        painter.setPen( self.text_color )
+        
+        if self.is_on:
+            text_rect = QRect( 10, 0, w - thumb_rect.width() - 20, h )
+            painter.drawText( text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, "OFF" )
         else:
-            scale_factor = self._height / self.original_height
-        return int(original_value * scale_factor)
+            text_rect = QRect( thumb_rect.width() + 10, 0, w - thumb_rect.width() - 20, h )
+            painter.drawText( text_rect, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, "ON" )
+        
+        if self.selected:
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
 
-    def setSelected(self, selected):
-        self.selected = selected
-        self.update()
+    def drawSelectionHandles( self, painter ):
+        if not self.selected:
+            return
+            
+        handle_size = 8
+        half_size = handle_size // 2
 
-    def setSize(self, width, height):
-        """Postavlja veličinu widgeta i ažurira properties bar"""
-        self._width = width
-        self._height = 30  # Fiksna visina
-        self.setFixedSize(width, self._height)
+        painter.setBrush( QColor( 0, 255, 0 ) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+
+        corners = [ QPoint(4, 4), QPoint(self.width()-4, 4), ]
+
+        for corner in corners:
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 255, 255 ) ) 
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+
+    def drawSelectionBorder( self, painter ):
+        if not self.selected:
+            return
+            
+        margin = 2
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
+
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
+
+    def handleResize( self, global_pos ):
+        if not self.resize_corner:
+            return
+
+        delta = global_pos - self.resize_start_pos
+        new_width = self.resize_start_size.width()
+
+        if self.resize_corner == "right":
+            new_width = max( 80, self.resize_start_size.width() + delta.x() )
+
+        elif self.resize_corner == "left":
+            new_width = max( 80, self.resize_start_size.width() - delta.x() )
+            width_delta = self._width - new_width
+            self.move( self.x() + width_delta, self.y() )
+
+        self.setSize( new_width, self._height )
+
+    def move( self, x, y ):
+        super().move( x, y )
         
-        # Ažuriraj properties bar
         main_window = self.findMainWindow()
-        if main_window and hasattr(main_window, 'current_shape') and main_window.current_shape == self:
-            try:
-                if hasattr(main_window, 'width_spin_toggle'):
-                    main_window.width_spin_toggle.blockSignals(True)
-                    main_window.width_spin_toggle.setValue(width)
-                    main_window.width_spin_toggle.blockSignals(False)
-            except RuntimeError:
-                pass
-        
-        # Ažuriraj rečnik
-        self.updatePropertiesDict()
-        
-        self.update()
-    
-    # OVERRIDE MOVE METODA
-    def move(self, x, y):
-        super().move(x, y)
-        
-        main_window = self.findMainWindow()
+
         if main_window and main_window.current_shape == self:
             try:
-                if hasattr(main_window, 'pos_x_spin_toggle'):
-                    main_window.pos_x_spin_toggle.blockSignals(True)
-                    main_window.pos_x_spin_toggle.setValue(x)
-                    main_window.pos_x_spin_toggle.blockSignals(False)
+                if hasattr( main_window, 'pos_x_spin_toggle' ):
+                    main_window.pos_x_spin_toggle.blockSignals( True )
+                    main_window.pos_x_spin_toggle.setValue( x )
+                    main_window.pos_x_spin_toggle.blockSignals( False )
+
             except RuntimeError:
                 pass
             
             try:
-                if hasattr(main_window, 'pos_y_spin_toggle'):
-                    main_window.pos_y_spin_toggle.blockSignals(True)
-                    main_window.pos_y_spin_toggle.setValue(y)
-                    main_window.pos_y_spin_toggle.blockSignals(False)
+                if hasattr( main_window, 'pos_y_spin_toggle' ):
+                    main_window.pos_y_spin_toggle.blockSignals( True )
+                    main_window.pos_y_spin_toggle.setValue( y )
+                    main_window.pos_y_spin_toggle.blockSignals( False )
+
             except RuntimeError:
                 pass
 
-    def getWidth(self):
-        """Getter za width"""
+    def toggleState( self ):
+        self.setState( not self.is_on )
+
+    def getScaledValue( self, original_value, is_width = True ):
+        if is_width:
+            scale_factor = self._width / self.original_width
+
+        else:
+            scale_factor = self._height / self.original_height
+
+        return int( original_value * scale_factor )
+    
+    def getWidth( self ):
         return self._width
 
-    def getHeight(self):
-        """Getter za height"""
+    def getHeight( self ):
         return self._height
-
-    def set_track_color(self, color):
-        self.track_color = color
-        self.update()
-
-    def set_thumb_color(self, color):
-        self.thumb_color = color
-        self.update()
-
-    def setBorderColor(self, color):
-        self.border_color = color
-        self.update()
-
-    def set_white_border_color(self, color):
-        self.white_border_color = color
-        self.update()
-
-    def setTextColor(self, color):
-        self.text_color = color
-        self.update()
-
-    def set_background_color(self, color):
-        self.background_color = color
-        self.update()
-
-    def set_state(self, is_on):
-        """Postavlja stanje toggle-a (True = ON, False = OFF)"""
-        self.is_on = is_on
-        self.update()
-        
-        # Ažuriraj state checkbox u properties bar-u
-        main_window = self.findMainWindow()
-        if main_window and main_window.current_shape == self:
-            try:
-                if hasattr(main_window, 'state_checkbox_toggle'):
-                    main_window.state_checkbox_toggle.blockSignals(True)
-                    main_window.state_checkbox_toggle.setChecked(self.is_on)
-                    main_window.state_checkbox_toggle.blockSignals(False)
-            except RuntimeError:
-                pass
-
-    def get_state(self):
-        """Getter za stanje toggle-a"""
+    
+    def getState( self ):
         return self.is_on
-
-    def setActive(self, active):
-        self.active = active
-        self.setEnabled(active)
-        self.update()
-
-    def setVisibleToggle(self, visible):
-        self.visible = visible
-        self.setVisible(visible)
-        self.update()
-
-    def setStatic(self, static):
-        self.static = static
-        self.update()
-
-    def set_3d(self, _3d):
-        self._3d = _3d
-        self.update()
-
-    def toggle_state(self):
-        """Menja stanje toggle-a"""
-        self.set_state(not self.is_on)
-
-    def getPropertiesDict(self):
-        """Vraća rečnik sa svim svojstvima toggle-a"""
+    
+    def getPropertiesDict( self ):
         return {
             'type': 'Toggle',
-            'name': getattr(self, 'custom_name', 'Toggle_0'),
-            'stack_order': getattr(self, 'stack_order', 0),
+            'name': getattr( self, 'custom_name', 'Toggle_0' ),
+            'stack_order': getattr( self, 'stack_order', 0 ),
             'tag': self.tag,
-            'position': (self.x(), self.y()),
+            'position': ( self.x(), self.y() ),
             'width': self._width,
             'height': self._height,
             'active': self.active,
@@ -4088,307 +3763,222 @@ class ToggleWidget(QWidget):
             'background_color': self.background_color.name()
         }
 
-    def updatePropertiesDict(self):
-        """Ažurira rečnik svojstava"""
-        if hasattr(self, 'custom_name') and hasattr(self.window(), 'all_toggle_dicts'):
-            main_window = self.window()
-            if self.custom_name in main_window.all_toggle_dicts:
-                main_window.all_toggle_dicts[self.custom_name] = self.getPropertiesDict()
-
-    # Metode za resize i drag
-    def drawSelectionHandles(self, painter):
-        """Crtanje resize handle-ova na uglovima kada je selektovano"""
-        if not self.selected:
-            return
-            
-        handle_size = 8
+    def getCornerAt( self, pos ):
+        handle_size = 12 
         half_size = handle_size // 2
-
-        # Zeleni handle-ovi
-        painter.setBrush(QColor(0, 255, 0))
-        painter.setPen(QPen(QColor(0, 80, 200), 1))
-
-        # Samo levi i desni ugao (jer može samo width da se menja)
-        corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-        ]
-
-        for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
-                              handle_size, handle_size)
-
-            # Mali beli centar
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))
-            painter.setPen(QPen(QColor(0, 80, 200), 1))
-
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira kada je selektovano"""
-        if not self.selected:
-            return
+        
+        corners = {
+            "left": QPoint( 0, self.height() // 2 ),
+            "right": QPoint( self.width(), self.height() // 2 )
+        }
+        
+        for corner_name, corner_pos in corners.items():
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
             
-        margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+            if corner_rect.contains( pos ):
+                return corner_name
+        
+        return None
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+    def getThumbRect( self ):
+        thumb_height = self._height - 10
+        thumb_width = thumb_height
+        
+        if self.is_on:
+            thumb_x = self._width - thumb_width - 5
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
+        else:
+            thumb_x = 5
+            
+        thumb_y = 5
+        
+        return QRect( thumb_x, thumb_y, thumb_width, thumb_height )
 
-    def mousePressEvent(self, event):
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
+
+    def setSize( self, width, height ):
+        self._width = width
+        self._height = 30 
+        self.setFixedSize( width, self._height )
+        
+        main_window = self.findMainWindow()
+
+        if main_window and hasattr( main_window, 'current_shape' ) and main_window.current_shape == self:
+            try:
+                if hasattr( main_window, 'width_spin_toggle' ):
+                    main_window.width_spin_toggle.blockSignals( True )
+                    main_window.width_spin_toggle.setValue( width )
+                    main_window.width_spin_toggle.blockSignals( False )
+
+            except RuntimeError:
+                pass
+        
+        self.updatePropertiesDict()
+        self.update()
+
+    def setTrackColor( self, color ):
+        self.track_color = color
+        self.update()
+
+    def setThumbColor( self, color ):
+        self.thumb_color = color
+        self.update()
+
+    def setBorderColor( self, color ):
+        self.border_color = color
+        self.update()
+
+    def setWhiteBorderColor( self, color ):
+        self.white_border_color = color
+        self.update()
+
+    def setTextColor( self, color ):
+        self.text_color = color
+        self.update()
+
+    def setBackgroundColor( self, color ):
+        self.background_color = color
+        self.update()
+
+    def setState( self, is_on ):
+        self.is_on = is_on
+        self.update()
+        
+        main_window = self.findMainWindow()
+
+        if main_window and main_window.current_shape == self:
+            try:
+                if hasattr( main_window, 'state_checkbox_toggle' ):
+                    main_window.state_checkbox_toggle.blockSignals( True )
+                    main_window.state_checkbox_toggle.setChecked( self.is_on )
+                    main_window.state_checkbox_toggle.blockSignals( False )
+
+            except RuntimeError:
+                pass
+
+    def setActive( self, active ):
+        self.active = active
+        self.setEnabled( active )
+        self.update()
+
+    def setVisibleToggle( self, visible ):
+        self.visible = visible
+        self.setVisible( visible )
+        self.update()
+
+    def setStatic( self, static ):
+        self.static = static
+        self.update()
+
+    def set3d( self, _3d ):
+        self._3d = _3d
+        self.update()
+
+    def updatePropertiesDict( self ):
+        if hasattr( self, 'custom_name' ) and hasattr( self.window(), 'all_toggle_dicts' ):
+            main_window = self.window()
+
+            if self.custom_name in main_window.all_toggle_dicts:
+                main_window.all_toggle_dicts[ self.custom_name ] = self.getPropertiesDict()
+
+    def findMainWindow( self ):
+        parent = self.parent()
+
+        while parent:
+            if isinstance( parent, QMainWindow ):
+                return parent
+            
+            parent = parent.parent()
+
+        return None
+
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
 
-            # Proveri da li je kliknut resize handle
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
-                # Počni resize
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+
             else:
-                # Počni dragovanje ili selektuj
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
 
-                # Ako je klik na thumb, promeni stanje
-                thumb_rect = self.get_thumb_rect()
-                if thumb_rect.contains(event.pos()):
-                    self.toggle_state()
+                thumb_rect = self.getThumbRect()
+
+                if thumb_rect.contains( event.pos() ):
+                    self.toggleState()
                     self.updatePropertiesDict()
 
                 self.clicked.emit(self)
 
         event.accept()
 
-    def mouseMoveEvent(self, event):
-        mouse_pos = event.pos()
-
-        # Proveri da li je miš preko resize handle-a
-        corner = self.getCornerAt(mouse_pos)
-        if corner:
-            # Postavi horizontalni kursor za resize
-            self.setCursor(Qt.CursorShape.SizeHorCursor)
-        else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
-
-        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
-        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
-            delta = mouse_pos - self.drag_start_pos
-
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-            self.move(new_x, new_y)
-
-        event.accept()
-
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
 
-            # Ažuriraj rečnik
             self.updatePropertiesDict()
 
         event.accept()
 
-    def getCornerAt(self, pos):
-        """Proverava da li je miš preko nekog od uglova za resize"""
-        handle_size = 12  # Veća zona za lakše hvatanje
-        half_size = handle_size // 2
-        
-        corners = {
-            "left": QPoint(0, self.height() // 2),
-            "right": QPoint(self.width(), self.height() // 2)
-        }
-        
-        for corner_name, corner_pos in corners.items():
-            # Kreiraj pravougaonik oko ugla
-            corner_rect = QRect(
-                corner_pos.x() - half_size,
-                corner_pos.y() - half_size,
-                handle_size,
-                handle_size
-            )
-            
-            if corner_rect.contains(pos):
-                return corner_name
-        
-        return None
+    def mouseMoveEvent( self, event ):
+        mouse_pos = event.pos()
 
-    def handleResize(self, global_pos):
-        """Menja veličinu ToggleWidget-a (samo width)"""
-        if not self.resize_corner:
-            return
+        corner = self.getCornerAt( mouse_pos )
+        if corner:
+            self.setCursor( Qt.CursorShape.SizeHorCursor )
 
-        # Računaj promenu u veličini
-        delta = global_pos - self.resize_start_pos
-
-        new_width = self.resize_start_size.width()
-
-        if self.resize_corner == "right":
-            new_width = max(80, self.resize_start_size.width() + delta.x())
-        elif self.resize_corner == "left":
-            new_width = max(80, self.resize_start_size.width() - delta.x())
-            width_delta = self._width - new_width
-            self.move(self.x() + width_delta, self.y())
-
-        self.setSize(new_width, self._height)
-
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
-        parent = self.parent()
-        while parent:
-            if isinstance(parent, QMainWindow):
-                return parent
-            parent = parent.parent()
-        return None
-
-    def get_thumb_rect(self):
-        """Vraća pravougaonik thumb-a"""
-        # Visina thumb-a je fiksna proporcija
-        thumb_height = self._height - 10
-        thumb_width = thumb_height
-        
-        if self.is_on:
-            # Thumb je na desnoj strani (ON pozicija)
-            thumb_x = self._width - thumb_width - 5
         else:
-            # Thumb je na levoj strani (OFF pozicija)
-            thumb_x = 5
-            
-        thumb_y = 5
-        
-        return QRect(thumb_x, thumb_y, thumb_width, thumb_height)
+            self.setCursor( Qt.CursorShape.ArrowCursor )
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        w = self._width
-        h = self._height
-        
-        # Background
-        pen = QPen(self.track_color)
-        painter.setPen(pen)
-        painter.setBrush(self.background_color)
-        
-        # Polumjer polukrugova je h/2
-        radius = h // 2
-        
-        # Centralni pravougaonik
-        painter.drawRect(radius, 0, w - 2 * radius, h)
-        
-        # Levi polukrug
-        painter.drawPie(0, 0, 2 * radius, 2 * radius, 90 * 16, 180 * 16)
-        
-        # Desni polukrug
-        painter.drawPie(w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, -180 * 16)
-        
-        if self._3d:
-            # Donji beli border
-            pen = QPen(self.white_border_color)
-            pen.setWidth(2)
-            painter.setPen(pen)
-            radius = h // 2
-            
-            # Donja linija
-            painter.drawLine(radius, h, w - radius, h)
+        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
+            self.handleResize( event.globalPosition().toPoint() )
 
-            # Desni donji luk
-            painter.drawArc(w - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, -135 * 16)
+        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            delta = mouse_pos - self.drag_start_pos
 
-            # Levi donji luk
-            painter.drawArc(0, 0, 2 * radius, 2 * radius, 225 * 16, 45 * 16)
-            
-            pen = QPen(self.border_color)
-            pen.setWidth(3)
-            painter.setPen(pen)
+            new_x = self.x() + delta.x()
+            new_y = self.y() + delta.y()
+            self.move( new_x, new_y )
 
-            # Gornja linija
-            painter.drawLine(radius, 0, w - radius, 0)
+        event.accept()
 
-            # Levi gornji luk
-            painter.drawArc(0, 0, 2 * radius, 2 * radius, 90 * 16, 135 * 16)
-
-            # Desni gornji luk
-            painter.drawArc(w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, -45 * 16)
-        
-        # Thumb (knob)
-        thumb_rect = self.get_thumb_rect()
-        pen = QPen(self.thumb_color)
-        painter.setPen(pen)
-        painter.setBrush(self.thumb_color)
-        
-        # Crtanje thumb-a kao elipse
-        painter.drawEllipse(thumb_rect)
-        
-        # Tekst (ON/OFF)
-        font = QFont()
-        font_size = max(8, h // 2)
-        font.setPointSize(font_size)
-        painter.setFont(font)
-        painter.setPen(self.text_color)
-        
-        if self.is_on:
-            # Thumb je desno, tekst "OFF" levo
-            text_rect = QRect(10, 0, w - thumb_rect.width() - 20, h)
-            painter.drawText(text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, "OFF")
-        else:
-            # Thumb je levo, tekst "ON" desno
-            text_rect = QRect(thumb_rect.width() + 10, 0, w - thumb_rect.width() - 20, h)
-            painter.drawText(text_rect, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, "ON")
-        
-        # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-        if self.selected:
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
-class ScrollBarWidget(QWidget):
-    clicked = pyqtSignal(object)
+class ScrollBarWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def __init__(self, width, height, parent=None):
-        super().__init__(parent)
+    def __init__( self, width, height, parent = None ):
+        super().__init__( parent )
         self._width = width
         self._height = height
-        self.setFixedSize(width, height)
+        self.setFixedSize( width, height )
         
-        # Svojstva za scroll bar
-        self.track_color = QColor(0, 32, 64)  # Tamnoplava - glavni track
-        self.thumb_color = QColor(0, 64, 128)  # Svetloplava - thumb (pokazivač)
-        self.border_color = QColor(0, 0, 0)    # Crni border
-        self.white_border_color = QColor(236, 238, 241)  # Sivi/beli border
+        self.track_color = QColor( 0, 32, 64 ) 
+        self.thumb_color = QColor( 0, 64, 128 )
+        self.border_color = QColor( 0, 0, 0 )
+        self.white_border_color = QColor( 236, 238, 241 )
         
-        # Dodatna svojstva (za properties bar)
         self.active = True
         self.visible = True
         self.static = False
         self.custom_name = None
         self.stack_order = 1
-        self._3d = True  # 3D efekat
+        self._3d = True 
         
-        # Progress vrednosti
-        self.range_value = 100  # Range za scrollbar
-        self.current_value = 50  # Trenutna vrednost
-        self.knob_size = 30  # Veličina thumb-a u procentima (30% track-a)
+        self.range_value = 100 
+        self.current_value = 50
+        self.knob_size = 30
         
-        # Selekcija
         self.selected = False
-        self.selection_color = QColor(255, 0, 0)
+        self.selection_color = QColor( 255, 0, 0 )
         
-        # Resize i drag varijable
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
@@ -4396,650 +3986,554 @@ class ScrollBarWidget(QWidget):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        # Za draganje thumb-a
         self.thumb_dragging = False
         self.thumb_drag_start_pos = QPoint()
         self.thumb_drag_start_value = 0
 
         self.tag = 0
 
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
 
-    def setSelected(self, selected):
-        self.selected = selected
-        self.update()
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
+        
+        w = self._width
+        h = self._height
+        
+        radius = h // 2
+        
+        pen = QPen( self.track_color )
+        pen.setWidth( 3 )
+        painter.setPen( pen )
+        painter.setBrush( self.track_color )
+        
+        painter.drawPie( 0, 0, 2 * radius, 2 * radius, 90 * 16, 180 * 16 )
+        painter.drawRect( radius, 0, w - 2 * radius, h )
+        painter.drawPie( w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 180 * 16 )
+        
+        thumb_rect = self.getThumbRect()
+        pen = QPen( self.thumb_color )
+        pen.setWidth( 2 )
+        painter.setPen( pen )
+        painter.setBrush( self.thumb_color )
+        
+        thumb_radius = thumb_rect.height() // 2
+        
+        painter.drawPie( thumb_rect.x(), thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 90 * 16, 180 * 16 )
+        painter.drawRect( thumb_rect.x() + thumb_radius, thumb_rect.y(), thumb_rect.width() - 2 * thumb_radius, thumb_rect.height() )
+        painter.drawPie( thumb_rect.x() + thumb_rect.width() - 2 * thumb_radius, thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 90 * 16, -180 * 16 )
+        
+        if self._3d:
+            pen = QPen( self.white_border_color )
+            pen.setWidth( 1 )
+            painter.setPen( pen )
+            
+            painter.drawLine( thumb_rect.x() + thumb_radius, thumb_rect.y(), thumb_rect.x() + thumb_rect.width() - thumb_radius, thumb_rect.y())
+            painter.drawArc( thumb_rect.x(), thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 90 * 16, 135 * 16 )
+            
+            pen.setWidth( 3 )
+            painter.setPen( pen )
+            
+            painter.drawLine( radius, h, w - radius, h )
+            painter.drawArc( w - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, - 135 * 16 )
+            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 225 * 16, 45 * 16 )
+            
+            pen = QPen( self.border_color )
+            pen.setWidth( 1 )
+            painter.setPen( pen )
 
-    def setSize(self, width, height):
-        self._width = width
-        self._height = height
-        self.setFixedSize(width, height)
-        self.update()
+            painter.drawLine( thumb_rect.x() + thumb_radius, thumb_rect.y() + thumb_rect.height(), thumb_rect.x() + thumb_rect.width() - thumb_radius, thumb_rect.y() + thumb_rect.height() )
+            painter.drawArc( thumb_rect.x() + thumb_rect.width() - 2 * thumb_radius, thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 45 * 16, - 135 * 16 )
+            
+            pen.setWidth( 3 )
+            painter.setPen( pen )
+            
+            painter.drawLine( radius, 0, w - radius, 0 )
+            painter.drawArc( w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 45 * 16 )
+            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 90 * 16, 135 * 16 )
+        
+        if self.selected:
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
 
-    def getWidth(self):
-        """Getter za width"""
-        return self._width
-
-    def getHeight(self):
-        """Getter za height"""
-        return self._height
-
-    def set_track_color(self, color):
-        self.track_color = color
-        self.update()
-
-    def set_thumb_color(self, color):
-        self.thumb_color = color
-        self.update()
-
-    def setBorderColor(self, color):
-        self.border_color = color
-        self.update()
-
-    def set_white_border_color(self, color):
-        self.white_border_color = color
-        self.update()
-
-    def setVisibleScrollBar(self, visible):
-        self.visible = visible
-        self.setVisible(visible)
-        self.update()
-
-    def set_3d(self, three_d):
-        self._3d = three_d
-        self.update()
-
-    def set_range(self, value):
-        """Postavlja range vrednost scroll bar-a"""
-        self.range_value = max(1, value)
-        self.update()
-
-    def set_current_value(self, value):
-        """Postavlja trenutnu vrednost scroll bar-a"""
-        self.current_value = max(0, min(self.range_value, value))
-        self.update()
-
-    def get_current_value(self):
-        """Getter za trenutnu vrednost"""
-        return self.current_value
-
-    def set_knob_size(self, size):
-        """Postavlja veličinu thumb-a u procentima (0-100)"""
-        self.knob_size = max(10, min(100, size))  # Minimalno 10%, maksimalno 100%
-        self.update()
-
-    def get_knob_size(self):
-        """Getter za veličinu thumb-a"""
-        return self.knob_size
-
-    # Metode za resize i drag
-    def drawSelectionHandles(self, painter):
-        """Crtanje resize handle-ova na uglovima kada je selektovano"""
+    def drawSelectionHandles( self, painter ):
         if not self.selected:
             return
             
         handle_size = 8
         half_size = handle_size // 2
 
-        # Zeleni handle-ovi
-        painter.setBrush(QColor(0, 255, 0))
-        painter.setPen(QPen(QColor(0, 80, 200), 1))
+        painter.setBrush( QColor( 0, 255, 0 ) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-        # 4 ugla
-        corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-            QPoint(4, self.height()-4),  # donji levi
-            QPoint(self.width()-4, self.height()-4)  # donji desni
-        ]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
-                              handle_size, handle_size)
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
 
-            # Mali beli centar
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))
-            painter.setPen(QPen(QColor(0, 80, 200), 1))
+            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira kada je selektovano"""
+    def drawSelectionBorder( self, painter ):
         if not self.selected:
             return
             
         margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
 
-    def mousePressEvent(self, event):
+    def handleResize( self, global_pos ):
+        if not self.resize_corner:
+            return
+
+        delta = global_pos - self.resize_start_pos
+
+        new_width = self.resize_start_size.width()
+        new_height = self.resize_start_size.height()
+
+        if self.resize_corner == "bottom_right":
+            new_width = max( 100, self.resize_start_size.width() + delta.x() )
+            new_height = max( 10, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_right":
+            new_width = max( 100, self.resize_start_size.width() + delta.x() )
+            new_height = max( 10, self.resize_start_size.height() - delta.y() )
+
+        elif self.resize_corner == "bottom_left":
+            new_width = max( 100, self.resize_start_size.width() - delta.x() )
+            new_height = max( 10, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_left":
+            new_width = max( 100, self.resize_start_size.width() - delta.x() )
+            new_height = max( 10, self.resize_start_size.height() - delta.y() )
+
+        self.setSize(new_width, new_height)
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
+
+    def calculateValueFromPosition( self, x ):
+        track_rect = self.getTrackRect()
+        thumb_rect = self.getThumbRect()
+        
+        relative_x = x - track_rect.x() - thumb_rect.width() / 2
+        track_width = track_rect.width() - thumb_rect.width()
+        
+        if track_width > 0:
+            value = int( ( relative_x / track_width ) * self.range_value )
+
+            return max( 0, min( self.range_value, value ) )
+        
+        return self.current_value
+
+    def getCurrentValue( self ):
+        return self.current_value
+
+    def getKnobSize( self ):
+        return self.knob_size
+    
+    def getWidth( self ):
+        return self._width
+
+    def getHeight( self ):
+        return self._height
+
+    def getCurrentValue( self ):
+        return self.current_value
+
+    def getCornerAt( self, pos ):
+        handle_size = 12 
+        half_size = handle_size // 2
+        
+        corners = {
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
+        }
+        
+        for corner_name, corner_pos in corners.items():
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
+            
+            if corner_rect.contains( pos ):
+                return corner_name
+        
+        return None
+
+    def getTrackRect( self ):
+        w = self._width
+        h = self._height
+        
+        radius = h // 2
+        
+        return QRect( radius, 0, w - 2 * radius, h )
+
+    def getThumbRect( self ):
+        track_rect = self.getTrackRect()
+        
+        thumb_width = int( track_rect.width() * ( self.knob_size / 100.0 ) )
+        thumb_width = max( 20, min( track_rect.width(), thumb_width ) )
+        
+        max_position = track_rect.width() - thumb_width
+
+        if max_position > 0:
+            thumb_x = track_rect.x() + int( ( self.current_value / self.range_value ) * max_position )
+
+        else:
+            thumb_x = track_rect.x()
+        
+        thumb_height = int( h * 0.6 ) if ( h := self._height ) > 20 else h - 4
+        thumb_y = ( h - thumb_height ) // 2
+        
+        return QRect( thumb_x, thumb_y, thumb_width, thumb_height )
+
+    def getPropertiesDict( self ):
+        return {
+            'type': 'ScrollBar',
+            'name': getattr( self, 'custom_name', 'ScrollBar_0' ),
+            'stack_order': getattr( self, 'stack_order', 0 ),
+            'tag': self.tag,
+            'position': ( self.x(), self.y() ),
+            'width': self._width,
+            'height': self._height,
+            'active': getattr( self, 'active', True ),
+            'visible': getattr( self, 'visible', True ),
+            'static': getattr( self, 'static', False ),
+            '_3d': getattr( self, '_3d', True ),
+            'range_value': getattr( self, 'range_value', 100 ),
+            'current_value': getattr( self, 'current_value', 50 ),
+            'knob_size': getattr( self, 'knob_size', 30 ),
+            'thumb_color': self.thumb_color.name(),
+            'track_color': self.track_color.name(),
+            'border_color': self.border_color.name(),
+            'white_border_color': self.white_border_color.name()
+        }
+    
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
+
+    def setSize( self, width, height ):
+        self._width = width
+        self._height = height
+        self.setFixedSize( width, height )
+        self.update()
+
+    def setTrackColor( self, color ):
+        self.track_color = color
+        self.update()
+
+    def setThumbColor( self, color ):
+        self.thumb_color = color
+        self.update()
+
+    def setBorderColor( self, color ):
+        self.border_color = color
+        self.update()
+
+    def setWhiteBorderColor( self, color ):
+        self.white_border_color = color
+        self.update()
+
+    def setVisibleScrollBar( self, visible ):
+        self.visible = visible
+        self.setVisible( visible )
+        self.update()
+
+    def set3d( self, _3d ):
+        self._3d = _3d
+        self.update()
+
+    def setRange( self, value ):
+        self.range_value = max(1, value)
+        self.update()
+
+    def setCurrentValue( self, value ):
+        self.current_value = max( 0, min( self.range_value, value ) )
+        self.update()
+
+    def setKnobSize( self, size ):
+        self.knob_size = max( 10, min( 100, size ) )
+        self.update()
+
+    def updatePropertiesSize( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'width_spin_scrollbar' ):
+                main_window.width_spin_scrollbar.blockSignals( True )
+                main_window.width_spin_scrollbar.setValue( self._width )
+                main_window.width_spin_scrollbar.blockSignals( False )
+                
+            if hasattr( main_window, 'height_spin_scrollbar' ):
+                main_window.height_spin_scrollbar.blockSignals( True )
+                main_window.height_spin_scrollbar.setValue( self._height )
+                main_window.height_spin_scrollbar.blockSignals( False )
+
+    def updatePropertiesPosition( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'pos_x_spin_scrollbar' ):
+                main_window.pos_x_spin_scrollbar.blockSignals( True )
+                main_window.pos_x_spin_scrollbar.setValue( self.x() )
+                main_window.pos_x_spin_scrollbar.blockSignals( False )
+                
+            if hasattr( main_window, 'pos_y_spin_scrollbar' ):
+                main_window.pos_y_spin_scrollbar.blockSignals( True )
+                main_window.pos_y_spin_scrollbar.setValue( self.y() )
+                main_window.pos_y_spin_scrollbar.blockSignals( False )
+
+    def updatePropertiesValue( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if (hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'current_value_spin_scrollbar' ):
+                main_window.current_value_spin_scrollbar.blockSignals( True )
+                main_window.current_value_spin_scrollbar.setValue( self.current_value )
+                main_window.current_value_spin_scrollbar.blockSignals( False )
+                
+            if hasattr( main_window, 'knob_size_spin_scrollbar' ):
+                main_window.knob_size_spin_scrollbar.blockSignals( True )
+                main_window.knob_size_spin_scrollbar.setValue( self.knob_size )
+                main_window.knob_size_spin_scrollbar.blockSignals( False )
+
+    def updateAllProperties( self ):
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
+        self.updatePropertiesValue()
+        
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'active_checkbox_scrollbar' ):
+                main_window.active_checkbox_scrollbar.blockSignals( True )
+                main_window.active_checkbox_scrollbar.setChecked( self.active )
+                main_window.active_checkbox_scrollbar.blockSignals( False )
+                
+            if hasattr( main_window, 'visible_checkbox_scrollbar' ):
+                main_window.visible_checkbox_scrollbar.blockSignals( True )
+                main_window.visible_checkbox_scrollbar.setChecked( self.visible )
+                main_window.visible_checkbox_scrollbar.blockSignals( False )
+                
+            if hasattr( main_window, 'static_checkbox_scrollbar' ):
+                main_window.static_checkbox_scrollbar.blockSignals( True )
+                main_window.static_checkbox_scrollbar.setChecked( self.static )
+                main_window.static_checkbox_scrollbar.blockSignals( False )
+                
+            if hasattr(main_window, '_3d_checkbox_scrollbar'):
+                main_window._3d_checkbox_scrollbar.blockSignals( True )
+                main_window._3d_checkbox_scrollbar.setChecked( self._3d )
+                main_window._3d_checkbox_scrollbar.blockSignals( False )
+            
+            if hasattr( main_window, 'range_spin_scrollbar' ):
+                main_window.range_spin_scrollbar.blockSignals( True )
+                main_window.range_spin_scrollbar.setValue( self.range_value )
+                main_window.range_spin_scrollbar.blockSignals( False )
+                
+            if hasattr( main_window, 'current_value_spin_scrollbar' ):
+                main_window.current_value_spin_scrollbar.blockSignals( True )
+                main_window.current_value_spin_scrollbar.setValue( self.current_value )
+                main_window.current_value_spin_scrollbar.blockSignals( False )
+                
+            if hasattr( main_window, 'knob_size_spin_scrollbar' ):
+                main_window.knob_size_spin_scrollbar.blockSignals( True )
+                main_window.knob_size_spin_scrollbar.setValue( self.knob_size )
+                main_window.knob_size_spin_scrollbar.blockSignals( False )
+            
+            if hasattr( main_window, 'name_edit_scrollbar' ):
+                main_window.name_edit_scrollbar.blockSignals( True )
+                main_window.name_edit_scrollbar.setText( self.custom_name )
+                main_window.name_edit_scrollbar.blockSignals( False )
+            
+            if hasattr( main_window, 'stack_order_spin_scrollbar' ):
+                main_window.stack_order_spin_scrollbar.blockSignals( True )
+
+                if main_window.current_shape in main_window.all_shapes:
+                    index = main_window.all_shapes.index( main_window.current_shape ) + 1
+                    main_window.stack_order_spin_scrollbar.setValue( index )
+
+                main_window.stack_order_spin_scrollbar.blockSignals( False )
+            
+            if hasattr( main_window, 'track_color_rect_scrollbar' ):
+                main_window.track_color_rect_scrollbar.setStyleSheet( f"background-color: { self.track_color.name() }; border: 1px solid #ccc;" )
+                
+            if hasattr( main_window, 'thumb_color_rect_scrollbar' ):
+                main_window.thumb_color_rect_scrollbar.setStyleSheet( f"background-color: { self.thumb_color.name() }; border: 1px solid #ccc;" )
+                
+            if hasattr( main_window, 'border_color_rect_scrollbar' ):
+                main_window.border_color_rect_scrollbar.setStyleSheet( f"background-color: { self.border_color.name() }; border: 1px solid #ccc;" )
+                
+            if hasattr( main_window, 'white_border_color_rect_scrollbar' ):
+                main_window.white_border_color_rect_scrollbar.setStyleSheet( f"background-color: { self.white_border_color.name() }; border: 1px solid #ccc;" )
+
+    def updatePropertiesDict( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+            
+        if hasattr( main_window, 'all_scrollbar_dicts' ):
+            if self.custom_name in main_window.all_scrollbar_dicts:
+                main_window.all_scrollbar_dicts[ self.custom_name ] = self.getPropertiesDict()
+
+    def findMainWindow( self ):
+        parent = self.parent()
+
+        while parent:
+            if isinstance(parent, QMainWindow):
+                return parent
+            
+            parent = parent.parent()
+
+        return None
+
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
 
-            # Proveri da li je kliknut resize handle
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
-                # Počni resize
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+
             else:
-                # Proveri da li je klik na thumb (pokazivač)
-                thumb_rect = self.get_thumb_rect()
-                if thumb_rect.contains(event.pos()):
-                    # Klik na thumb - počni draganje thumb-a
+                thumb_rect = self.getThumbRect()
+
+                if thumb_rect.contains( event.pos() ):
                     self.thumb_dragging = True
                     self.dragging = False
                     self.thumb_drag_start_pos = event.pos()
                     self.thumb_drag_start_value = self.current_value
+
                 else:
-                    # Počni dragovanje widgeta ili klik na track
                     self.dragging = True
                     self.thumb_dragging = False
                     self.drag_start_pos = mouse_pos
-                    
-                    # Klik na track - pomeri thumb na tu poziciju
-                    track_rect = self.get_track_rect()
-                    if track_rect.contains(event.pos()):
-                        # Izračunaj novu vrednost na osnovu pozicije klika
-                        new_value = self._calculate_value_from_position(event.pos().x())
-                        self.set_current_value(new_value)
+                    track_rect = self.getTrackRect()
+
+                    if track_rect.contains( event.pos() ):
+                        new_value = self.calculateValueFromPosition( event.pos().x() )
+                        self.setCurrentValue( new_value )
                 
-                self.clicked.emit(self)
-                # Ažuriraj sve properties kada se selektuje
-                self.update_all_properties()
+                self.clicked.emit( self )
+                self.updateAllProperties()
 
         event.accept()
 
-    def mouseMoveEvent(self, event):
-        mouse_pos = event.pos()
-        
-        # Proveri da li je miš preko resize handle-a
-        corner = self.getCornerAt(mouse_pos)
-        if corner:
-            # Postavi odgovarajući kursor
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
-        
-        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
-        elif self.thumb_dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Draganje thumb-a
-            delta_x = mouse_pos.x() - self.thumb_drag_start_pos.x()
-            track_rect = self.get_track_rect()
-            thumb_rect = self.get_thumb_rect()
-            
-            # Izračunaj koliko piksela odgovara jednoj jedinici vrednosti
-            track_width = track_rect.width() - thumb_rect.width()
-            if track_width > 0:
-                pixels_per_unit = track_width / self.range_value
-                delta_value = int(delta_x / pixels_per_unit)
-                new_value = self.thumb_drag_start_value + delta_value
-                self.set_current_value(new_value)
-                
-                # Ažuriraj properties bar u real-time
-                self._update_properties_value()
-        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
-            delta = mouse_pos - self.drag_start_pos
-            
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-            super().move(new_x, new_y)
-            
-            # Ažuriraj properties bar U TOKU draganja (real-time)
-            self.updatePropertiesPosition()
-        
-        event.accept()
-
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
             self.thumb_dragging = False
             self.resize_corner = None
 
-            # Ažuriraj properties bar NAKON što se završi drag ili resize
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
-            
-            # Ažuriraj rečnik
             self.updatePropertiesDict()
 
         event.accept()
 
-    def getCornerAt(self, pos):
-        """Proverava da li je miš preko nekog od uglova za resize"""
-        handle_size = 12  # Veća zona za lakše hvatanje
-        half_size = handle_size // 2
+    def mouseMoveEvent( self, event ):
+        mouse_pos = event.pos()
         
-        corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
-        }
-        
-        for corner_name, corner_pos in corners.items():
-            # Kreiraj pravougaonik oko ugla
-            corner_rect = QRect(
-                corner_pos.x() - half_size,
-                corner_pos.y() - half_size,
-                handle_size,
-                handle_size
-            )
-            
-            if corner_rect.contains(pos):
-                return corner_name
-        
-        return None
+        corner = self.getCornerAt( mouse_pos )
+        if corner:
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
 
-    def handleResize(self, global_pos):
-        """Menja veličinu ScrollBarWidget-a"""
-        if not self.resize_corner:
-            return
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
 
-        # Računaj promenu u veličini
-        delta = global_pos - self.resize_start_pos
-
-        new_width = self.resize_start_size.width()
-        new_height = self.resize_start_size.height()
-
-        # Svi uglovi mogu da menjaju veličinu
-        if self.resize_corner == "bottom_right":
-            new_width = max(100, self.resize_start_size.width() + delta.x())
-            new_height = max(10, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_right":
-            new_width = max(100, self.resize_start_size.width() + delta.x())
-            new_height = max(10, self.resize_start_size.height() - delta.y())
-        elif self.resize_corner == "bottom_left":
-            new_width = max(100, self.resize_start_size.width() - delta.x())
-            new_height = max(10, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_left":
-            new_width = max(100, self.resize_start_size.width() - delta.x())
-            new_height = max(10, self.resize_start_size.height() - delta.y())
-
-        self.setSize(new_width, new_height)
-        
-        # Ažuriraj properties bar U TOKU resize-a
-        self.updatePropertiesSize()
-        self.updatePropertiesPosition()
-
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
-        parent = self.parent()
-        while parent:
-            if isinstance(parent, QMainWindow):
-                return parent
-            parent = parent.parent()
-        return None
-
-    def updatePropertiesSize(self):
-        """Ažuriraj veličinu u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        # Proveri da li je ovaj widget trenutno selektovan
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj width i height spin-ove ako postoje u properties baru
-            if hasattr(main_window, 'width_spin_scrollbar'):
-                main_window.width_spin_scrollbar.blockSignals(True)
-                main_window.width_spin_scrollbar.setValue(self._width)
-                main_window.width_spin_scrollbar.blockSignals(False)
-                
-            if hasattr(main_window, 'height_spin_scrollbar'):
-                main_window.height_spin_scrollbar.blockSignals(True)
-                main_window.height_spin_scrollbar.setValue(self._height)
-                main_window.height_spin_scrollbar.blockSignals(False)
-
-    def updatePropertiesPosition(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        # Proveri da li je ovaj widget trenutno selektovan
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj position spin-ove ako postoje u properties baru
-            if hasattr(main_window, 'pos_x_spin_scrollbar'):
-                main_window.pos_x_spin_scrollbar.blockSignals(True)
-                main_window.pos_x_spin_scrollbar.setValue(self.x())
-                main_window.pos_x_spin_scrollbar.blockSignals(False)
-                
-            if hasattr(main_window, 'pos_y_spin_scrollbar'):
-                main_window.pos_y_spin_scrollbar.blockSignals(True)
-                main_window.pos_y_spin_scrollbar.setValue(self.y())
-                main_window.pos_y_spin_scrollbar.blockSignals(False)
-
-    def _update_properties_value(self):
-        """Ažuriraj vrednosti u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        # Proveri da li je ovaj widget trenutno selektovan
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj value spin-ove ako postoje u properties baru
-            if hasattr(main_window, 'current_value_spin_scrollbar'):
-                main_window.current_value_spin_scrollbar.blockSignals(True)
-                main_window.current_value_spin_scrollbar.setValue(self.current_value)
-                main_window.current_value_spin_scrollbar.blockSignals(False)
-                
-            if hasattr(main_window, 'knob_size_spin_scrollbar'):
-                main_window.knob_size_spin_scrollbar.blockSignals(True)
-                main_window.knob_size_spin_scrollbar.setValue(self.knob_size)
-                main_window.knob_size_spin_scrollbar.blockSignals(False)
-
-    def update_all_properties(self):
-        """Ažurira sve properties u properties baru"""
-        self.updatePropertiesSize()
-        self.updatePropertiesPosition()
-        self._update_properties_value()
-        
-        # Ažuriraj ostale properties ako su prikazane
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj checkbox-ove ako postoje
-            if hasattr(main_window, 'active_checkbox_scrollbar'):
-                main_window.active_checkbox_scrollbar.blockSignals(True)
-                main_window.active_checkbox_scrollbar.setChecked(self.active)
-                main_window.active_checkbox_scrollbar.blockSignals(False)
-                
-            if hasattr(main_window, 'visible_checkbox_scrollbar'):
-                main_window.visible_checkbox_scrollbar.blockSignals(True)
-                main_window.visible_checkbox_scrollbar.setChecked(self.visible)
-                main_window.visible_checkbox_scrollbar.blockSignals(False)
-                
-            if hasattr(main_window, 'static_checkbox_scrollbar'):
-                main_window.static_checkbox_scrollbar.blockSignals(True)
-                main_window.static_checkbox_scrollbar.setChecked(self.static)
-                main_window.static_checkbox_scrollbar.blockSignals(False)
-                
-            if hasattr(main_window, '_3d_checkbox_scrollbar'):
-                main_window._3d_checkbox_scrollbar.blockSignals(True)
-                main_window._3d_checkbox_scrollbar.setChecked(self._3d)
-                main_window._3d_checkbox_scrollbar.blockSignals(False)
-            
-            # Ažuriraj vrednosti ako postoje
-            if hasattr(main_window, 'range_spin_scrollbar'):
-                main_window.range_spin_scrollbar.blockSignals(True)
-                main_window.range_spin_scrollbar.setValue(self.range_value)
-                main_window.range_spin_scrollbar.blockSignals(False)
-                
-            if hasattr(main_window, 'current_value_spin_scrollbar'):
-                main_window.current_value_spin_scrollbar.blockSignals(True)
-                main_window.current_value_spin_scrollbar.setValue(self.current_value)
-                main_window.current_value_spin_scrollbar.blockSignals(False)
-                
-            if hasattr(main_window, 'knob_size_spin_scrollbar'):
-                main_window.knob_size_spin_scrollbar.blockSignals(True)
-                main_window.knob_size_spin_scrollbar.setValue(self.knob_size)
-                main_window.knob_size_spin_scrollbar.blockSignals(False)
-            
-            # Ažuriraj ime ako postoji
-            if hasattr(main_window, 'name_edit_scrollbar'):
-                main_window.name_edit_scrollbar.blockSignals(True)
-                main_window.name_edit_scrollbar.setText(self.custom_name)
-                main_window.name_edit_scrollbar.blockSignals(False)
-            
-            # Ažuriraj stack order ako postoji
-            if hasattr(main_window, 'stack_order_spin_scrollbar'):
-                main_window.stack_order_spin_scrollbar.blockSignals(True)
-                # Pronađi indeks u listi svih shape-ova
-                if main_window.current_shape in main_window.all_shapes:
-                    index = main_window.all_shapes.index(main_window.current_shape) + 1
-                    main_window.stack_order_spin_scrollbar.setValue(index)
-                main_window.stack_order_spin_scrollbar.blockSignals(False)
-            
-            # Ažuriraj boje ako postoje
-            if hasattr(main_window, 'track_color_rect_scrollbar'):
-                main_window.track_color_rect_scrollbar.setStyleSheet(f"background-color: {self.track_color.name()}; border: 1px solid #ccc;")
-                
-            if hasattr(main_window, 'thumb_color_rect_scrollbar'):
-                main_window.thumb_color_rect_scrollbar.setStyleSheet(f"background-color: {self.thumb_color.name()}; border: 1px solid #ccc;")
-                
-            if hasattr(main_window, 'border_color_rect_scrollbar'):
-                main_window.border_color_rect_scrollbar.setStyleSheet(f"background-color: {self.border_color.name()}; border: 1px solid #ccc;")
-                
-            if hasattr(main_window, 'white_border_color_rect_scrollbar'):
-                main_window.white_border_color_rect_scrollbar.setStyleSheet(f"background-color: {self.white_border_color.name()}; border: 1px solid #ccc;")
-
-    def get_track_rect(self):
-        """Vraća pravougaonik za track (glavni deo scroll bar-a)"""
-        w = self._width
-        h = self._height
-        
-        # Polumjer za polukrugove
-        radius = h // 2
-        
-        return QRect(radius, 0, w - 2 * radius, h)
-
-    def get_thumb_rect(self):
-        """Vraća pravougaonik za thumb (pokazivač)"""
-        track_rect = self.get_track_rect()
-        
-        # Izračunaj veličinu thumb-a u pikselima
-        thumb_width = int(track_rect.width() * (self.knob_size / 100.0))
-        thumb_width = max(20, min(track_rect.width(), thumb_width))  # Min 20px
-        
-        # Izračunaj poziciju thumb-a baziranu na current_value
-        max_position = track_rect.width() - thumb_width
-        if max_position > 0:
-            thumb_x = track_rect.x() + int((self.current_value / self.range_value) * max_position)
         else:
-            thumb_x = track_rect.x()
+            self.setCursor( Qt.CursorShape.ArrowCursor )
         
-        thumb_height = int(h * 0.6) if (h := self._height) > 20 else h - 4
-        thumb_y = (h - thumb_height) // 2
-        
-        return QRect(thumb_x, thumb_y, thumb_width, thumb_height)
+        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
+            self.handleResize( event.globalPosition().toPoint() )
 
-    def _calculate_value_from_position(self, x):
-        """Izračunava vrednost na osnovu X koordinate"""
-        track_rect = self.get_track_rect()
-        thumb_rect = self.get_thumb_rect()
-        
-        # Relativna pozicija unutar track-a
-        relative_x = x - track_rect.x() - thumb_rect.width() / 2
-        track_width = track_rect.width() - thumb_rect.width()
-        
-        if track_width > 0:
-            value = int((relative_x / track_width) * self.range_value)
-            return max(0, min(self.range_value, value))
-        return self.current_value
+        elif self.thumb_dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            delta_x = mouse_pos.x() - self.thumb_drag_start_pos.x()
+            track_rect = self.getTrackRect()
+            thumb_rect = self.getThumbRect()
+            
+            track_width = track_rect.width() - thumb_rect.width()
+            
+            if track_width > 0:
+                pixels_per_unit = track_width / self.range_value
+                delta_value = int( delta_x / pixels_per_unit )
+                new_value = self.thumb_drag_start_value + delta_value
+                self.setCurrentValue( new_value )
+                
+                self.updatePropertiesValue()
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            delta = mouse_pos - self.drag_start_pos
+            
+            new_x = self.x() + delta.x()
+            new_y = self.y() + delta.y()
+            super().move( new_x, new_y )
+            
+            self.updatePropertiesPosition()
         
-        w = self._width
-        h = self._height
-        
-        # Polumjer za polukrugove
-        radius = h // 2
-        
-        # 1. Glavni track (tamnoplavi)
-        pen = QPen(self.track_color)
-        pen.setWidth(3)
-        painter.setPen(pen)
-        painter.setBrush(self.track_color)
-        
-        # Levi polukrug
-        painter.drawPie(0, 0, 2 * radius, 2 * radius, 90*16, 180*16)
-        # Centralni pravougaonik
-        painter.drawRect(radius, 0, w - 2 * radius, h)
-        # Desni polukrug
-        painter.drawPie(w - 2 * radius, 0, 2 * radius, 2 * radius, 90*16, -180*16)
-        
-        # 2. Thumb (svetloplavi pokazivač)
-        thumb_rect = self.get_thumb_rect()
-        pen = QPen(self.thumb_color)
-        pen.setWidth(2)
-        painter.setPen(pen)
-        painter.setBrush(self.thumb_color)
-        
-        # Crtanje thumb-a kao zaobljenog pravougaonika
-        thumb_radius = thumb_rect.height() // 2
-        
-        # Levi polukrug thumb-a
-        painter.drawPie(thumb_rect.x(), thumb_rect.y(), 
-                       2 * thumb_radius, 2 * thumb_radius, 90*16, 180*16)
-        # Centralni pravougaonik thumb-a
-        painter.drawRect(thumb_rect.x() + thumb_radius, thumb_rect.y(), 
-                        thumb_rect.width() - 2 * thumb_radius, thumb_rect.height())
-        # Desni polukrug thumb-a
-        painter.drawPie(thumb_rect.x() + thumb_rect.width() - 2 * thumb_radius, 
-                       thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 90*16, -180*16)
-        
-        if self._3d:
-            # 3. Gornji beli border (tanak) - gornja linija thumb-a
-            pen = QPen(self.white_border_color)
-            pen.setWidth(1)
-            painter.setPen(pen)
-            
-            # Gornja linija thumb-a
-            painter.drawLine(thumb_rect.x() + thumb_radius, thumb_rect.y(),
-                            thumb_rect.x() + thumb_rect.width() - thumb_radius, thumb_rect.y())
-            
-            # Levi gornji luk thumb-a
-            painter.drawArc(thumb_rect.x(), thumb_rect.y(),
-                          2 * thumb_radius, 2 * thumb_radius, 90*16, 135*16)
-            
-            # 4. Donji beli border (deblji) - donja linija track-a
-            pen.setWidth(3)
-            painter.setPen(pen)
-            
-            # Donja linija track-a
-            painter.drawLine(radius, h, w - radius, h)
-            
-            # Desni donji luk track-a
-            painter.drawArc(w - 2 * radius, 0, 2 * radius, 2 * radius, 45*16, -135*16)
-            
-            # Levi donji luk track-a
-            painter.drawArc(0, 0, 2 * radius, 2 * radius, 225*16, 45*16)
-            
-            # 5. Donji crni border (tanak) - donja linija thumb-a
-            pen = QPen(self.border_color)
-            pen.setWidth(1)
-            painter.setPen(pen)
-            
-            # Donja linija thumb-a
-            painter.drawLine(thumb_rect.x() + thumb_radius, thumb_rect.y() + thumb_rect.height(),
-                            thumb_rect.x() + thumb_rect.width() - thumb_radius, thumb_rect.y() + thumb_rect.height())
-            
-            # Desni donji luk thumb-a
-            painter.drawArc(thumb_rect.x() + thumb_rect.width() - 2 * thumb_radius, 
-                          thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 45*16, -135*16)
-            
-            # 6. Gornji crni border (deblji) - gornja linija track-a
-            pen.setWidth(3)
-            painter.setPen(pen)
-            
-            # Gornja linija track-a
-            painter.drawLine(radius, 0, w - radius, 0)
-            
-            # Desni gornji luk track-a
-            painter.drawArc(w - 2 * radius, 0, 2 * radius, 2 * radius, 90*16, -45*16)
-            
-            # Levi gornji luk track-a
-            painter.drawArc(0, 0, 2 * radius, 2 * radius, 90*16, 135*16)
-        
-        # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-        if self.selected:
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
+        event.accept()
 
-    def getPropertiesDict(self):
-        """Vraća rečnik sa svim svojstvima scroll bar-a"""
-        return {
-            'type': 'ScrollBar',
-            'name': getattr(self, 'custom_name', 'ScrollBar_0'),
-            'stack_order': getattr(self, 'stack_order', 0),
-            'tag': self.tag,
-            'position': (self.x(), self.y()),
-            'width': self._width,
-            'height': self._height,
-            'active': getattr(self, 'active', True),
-            'visible': getattr(self, 'visible', True),
-            'static': getattr(self, 'static', False),
-            '_3d': getattr(self, '_3d', True),
-            'range_value': getattr(self, 'range_value', 100),
-            'current_value': getattr(self, 'current_value', 50),
-            'knob_size': getattr(self, 'knob_size', 30),
-            'thumb_color': self.thumb_color.name(),
-            'track_color': self.track_color.name(),
-            'border_color': self.border_color.name(),
-            'white_border_color': self.white_border_color.name()
-        }
 
-    def updatePropertiesDict(self):
-        """Ažurira rečnik svojstava"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-            
-        if hasattr(main_window, 'all_scrollbar_dicts'):
-            if self.custom_name in main_window.all_scrollbar_dicts:
-                main_window.all_scrollbar_dicts[self.custom_name] = self.getPropertiesDict()
-# U widgets.py, ažuriraj DialWidget klasu:
-
-class SliderWidget(QWidget):
-    clicked = pyqtSignal(object)
+class SliderWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def __init__(self, width, height, parent=None):
-        super().__init__(parent)
+    def __init__( self, width, height, parent = None ):
+        super().__init__( parent )
+
         self._width = width
         self._height = height
-        self.setFixedSize(width, height)
+        self.setFixedSize( width, height )
         
-        # Svojstva za slider
-        self.track_color = QColor(0, 32, 64)  # Tamnoplava - desna strana (track)
-        self.thumb_color = QColor(255, 255, 255)  # Bela - leva strana (progress)
-        self.progress_color = QColor(0, 32, 64)  # Tamnoplava - thumb (krug)
-        self.border_color = QColor(0, 0, 0)  # Crni border
+        self.track_color = QColor( 0, 32, 64 )
+        self.thumb_color = QColor( 255, 255, 255 )
+        self.progress_color = QColor( 0, 32, 64 )
+        self.border_color = QColor( 0, 0, 0 ) 
         
-        # Dodatna svojstva
         self.active = True
         self.visible = True
         self.static = False
-        self._3d = True  # Dodaj 3D atribut
+        self._3d = True  
         self.custom_name = None
         self.stack_order = 1
 
         self.tag = 0
         
-        # Progress vrednost (0-100)
         self.value = 50
         
-        # Resize i drag varijable
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
@@ -5047,596 +4541,490 @@ class SliderWidget(QWidget):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        # Selekcija
         self.selected = False
         
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
 
-    def setSelected(self, selected):
-        self.selected = selected
-        self.update()
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
-    def setSize(self, width, height):
-        self._width = width
-        self._height = height
-        self.setFixedSize(width, height)
-        self.update()
+        track_rect = self.getTrackRect()
+        progress_rect = self.getProgressRect()
+        thumb_rect = self.getThumbRect()
+        track_right_rect = self.getTrackRightRect()
 
-    def getWidth(self):
-        """Getter za width"""
-        return self._width
+        radius = track_rect.height() // 2
 
-    def getHeight(self):
-        """Getter za height"""
-        return self._height
+        pen = QPen( self.border_color )
+        pen.setWidth( 3 )
+        painter.setPen( pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
 
-    def set_track_color(self, color):
-        self.track_color = color
-        self.update()
+        painter.drawArc( track_rect.x() - radius, track_rect.y(), radius * 2, radius * 2, 90 * 16, 180 * 16 )
+        painter.drawArc( track_rect.x() + track_rect.width() - radius, track_rect.y(), radius * 2, radius * 2, 90 * 16, - 180 * 16 )
+        painter.drawLine( track_rect.x(), track_rect.y(), track_rect.x() + track_rect.width(), track_rect.y())
+        painter.drawLine( track_rect.x(), track_rect.y() + track_rect.height(), track_rect.x() + track_rect.width(), track_rect.y() + track_rect.height() )
 
-    def set_thumb_color(self, color):
-        self.thumb_color = color
-        self.update()
+        if track_right_rect.width() > 0:
+            pen = QPen( self.track_color )
+            pen.setWidth( 3 )
+            painter.setPen( pen )
+            painter.setBrush( self.track_color )
 
-    def set_progress_color(self, color):
-        self.progress_color = color
-        self.update()
+            if track_right_rect.width() > radius:
+                painter.drawPie( track_rect.x() + track_rect.width() - radius, track_rect.y(), radius * 2, radius * 2, 90 * 16, - 180 * 16 )
+                painter.drawRect( track_right_rect.x(), track_rect.y(), track_right_rect.width(), track_rect.height() )
 
-    def setBorderColor(self, color):
-        self.border_color = color
-        self.update()
+            else:
+                painter.drawRect( track_right_rect.x(), track_rect.y(), track_right_rect.width(), track_rect.height() )
 
-    def set_value(self, value):
-        """Postavlja vrednost slidera (0-100)"""
-        self.value = max(0, min(100, value))
-        self.update()
+        if progress_rect.width() > 0:
+            pen = QPen( self.thumb_color )
+            pen.setWidth( 3 )
+            painter.setPen( pen )
+            painter.setBrush( self.thumb_color )
 
-    def get_value(self):
-        """Getter za vrednost slidera"""
-        return self.value
+            if progress_rect.width() > radius:
+                painter.drawPie( track_rect.x() - radius, track_rect.y(), radius * 2, radius * 2, 90 * 16, 180 * 16 )
+                painter.drawRect( track_rect.x(), track_rect.y(), progress_rect.width() - radius, track_rect.height() )
 
-    def setVisibleSlider(self, visible):
-        self.visible = visible
-        self.setVisible(visible)
-        self.update()
+            else:
+                painter.drawRect( track_rect.x(), track_rect.y(), progress_rect.width(), track_rect.height() )
 
-    def set_3d(self, three_d):
-        self._3d = three_d
-        self.update()  # OVO JE KLJUČNO - forsira repaint
+            if track_right_rect.width() > 0:
+                pen = QPen( QColor(0, 0, 0) )
+                pen.setWidth( 2 )
+                painter.setPen( pen )
 
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
-        parent = self.parent()
-        while parent:
-            if isinstance(parent, QMainWindow):
-                return parent
-            parent = parent.parent()
-        return None
+                painter.drawLine( track_rect.x(), track_rect.y()-1, track_rect.x() + progress_rect.width(), track_rect.y() - 1 )
+                painter.drawLine( track_rect.x(), track_rect.y() + progress_rect.height()+1, track_rect.x() + progress_rect.width(), track_rect.y() + progress_rect.height() + 1 )
+                painter.drawArc( track_rect.x() - radius - 1, track_rect.y() - 1, radius * 2 + 2, radius * 2 + 2, 90 * 16, 180 * 16 )
 
-    def updatePropertiesSize(self):
-        """Ažuriraj veličinu u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        # Proveri da li je ovaj widget trenutno selektovan
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj width i height spin-ove ako postoje u properties baru
-            if hasattr(main_window, 'width_spin_slider'):
-                main_window.width_spin_slider.blockSignals(True)
-                main_window.width_spin_slider.setValue(self._width)
-                main_window.width_spin_slider.blockSignals(False)
-                
-            if hasattr(main_window, 'height_spin_slider'):
-                main_window.height_spin_slider.blockSignals(True)
-                main_window.height_spin_slider.setValue(self._height)
-                main_window.height_spin_slider.blockSignals(False)
+        pen = QPen( self.progress_color )
+        pen.setWidth( 3 )
+        painter.setPen( pen )
+        painter.setBrush( self.progress_color )
+        painter.drawEllipse( thumb_rect )
 
-    def updatePropertiesPosition(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        # Proveri da li je ovaj widget trenutno selektovan
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj position spin-ove ako postoje u properties baru
-            if hasattr(main_window, 'pos_x_spin_slider'):
-                main_window.pos_x_spin_slider.blockSignals(True)
-                main_window.pos_x_spin_slider.setValue(self.x())
-                main_window.pos_x_spin_slider.blockSignals(False)
-                
-            if hasattr(main_window, 'pos_y_spin_slider'):
-                main_window.pos_y_spin_slider.blockSignals(True)
-                main_window.pos_y_spin_slider.setValue(self.y())
-                main_window.pos_y_spin_slider.blockSignals(False)
+        if self._3d:
+            if progress_rect.width() > 0:
+                pen = QPen( QColor( 255, 255, 255 ) )
+                pen.setWidth( 1 )
+                painter.setPen( pen )
+                painter.drawLine( track_right_rect.x(), track_rect.y() - 1, track_rect.x() + track_rect.width(), track_rect.y() - 1 )
+                painter.drawLine( track_right_rect.x(), track_rect.y() + progress_rect.height() + 1, track_rect.x() + track_rect.width(), track_rect.y() + progress_rect.height() + 1 )
+                painter.drawArc( track_rect.x() + track_rect.width() - radius - 1, track_rect.y() - 1, radius * 2 + 2, radius * 2 + 2, 90 * 16, - 180 * 16 )
 
-    def update_all_properties(self):
-        """Ažurira sve properties u properties baru"""
-        self.updatePropertiesSize()
-        self.updatePropertiesPosition()
-        
-        # Ažuriraj ostale properties ako su prikazane
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj checkbox-ove ako postoje
-            if hasattr(main_window, 'active_checkbox_slider'):
-                main_window.active_checkbox_slider.blockSignals(True)
-                main_window.active_checkbox_slider.setChecked(self.active)
-                main_window.active_checkbox_slider.blockSignals(False)
-                
-            if hasattr(main_window, 'visible_checkbox_slider'):
-                main_window.visible_checkbox_slider.blockSignals(True)
-                main_window.visible_checkbox_slider.setChecked(self.visible)
-                main_window.visible_checkbox_slider.blockSignals(False)
-                
-            if hasattr(main_window, 'static_checkbox_slider'):
-                main_window.static_checkbox_slider.blockSignals(True)
-                main_window.static_checkbox_slider.setChecked(self.static)
-                main_window.static_checkbox_slider.blockSignals(False)
-                
-            if hasattr(main_window, '_3d_checkbox_slider'):
-                main_window._3d_checkbox_slider.blockSignals(True)
-                main_window._3d_checkbox_slider.setChecked(self._3d)
-                main_window._3d_checkbox_slider.blockSignals(False)
-            
-            # Ažuriraj value spin ako postoji
-            if hasattr(main_window, 'value_spin_slider'):
-                main_window.value_spin_slider.blockSignals(True)
-                main_window.value_spin_slider.setValue(self.value)
-                main_window.value_spin_slider.blockSignals(False)
-            
-            # Ažuriraj ime ako postoji
-            if hasattr(main_window, 'name_edit_slider'):
-                main_window.name_edit_slider.blockSignals(True)
-                main_window.name_edit_slider.setText(self.custom_name)
-                main_window.name_edit_slider.blockSignals(False)
-            
-            # Ažuriraj stack order ako postoji
-            if hasattr(main_window, 'stack_order_spin_slider'):
-                main_window.stack_order_spin_slider.blockSignals(True)
-                # Pronađi indeks u listi svih shape-ova
-                if main_window.current_shape in main_window.all_shapes:
-                    index = main_window.all_shapes.index(main_window.current_shape) + 1
-                    main_window.stack_order_spin_slider.setValue(index)
-                main_window.stack_order_spin_slider.blockSignals(False)
-            
-            # Ažuriraj boje ako postoje
-            if hasattr(main_window, 'bg_left_color_rect_slider'):
-                main_window.bg_left_color_rect_slider.setStyleSheet(f"background-color: {self.thumb_color.name()}; border: 1px solid #ccc;")
-                
-            if hasattr(main_window, 'bg_right_color_rect_slider'):
-                main_window.bg_right_color_rect_slider.setStyleSheet(f"background-color: {self.track_color.name()}; border: 1px solid #ccc;")
-                
-            if hasattr(main_window, 'knob_color_rect_slider'):
-                main_window.knob_color_rect_slider.setStyleSheet(f"background-color: {self.progress_color.name()}; border: 1px solid #ccc;")
+            pen = QPen( QColor( 236, 238, 241 ) )
+            pen.setWidth( 1 )
+            painter.setPen( pen )
+            painter.drawArc( thumb_rect, 40 * 16, 160 * 16 )
 
-    # Metode za resize i drag
-    def drawSelectionHandles(self, painter):
-        """Crtanje resize handle-ova na uglovima kada je selektovano"""
+            pen = QPen( QColor( 0, 0, 0 ) )
+            pen.setWidth( 1 )
+            painter.setPen( pen )
+            painter.drawArc( thumb_rect, 200 * 16, 180 * 16 )
+
+        if self.selected:
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
+
+    def drawSelectionHandles( self, painter ):
         if not self.selected:
             return
             
         handle_size = 8
         half_size = handle_size // 2
 
-        # Zeleni handle-ovi
-        painter.setBrush(QColor(0, 255, 0))
-        painter.setPen(QPen(QColor(0, 80, 200), 1))
+        painter.setBrush( QColor( 0, 255, 0 ) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-        # 4 ugla
-        corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-            QPoint(4, self.height()-4),  # donji levi
-            QPoint(self.width()-4, self.height()-4)  # donji desni
-        ]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
-                              handle_size, handle_size)
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-            # Mali beli centar
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))
-            painter.setPen(QPen(QColor(0, 80, 200), 1))
+    def drawSelectionBorder( self, painter ):
 
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira kada je selektovano"""
         if not self.selected:
             return
             
         margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
 
-    def mousePressEvent(self, event):
+    def handleResize( self, global_pos ): 
+
+        if not self.resize_corner:
+            return
+
+        delta = global_pos - self.resize_start_pos
+        new_width = self.resize_start_size.width()
+        new_height = self.resize_start_size.height()
+
+        if self.resize_corner == "bottom_right":
+            new_width = max( 100, self.resize_start_size.width() + delta.x() )
+            new_height = max( 30, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_right":
+            new_width = max( 100, self.resize_start_size.width() + delta.x() )
+            new_height = max( 30, self.resize_start_size.height() - delta.y() )
+
+        elif self.resize_corner == "bottom_left":
+            new_width = max( 100, self.resize_start_size.width() - delta.x() )
+            new_height = max( 30, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_left":
+            new_width = max( 100, self.resize_start_size.width() - delta.x() )
+            new_height = max( 30, self.resize_start_size.height() - delta.y() )
+
+        self.setSize( new_width, new_height )
+
+    def getValue( self ):
+        return self.value
+
+    def getWidth( self ):
+        return self._width
+
+    def getHeight( self ):
+        return self._height
+
+    def getCornerAt( self, pos ):
+        handle_size = 12
+        half_size = handle_size // 2
+        
+        corners = {
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
+        }
+        
+        for corner_name, corner_pos in corners.items():
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
+            
+            if corner_rect.contains( pos ):
+                return corner_name
+        
+        return None
+
+    def getTrackRect( self ):
+        w = self._width
+        h = self._height
+        
+        track_height = h // 3
+        track_y = h // 3
+        radius = h // 6 
+        
+        return QRect( radius, track_y, w - 2 * radius, track_height )
+
+    def getProgressRect( self ):
+        track_rect = self.getTrackRect()
+        progress_width = int( track_rect.width() * self.value / 100 )
+        
+        return QRect( track_rect.x(), track_rect.y(), progress_width, track_rect.height() )
+
+    def getTrackRightRect( self ):
+        track_rect = self.getTrackRect()
+        thumb_rect = self.getThumbRect()
+        
+        start_x = thumb_rect.x() + thumb_rect.width()
+        width = track_rect.x() + track_rect.width() - start_x
+        
+        if width > 0:
+            return QRect( start_x, track_rect.y(), width, track_rect.height() )
+        return QRect()
+
+    def getThumbRect( self ):
+        track_rect = self.getTrackRect()
+        
+        thumb_diameter = min( track_rect.height() * 2, self._height * 0.8 )
+        
+        thumb_x = track_rect.x() + int( ( track_rect.width() - thumb_diameter ) * ( self.value / 100 ) )
+        thumb_y = ( self._height - thumb_diameter ) // 2
+        
+        return QRect( thumb_x, thumb_y, thumb_diameter, thumb_diameter )
+
+    def getPropertiesDict( self ):
+        return {
+            'type': 'Slider',
+            'name': getattr( self, 'custom_name', 'Slider_0' ),
+            'stack_order': getattr( self, 'stack_order', 0 ),
+            'tag': self.tag,
+            'position': ( self.x(), self.y() ),
+            'width': self._width,
+            'height': self._height,
+            'active': getattr( self, 'active', True ),
+            'visible': getattr( self, 'visible', True ),
+            'static': getattr( self, 'static', False ),
+            '_3d': getattr( self, '_3d', False ),
+            'value': self.value,
+            'knob_color': self.progress_color.name(),         
+            'background_left_color': self.thumb_color.name(),  
+            'background_right_color': self.track_color.name(),
+            'border_color': self.border_color.name()
+        }
+
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
+
+    def setSize( self, width, height ):
+        self._width = width
+        self._height = height
+        self.setFixedSize( width, height )
+        self.update()
+
+    def setTrackColor( self, color ):
+        self.track_color = color
+        self.update()
+
+    def setThumbColor( self, color ):
+        self.thumb_color = color
+        self.update()
+
+    def setProgressColor( self, color ):
+        self.progress_color = color
+        self.update()
+
+    def setBorderColor( self, color ):
+        self.border_color = color
+        self.update()
+
+    def setValue( self, value ):
+        self.value = max( 0, min( 100, value ) )
+        self.update()
+
+    def setVisibleSlider( self, visible ):
+        self.visible = visible
+        self.setVisible( visible )
+        self.update()
+
+    def set3d( self, _3d ):
+        self._3d = _3d
+        self.update()
+
+    def updatePropertiesSize( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'width_spin_slider' ):
+                main_window.width_spin_slider.blockSignals( True )
+                main_window.width_spin_slider.setValue( self._width )
+                main_window.width_spin_slider.blockSignals( False )
+                
+            if hasattr( main_window, 'height_spin_slider' ):
+                main_window.height_spin_slider.blockSignals( True )
+                main_window.height_spin_slider.setValue( self._height )
+                main_window.height_spin_slider.blockSignals( False )
+
+    def updatePropertiesPosition( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            if hasattr( main_window, 'pos_x_spin_slider' ):
+                main_window.pos_x_spin_slider.blockSignals( True )
+                main_window.pos_x_spin_slider.setValue( self.x() )
+                main_window.pos_x_spin_slider.blockSignals( False )
+                
+            if hasattr( main_window, 'pos_y_spin_slider' ):
+                main_window.pos_y_spin_slider.blockSignals( True )
+                main_window.pos_y_spin_slider.setValue( self.y() )
+                main_window.pos_y_spin_slider.blockSignals( False )
+
+    def updateAllProperties( self ):
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition()
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            if hasattr( main_window, 'active_checkbox_slider' ):
+                main_window.active_checkbox_slider.blockSignals( True )
+                main_window.active_checkbox_slider.setChecked( self.active )
+                main_window.active_checkbox_slider.blockSignals( False )
+                
+            if hasattr( main_window, 'visible_checkbox_slider' ):
+                main_window.visible_checkbox_slider.blockSignals( True )
+                main_window.visible_checkbox_slider.setChecked( self.visible )
+                main_window.visible_checkbox_slider.blockSignals( False )
+                
+            if hasattr( main_window, 'static_checkbox_slider' ):
+                main_window.static_checkbox_slider.blockSignals( True )
+                main_window.static_checkbox_slider.setChecked( self.static )
+                main_window.static_checkbox_slider.blockSignals( False )
+                
+            if hasattr( main_window, '_3d_checkbox_slider' ):
+                main_window._3d_checkbox_slider.blockSignals( True )
+                main_window._3d_checkbox_slider.setChecked( self._3d )
+                main_window._3d_checkbox_slider.blockSignals( False )
+            
+            if hasattr( main_window, 'value_spin_slider' ):
+                main_window.value_spin_slider.blockSignals( True )
+                main_window.value_spin_slider.setValue( self.value )
+                main_window.value_spin_slider.blockSignals( False )
+            
+            if hasattr( main_window, 'name_edit_slider' ):
+                main_window.name_edit_slider.blockSignals( True )
+                main_window.name_edit_slider.setText( self.custom_name )
+                main_window.name_edit_slider.blockSignals( False )
+            
+            if hasattr( main_window, 'stack_order_spin_slider' ):
+                main_window.stack_order_spin_slider.blockSignals( True )
+
+                if main_window.current_shape in main_window.all_shapes:
+                    index = main_window.all_shapes.index( main_window.current_shape ) + 1
+                    main_window.stack_order_spin_slider.setValue( index )
+
+                main_window.stack_order_spin_slider.blockSignals( False )
+            
+            if hasattr( main_window, 'bg_left_color_rect_slider' ):
+                main_window.bg_left_color_rect_slider.setStyleSheet( f"background-color: { self.thumb_color.name() }; border: 1px solid #ccc;" )
+                
+            if hasattr( main_window, 'bg_right_color_rect_slider' ):
+                main_window.bg_right_color_rect_slider.setStyleSheet( f"background-color: { self.track_color.name()} ; border: 1px solid #ccc;" )
+                
+            if hasattr(main_window, 'knob_color_rect_slider'):
+                main_window.knob_color_rect_slider.setStyleSheet( f"background-color: { self.progress_color.name() }; border: 1px solid #ccc;" )
+
+    def updatePropertiesDict( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+            
+        if hasattr( main_window, 'all_slider_dicts' ):
+            if self.custom_name in main_window.all_slider_dicts:
+                main_window.all_slider_dicts[ self.custom_name ] = self.getPropertiesDict()
+
+    def findMainWindow( self ):
+        parent = self.parent()
+
+        while parent:
+            if isinstance( parent, QMainWindow ):
+                return parent
+            
+            parent = parent.parent()
+
+        return None
+
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
 
-            # Proveri da li je kliknut resize handle
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
-                # Počni resize
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+
             else:
-                # Počni dragovanje ili selektuj
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                
-                # Proveri da li je klik na thumb (krug) ili track
-                thumb_rect = self.get_thumb_rect()
+                thumb_rect = self.getThumbRect()
+
                 if thumb_rect.contains(event.pos()):
-                    # Klik na thumb - za buduću implementaciju draganja thumb-a
                     pass
+
                 else:
-                    # Klik na track - pomeri thumb na tu poziciju
-                    track_rect = self.get_track_rect()
-                    if track_rect.contains(event.pos()):
+                    track_rect = self.getTrackRect()
+
+                    if track_rect.contains( event.pos() ):
                         relative_x = event.pos().x() - track_rect.x()
-                        new_value = int((relative_x / track_rect.width()) * 100)
-                        self.set_value(new_value)
+                        new_value = int( ( relative_x / track_rect.width() ) * 100 )
+                        self.setValue( new_value )
                 
-                self.clicked.emit(self)
-                # Ažuriraj sve properties kada se selektuje
-                self.update_all_properties()
+                self.clicked.emit( self )
+                self.updateAllProperties()
 
         event.accept()
 
-    def mouseMoveEvent(self, event):
-        mouse_pos = event.pos()
-        
-        # Proveri da li je miš preko resize handle-a
-        corner = self.getCornerAt(mouse_pos)
-        if corner:
-            # Postavi odgovarajući kursor
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
-        
-        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
-            # Ažuriraj properties bar U TOKU resize-a
-            self.updatePropertiesSize()
-            self.updatePropertiesPosition()
-        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
-            delta = mouse_pos - self.drag_start_pos
-            
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-            super().move(new_x, new_y)
-            
-            # Ažuriraj properties bar U TOKU draganja (real-time)
-            self.updatePropertiesPosition()
-        
-        event.accept()
-
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
 
-            # Ažuriraj properties bar NAKON što se završi drag ili resize
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
-            
-            # Ažuriraj rečnik
             self.updatePropertiesDict()
 
         event.accept()
 
-    def getCornerAt(self, pos):
-        """Proverava da li je miš preko nekog od uglova za resize"""
-        handle_size = 12  # Veća zona za lakše hvatanje
-        half_size = handle_size // 2
+    def mouseMoveEvent( self, event ):
+        mouse_pos = event.pos()
+        corner = self.getCornerAt( mouse_pos )
+
+        if corner:
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
+
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
+
+        else:
+            self.setCursor( Qt.CursorShape.ArrowCursor )
         
-        corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
-        }
+        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
+            self.handleResize( event.globalPosition().toPoint() )
+            self.updatePropertiesSize()
+            self.updatePropertiesPosition()
+
+        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            delta = mouse_pos - self.drag_start_pos
+
+            new_x = self.x() + delta.x()
+            new_y = self.y() + delta.y()
+
+            super().move( new_x, new_y )
+            self.updatePropertiesPosition()
         
-        for corner_name, corner_pos in corners.items():
-            # Kreiraj pravougaonik oko ugla
-            corner_rect = QRect(
-                corner_pos.x() - half_size,
-                corner_pos.y() - half_size,
-                handle_size,
-                handle_size
-            )
-            
-            if corner_rect.contains(pos):
-                return corner_name
-        
-        return None
+        event.accept()
 
-    def handleResize(self, global_pos):
-        """Menja veličinu SliderWidget-a"""
-        if not self.resize_corner:
-            return
-
-        # Računaj promenu u veličini
-        delta = global_pos - self.resize_start_pos
-
-        new_width = self.resize_start_size.width()
-        new_height = self.resize_start_size.height()
-
-        # Svi uglovi mogu da menjaju veličinu
-        if self.resize_corner == "bottom_right":
-            new_width = max(100, self.resize_start_size.width() + delta.x())
-            new_height = max(30, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_right":
-            new_width = max(100, self.resize_start_size.width() + delta.x())
-            new_height = max(30, self.resize_start_size.height() - delta.y())
-        elif self.resize_corner == "bottom_left":
-            new_width = max(100, self.resize_start_size.width() - delta.x())
-            new_height = max(30, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_left":
-            new_width = max(100, self.resize_start_size.width() - delta.x())
-            new_height = max(30, self.resize_start_size.height() - delta.y())
-
-        self.setSize(new_width, new_height)
-
-    def get_track_rect(self):
-        """Vraća pravougaonik za track (deo između polukrugova)"""
-        w = self._width
-        h = self._height
-        
-        # Track zauzima centralni deo, sa polukrugovima na krajevima
-        track_height = h // 3  # Track zauzima trećinu visine
-        track_y = h // 3  # Centriran vertikalno
-        
-        # Polukrugovi na krajevima
-        radius = h // 6  # Polumjer polukrugova
-        
-        return QRect(radius, track_y, w - 2 * radius, track_height)
-
-    def get_progress_rect(self):
-        """Vraća pravougaonik za progress deo (leva strana)"""
-        track_rect = self.get_track_rect()
-        progress_width = int(track_rect.width() * self.value / 100)
-        
-        return QRect(track_rect.x(), track_rect.y(), progress_width, track_rect.height())
-
-    def get_track_right_rect(self):
-        """Vraća pravougaonik za desnu stranu track-a (deo desno od thumb-a)"""
-        track_rect = self.get_track_rect()
-        thumb_rect = self.get_thumb_rect()
-        
-        # Počinje od desne ivice thumb-a do kraja track-a
-        start_x = thumb_rect.x() + thumb_rect.width()
-        width = track_rect.x() + track_rect.width() - start_x
-        
-        if width > 0:
-            return QRect(start_x, track_rect.y(), width, track_rect.height())
-        return QRect()  # Prazan pravougaonik ako nema prostora
-
-    def get_thumb_rect(self):
-        """Vraća pravougaonik za thumb (krug)"""
-        track_rect = self.get_track_rect()
-        
-        # Thumb je krug koji se pomera po track-u
-        thumb_diameter = min(track_rect.height() * 2, self._height * 0.8)  # 80% visine ili 2x track visina
-        thumb_radius = thumb_diameter // 2
-        
-        # Pozicija thumb-a bazirana na vrednosti
-        thumb_x = track_rect.x() + int((track_rect.width() - thumb_diameter) * (self.value / 100))
-        thumb_y = (self._height - thumb_diameter) // 2  # Centriran vertikalno
-        
-        return QRect(thumb_x, thumb_y, thumb_diameter, thumb_diameter)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        w = self._width
-        h = self._height
-
-        # Pravougaonici
-        track_rect = self.get_track_rect()
-        progress_rect = self.get_progress_rect()
-        thumb_rect = self.get_thumb_rect()
-        track_right_rect = self.get_track_right_rect()
-
-        radius = track_rect.height() // 2
-
-        # 1. CELI TRACK - osnova (crni outline)
-        pen = QPen(self.border_color)
-        pen.setWidth(3)
-        painter.setPen(pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-
-        # Levi polukrug track-a (outline)
-        painter.drawArc(track_rect.x() - radius, track_rect.y(), 
-                       radius * 2, radius * 2, 90*16, 180*16)
-
-        # Desni polukrug track-a (outline)
-        painter.drawArc(track_rect.x() + track_rect.width() - radius, track_rect.y(),
-                       radius * 2, radius * 2, 90*16, -180*16)
-
-        # Gornja i donja linija track-a (outline)
-        painter.drawLine(track_rect.x(), track_rect.y(), 
-                        track_rect.x() + track_rect.width(), track_rect.y())
-        painter.drawLine(track_rect.x(), track_rect.y() + track_rect.height(),
-                        track_rect.x() + track_rect.width(), track_rect.y() + track_rect.height())
-
-        # 2. DESNA STRANA TRACK-A (tamnoplava) - popunjava prostor DESNO od thumb-a
-        if track_right_rect.width() > 0:
-            pen = QPen(self.track_color)
-            pen.setWidth(3)
-            painter.setPen(pen)
-            painter.setBrush(self.track_color)
-
-            # Desni deo pravougaonika
-            if track_right_rect.width() > radius:
-                # Iscrtaj desni polukrug
-                painter.drawPie(track_rect.x() + track_rect.width() - radius, track_rect.y(),
-                              radius * 2, radius * 2, 90*16, -180*16)
-
-                # Iscrtaj desni deo pravougaonika
-                painter.drawRect(track_right_rect.x(), track_rect.y(),
-                               track_right_rect.width(), track_rect.height())
-            else:
-                # Ako je mali prostor, samo popuni šta može
-                painter.drawRect(track_right_rect.x(), track_rect.y(),
-                               track_right_rect.width(), track_rect.height())
-
-        # 3. LEVA STRANA TRACK-A (progress - bela) - popunjava prostor LEVO od thumb-a
-        if progress_rect.width() > 0:
-            pen = QPen(self.thumb_color)
-            pen.setWidth(3)
-            painter.setPen(pen)
-            painter.setBrush(self.thumb_color)
-
-            # Levi deo pravougaonika
-            if progress_rect.width() > radius:
-                # Iscrtaj levi polukrug
-                painter.drawPie(track_rect.x() - radius, track_rect.y(),
-                              radius * 2, radius * 2, 90*16, 180*16)
-
-                # Iscrtaj levi deo pravougaonika (do thumb-a)
-                painter.drawRect(track_rect.x(), track_rect.y(),
-                               progress_rect.width() - radius, track_rect.height())
-            else:
-                # Ako je progress mali, samo popuni šta može
-                painter.drawRect(track_rect.x(), track_rect.y(),
-                               progress_rect.width(), track_rect.height())
-
-            if track_right_rect.width() > 0:
-                # Tamna linija ispod desnog dela
-                pen = QPen(QColor(0, 0, 0))
-                pen.setWidth(2)
-                painter.setPen(pen)
-
-                painter.drawLine(track_rect.x(), track_rect.y()-1, track_rect.x() + progress_rect.width(), track_rect.y()-1)
-                painter.drawLine(track_rect.x(), track_rect.y() + progress_rect.height()+1, track_rect.x() + progress_rect.width(), track_rect.y() + progress_rect.height()+1)
-                painter.drawArc(track_rect.x() - radius-1, track_rect.y()-1, radius * 2+2, radius * 2+2, 90*16, 180*16)
-
-        # 4. THUMB (tamnoplavi krug) - preklapa oba dela
-        pen = QPen(self.progress_color)
-        pen.setWidth(3)
-        painter.setPen(pen)
-        painter.setBrush(self.progress_color)
-        painter.drawEllipse(thumb_rect)
-
-        # 5. 3D efekti ako je uključen
-        if self._3d:
-            # 3D efekti za track
-            if progress_rect.width() > 0:
-                # Svetla linija iznad progress dela
-                pen = QPen(QColor(255, 255, 255))
-                pen.setWidth(1)
-                painter.setPen(pen)
-                painter.drawLine(track_right_rect.x(), track_rect.y()-1, track_rect.x() + track_rect.width(), track_rect.y()-1)
-                painter.drawLine(track_right_rect.x(), track_rect.y() + progress_rect.height()+1, track_rect.x() + track_rect.width(), track_rect.y() + progress_rect.height()+1)
-                painter.drawArc(track_rect.x() + track_rect.width() - radius-1, track_rect.y()-1, radius * 2+2, radius * 2+2, 90*16, -180*16)
-
-            # 3D efekti za thumb - BELI LUK (gornja polovina: od 45° do 225°)
-            pen = QPen(QColor(236, 238, 241))  # Svetlo siva/bela boja
-            pen.setWidth(1)
-            painter.setPen(pen)
-            # Crtanje belog luka (gornja polovina)
-            painter.drawArc(thumb_rect, 40*16, 160*16)
-
-            # 3D efekti za thumb - CRNI LUK (donja polovina: od 225° do 45°)
-            pen = QPen(QColor(0, 0, 0))  # Crna boja
-            pen.setWidth(1)
-            painter.setPen(pen)
-            # Crtanje crnog luka (donja polovina)
-            # 225° = 225 * 16 = 3600, 180° = 180 * 16 = 2880
-            painter.drawArc(thumb_rect, 200*16, 180*16)
-
-
-        # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-        if self.selected:
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
-
-    def getPropertiesDict(self):
-        """Vraća rečnik sa svim svojstvima slider-a"""
-        return {
-            'type': 'Slider',
-            'name': getattr(self, 'custom_name', 'Slider_0'),
-            'stack_order': getattr(self, 'stack_order', 0),
-            'tag': self.tag,
-            'position': (self.x(), self.y()),
-            'width': self._width,
-            'height': self._height,
-            'active': getattr(self, 'active', True),
-            'visible': getattr(self, 'visible', True),
-            'static': getattr(self, 'static', False),
-            '_3d': getattr(self, '_3d', False),
-            'value': self.value,
-            'knob_color': self.progress_color.name(),           # Knob (krug)
-            'background_left_color': self.thumb_color.name(),   # Leva strana (progress)
-            'background_right_color': self.track_color.name(),  # Desna strana (track)
-            'border_color': self.border_color.name()
-        }
-
-    def updatePropertiesDict(self):
-        """Ažurira rečnik svojstava"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-            
-        if hasattr(main_window, 'all_slider_dicts'):
-            if self.custom_name in main_window.all_slider_dicts:
-                main_window.all_slider_dicts[self.custom_name] = self.getPropertiesDict()
-
-class ProgressBarWidget(QWidget):
-    clicked = pyqtSignal(object)
+class ProgressBarWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def __init__(self, width, height, parent=None):
-        super().__init__(parent)
+    def __init__( self, width, height, parent = None ):
+        super().__init__( parent )
         self._width = width
         self._height = height
-        self.setFixedSize(width, height)
+        self.setFixedSize( width, height )
         
-        # Svojstva za progress bar
-        self.bar_color = QColor(0, 32, 64)      # Tamnoplava kao original
-        self.progress_color = QColor(255, 255, 255)  # Bela kao original
-        self.border_color = QColor(0, 0, 0)     # Crni border
-        self.white_border_color = QColor(236, 238, 241)  # Svetli border kao original
+        self.bar_color = QColor( 0, 32, 64 ) 
+        self.progress_color = QColor( 255, 255, 255 )
+        self.border_color = QColor( 0, 0, 0 ) 
+        self.white_border_color = QColor( 236, 238, 241 )
         
-        # Progress vrednost (0-100)
-        self.progress_value = 50  # Podrazumevano 50% kao u originalu
+        self.progress_value = 50
         
-        # Selekcija
         self.selected = False
-        self.selection_color = QColor(255, 0, 0)
+        self.selection_color = QColor( 255, 0, 0 )
         
-        # Default properties za properties dict
         self.custom_name = ""
         self.stack_order = 1
         self.active = True
@@ -5647,7 +5035,6 @@ class ProgressBarWidget(QWidget):
         self.min_value = 0
         self.max_value = 100
         
-        # Resize i drag varijable (kao u SliderWidget)
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
@@ -5655,353 +5042,176 @@ class ProgressBarWidget(QWidget):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
 
-    def setSelected(self, selected):
-        self.selected = selected
-        self.update()
-
-    def setSize(self, width, height):
-        """Postavlja veličinu widgeta i ažurira properties bar"""
-        self._width = width
-        self._height = height
-        self.setFixedSize(width, height)
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
-        # Ažuriraj properties bar
-        main_window = self.findMainWindow()
-        if main_window and main_window.current_shape == self:
-            try:
-                if hasattr(main_window, 'progress_width_spin'):
-                    main_window.progress_width_spin.blockSignals(True)
-                    main_window.progress_width_spin.setValue(width)
-                    main_window.progress_width_spin.blockSignals(False)
-            except RuntimeError:
-                pass
-            
-            try:
-                if hasattr(main_window, 'progress_height_spin'):
-                    main_window.progress_height_spin.blockSignals(True)
-                    main_window.progress_height_spin.setValue(height)
-                    main_window.progress_height_spin.blockSignals(False)
-            except RuntimeError:
-                pass
+        w = self._width
+        h = self._height
+
+        pen = QPen( self.bar_color )
+        pen.setWidth( 3 )
+        painter.setPen( pen )
+        painter.setBrush( self.bar_color )
         
-        # Ažuriraj rečnik
-        self.updatePropertiesDict()
+        radius = h // 2
         
-        self.update()
+        painter.drawPie( 0, 0, 2 * radius, 2 * radius, 90 * 16, 180 * 16 )
+        painter.drawRect( radius, 0, w - 2 * radius, h )
+        painter.drawPie(w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 180 * 16 )
+        
+        pen = QPen( self.progress_color )
+        pen.setWidth( 3 )
+        painter.setPen( pen )
+        painter.setBrush( self.progress_color )
+        
+        progress_width = int( ( w - 2 * radius ) * ( self.progress_value / 100.0 ) )
+        
+        inner_offset = 6 
+        inner_radius = radius - inner_offset // 2
+        
+        painter.drawPie( inner_offset // 2, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90 * 16, 180 * 16 )
+        painter.drawRect( radius - 3 + inner_offset // 2, inner_offset // 2, progress_width, 2 * inner_radius )
+        painter.drawPie( inner_offset // 2 + progress_width, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90 * 16, - 180 * 16 )
 
-    def getWidth(self):
-        return self._width
+        if self._3d:
+            pen = QPen( self.border_color )
+            pen.setWidth( 2 )
+            painter.setPen( pen )
 
-    def getHeight(self):
-        return self._height
+            painter.drawLine( radius, 0, w - radius, 0 )
+            painter.drawArc( w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 45 * 16 )
+            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 90 * 16, 135 * 16 )
 
-    def set_bar_color(self, color):
-        self.bar_color = color
-        self.update()
+            pen = QPen( self.white_border_color )
+            pen.setWidth( 1 )
+            painter.setPen( pen )
 
-    def set_progress_color(self, color):
-        self.progress_color = color
-        self.update()
+            painter.drawLine( radius, h, w - radius, h )
+            painter.drawArc( w - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, - 135 * 16 )
+            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 225 * 16, 45 * 16 )
 
-    def setBorderColor(self, color):
-        self.border_color = color
-        self.update()
+        if self.selected:
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
 
-    def set_white_border_color(self, color):
-        self.white_border_color = color
-        self.update()
-
-    def set_progress(self, value):
-        """Postavlja vrednost progress bara (0-100)"""
-        self.progress_value = max(0, min(100, value))
-        self.update()
-
-    def get_progress(self):
-        """Getter za progress vrednost"""
-        return self.progress_value
-
-    # Metode za resize i drag (kao u SliderWidget)
-    def drawSelectionHandles(self, painter):
-        """Crtanje resize handle-ova na uglovima kada je selektovano"""
+    def drawSelectionHandles( self, painter ):
         if not self.selected:
             return
             
         handle_size = 8
         half_size = handle_size // 2
 
-        # Zeleni handle-ovi
-        painter.setBrush(QColor(0, 255, 0))
-        painter.setPen(QPen(QColor(0, 80, 200), 1))
+        painter.setBrush( QColor( 0, 255, 0 ) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-        # 4 ugla
-        corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-            QPoint(4, self.height()-4),  # donji levi
-            QPoint(self.width()-4, self.height()-4)  # donji desni
-        ]
+        corners = [ QPoint(4, 4), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
-                              handle_size, handle_size)
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-            # Mali beli centar
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))
-            painter.setPen(QPen(QColor(0, 80, 200), 1))
-
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira kada je selektovano"""
+    def drawSelectionBorder( self, painter ):
         if not self.selected:
             return
             
         margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            mouse_pos = event.pos()
-
-            # Proveri da li je kliknut resize handle
-            self.resize_corner = self.getCornerAt(mouse_pos)
-
-            if self.resize_corner:
-                # Počni resize
-                self.resizing = True
-                self.resize_start_pos = event.globalPosition().toPoint()
-                self.resize_start_size = self.size()
-            else:
-                # Počni dragovanje ili selektuj
-                self.dragging = True
-                self.drag_start_pos = mouse_pos
-                
-                self.clicked.emit(self)
-                # Ažuriraj sve properties kada se selektuje
-    
-
-        event.accept()
-
-    def mouseMoveEvent(self, event):
-        mouse_pos = event.pos()
-        
-        # Proveri da li je miš preko resize handle-a
-        corner = self.getCornerAt(mouse_pos)
-        if corner:
-            # Postavi odgovarajući kursor
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
-        
-        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
-        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
-            delta = mouse_pos - self.drag_start_pos
-            
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-            
-            # KORISTITE self.move() UMESTO super().move()
-            self.move(new_x, new_y)  # OVO ĆE POZVATI OVERRIDE MOVE METODU
-        
-        event.accept()
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
 
     def move(self, x, y):
-        """Override move metode da ažurira properties bar"""
         super().move(x, y)
         
         main_window = self.findMainWindow()
         if main_window and main_window.current_shape == self:
             try:
-                if hasattr(main_window, 'progress_pos_x_spin'):
-                    main_window.progress_pos_x_spin.blockSignals(True)
-                    main_window.progress_pos_x_spin.setValue(x)
-                    main_window.progress_pos_x_spin.blockSignals(False)
+                if hasattr( main_window, 'progress_pos_x_spin' ):
+                    main_window.progress_pos_x_spin.blockSignals( True )
+                    main_window.progress_pos_x_spin.setValue( x )
+                    main_window.progress_pos_x_spin.blockSignals( False )
+
             except RuntimeError:
                 pass
             
             try:
-                if hasattr(main_window, 'progress_pos_y_spin'):
-                    main_window.progress_pos_y_spin.blockSignals(True)
-                    main_window.progress_pos_y_spin.setValue(y)
-                    main_window.progress_pos_y_spin.blockSignals(False)
+                if hasattr( main_window, 'progress_pos_y_spin' ):
+                    main_window.progress_pos_y_spin.blockSignals( True )
+                    main_window.progress_pos_y_spin.setValue( y )
+                    main_window.progress_pos_y_spin.blockSignals( False )
+
             except RuntimeError:
                 pass
 
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.resizing = False
-            self.dragging = False
-            self.resize_corner = None
+    def handleResize( self, global_pos ):
+        if not self.resize_corner:
+            return
 
-            # Ažuriraj properties bar NAKON što se završi drag ili resize
-            
-            # Ažuriraj rečnik
-            self.updatePropertiesDict()
+        delta = global_pos - self.resize_start_pos
+        new_width = self.resize_start_size.width()
+        new_height = self.resize_start_size.height()
 
-        event.accept()
+        if self.resize_corner == "bottom_right":
+            new_width = max( 50, self.resize_start_size.width() + delta.x() )
+            new_height = max( 5, self.resize_start_size.height() + delta.y() )
 
-    def getCornerAt(self, pos):
-        """Proverava da li je miš preko nekog od uglova za resize"""
-        handle_size = 12  # Veća zona za lakše hvatanje
+        elif self.resize_corner == "top_right":
+            new_width = max( 50, self.resize_start_size.width() + delta.x() )
+            new_height = max( 5, self.resize_start_size.height() - delta.y() )
+
+        elif self.resize_corner == "bottom_left":
+            new_width = max( 50, self.resize_start_size.width() - delta.x() )
+            new_height = max( 5, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_left":
+            new_width = max( 50, self.resize_start_size.width() - delta.x() )
+            new_height = max( 5, self.resize_start_size.height() - delta.y() )
+
+        self.setSize( new_width, new_height )
+
+    def get_progress( self ):
+        return self.progress_value
+
+    def getWidth( self ):
+        return self._width
+
+    def getHeight( self ):
+        return self._height
+
+    def getCornerAt( self, pos ):
+        handle_size = 12
         half_size = handle_size // 2
         
         corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
         }
         
         for corner_name, corner_pos in corners.items():
-            # Kreiraj pravougaonik oko ugla
-            corner_rect = QRect(
-                corner_pos.x() - half_size,
-                corner_pos.y() - half_size,
-                handle_size,
-                handle_size
-            )
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
             
-            if corner_rect.contains(pos):
+            if corner_rect.contains( pos ):
                 return corner_name
         
         return None
 
-    def handleResize(self, global_pos):
-        """Menja veličinu ProgressBarWidget-a"""
-        if not self.resize_corner:
-            return
-
-        # Računaj promenu u veličini
-        delta = global_pos - self.resize_start_pos
-
-        new_width = self.resize_start_size.width()
-        new_height = self.resize_start_size.height()
-
-        # Svi uglovi mogu da menjaju veličinu
-        if self.resize_corner == "bottom_right":
-            new_width = max(50, self.resize_start_size.width() + delta.x())  # Smanjeno na 50
-            new_height = max(5, self.resize_start_size.height() + delta.y())  # Smanjeno na 5
-        elif self.resize_corner == "top_right":
-            new_width = max(50, self.resize_start_size.width() + delta.x())
-            new_height = max(5, self.resize_start_size.height() - delta.y())
-        elif self.resize_corner == "bottom_left":
-            new_width = max(50, self.resize_start_size.width() - delta.x())
-            new_height = max(5, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_left":
-            new_width = max(50, self.resize_start_size.width() - delta.x())
-            new_height = max(5, self.resize_start_size.height() - delta.y())
-
-        self.setSize(new_width, new_height)
-
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
-        parent = self.parent()
-        while parent:
-            if isinstance(parent, QMainWindow):
-                return parent
-            parent = parent.parent()
-        return None
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        w = self._width
-        h = self._height
-        
-        # Prvo crtamo celokupni progress bar (pozadina)
-        # Tamnoplavi deo (pozadina) - celokupni bar
-        pen = QPen(self.bar_color)
-        pen.setWidth(3)
-        painter.setPen(pen)
-        painter.setBrush(self.bar_color)
-        
-        # Polumjer za polukrugove
-        radius = h // 2
-        
-        # Levi polukrug
-        painter.drawPie(0, 0, 2 * radius, 2 * radius, 90*16, 180*16)
-        # Centralni pravougaonik
-        painter.drawRect(radius, 0, w - 2 * radius, h)
-        # Desni polukrug
-        painter.drawPie(w - 2 * radius, 0, 2 * radius, 2 * radius, 90*16, -180*16)
-        
-        # Beli deo (progress) - samo deo koji je popunjen
-        pen = QPen(self.progress_color)
-        pen.setWidth(3)
-        painter.setPen(pen)
-        painter.setBrush(self.progress_color)
-        
-        # Izračunaj širinu progress dela
-        progress_width = int((w - 2 * radius) * (self.progress_value / 100.0))
-        
-        
-        # Levi beli polukrug (uvek crtamo ako ima progress)
-        inner_offset = 6  # Unutrašnji offset za beli deo
-        inner_radius = radius - inner_offset // 2
-        
-        # Levi beli polukrug
-        painter.drawPie(inner_offset // 2, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90*16, 180*16)
-        
-        # Centralni beli pravougaonik (progress deo)
-        painter.drawRect(radius - 3 + inner_offset // 2, inner_offset // 2, progress_width, 2 * inner_radius)
-        
-        # Desni beli polukrug (crtamo samo ako je progress 100%)
-        painter.drawPie(inner_offset // 2 + progress_width, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90*16, -180*16)
-
-        if self._3d:
-            # Crni border (gornji deo)
-            pen = QPen(self.border_color)
-            pen.setWidth(2)
-            painter.setPen(pen)
-
-            # Gornja linija
-            painter.drawLine(radius, 0, w - radius, 0)
-            # Desni gornji luk
-            painter.drawArc(w - 2 * radius, 0, 2 * radius, 2 * radius, 90*16, -45*16)
-            # Levi gornji luk
-            painter.drawArc(0, 0, 2 * radius, 2 * radius, 90*16, 135*16)
-
-            # Svetli border (donji deo) - kao u originalu
-            pen = QPen(self.white_border_color)
-            pen.setWidth(1)
-            painter.setPen(pen)
-
-            # Donja linija
-            painter.drawLine(radius, h, w - radius, h)
-            # Desni donji luk
-            painter.drawArc(w - 2 * radius, 0, 2 * radius, 2 * radius, 45*16, -135*16)
-            # Levi donji luk
-            painter.drawArc(0, 0, 2 * radius, 2 * radius, 225*16, 45*16)
-
-        # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-        if self.selected:
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
-
-    # METODE ZA PROPERTIES DICT
-    def getPropertiesDict(self):
-        """Vraća rečnik sa svim svojstvima progress bar-a"""
+    def getPropertiesDict( self ):
         return {
             'type': 'ProgressBar',
             'name': self.custom_name,
@@ -6010,7 +5220,7 @@ class ProgressBarWidget(QWidget):
             'visible': self.visible,
             'static': self.static,
             'position': (self.x(), self.y()),
-            'size': (self.getWidth(), self.getHeight()),
+            'size': ( self.getWidth(), self.getHeight() ),
             'progress_color': self.progress_color.name(),
             'background_color': self.bar_color.name(),
             '_3d': self._3d,
@@ -6022,81 +5232,196 @@ class ProgressBarWidget(QWidget):
             'progress_value': self.progress_value
         }
 
-    def updatePropertiesDict(self):
-        """Ažurira properties rečnik"""
-        main_window = self.findMainWindow()
-        if main_window and hasattr(main_window, 'all_progressbar_dicts'):
-            main_window.all_progressbar_dicts[self.custom_name] = self.getPropertiesDict()
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
 
-    def setActive(self, active):
+    def setSize( self, width, height ):
+        self._width = width
+        self._height = height
+        self.setFixedSize( width, height )
+        
+        main_window = self.findMainWindow()
+
+        if main_window and main_window.current_shape == self:
+            try:
+                if hasattr( main_window, 'progress_width_spin' ):
+                    main_window.progress_width_spin.blockSignals( True )
+                    main_window.progress_width_spin.setValue( width )
+                    main_window.progress_width_spin.blockSignals( False )
+
+            except RuntimeError:
+                pass
+            
+            try:
+                if hasattr( main_window, 'progress_height_spin' ):
+                    main_window.progress_height_spin.blockSignals( True )
+                    main_window.progress_height_spin.setValue( height )
+                    main_window.progress_height_spin.blockSignals( False )
+
+            except RuntimeError:
+                pass
+        
+        self.updatePropertiesDict()
+        self.update()
+
+    def setBarColor( self, color ):
+        self.bar_color = color
+        self.update()
+
+    def setProgressColor( self, color ):
+        self.progress_color = color
+        self.update()
+
+    def setBorderColor( self, color ):
+        self.border_color = color
+        self.update()
+
+    def setWhiteBorderColor( self, color ):
+        self.white_border_color = color
+        self.update()
+
+    def setProgress( self, value ):
+        self.progress_value = max( 0, min( 100, value ) )
+        self.update()
+
+    def setActive( self, active ):
         self.active = active
         self.update()
 
-    def setVisibleProgressBar(self, visible):
+    def setVisibleProgressBar( self, visible ):
         self.visible = visible
-        self.setVisible(visible)
+        self.setVisible( visible )
         self.update()
 
-    def setStatic(self, static):
+    def setStatic( self, static ):
         self.static = static
         self.update()
 
-    def set_3d(self, _3d):
+    def set3d( self, _3d ):
         self._3d = _3d
         self.update()
 
-    def set_value(self, value):
-        self.value = max(self.min_value, min(self.max_value, value))
-        # Ažuriraj i progress vrednost ako je potrebno
+    def setValue( self, value ):
+        self.value = max( self.min_value, min( self.max_value, value ) )
         progress_range = self.max_value - self.min_value
+
         if progress_range > 0:
-            self.progress_value = int(((self.value - self.min_value) / progress_range) * 100)
+            self.progress_value = int( ( ( self.value - self.min_value) / progress_range ) * 100 )
+
         self.update()
 
-    def set_range(self, min_value, max_value):
+    def setRange( self, min_value, max_value ):
         self.min_value = min_value
         self.max_value = max_value
-        # Ažuriraj trenutnu vrednost da bude unutar novog opsega
-        self.value = max(min_value, min(max_value, self.value))
-        # Ažuriraj progress vrednost
+        self.value = max( min_value, min( max_value, self.value ) )
         progress_range = self.max_value - self.min_value
+
         if progress_range > 0:
-            self.progress_value = int(((self.value - self.min_value) / progress_range) * 100)
+            self.progress_value = int( ( ( self.value - self.min_value ) / progress_range ) * 100 )
+
         self.update()
 
-class ImageWidget(QWidget):
-    clicked = pyqtSignal(object)
+    def updatePropertiesDict( self ):
+        main_window = self.findMainWindow()
+
+        if main_window and hasattr( main_window, 'all_progressbar_dicts' ):
+            main_window.all_progressbar_dicts[self.custom_name] = self.getPropertiesDict()
+
+    def findMainWindow( self ):
+        parent = self.parent()
+
+        while parent:
+            if isinstance( parent, QMainWindow ):
+                return parent
+            
+            parent = parent.parent()
+
+        return None
+
+    def mousePressEvent( self, event ):
+        if event.button() == Qt.MouseButton.LeftButton:
+            mouse_pos = event.pos()
+
+            self.resize_corner = self.getCornerAt( mouse_pos )
+
+            if self.resize_corner:
+                self.resizing = True
+                self.resize_start_pos = event.globalPosition().toPoint()
+                self.resize_start_size = self.size()
+
+            else:
+                self.dragging = True
+                self.drag_start_pos = mouse_pos
+                
+                self.clicked.emit( self )
+
+        event.accept()
+
+    def mouseReleaseEvent( self, event ):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.resizing = False
+            self.dragging = False
+            self.resize_corner = None
+
+            self.updatePropertiesDict()
+
+        event.accept()
+
+    def mouseMoveEvent( self, event ):
+        mouse_pos = event.pos()
+        corner = self.getCornerAt(mouse_pos)
+
+        if corner:
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
+
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
+
+        else:
+            self.setCursor( Qt.CursorShape.ArrowCursor )
+        
+        if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
+            self.handleResize(event.globalPosition().toPoint())
+
+        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            delta = mouse_pos - self.drag_start_pos
+            
+            new_x = self.x() + delta.x()
+            new_y = self.y() + delta.y()
+
+            self.move(new_x, new_y)
+        
+        event.accept()
+
+class ImageWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def __init__(self, width=100, height=100, parent=None):
-        super().__init__(parent)
+    def __init__( self, width = 100, height = 100, parent = None ):
+        super().__init__( parent )
         self._width = width
         self._height = height
         
-        # Status properties
         self.active = True
         self.visible = True
         self.static = False
         self.custom_name = None
         self.stack_order = 1
         
-        # Geometry properties
         self._x = 0
         self._y = 0
         
-        # Frame properties
         self.frame_enabled = False
-        self.frame_color = QColor(0, 0, 0)
+        self.frame_color = QColor( 0, 0, 0 )
         self.frame_width = 1
         
-        # Background color
-        self.background_color = QColor(240, 240, 240)
+        self.background_color = QColor( 240, 240, 240 )
         
-        # Image properties
         self.image_path = ""
-        self.original_pixmap = QPixmap()  # Originalna učitana slika
-        self.pixmap = QPixmap()  # Trenutno prikazana slika (resizovana)
+        self.original_pixmap = QPixmap()
+        self.pixmap = QPixmap()
         
-        # Selection
         self.selected = False
         self.dragging = False
         self.resizing = False
@@ -6105,145 +5430,164 @@ class ImageWidget(QWidget):
         self.resize_start_pos = QPoint()
         self.resize_start_size = QSize()
         
-        # Postavi fiksnu veličinu
-        self.setFixedSize(self._width, self._height)
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setFixedSize( self._width, self._height )
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
         self.updatePropertiesDict()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
+        
+        painter.setBrush( self.background_color )
+        painter.setPen( Qt.PenStyle.NoPen )
+        painter.drawRect( 0, 0, self._width, self._height )
+        
+        if not self.pixmap.isNull():
+            if self.frame_enabled:
+                margin = self.frame_width  
+
+            else:
+                margin = 0
+        
+            x = margin
+            y = margin
+            
+            painter.drawPixmap(x, y, self.pixmap)
+        
+        if self.frame_enabled and self.frame_width > 0:
+            painter.setPen( QPen( self.frame_color, self.frame_width ) )
+            painter.setBrush( Qt.BrushStyle.NoBrush )
+            painter.drawRect( 0, 0, self._width, self._height )
+        
+        if self.selected:
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
+
+    def drawSelectionHandles( self, painter ):
+        if not self.selected:
+            return
+            
+        handle_size = 8
+        half_size = handle_size // 2
+
+        painter.setBrush( QColor( 0, 255, 0 ) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
+
+        for corner in corners:
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
     
-    def setSize(self, width, height):
-        """Postavlja veličinu widgeta i resizuje sliku"""
-        self._width = max(20, width)
-        self._height = max(20, height)
+    def drawSelectionBorder( self, painter ):
+        if not self.selected:
+            return
+            
+        margin = 2
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
+
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
+
+    def handleResize( self, global_pos ):
+        if not self.resize_corner:
+            return
+
+        delta = global_pos - self.resize_start_pos
+
+        new_width = self.resize_start_size.width()
+        new_height = self.resize_start_size.height()
+
+        if self.resize_corner == "bottom_right":
+            new_width = max( 20, self.resize_start_size.width() + delta.x() )
+            new_height = max( 20, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_right":
+            new_width = max( 20, self.resize_start_size.width() + delta.x() )
+            new_height = max( 20, self.resize_start_size.height() - delta.y() )
+
+        elif self.resize_corner == "bottom_left":
+            new_width = max( 20, self.resize_start_size.width() - delta.x() )
+            new_height = max( 20, self.resize_start_size.height() + delta.y() )
+
+        elif self.resize_corner == "top_left":
+            new_width = max( 20, self.resize_start_size.width() - delta.x() )
+            new_height = max( 20, self.resize_start_size.height() - delta.y() )
+
+        self._width = new_width
+        self._height = new_height
         
-        self.setFixedSize(self._width, self._height)
+        self.setFixedSize( new_width, new_height )
         
-        # Ako postoji originalna slika, resizuj je
         if not self.original_pixmap.isNull():
-            self._resize_pixmap()
+            self.resizePixmap()
         
-        self.update()
-    
-    def _resize_pixmap(self):
-        """Resizuje originalnu sliku na trenutne dimenzije widgeta"""
+        self.updatePropertiesSize()
+
+    def resizePixmap( self ):
         if self.original_pixmap.isNull():
             return
         
-        # Resizuj sliku da popuni celu dostupnu površinu (bez frame-a)
-        margin = self.frame_width if self.frame_enabled else 0
-        content_width = max(1, self._width - 2 * margin)
-        content_height = max(1, self._height - 2 * margin)
-        
-        self.pixmap = self.original_pixmap.scaled(
-            content_width, content_height,
-            Qt.AspectRatioMode.IgnoreAspectRatio,  # Ignoriši aspect ratio da popuni celu površinu
-            Qt.TransformationMode.SmoothTransformation
-        )
+        if self.frame_enabled:
+            margin = self.frame_width  
 
-    def getWidth(self):
+        else:
+            margin = 0
+
+        content_width = max( 1, self._width - 2 * margin )
+        content_height = max( 1, self._height - 2 * margin )
+        
+        self.pixmap = self.original_pixmap.scaled( content_width, content_height, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation )
+
+    def getImagePath( self ):
+        return self.image_path
+
+    def getCornerAt( self, pos ):
+        handle_size = 12
+        half_size = handle_size // 2
+        
+        corners = {
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
+        }
+        
+        for corner_name, corner_pos in corners.items():
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
+            
+            if corner_rect.contains( pos ):
+                return corner_name
+        
+        return None
+
+    def getScaleToFit( self ):
+        return self.scale_to_fit
+
+    def getWidth( self ):
         return self._width
     
-    def getHeight(self):
+    def getHeight( self ):
         return self._height
-    
-    def set_frame_enabled(self, enabled):
-        self.frame_enabled = enabled
-        self._resize_pixmap()
-        self.update()
-    
-    def set_frame_color(self, color):
-        """Postavlja boju okvira"""
-        self.frame_color = color
-        self.update()
-    
-    def set_frame_width(self, width):
-        self.frame_width = max(0, min(20, width))
-        self._resize_pixmap()
-        self.update()
-    
-    def set_background_color(self, color):
-        self.background_color = color
-        self.update()
-    
-    def set_image_path(self, path):
-        """Učitava sliku i automatski je resizuje na trenutne dimenzije"""
-        supported_formats = ['.bmp', '.png', '.jpg', '.jpeg', '.jpe']
-        
-        if path:
-            file_extension = path.lower()
-            has_supported_extension = any(file_extension.endswith(ext) for ext in supported_formats)
-            
-            if has_supported_extension:
-                self.image_path = path
-                self.original_pixmap = QPixmap(path)
-                
-                if self.original_pixmap.isNull():
-                    print(f"Greška: Ne mogu da učitam sliku iz {path}")
-                    self.original_pixmap = QPixmap()
-                    self.pixmap = QPixmap()
-                    return False
-                
-                # Automatski resizuj sliku na trenutne dimenzije widgeta
-                self._resize_pixmap()
-                
-                # Postavi default ime ako nije postavljeno
-                if not self.custom_name:
-                    # Koristi ime fajla bez ekstenzije
-                    import os
-                    filename = os.path.basename(path)
-                    self.custom_name = f"Image_{os.path.splitext(filename)[0]}"
-                
-                self.update()
-                return True
-            
-            else:
-                print(f"Greška: Nepodržan format fajla: {path}")
-                return False
-        
-        return False
-    
-    def get_image_path(self):
-        """Getter za putanju slike"""
-        return self.image_path
-    
-    def set_scale_to_fit(self, scale):
-        """Postavlja da li se slika skalira da stane u widget"""
-        self.scale_to_fit = scale
-        self.update()
-    
-    def get_scale_to_fit(self):
-        """Getter za scale_to_fit"""
-        return self.scale_to_fit
-    
-    def setSelected(self, selected):
-        """Postavlja selektovani status"""
-        self.selected = selected
-        self.update()
-    
-    def setVisibleImage(self, visible):
-        """Postavlja visible status"""
-        self.visible = visible
-        self.setVisible(visible)
-        self.update()
-    
-    def updatePropertiesDict(self):
-        """Ažurira rečnik svojstava"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-            
-        if hasattr(main_window, 'all_image_dicts'):
-            if self.custom_name in main_window.all_image_dicts:
-                main_window.all_image_dicts[self.custom_name] = self.getPropertiesDict()
-    
+
     def getPropertiesDict(self):
-        """Vraća rečnik sa svim svojstvima slike"""
         return {
             'type': 'Image',
-            'name': getattr(self, 'custom_name', 'Image_0'),
-            'stack_order': getattr(self, 'stack_order', 0),
-            'position': (self.x(), self.y()),
+            'name': getattr( self, 'custom_name', 'Image_0' ),
+            'stack_order': getattr( self, 'stack_order', 0 ),
+            'position':  (self.x(), self.y() ),
             'width': self._width,
             'height': self._height,
             'frame_enabled': self.frame_enabled,
@@ -6251,149 +5595,234 @@ class ImageWidget(QWidget):
             'frame_width': self.frame_width,
             'background_color': self.background_color.name(),
             'image_path': self.image_path,
-            'scale_to_fit': self.get_scale_to_fit,
-            'active': getattr(self, 'active', True),
-            'visible': getattr(self, 'visible', True),
-            'static': getattr(self, 'static', False)
+            'scale_to_fit': self.getScaleToFit,
+            'active': getattr( self, 'active', True ),
+            'visible': getattr( self, 'visible', True ),
+            'static': getattr( self, 'static', False )
         }
+
+    def setSize( self, width, height ):
+        self._width = max( 20, width )
+        self._height = max( 20, height )
+        self.setFixedSize( self._width, self._height )
+        
+        if not self.original_pixmap.isNull():
+            self.resizePixmap()
+        
+        self.update()
     
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
+    def setFrameEnabled( self, enabled ):
+        self.frame_enabled = enabled
+        self.resizePixmap()
+        self.update()
+    
+    def setFrameColor( self, color ):
+        self.frame_color = color
+        self.update()
+    
+    def setFrameWidth( self, width ):
+        self.frame_width = max( 0, min( 20, width ) )
+        self.resizePixmap()
+        self.update()
+    
+    def setBackgroundColor( self, color ):
+        self.background_color = color
+        self.update()
+    
+    def setImagePath( self, path ):
+        supported_formats = ['.bmp', '.png', '.jpg', '.jpeg', '.jpe']
+        
+        if path:
+            file_extension = path.lower()
+            has_supported_extension = any( file_extension.endswith( ext ) for ext in supported_formats )
+            
+            if has_supported_extension:
+                self.image_path = path
+                self.original_pixmap = QPixmap( path )
+                
+                if self.original_pixmap.isNull():
+                    self.original_pixmap = QPixmap()
+                    self.pixmap = QPixmap()
+                    return False
+            
+                self.resizePixmap()
+
+                if not self.custom_name:
+                    filename = os.path.basename( path )
+                    self.custom_name = f"Image_{ os.path.splitext( filename )[ 0 ] }"
+                
+                self.update()
+                return True
+
+            else:
+                return False
+        
+        return False
+    
+    def setScaleToFit( self, scale ):
+        self.scale_to_fit = scale
+        self.update()
+    
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
+    
+    def setVisibleImage( self, visible ):
+        self.visible = visible
+        self.setVisible( visible )
+        self.update()
+
+    def updatePropertiesDict( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+            
+        if hasattr( main_window, 'all_image_dicts' ):
+            if self.custom_name in main_window.all_image_dicts:
+                main_window.all_image_dicts[ self.custom_name ] = self.getPropertiesDict()
+
+    def updatePropertiesSize( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if (hasattr( main_window, 'current_shape') and main_window.current_shape == self ):
+            
+            if hasattr( main_window, 'width_spin' ):
+                main_window.width_spin.blockSignals( True )
+                main_window.width_spin.setValue( self._width )
+                main_window.width_spin.blockSignals( False )
+                
+            if hasattr(main_window, 'height_spin'):
+                main_window.height_spin.blockSignals( True )
+                main_window.height_spin.setValue( self._height )
+                main_window.height_spin.blockSignals( False )
+    
+    def updatePropertiesPosition( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            if hasattr( main_window, 'pos_x_spin' ):
+                main_window.pos_x_spin.blockSignals( True )
+                main_window.pos_x_spin.setValue( self.x() )
+                main_window.pos_x_spin.blockSignals( False )
+                
+            if hasattr( main_window, 'pos_y_spin' ):
+                main_window.pos_y_spin.blockSignals( True )
+                main_window.pos_y_spin.setValue( self.y() )
+                main_window.pos_y_spin.blockSignals( False )
+    
+    def updateProperties( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+    
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            if hasattr( main_window, 'active_checkbox' ):
+                main_window.active_checkbox.blockSignals( True )
+                main_window.active_checkbox.setChecked( self.active )
+                main_window.active_checkbox.blockSignals( False )
+                
+            if hasattr( main_window, 'visible_checkbox' ):
+                main_window.visible_checkbox.blockSignals( True )
+                main_window.visible_checkbox.setChecked( self.visible )
+                main_window.visible_checkbox.blockSignals( False )
+                
+            if hasattr( main_window, 'static_checkbox' ):
+                main_window.static_checkbox.blockSignals( True )
+                main_window.static_checkbox.setChecked( self.static )
+                main_window.static_checkbox.blockSignals( False )
+            
+            if hasattr( main_window, 'name_edit' ):
+                main_window.name_edit.blockSignals( True )
+                main_window.name_edit.setText( self.custom_name )
+                main_window.name_edit.blockSignals( False )
+            
+            if hasattr( main_window, 'stack_order_spin' ):
+                main_window.stack_order_spin.blockSignals( True )
+                main_window.stack_order_spin.setValue( self.stack_order )
+                main_window.stack_order_spin.blockSignals( False )
+            
+            if hasattr( main_window, 'frame_checkbox' ):
+                main_window.frame_checkbox.blockSignals( True )
+                main_window.frame_checkbox.setChecked( self.frame_enabled )
+                main_window.frame_checkbox.blockSignals( False )
+            
+            if hasattr( main_window, 'frame_width_spin' ):
+                main_window.frame_width_spin.blockSignals( True )
+                main_window.frame_width_spin.setValue( self.frame_width )
+                main_window.frame_width_spin.blockSignals( False ) 
+            
+            if hasattr(main_window, 'frame_color_rect'):
+                main_window.frame_color_rect.setStyleSheet( f"background-color: { self.frame_color.name() }; border: 1px solid #ccc;" )
+
+    def findMainWindow( self ):
         parent = self.parent()
+
         while parent:
-            if isinstance(parent, QMainWindow):
+            if isinstance( parent, QMainWindow ):
                 return parent
+            
             parent = parent.parent()
+
         return None
     
-    def drawSelectionHandles(self, painter):
-        """Crtanje resize handle-ova na uglovima (konzistentno sa drugim widget-ima)"""
-        if not self.selected:
-            return
-            
-        handle_size = 8
-        half_size = handle_size // 2
-
-        # Zeleni handle-ovi
-        painter.setBrush(QColor(0, 255, 0))
-        painter.setPen(QPen(QColor(0, 80, 200), 1))
-
-        # 4 ugla
-        corners = [
-            QPoint(4, 4),  # gornji levi
-            QPoint(self.width()-4, 4),  # gornji desni
-            QPoint(4, self.height()-4),  # donji levi
-            QPoint(self.width()-4, self.height()-4)  # donji desni
-        ]
-
-        for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, 
-                              handle_size, handle_size)
-
-            # Mali beli centar
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))
-            painter.setPen(QPen(QColor(0, 80, 200), 1))
-    
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira (konzistentno)"""
-        if not self.selected:
-            return
-            
-        margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
-
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
-
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
-    
-    def getCornerAt(self, pos):
-        """Proverava da li je miš preko resize handle-a"""
-        handle_size = 12
-        half_size = handle_size // 2
-        
-        corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
-        }
-        
-        for corner_name, corner_pos in corners.items():
-            corner_rect = QRect(
-                corner_pos.x() - half_size,
-                corner_pos.y() - half_size,
-                handle_size,
-                handle_size
-            )
-            
-            if corner_rect.contains(pos):
-                return corner_name
-        
-        return None
-    
-    def mousePressEvent(self, event):
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
-
-            # Proveri da li je kliknut resize handle
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
-                # Počni resize
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+
             else:
-                # Počni dragovanje
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                
-                # Emituj signal za selekciju
                 self.clicked.emit(self)
-                self._update_properties()
+                self.updateProperties()
 
         event.accept()
     
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent( self, event ):
         mouse_pos = event.pos()
-        
-        # Proveri da li je miš preko resize handle-a
-        corner = self.getCornerAt(mouse_pos)
+        corner = self.getCornerAt( mouse_pos )
+
         if corner:
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
+
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
+
         else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
+            self.setCursor( Qt.CursorShape.ArrowCursor )
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
+            self.handleResize( event.globalPosition().toPoint() )
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
+
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            # Dragovanje widgeta
             delta = mouse_pos - self.drag_start_pos
-            
+
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-            super().move(new_x, new_y)
+
+            super().move( new_x, new_y )
             
             self.updatePropertiesPosition()
         
         event.accept()
     
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
@@ -6404,262 +5833,121 @@ class ImageWidget(QWidget):
             self.updatePropertiesDict()
 
         event.accept()
-    
-    def handleResize(self, global_pos):
-        """Menja veličinu widgeta i automatski resizuje sliku"""
-        if not self.resize_corner:
-            return
 
-        delta = global_pos - self.resize_start_pos
+class LabelWidget( QWidget ):
+    clicked = pyqtSignal( object )
+    
+    def __init__( self, width, height, parent = None ):
+        super().__init__( parent )
 
-        new_width = self.resize_start_size.width()
-        new_height = self.resize_start_size.height()
-
-        if self.resize_corner == "bottom_right":
-            new_width = max(20, self.resize_start_size.width() + delta.x())
-            new_height = max(20, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_right":
-            new_width = max(20, self.resize_start_size.width() + delta.x())
-            new_height = max(20, self.resize_start_size.height() - delta.y())
-        elif self.resize_corner == "bottom_left":
-            new_width = max(20, self.resize_start_size.width() - delta.x())
-            new_height = max(20, self.resize_start_size.height() + delta.y())
-        elif self.resize_corner == "top_left":
-            new_width = max(20, self.resize_start_size.width() - delta.x())
-            new_height = max(20, self.resize_start_size.height() - delta.y())
-
-        # Postavi novu veličinu
-        self._width = new_width
-        self._height = new_height
-        
-        self.setFixedSize(new_width, new_height)
-        
-        # Automatski resizuj sliku
-        if not self.original_pixmap.isNull():
-            self._resize_pixmap()
-        
-        # Ažuriraj properties bar
-        self.updatePropertiesSize()
-    
-    def updatePropertiesSize(self):
-        """Ažuriraj veličinu u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            if hasattr(main_window, 'width_spin'):
-                main_window.width_spin.blockSignals(True)
-                main_window.width_spin.setValue(self._width)
-                main_window.width_spin.blockSignals(False)
-                
-            if hasattr(main_window, 'height_spin'):
-                main_window.height_spin.blockSignals(True)
-                main_window.height_spin.setValue(self._height)
-                main_window.height_spin.blockSignals(False)
-    
-    def updatePropertiesPosition(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            if hasattr(main_window, 'pos_x_spin'):
-                main_window.pos_x_spin.blockSignals(True)
-                main_window.pos_x_spin.setValue(self.x())
-                main_window.pos_x_spin.blockSignals(False)
-                
-            if hasattr(main_window, 'pos_y_spin'):
-                main_window.pos_y_spin.blockSignals(True)
-                main_window.pos_y_spin.setValue(self.y())
-                main_window.pos_y_spin.blockSignals(False)
-    
-    def _update_properties(self):
-        """Ažurira sve properties u properties baru"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-    
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Ažuriraj checkbox-ove
-            if hasattr(main_window, 'active_checkbox'):
-                main_window.active_checkbox.blockSignals(True)
-                main_window.active_checkbox.setChecked(self.active)
-                main_window.active_checkbox.blockSignals(False)
-                
-            if hasattr(main_window, 'visible_checkbox'):
-                main_window.visible_checkbox.blockSignals(True)
-                main_window.visible_checkbox.setChecked(self.visible)
-                main_window.visible_checkbox.blockSignals(False)
-                
-            if hasattr(main_window, 'static_checkbox'):
-                main_window.static_checkbox.blockSignals(True)
-                main_window.static_checkbox.setChecked(self.static)
-                main_window.static_checkbox.blockSignals(False)
-            
-            # Ažuriraj ime
-            if hasattr(main_window, 'name_edit'):
-                main_window.name_edit.blockSignals(True)
-                main_window.name_edit.setText(self.custom_name)
-                main_window.name_edit.blockSignals(False)
-            
-            # Ažuriraj stack order - KORISTI STVARNU VREDNOST
-            if hasattr(main_window, 'stack_order_spin'):
-                main_window.stack_order_spin.blockSignals(True)
-                main_window.stack_order_spin.setValue(self.stack_order)  # OVO JE ISPRAVLJENO
-                main_window.stack_order_spin.blockSignals(False)
-            
-            # Ažuriraj frame checkbox
-            if hasattr(main_window, 'frame_checkbox'):
-                main_window.frame_checkbox.blockSignals(True)
-                main_window.frame_checkbox.setChecked(self.frame_enabled)
-                main_window.frame_checkbox.blockSignals(False)
-            
-            # Ažuriraj frame width
-            if hasattr(main_window, 'frame_width_spin'):
-                main_window.frame_width_spin.blockSignals(True)
-                main_window.frame_width_spin.setValue(self.frame_width)
-                main_window.frame_width_spin.blockSignals(False)
-            
-            # Ažuriraj frame color
-            if hasattr(main_window, 'frame_color_rect'):
-                main_window.frame_color_rect.setStyleSheet(
-                    f"background-color: {self.frame_color.name()}; border: 1px solid #ccc;"
-                )
-                    
-    
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        # Crtanje pozadine
-        painter.setBrush(self.background_color)
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.drawRect(0, 0, self._width, self._height)
-        
-        # Crtanje slike ako postoji
-        if not self.pixmap.isNull():
-            margin = self.frame_width if self.frame_enabled else 0
-            
-            # Centriraj sliku
-            x = margin
-            y = margin
-            
-            painter.drawPixmap(x, y, self.pixmap)
-        
-        # Crtanje okvira ako je omogućen
-        if self.frame_enabled and self.frame_width > 0:
-            painter.setPen(QPen(self.frame_color, self.frame_width))
-            painter.setBrush(Qt.BrushStyle.NoBrush)
-            painter.drawRect(0, 0, self._width, self._height)
-        
-        # Ako je selektovan, nacrtaj selekcioni okvir i handle-ove
-        if self.selected:
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
-
-class LabelWidget(QWidget):
-    clicked = pyqtSignal(object)
-    
-    def __init__(self, width, height, parent=None):
-        super().__init__(parent)
         self._width = width
         self._height = height
-        self.setFixedSize(width, height)
+        self.setFixedSize( width, height )
         
-        # Svojstva za label
-        self.text_color = QColor(0, 0, 0)             # Crni tekst
-        self.text = "Text"                            # Tekst labele
+        self.text_color = QColor( 0, 0, 0 )            
+        self.text = "Text"                    
         
-        # Dodatna svojstva
         self.active = True
         self.visible = True
         self.static = False
         
-        # Text properties
         self.text_size = 12
         self.text_font = "Arial"
-        self.text_alignment = "Left"  # Left, Right, Top, Bottom
+        self.text_alignment = "Left"
         
-        # Selekcija
         self.selected = False
-        self.selection_color = QColor(255, 0, 0)
+        self.selection_color = QColor( 255, 0, 0 )
         
-        # Drag varijable
         self.dragging = False
         self.drag_start_pos = QPoint()
         
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
-        # Za rečnik
         self.custom_name = None
         self.stack_order = 1
-    
-    def move(self, x, y):
-        """Override move metode da ažurira properties bar"""
-        super().move(x, y)
+
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
+        
+        painter.setPen( self.text_color )
+        font = QFont( self.text_font, self.text_size )
+        painter.setFont( font )
+        text_rect = QRect( 0, 0, self._width, self._height )
+        alignment_flags = Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft
+        
+        if self.text_alignment == "Left":
+            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
+
+        elif self.text_alignment == "Center":
+            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter 
+
+        elif self.text_alignment == "Right":
+            alignment_flags = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
+
+        elif self.text_alignment == "Top":
+            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
+
+        elif self.text_alignment == "Bottom":
+            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom
+            
+        else:
+            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
+
+        painter.drawText( text_rect, alignment_flags, self.text )
+        
+        if self.selected:
+            self.drawSelectionBorder( painter )
+
+    def drawSelectionBorder( self, painter ):
+        if not self.selected:
+            return
+            
+        margin = 2
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
+
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
+
+    def move( self, x, y ):
+        super().move( x, y )
         
         main_window = self.findMainWindow()
-        if main_window and hasattr(main_window, 'current_shape') and main_window.current_shape == self:
+
+        if main_window and hasattr( main_window, 'current_shape' ) and main_window.current_shape == self:
             try:
-                if hasattr(main_window, 'pos_x_spin_label'):
-                    main_window.pos_x_spin_label.blockSignals(True)
-                    main_window.pos_x_spin_label.setValue(x)
-                    main_window.pos_x_spin_label.blockSignals(False)
+                if hasattr( main_window, 'pos_x_spin_label' ):
+                    main_window.pos_x_spin_label.blockSignals( True )
+                    main_window.pos_x_spin_label.setValue( x )
+                    main_window.pos_x_spin_label.blockSignals( False )
+
             except RuntimeError:
                 pass
             
             try:
-                if hasattr(main_window, 'pos_y_spin_label'):
-                    main_window.pos_y_spin_label.blockSignals(True)
-                    main_window.pos_y_spin_label.setValue(y)
-                    main_window.pos_y_spin_label.blockSignals(False)
+                if hasattr( main_window, 'pos_y_spin_label' ):
+                    main_window.pos_y_spin_label.blockSignals( True )
+                    main_window.pos_y_spin_label.setValue( y )
+                    main_window.pos_y_spin_label.blockSignals( False )
+
             except RuntimeError:
                 pass
         
-        # Ažuriraj rečnik
         self.updatePropertiesDict()
     
-    def mouseMoveEvent(self, event):
-        if self.dragging and (event.buttons() & Qt.MouseButton.LeftButton):
-            # Dragovanje widgeta
-            delta = event.pos() - self.drag_start_pos
-            
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-            
-            # KORISTITE self.move() UMESTO super().move()
-            self.move(new_x, new_y)
-        
-        event.accept()
-    
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.dragging = False
-            # Rečnik je već ažuriran u move() metodi
-        event.accept()
-    
-    def updatePropertiesDict(self):
-        """Ažurira rečnik svojstava"""
-        main_window = self.findMainWindow()
-        if main_window and hasattr(main_window, 'all_label_dicts'):
-            main_window.all_label_dicts[self.custom_name] = self.getPropertiesDict()
-    
-    def getPropertiesDict(self):
-        """Vraća rečnik sa svim svojstvima label-a"""
+    def getPropertiesDict( self ):
         return {
             'type': 'Label',
-            'name': getattr(self, 'custom_name', 'Label_0'),
-            'stack_order': getattr(self, 'stack_order', 0),  # POPRAVLJENO
-            'position': (self.x(), self.y()),
+            'name': getattr( self, 'custom_name', 'Label_0' ),
+            'stack_order': getattr( self, 'stack_order', 0 ), 
+            'position': ( self.x(), self.y() ),
             'width': self._width,
             'height': self._height,
             'active': self.active,
@@ -6671,371 +5959,154 @@ class LabelWidget(QWidget):
             'text_font': self.text_font,
             'text_alignment': self.text_alignment
         }
-    
-    # Ostale metode ostaju iste...
-    def setSelected(self, selected):
+
+    def getWidth( self ):
+        return self._width
+
+    def getHeight( self ):
+        return self._height
+
+    def setSelected( self, selected ):
         self.selected = selected
         self.update()
 
-    def set_size_based_on_text(self):
-        """Postavlja veličinu widget-a na osnovu teksta"""
-        painter = QPainter(self)
-        font = QFont(self.text_font, self.text_size)
-        font_metrics = QFontMetrics(font)
+    def setSizeBasedOnText( self ):
+        painter = QPainter( self )
+        font = QFont( self.text_font, self.text_size )
+        font_metrics = QFontMetrics( font )
         
-        text_width = font_metrics.horizontalAdvance(self.text) + 20  # +20 za margin
-        text_height = font_metrics.height() + 10  # +10 za margin
+        text_width = font_metrics.horizontalAdvance( self.text ) + 20
+        text_height = font_metrics.height() + 10
         
-        self._width = max(50, text_width)
-        self._height = max(30, text_height)
-        self.setFixedSize(self._width, self._height)
+        self._width = max( 50, text_width )
+        self._height = max( 30, text_height )
+        self.setFixedSize( self._width, self._height )
         
         painter.end()
         self.update()
 
-    def getWidth(self):
-        """Getter za width"""
-        return self._width
-
-    def getHeight(self):
-        """Getter za height"""
-        return self._height
-
-    def setTextColor(self, color):
+    def setTextColor( self, color ):
         self.text_color = color
         self.update()
 
-    def set_text(self, text):
+    def setTextFont( self, text ):
         self.text = text
-        self.set_size_based_on_text()
+        self.setSizeBasedOnText()
         self.update()
 
-    def setTextSize(self, size):
+    def setTextSize( self, size ):
         self.text_size = size
-        self.set_size_based_on_text()
+        self.setSizeBasedOnText()
         self.update()
 
-    def set_text_font(self, font):
+    def setTextFont( self, font ):
         self.text_font = font
-        self.set_size_based_on_text()
+        self.setSizeBasedOnText()
         self.update()
 
-    def set_text_alignment(self, alignment):
+    def setTextAlignment( self, alignment ):
         self.text_alignment = alignment
         self.update()
 
-    def setActive(self, active):
+    def setActive( self, active ):
         self.active = active
-        self.setEnabled(active)
+        self.setEnabled( active )
         self.update()
 
-    def setVisibleLabel(self, visible):
+    def setVisibleLabel( self, visible ):
         self.visible = visible
-        self.setVisible(visible)
+        self.setVisible( visible )
         self.update()
 
-    def setStatic(self, static):
+    def setStatic( self, static ):
         self.static = static
         self.update()
 
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira kada je selektovano"""
-        if not self.selected:
-            return
-            
-        margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+    def updatePropertiesDict( self ):
+        main_window = self.findMainWindow()
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+        if main_window and hasattr( main_window, 'all_label_dicts' ):
+            main_window.all_label_dicts[ self.custom_name ] = self.getPropertiesDict()
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.dragging = True
-            self.drag_start_pos = event.pos()
-            self.clicked.emit(self)
-        event.accept()
-
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
+    def findMainWindow( self ):
         parent = self.parent()
+
         while parent:
-            if isinstance(parent, QMainWindow):
+            if isinstance( parent, QMainWindow ):
                 return parent
-            parent = parent.parent()
-        return None
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        # Crtanje teksta
-        painter.setPen(self.text_color)
-        font = QFont(self.text_font, self.text_size)
-        painter.setFont(font)
-        
-        # Određivanje pozicije teksta na osnovu alignment-a
-        text_rect = QRect(0, 0, self._width, self._height)
-        
-        alignment_flags = Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft
-        
-        if self.text_alignment == "Left":
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
-        elif self.text_alignment == "Center":
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter 
-        elif self.text_alignment == "Right":
-            alignment_flags = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
-        elif self.text_alignment == "Top":
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
-        elif self.text_alignment == "Bottom":
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom
-        else:
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
-
-        painter.drawText(text_rect, alignment_flags, self.text)
-        
-        # Ako je selektovan, nacrtaj selekcioni okvir
-        if self.selected:
-            self.drawSelectionBorder(painter)
-
-class NumericWidget(QWidget):
-    clicked = pyqtSignal(object)
-    
-    def __init__(self, width, height, parent=None):
-        super().__init__(parent)
-        self._width = width
-        self._height = height
-        self.setFixedSize(width, height)
-        
-        # Status svojstva
-        self.active = True
-        self.visible = True
-        self.static = False
-        
-        # Numerička svojstva
-        self.number = 123  # Podrazumevana vrednost
-        self.number_color = QColor(0, 0, 0)  # Crna boja broja
-        self.number_size = 12  # Veličina fonta
-        self.number_alignment = "Left"  # Left, Center, Right, Top, Bottom
-        self.number_font = "Arial"  # Font
-        
-        # Selekcija
-        self.selected = False
-        
-        # Drag varijable
-        self.dragging = False
-        self.drag_start_pos = QPoint()
-        
-        # Rečnik
-        self.custom_name = None
-        self.stack_order = 1
-        
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        
-        # Inicijalizuj display text
-        self._update_display_text()
-        self._update_display_size()
-
-    def setSelected(self, selected):
-        self.selected = selected
-        self.update()
-
-    def getWidth(self):
-        """Getter za width"""
-        return self._width
-
-    def getHeight(self):
-        """Getter za height"""
-        return self._height
-
-    def set_number(self, number):
-        self.number = number
-        self._update_display_text()
-        self._update_display_size()
-        self.update()
-
-    def set_number_color(self, color):
-        self.number_color = color
-        self.update()
-
-    def set_number_size(self, size):
-        self.number_size = size
-        self._update_display_size()
-        self.update()
-
-    def set_number_alignment(self, alignment):
-        self.number_alignment = alignment
-        self.update()
-
-    def setActive(self, active):
-        self.active = active
-        self.setEnabled(active)
-        self.update()
-
-    def setVisibleNumeric(self, visible):
-        self.visible = visible
-        self.setVisible(visible)
-        self.update()
-
-    def setStatic(self, static):
-        self.static = static
-        self.update()
-
-    def _update_display_text(self):
-        """Ažurira tekst koji se prikazuje"""
-        self.display_text = str(self.number)
-
-    def _update_display_size(self):
-        """Ažurira veličinu widgeta na osnovu teksta"""
-        painter = QPainter(self)
-        font = QFont(self.number_font, self.number_size)
-        font_metrics = QFontMetrics(font)
-        
-        text_width = font_metrics.horizontalAdvance(self.display_text) + 20  # +20 za margin
-        text_height = font_metrics.height() + 10  # +10 za margin
-        
-        self._width = max(50, text_width)
-        self._height = max(30, text_height)
-        self.setFixedSize(self._width, self._height)
-        
-        painter.end()
-
-    def getPropertiesDict(self):
-        """Vraća rečnik sa svim svojstvima numeričkog widgeta"""
-        return {
-            'type': 'Numeric',
-            'name': getattr(self, 'custom_name', 'Numeric_0'),
-            'stack_order': getattr(self, 'stack_order', 0),
-            'position': (self.x(), self.y()),
-            'width': self._width,
-            'height': self._height,
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'number': self.number,
-            'number_color': self.number_color.name(),
-            'number_size': self.number_size,
-            'number_alignment': self.number_alignment,
-            'number_font': self.number_font
-        }
-
-    def updatePropertiesDict(self):
-        """Ažurira rečnik svojstava"""
-        if hasattr(self, 'custom_name'):
-            main_window = self.findMainWindow()
-            if main_window and hasattr(main_window, 'all_numeric_dicts'):
-                if self.custom_name in main_window.all_numeric_dicts:
-                    main_window.all_numeric_dicts[self.custom_name] = self.getPropertiesDict()
-                else:
-                    main_window.all_numeric_dicts[self.custom_name] = self.getPropertiesDict()
-
-    # Metode za drag
-    def drawSelectionBorder(self, painter):
-        """Crtanje crvenog isprekidanog okvira kada je selektovano"""
-        if not self.selected:
-            return
             
-        margin = 2
-        border_rect = QRect(margin, margin, 
-                           self.width() - 2 * margin, 
-                           self.height() - 2 * margin)
+            parent = parent.parent()
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
-
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.dragging = True
-            self.drag_start_pos = event.pos()
-            self.clicked.emit(self)
-        event.accept()
-
-    def mouseMoveEvent(self, event):
-        if self.dragging and (event.buttons() & Qt.MouseButton.LeftButton):
-            # Dragovanje widgeta
+        return None
+    
+    def mouseMoveEvent( self, event ):
+        if self.dragging and ( event.buttons() & Qt.MouseButton.LeftButton ):
             delta = event.pos() - self.drag_start_pos
             
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-            super().move(new_x, new_y)
             
-            # Ažuriraj properties bar ako postoji
-            self.updatePropertiesPosition()
+            self.move( new_x, new_y )
         
         event.accept()
 
-    def mouseReleaseEvent(self, event):
+    def mousePressEvent( self, event ):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.dragging = True
+            self.drag_start_pos = event.pos()
+            self.clicked.emit( self )
+
+        event.accept()
+
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = False
-            # Ažuriraj properties bar
-            self.updatePropertiesPosition()
-            # Ažuriraj rečnik
-            self.updatePropertiesDict()
+
         event.accept()
 
-    def updatePropertiesPosition(self):
-        """Ažuriraj poziciju u properties bar-u"""
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-        
-        if (hasattr(main_window, 'current_shape') and 
-            main_window.current_shape == self):
-            
-            # Proveri za numeričke kontrole
-            if hasattr(main_window, 'pos_x_spin_numeric'):
-                main_window.pos_x_spin_numeric.blockSignals(True)
-                main_window.pos_x_spin_numeric.setValue(self.x())
-                main_window.pos_x_spin_numeric.blockSignals(False)
-            elif hasattr(main_window, 'pos_x_spin'):
-                main_window.pos_x_spin.blockSignals(True)
-                main_window.pos_x_spin.setValue(self.x())
-                main_window.pos_x_spin.blockSignals(False)
-                
-            if hasattr(main_window, 'pos_y_spin_numeric'):
-                main_window.pos_y_spin_numeric.blockSignals(True)
-                main_window.pos_y_spin_numeric.setValue(self.y())
-                main_window.pos_y_spin_numeric.blockSignals(False)
-            elif hasattr(main_window, 'pos_y_spin'):
-                main_window.pos_y_spin.blockSignals(True)
-                main_window.pos_y_spin.setValue(self.y())
-                main_window.pos_y_spin.blockSignals(False)
+class NumericWidget( QWidget ):
+    clicked = pyqtSignal( object )
+    
+    def __init__( self, width, height, parent = None ):
+        super().__init__( parent)
 
-    def findMainWindow(self):
-        """Pronađi glavni prozor u hijerarhiji"""
-        parent = self.parent()
-        while parent:
-            if isinstance(parent, QMainWindow):
-                return parent
-            parent = parent.parent()
-        return None
+        self._width = width
+        self._height = height
+        self.setFixedSize( width, height )
+        
+        self.active = True
+        self.visible = True
+        self.static = False
+        
+        self.number = 123
+        self.number_color = QColor( 0, 0, 0 )
+        self.number_size = 12
+        self.number_alignment = "Left" 
+        self.number_font = "Arial"
+        
+        self.selected = False
+        
+        self.dragging = False
+        self.drag_start_pos = QPoint()
+        
+        self.custom_name = None
+        self.stack_order = 1
+        
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.updateDisplayText()
+        self.updateDisplaySize()
+
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
-        # Crtanje teksta (broja)
-        painter.setPen(self.number_color)
-        font = QFont(self.number_font, self.number_size)
-        painter.setFont(font)
+        painter.setPen( self.number_color )
+        font = QFont( self.number_font, self.number_size )
+        painter.setFont( font )
         
-        # Određivanje pozicije teksta na osnovu alignment-a
-        text_rect = QRect(0, 0, self._width, self._height)
+        text_rect = QRect( 0, 0, self._width, self._height )
         
         if self.number_alignment == "Left":
             alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
@@ -7050,8 +6121,178 @@ class NumericWidget(QWidget):
         else:
             alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
 
-        painter.drawText(text_rect, alignment_flags, self.display_text)
+        painter.drawText( text_rect, alignment_flags, self.display_text )
         
-        # Ako je selektovan, nacrtaj selekcioni okvir
         if self.selected:
             self.drawSelectionBorder(painter)
+
+    def drawSelectionBorder( self, painter ):
+        if not self.selected:
+            return
+            
+        margin = 2
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
+
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
+
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
+
+    def setNumber( self, number ):
+        self.number = number
+        self.updateDisplayText()
+        self.updateDisplaySize()
+        self.update()
+
+    def setNumberColor( self, color ):
+        self.number_color = color
+        self.update()
+
+    def setNumberSize( self, size ):
+        self.number_size = size
+        self.updateDisplaySize()
+        self.update()
+
+    def setNumberAlignment( self, alignment ):
+        self.number_alignment = alignment
+        self.update()
+
+    def setActive( self, active ):
+        self.active = active
+        self.setEnabled( active )
+        self.update()
+
+    def setVisibleNumeric( self, visible ):
+        self.visible = visible
+        self.setVisible( visible )
+        self.update()
+
+    def setStatic( self, static ):
+        self.static = static
+        self.update()
+
+    def getWidth( self ):
+        return self._width
+
+    def getHeight( self ):
+        return self._height
+
+    def getPropertiesDict( self ):
+        return {
+            'type': 'Numeric',
+            'name': getattr( self, 'custom_name', 'Numeric_0' ),
+            'stack_order': getattr( self, 'stack_order', 0 ),
+            'position': ( self.x(), self.y() ),
+            'width': self._width,
+            'height': self._height,
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'number': self.number,
+            'number_color': self.number_color.name(),
+            'number_size': self.number_size,
+            'number_alignment': self.number_alignment,
+            'number_font': self.number_font
+        }
+
+    def updateDisplayText( self ):
+        self.display_text = str(self.number)
+
+    def updateDisplaySize( self ):
+        painter = QPainter(self)
+        font = QFont(self.number_font, self.number_size)
+        font_metrics = QFontMetrics( font )
+        
+        text_width = font_metrics.horizontalAdvance( self.display_text ) + 20 
+        text_height = font_metrics.height() + 10
+        
+        self._width = max( 50, text_width )
+        self._height = max( 30, text_height )
+        self.setFixedSize( self._width, self._height )
+        
+        painter.end()
+
+    def updatePropertiesDict( self ):
+        if hasattr( self, 'custom_name' ):
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'all_numeric_dicts' ):
+                if self.custom_name in main_window.all_numeric_dicts:
+                    main_window.all_numeric_dicts[ self.custom_name ] = self.getPropertiesDict()
+
+                else:
+                    main_window.all_numeric_dicts[ self.custom_name ] = self.getPropertiesDict()
+
+    def updatePropertiesPosition( self ):
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+        
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            if hasattr( main_window, 'pos_x_spin_numeric' ):
+                main_window.pos_x_spin_numeric.blockSignals( True )
+                main_window.pos_x_spin_numeric.setValue( self.x() )
+                main_window.pos_x_spin_numeric.blockSignals( False )
+
+            elif hasattr( main_window, 'pos_x_spin' ):
+                main_window.pos_x_spin.blockSignals( True )
+                main_window.pos_x_spin.setValue( self.x() )
+                main_window.pos_x_spin.blockSignals( False )
+                
+            if hasattr( main_window, 'pos_y_spin_numeric' ):
+                main_window.pos_y_spin_numeric.blockSignals( True )
+                main_window.pos_y_spin_numeric.setValue( self.y() )
+                main_window.pos_y_spin_numeric.blockSignals( False )
+
+            elif hasattr( main_window, 'pos_y_spin' ):
+                main_window.pos_y_spin.blockSignals( True )
+                main_window.pos_y_spin.setValue( self.y() )
+                main_window.pos_y_spin.blockSignals( False )
+
+    def findMainWindow( self ):
+        parent = self.parent()
+
+        while parent:
+            if isinstance( parent, QMainWindow ):
+                return parent
+
+            parent = parent.parent()
+
+        return None
+
+    def mousePressEvent( self, event ):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.dragging = True
+            self.drag_start_pos = event.pos()
+            self.clicked.emit( self )
+
+        event.accept()
+
+    def mouseReleaseEvent( self, event ):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.dragging = False
+            self.updatePropertiesPosition()
+            self.updatePropertiesDict()
+
+        event.accept()
+
+    def mouseMoveEvent( self, event ):
+        if self.dragging and ( event.buttons() & Qt.MouseButton.LeftButton ):
+            delta = event.pos() - self.drag_start_pos
+            
+            new_x = self.x() + delta.x()
+            new_y = self.y() + delta.y()
+            super().move( new_x, new_y )
+            
+            self.updatePropertiesPosition()
+        
+        event.accept()

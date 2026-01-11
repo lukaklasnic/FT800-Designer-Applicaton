@@ -2415,7 +2415,7 @@ def change_clock_background_color(main_window):
         current_color = main_window.current_shape.background_color
         color = QColorDialog.getColor(current_color)
         if color.isValid():
-            main_window.current_shape.set_background_color(color)
+            main_window.current_shape.setBackgroundColor(color)
             main_window.bg_color_rect_clock.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_clock_dicts'):
                 main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
@@ -2424,28 +2424,28 @@ def update_clock_use_3d(main_window, state):
     """Ažurira 3D efekat za clock"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
         use_3d = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_use_3d(use_3d)
+        main_window.current_shape.set3d(use_3d)
         if hasattr(main_window, 'all_clock_dicts'):
             main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_hours(main_window, value):
     """Ažurira sate za clock"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
-        main_window.current_shape.set_hours(value)
+        main_window.current_shape.setHours(value)
         if hasattr(main_window, 'all_clock_dicts'):
             main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_minutes(main_window, value):
     """Ažurira minute za clock"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
-        main_window.current_shape.set_minutes(value)
+        main_window.current_shape.setMinutes(value)
         if hasattr(main_window, 'all_clock_dicts'):
             main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_clock_seconds(main_window, value):
     """Ažurira sekunde za clock"""
     if main_window.current_shape and isinstance(main_window.current_shape, ClockWidget):
-        main_window.current_shape.set_seconds(value)
+        main_window.current_shape.setSeconds(value)
         if hasattr(main_window, 'all_clock_dicts'):
             main_window.all_clock_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
@@ -2829,7 +2829,7 @@ def change_gauge_background_color(main_window):
         current_color = main_window.current_shape.background_color
         color = QColorDialog.getColor(current_color)
         if color.isValid():
-            main_window.current_shape.set_background_color(color)
+            main_window.current_shape.setBackgroundColor(color)
             main_window.bg_color_rect_gauge.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_gauge_dicts'):
                 main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
@@ -2838,28 +2838,28 @@ def update_gauge_use_3d(main_window, state):
     """Ažurira 3D efekat za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
         use_3d = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_use_3d(use_3d)
+        main_window.current_shape.set3d(use_3d)
         if hasattr(main_window, 'all_gauge_dicts'):
             main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_major_subdivision(main_window, value):
     """Ažurira broj glavnih podeoka za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
-        main_window.current_shape.set_major_subdivision(value)
+        main_window.current_shape.setMajorSubdivision(value)
         if hasattr(main_window, 'all_gauge_dicts'):
             main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_minor_subdivision(main_window, value):
     """Ažurira broj sporednih podeoka za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
-        main_window.current_shape.set_minor_subdivision(value)
+        main_window.current_shape.setMinorSubdivision(value)
         if hasattr(main_window, 'all_gauge_dicts'):
             main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_gauge_range_value(main_window, value):
     """Ažurira maksimalnu vrednost za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
-        main_window.current_shape.set_range_value(value)
+        main_window.current_shape.setRangeValue(value)
         # Ažuriraj maksimum za value spin
         if hasattr(main_window, 'value_spin_gauge'):
             main_window.value_spin_gauge.setRange(0, value)
@@ -2869,7 +2869,7 @@ def update_gauge_range_value(main_window, value):
 def update_gauge_value(main_window, value):
     """Ažurira trenutnu vrednost za gauge"""
     if main_window.current_shape and isinstance(main_window.current_shape, GaugeWidget):
-        main_window.current_shape.set_value(value)
+        main_window.current_shape.setValue(value)
         if hasattr(main_window, 'all_gauge_dicts'):
             main_window.all_gauge_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
@@ -3203,14 +3203,14 @@ def update_dial_3d(main_window, state):
     """Ažurira 3D efekat za dial"""
     if main_window.current_shape and isinstance(main_window.current_shape, DialWidget):
         use_3d = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_3d(use_3d)
+        main_window.current_shape.set3d(use_3d)
         if hasattr(main_window, 'all_dial_dicts'):
             main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_dial_value(main_window, value):
     """Ažurira trenutnu vrednost za dial"""
     if main_window.current_shape and isinstance(main_window.current_shape, DialWidget):
-        main_window.current_shape.set_value(value)
+        main_window.current_shape.setValue(value)
         if hasattr(main_window, 'all_dial_dicts'):
             main_window.all_dial_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
@@ -3564,7 +3564,7 @@ def changeToggleKnobColor(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         color = QColorDialog.getColor(main_window.current_shape.thumb_color)
         if color.isValid():
-            main_window.current_shape.set_thumb_color(color)
+            main_window.current_shape.setThumbColor(color)
             if hasattr(main_window, 'knob_color_rect_toggle'):
                 main_window.knob_color_rect_toggle.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_toggle_dicts'):
@@ -3575,7 +3575,7 @@ def changeToggleBackgroundColor(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         color = QColorDialog.getColor(main_window.current_shape.background_color)
         if color.isValid():
-            main_window.current_shape.set_background_color(color)
+            main_window.current_shape.setBackgroundColor(color)
             if hasattr(main_window, 'bg_color_rect_toggle'):
                 main_window.bg_color_rect_toggle.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_toggle_dicts'):
@@ -3585,7 +3585,7 @@ def updateToggle3D(main_window, state):
     """Ažurira 3D svojstvo toggle-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         _3d = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_3d(_3d)
+        main_window.current_shape.set3d(_3d)
         if hasattr(main_window, 'all_toggle_dicts'):
             main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
@@ -3593,7 +3593,7 @@ def updateToggleState(main_window, state):
     """Ažurira stanje toggle-a"""
     if main_window.current_shape and isinstance(main_window.current_shape, ToggleWidget):
         is_on = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_state(is_on)
+        main_window.current_shape.setState(is_on)
         if hasattr(main_window, 'all_toggle_dicts'):
             main_window.all_toggle_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
@@ -3927,7 +3927,7 @@ def changeLabelTextColor(self):
 def updateLabelText(self, text):
     """Ažurira tekst label-a"""
     if self.current_shape and isinstance(self.current_shape, LabelWidget):
-        self.current_shape.set_text(text)
+        self.current_shape.setTextFont(text)
         # Ažuriraj width i height spinbox-ove kada se promeni tekst
         if hasattr(self, 'width_spin_label'):
             self.width_spin_label.setValue(self.current_shape.getWidth())
@@ -3952,7 +3952,7 @@ def updateLabelTextSize(self, value):
 def updateLabelAlignment(self, text):
     """Ažurira poravnanje teksta za label"""
     if self.current_shape and isinstance(self.current_shape, LabelWidget):
-        self.current_shape.set_text_alignment(text)
+        self.current_shape.setTextAlignment(text)
         if hasattr(self, 'all_label_dicts'):
             self.all_label_dicts[self.current_shape.custom_name] = self.current_shape.getPropertiesDict()
 
@@ -4292,7 +4292,7 @@ def showSliderProperties(main_window, current_index):
     value_val_layout.addStretch(1)
     main_window.value_spin_slider = QSpinBox()
     main_window.value_spin_slider.setRange(0, 100)
-    main_window.value_spin_slider.setValue(main_window.current_shape.get_value())
+    main_window.value_spin_slider.setValue(main_window.current_shape.getValue())
     main_window.value_spin_slider.valueChanged.connect(lambda value: update_slider_value(main_window, value))
     main_window.value_spin_slider.setStyleSheet("color: black; background-color: white;")
     main_window.value_spin_slider.setFixedWidth(60)
@@ -4318,7 +4318,7 @@ def change_slider_background_left_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, SliderWidget):
         color = QColorDialog.getColor(main_window.current_shape.thumb_color)
         if color.isValid():
-            main_window.current_shape.set_thumb_color(color)
+            main_window.current_shape.setThumbColor(color)
             main_window.bg_left_color_rect_slider.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_slider_dicts'):
                 main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
@@ -4328,7 +4328,7 @@ def change_slider_background_right_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, SliderWidget):
         color = QColorDialog.getColor(main_window.current_shape.track_color)
         if color.isValid():
-            main_window.current_shape.set_track_color(color)
+            main_window.current_shape.setTrackColor(color)
             main_window.bg_right_color_rect_slider.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_slider_dicts'):
                 main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
@@ -4408,7 +4408,7 @@ def change_slider_knob_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, SliderWidget):
         color = QColorDialog.getColor(main_window.current_shape.progress_color)
         if color.isValid():
-            main_window.current_shape.set_progress_color(color)
+            main_window.current_shape.setProgressColor(color)
             main_window.knob_color_rect_slider.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_slider_dicts'):
                 main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
@@ -4418,14 +4418,14 @@ def update_slider_3d(main_window, state):
     """Ažurira 3D efekat za slider"""
     if main_window.current_shape and isinstance(main_window.current_shape, SliderWidget):
         use_3d = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_3d(use_3d)  # Koristi setter metodu
+        main_window.current_shape.set3d(use_3d)  # Koristi setter metodu
         if hasattr(main_window, 'all_slider_dicts'):
             main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def update_slider_value(main_window, value):
     """Ažurira trenutnu vrednost za slider"""
     if main_window.current_shape and isinstance(main_window.current_shape, SliderWidget):
-        main_window.current_shape.set_value(value)
+        main_window.current_shape.setValue(value)
         if hasattr(main_window, 'all_slider_dicts'):
             main_window.all_slider_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
@@ -4829,7 +4829,7 @@ def change_scrollbar_thumb_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ScrollBarWidget):
         color = QColorDialog.getColor(main_window.current_shape.thumb_color)
         if color.isValid():
-            main_window.current_shape.set_thumb_color(color)
+            main_window.current_shape.setThumbColor(color)
             main_window.thumb_color_rect_scrollbar.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
 
 def change_scrollbar_track_color(main_window):
@@ -4837,19 +4837,19 @@ def change_scrollbar_track_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ScrollBarWidget):
         color = QColorDialog.getColor(main_window.current_shape.track_color)
         if color.isValid():
-            main_window.current_shape.set_track_color(color)
+            main_window.current_shape.setTrackColor(color)
             main_window.track_color_rect_scrollbar.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
 
 def update_scrollbar_3d(main_window, state):
     """Ažurira 3D efekat za scrollbar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ScrollBarWidget):
         use_3d = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_3d(use_3d)
+        main_window.current_shape.set3d(use_3d)
 
 def update_scrollbar_range(main_window, value):
     """Ažurira range za scrollbar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ScrollBarWidget):
-        main_window.current_shape.set_range(value)
+        main_window.current_shape.setRange(value)
         # Ažuriraj max vrednost za current_value spin
         if hasattr(main_window, 'current_value_spin_scrollbar'):
             main_window.current_value_spin_scrollbar.setRange(0, value)
@@ -4857,12 +4857,12 @@ def update_scrollbar_range(main_window, value):
 def update_scrollbar_current_value(main_window, value):
     """Ažurira trenutnu vrednost za scrollbar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ScrollBarWidget):
-        main_window.current_shape.set_current_value(value)
+        main_window.current_shape.setCurrentValue(value)
 
 def update_scrollbar_knob_size(main_window, value):
     """Ažurira veličinu thumb-a za scrollbar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ScrollBarWidget):
-        main_window.current_shape.set_knob_size(value)
+        main_window.current_shape.setKnobSize(value)
 
 #-------------------------------------------------------------------------------------------------------------------------------
 
@@ -5189,7 +5189,7 @@ def updateProgressBarThreeD(main_window, state):
     """Ažurira 3D status za progress bar"""
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
         _3d = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_3d(_3d)
+        main_window.current_shape.set3d(_3d)
         main_window.current_shape.updatePropertiesDict()
 
 def updateProgressBarName(main_window):
@@ -5233,7 +5233,7 @@ def changeProgressBarProgressColor(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
         color = QColorDialog.getColor(main_window.current_shape.progress_color)
         if color.isValid():
-            main_window.current_shape.set_progress_color(color)
+            main_window.current_shape.setProgressColor(color)
             main_window.progress_progress_color_rect.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             main_window.current_shape.updatePropertiesDict()
 
@@ -5241,7 +5241,7 @@ def changeProgressBarBackgroundColor(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
         color = QColorDialog.getColor(main_window.current_shape.bar_color)
         if color.isValid():
-            main_window.current_shape.set_bar_color(color)
+            main_window.current_shape.setBarColor(color)
             main_window.progress_background_color_rect.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             main_window.current_shape.updatePropertiesDict()
 
@@ -5250,14 +5250,14 @@ def updateProgressBarRange(main_window):
         min_val = main_window.progress_min_spin.value()
         max_val = main_window.progress_max_spin.value()
         if min_val < max_val:
-            main_window.current_shape.set_range(min_val, max_val)
+            main_window.current_shape.setRange(min_val, max_val)
             # Ažuriraj value spin da bude u opsegu
             main_window.progress_value_spin.setRange(min_val, max_val)
             main_window.current_shape.updatePropertiesDict()
 
 def updateProgressBarValue(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ProgressBarWidget):
-        main_window.current_shape.set_value(main_window.progress_value_spin.value())
+        main_window.current_shape.setValue(main_window.progress_value_spin.value())
         main_window.current_shape.updatePropertiesDict()
 
 #-------------------------------------------------------------------------------------------------------------------------------
@@ -5571,7 +5571,7 @@ def showKeysProperties(main_window, current_index):
 def update_keys_font_size(main_window, value):
     """Ažurira veličinu fonta za keys"""
     if main_window.current_shape and isinstance(main_window.current_shape, KeysWidget):
-        main_window.current_shape.set_font_size(value)
+        main_window.current_shape.setFontSize(value)
         if hasattr(main_window, 'all_keys_dicts'):
             main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
@@ -5580,7 +5580,7 @@ def change_keys_start_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, KeysWidget):
         color = QColorDialog.getColor(main_window.current_shape.key_color_top)
         if color.isValid():
-            main_window.current_shape.set_key_colors(color, main_window.current_shape.key_color_bottom)
+            main_window.current_shape.setKeyColors(color, main_window.current_shape.key_color_bottom)
             main_window.start_color_rect_keys.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_keys_dicts'):
                 main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
@@ -5590,7 +5590,7 @@ def change_keys_end_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, KeysWidget):
         color = QColorDialog.getColor(main_window.current_shape.key_color_bottom)
         if color.isValid():
-            main_window.current_shape.set_key_colors(main_window.current_shape.key_color_top, color)
+            main_window.current_shape.setKeyColors(main_window.current_shape.key_color_top, color)
             main_window.end_color_rect_keys.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_keys_dicts'):
                 main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
@@ -5611,7 +5611,7 @@ def update_keys_3d(main_window, state):
     """Ažurira 3D efekat za keys"""
     if main_window.current_shape and isinstance(main_window.current_shape, KeysWidget):
         is_3d = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_3d(is_3d)
+        main_window.current_shape.set3d(is_3d)
         if hasattr(main_window, 'all_keys_dicts'):
             main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
@@ -5699,7 +5699,7 @@ def update_keys_3d(main_window, state):
     """Ažurira 3D efekat za keys"""
     if main_window.current_shape and isinstance(main_window.current_shape, KeysWidget):
         is_3d = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_3d(is_3d)
+        main_window.current_shape.set3d(is_3d)
         if hasattr(main_window, 'all_keys_dicts'):
             main_window.all_keys_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
@@ -6043,7 +6043,7 @@ def select_image_file(main_window):
         )
 
         if file_path:
-            success = main_window.current_shape.set_image_path(file_path)
+            success = main_window.current_shape.setImagePath(file_path)
             if success and hasattr(main_window, 'all_image_dicts'):
                 main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
@@ -6051,7 +6051,7 @@ def update_image_frame_enabled(main_window, state):
     """Ažurira enable status za frame i resizuje sliku"""
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
         is_enabled = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.set_frame_enabled(is_enabled)
+        main_window.current_shape.setFrameEnabled(is_enabled)
         
         if hasattr(main_window, 'all_image_dicts'):
             main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
@@ -6059,7 +6059,7 @@ def update_image_frame_enabled(main_window, state):
 def update_image_frame_width(main_window, value):
     """Ažurira debljinu frame-a i resizuje sliku"""
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
-        main_window.current_shape.set_frame_width(value)
+        main_window.current_shape.setFrameWidth(value)
         
         if hasattr(main_window, 'all_image_dicts'):
             main_window.all_image_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
@@ -6069,7 +6069,7 @@ def change_image_frame_color(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, ImageWidget):
         color = QColorDialog.getColor(main_window.current_shape.frame_color)
         if color.isValid():
-            main_window.current_shape.set_frame_color(color)
+            main_window.current_shape.setFrameColor(color)
             main_window.frame_color_rect.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             
             if hasattr(main_window, 'all_image_dicts'):
@@ -6901,7 +6901,7 @@ def changeNumericNumberColor(main_window):
     if main_window.current_shape and isinstance(main_window.current_shape, NumericWidget):
         color = QColorDialog.getColor(main_window.current_shape.number_color)
         if color.isValid():
-            main_window.current_shape.set_number_color(color)
+            main_window.current_shape.setNumberColor(color)
             main_window.number_color_rect_numeric.setStyleSheet(f"background-color: {color.name()}; border: 1px solid #ccc;")
             if hasattr(main_window, 'all_numeric_dicts'):
                 main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
@@ -6909,21 +6909,21 @@ def changeNumericNumberColor(main_window):
 def updateNumericNumber(main_window, value):
     """Ažurira broj koji se prikazuje"""
     if main_window.current_shape and isinstance(main_window.current_shape, NumericWidget):
-        main_window.current_shape.set_number(value)
+        main_window.current_shape.setNumber(value)
         if hasattr(main_window, 'all_numeric_dicts'):
             main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateNumericNumberSize(main_window, value):
     """Ažurira veličinu broja"""
     if main_window.current_shape and isinstance(main_window.current_shape, NumericWidget):
-        main_window.current_shape.set_number_size(value)
+        main_window.current_shape.setNumberSize(value)
         if hasattr(main_window, 'all_numeric_dicts'):
             main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
 def updateNumericNumberAlignment(main_window, text):
     """Ažurira poravnanje broja"""
     if main_window.current_shape and isinstance(main_window.current_shape, NumericWidget):
-        main_window.current_shape.set_number_alignment(text)
+        main_window.current_shape.setNumberAlignment(text)
         if hasattr(main_window, 'all_numeric_dicts'):
             main_window.all_numeric_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
 
