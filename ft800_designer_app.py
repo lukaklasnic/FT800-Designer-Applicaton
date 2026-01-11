@@ -18,7 +18,8 @@ from callback import (generate_auto_tag, showButtonProperties, updateButtonSize,
                       updateLabelSize, showSliderProperties, showScrollBarProperties, 
                       showProgressBarProperties, showKeysProperties, update_keys_size, 
                       updateImageSize, showImageProperties, showEllipseProperties, 
-                      updateEllipseSize, showNumericProperties, show_canvas_properties, generate_components_c, generate_components_h)
+                      updateEllipseSize, showNumericProperties, show_canvas_properties )
+from generator import ( generate_components_c, generate_components_h )
 from pathlib import Path
 
 from ui_components import Canvas, WidgetIcon
