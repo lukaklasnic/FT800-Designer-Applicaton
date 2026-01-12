@@ -9,14 +9,14 @@ from widgets import (RectangleWidget, LineWidget, CircleWidget, KeysWidget, Butt
                      SliderWidget, ToggleWidget, LabelWidget, ImageWidget,
                     EllipseWidget, NumericWidget)
 import sys
-from callback import (generate_auto_tag, showButtonProperties, updateButtonSize, 
+from properties import (generate_auto_tag, showButtonProperties, updateButtonSize, 
                       showLineProperties, generateWidgetName, renumberAllWidgets, 
                       showCircleProperties, updateCircleSize, showRectangleProperties, 
                       showClockProperties, updateClockSize, updateGaugeSize, 
                       showGaugeProperties, showDialProperties, updateDialSize, 
                       showToggleProperties, updateToggleSize, showLabelProperties, 
                       updateLabelSize, showSliderProperties, showScrollBarProperties, 
-                      showProgressBarProperties, showKeysProperties, update_keys_size, 
+                      showProgressBarProperties, showKeysProperties, updateKeysSize, 
                       updateImageSize, showImageProperties, showEllipseProperties, 
                       updateEllipseSize, showNumericProperties, show_canvas_properties )
 from generator import ( generate_components_c, generate_components_h )

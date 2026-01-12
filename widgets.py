@@ -920,7 +920,7 @@ class CircleWidget( QWidget ):
         self.update()
         self.updatePropertiesDict()
     
-    def setLineThickness( self, thickness ):
+    def setLineEdgeWidth( self, thickness ):
         self.line_thickness = thickness
         self.update()
         self.updatePropertiesDict()
