@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import (QLabel, QHBoxLayout, QWidget, QSpinBox, QLineEdit, QCheckBox, QComboBox, QPushButton )
+from PyQt6.QtWidgets import ( QLabel, QHBoxLayout, QWidget, QSpinBox, QLineEdit, QCheckBox, QComboBox, QPushButton )
 from ui_components import ColorRectangle
 from widgets import ButtonWidget
 from PyQt6.QtGui import QColor
