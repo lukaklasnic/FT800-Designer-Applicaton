@@ -9,16 +9,16 @@ from widgets import (RectangleWidget, LineWidget, CircleWidget, KeysWidget, Butt
                      SliderWidget, ToggleWidget, LabelWidget, ImageWidget,
                     EllipseWidget, NumericWidget)
 import sys
-from properties import (generate_auto_tag, showButtonProperties, updateButtonSize, 
+from properties import (generateAutoTag, showButtonProperties, updateButtonSize, 
                       showLineProperties, generateWidgetName, renumberAllWidgets, 
                       showCircleProperties, updateCircleSize, showRectangleProperties, 
                       showClockProperties, updateClockSize, updateGaugeSize, 
-                      showGaugeProperties, showDialProperties, updateDialSize, 
+                      showGaugeProperties, showDialProperties, 
                       showToggleProperties, updateToggleSize, showLabelProperties, 
                       updateLabelSize, showSliderProperties, showScrollBarProperties, 
                       showProgressBarProperties, showKeysProperties, updateKeysSize, 
                       updateImageSize, showImageProperties, showEllipseProperties, 
-                      updateEllipseSize, showNumericProperties, show_canvas_properties )
+                      updateEllipseSize, showNumericProperties, showCanvasProperties )
 from generator import ( generate_components_c, generate_components_h )
 from pathlib import Path
 
@@ -562,7 +562,7 @@ class MainWindow(QMainWindow):
             if not self.current_shape:
                 current_canvas = self.get_current_canvas()
                 if current_canvas:
-                    show_canvas_properties(self, current_canvas)
+                    showCanvasProperties(self, current_canvas)
                     self.canvas_properties_visible = True
                     self.shape_properties_visible = False
                     
@@ -737,7 +737,7 @@ class MainWindow(QMainWindow):
         for i, widget in enumerate(sorted_widgets, 1):
             widget.stack_order = i
 
-        self.sort_widgets_by_stack_order()
+        self.sortWidgetsByStackOrder()
 
     def hide_shape_properties(self):
         if not self.shape_properties_visible:
@@ -798,7 +798,7 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "Rectangle")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.tag = generate_auto_tag(self, shape)
+            shape.tag = generateAutoTag(self, shape)
 
             if not hasattr(self, 'all_rectangle_dicts'):
                 self.all_rectangle_dicts = {}
@@ -818,7 +818,7 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "Line")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.tag = generate_auto_tag(self, shape)
+            shape.tag = generateAutoTag(self, shape)
 
             if not hasattr(self, 'all_line_dicts'):
                 self.all_line_dicts = {}
@@ -832,7 +832,7 @@ class MainWindow(QMainWindow):
             shape.custom_name = generateWidgetName(self, "Circle")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
             shape.updateCenterPosition()
-            shape.tag = generate_auto_tag(self, shape)
+            shape.tag = generateAutoTag(self, shape)
 
             if not hasattr(self, 'all_circle_dicts'):
                 self.all_circle_dicts = {}
@@ -845,7 +845,7 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "Ellipse")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.tag = generate_auto_tag(self, shape)
+            shape.tag = generateAutoTag(self, shape)
 
             if not hasattr(self, 'all_ellipse_dicts'):
                 self.all_ellipse_dicts = {}
@@ -877,7 +877,7 @@ class MainWindow(QMainWindow):
                 self.all_button_dicts = {}
             self.all_button_dicts[shape.custom_name] = shape.getPropertiesDict()
 
-            shape.tag = generate_auto_tag(self, shape)
+            shape.tag = generateAutoTag(self, shape)
 
         elif self.selected_shape == "Gauge":
             shape = GaugeWidget(80, widget_container)
@@ -886,7 +886,7 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "Gauge")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.tag = generate_auto_tag(self, shape)
+            shape.tag = generateAutoTag(self, shape)
             shape.updatePropertiesDict()
 
             if not hasattr(self, 'all_gauge_dicts'):
@@ -926,7 +926,7 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "ScrollBar")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.tag = generate_auto_tag(self, shape)
+            shape.tag = generateAutoTag(self, shape)
 
             if not hasattr(self, 'all_scrollbar_dicts'):
                 self.all_scrollbar_dicts = {}
@@ -939,7 +939,7 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "Dial")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.tag = generate_auto_tag(self, shape)
+            shape.tag = generateAutoTag(self, shape)
 
             if not hasattr(self, 'all_dial_dicts'):
                 self.all_dial_dicts = {}
@@ -952,7 +952,7 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "Slider")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.tag = generate_auto_tag(self, shape)
+            shape.tag = generateAutoTag(self, shape)
 
             if not hasattr(self, 'all_slider_dicts'):
                 self.all_slider_dicts = {}
@@ -965,7 +965,7 @@ class MainWindow(QMainWindow):
 
             shape.custom_name = generateWidgetName(self, "Toggle")
             shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.tag = generate_auto_tag(self, shape)
+            shape.tag = generateAutoTag(self, shape)
 
             if not hasattr(self, 'all_toggle_dicts'):
                 self.all_toggle_dicts = {}
@@ -1026,7 +1026,7 @@ class MainWindow(QMainWindow):
             
             # Dodaj widget u listu za trenutni canvas
             self.canvas_widgets[current_canvas.canvas_id].append(shape)
-            self.sort_widgets_by_stack_order()
+            self.sortWidgetsByStackOrder()
             self.select_shape(shape)
             
             QApplication.restoreOverrideCursor()
@@ -1148,9 +1148,9 @@ class MainWindow(QMainWindow):
         """Ažurira stack_order selektovanog widget-a i sortira widget-e"""
         if self.current_shape:
             self.current_shape.stack_order = value
-            self.sort_widgets_by_stack_order()
+            self.sortWidgetsByStackOrder()
 
-    def sort_widgets_by_stack_order(self):
+    def sortWidgetsByStackOrder(self):
         """Sortira widget-e po stack_order"""
         current_widgets = self.get_current_canvas_widgets()
         if not current_widgets:
