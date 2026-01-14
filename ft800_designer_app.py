@@ -11,26 +11,26 @@ import sys
 class MainWindow( QMainWindow ):
     def __init__( self ):
         super().__init__()
-        self.init_multiple_canvas()
-        self.set_title_bar()
-        self.set_scroll_area()
-        self.set_main_layouts()
+        self.initMultipleCanvas()
+        self.setTitleBar()
+        self.setScrollArea()
+        self.setMainLayouts()
         
-    def set_title_bar( self ):
+    def setTitleBar( self ):
         self.setWindowTitle( "FT800 Designer application" )
         self.setWindowIcon( QIcon( "B:\Dokumenti\Fakultet\Merno Informacioni Sistemi i Smart Tehnologije\FT800-Designer-Applicaton\designer_logo_ic" ) )
 
-    def set_scroll_area( self ):
+    def setScrollArea( self ):
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable( False )
         self.scroll_area.setHorizontalScrollBarPolicy( Qt.ScrollBarPolicy.ScrollBarAsNeeded )
         self.scroll_area.setVerticalScrollBarPolicy( Qt.ScrollBarPolicy.ScrollBarAsNeeded )
         self.scroll_area.setFrameShape( QScrollArea.Shape.NoFrame )
 
-    def set_main_layouts( self ):
+    def setMainLayouts( self ):
         self.main_widget = QWidget()
         self.main_widget.setMinimumSize( 1919, 1008 )
-        self.main_widget.mousePressEvent = self.on_main_widget_click
+        self.main_widget.mousePressEvent = self.onMainWidgetClick
         self.main_widget.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
 
         main_horizontal_layout = QHBoxLayout( self.main_widget )
@@ -45,9 +45,9 @@ class MainWindow( QMainWindow ):
         self.widgets_icon_widget = QWidget()
         self.widgets_icon_widget.setMinimumWidth( 248 )
 
-        self.add_widgets_to_properties_bar( self.properties_widget )
-        self.add_widgets_to_central_layout( self.central_widget )
-        self.add_widgets_to_icons_panel( self.widgets_icon_widget )
+        self.addWidgetsToPropertiesBar( self.properties_widget )
+        self.addWidgetsToCentralLayout( self.central_widget )
+        self.addWidgetsToIconsPanel( self.widgets_icon_widget )
 
         main_horizontal_layout.addWidget( self.properties_widget, 1 )
         
@@ -78,19 +78,19 @@ class MainWindow( QMainWindow ):
         self.selected_shape = None
         self.current_shape = None
         
-    def init_multiple_canvas( self ):
+    def initMultipleCanvas( self ):
         self.canvases = []
         self.current_canvas_index = 0 
         self.all_canvas_dicts = {} 
         self.canvas_widgets = {}
         
-        self.create_new_canvas()
+        self.createNewCanvas()
         
-    def create_new_canvas( self ):
+    def createNewCanvas( self ):
         canvas_id = len( self.canvases )
         canvas = Canvas( canvas_id = canvas_id )
-        canvas.clicked.connect( self.on_canvas_clicked )
-        canvas.properties_changed.connect( lambda: self.update_canvas_dict( canvas ) )
+        canvas.clicked.connect( self.onCanvasClicked )
+        canvas.properties_changed.connect( lambda: self.updateCanvasDict( canvas ) )
         
         self.canvases.append( canvas )
         self.canvas_widgets[ canvas_id ] = []
@@ -98,7 +98,7 @@ class MainWindow( QMainWindow ):
         
         return canvas_id
         
-    def show_canvas( self, canvas_index ):
+    def showCanvas( self, canvas_index ):
         if 0 <= canvas_index < len( self.canvases ):
             self.current_canvas_index = canvas_index
             
@@ -117,12 +117,12 @@ class MainWindow( QMainWindow ):
             if hasattr( self, 'canvas_counter_label' ):
                 self.canvas_counter_label.setText( f"Canvas { canvas_index + 1 } / {len( self.canvases ) }" )
             
-    def add_widgets_to_properties_bar( self, properties_widget ):
+    def addWidgetsToPropertiesBar( self, properties_widget ):
         self.properties_layout = QVBoxLayout( properties_widget )
         self.properties_layout.setContentsMargins( 10, 10, 10, 10 )
         self.properties_layout.setAlignment( Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft )
 
-    def add_widgets_to_central_layout( self, central_widget ):
+    def addWidgetsToCentralLayout( self, central_widget ):
         central_layout = QVBoxLayout( central_widget )
         central_layout.setContentsMargins( 10, 10, 10, 10 )
         central_layout.setAlignment( Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft )
@@ -150,7 +150,7 @@ class MainWindow( QMainWindow ):
                 border: 2px solid #cc5500;
             }
         """ )
-        generate_button.clicked.connect( self.generate_all_files )
+        generate_button.clicked.connect( self.generateAllFiles )
 
         top_layout.addWidget( generate_button )
         top_layout.addStretch( 1 )
@@ -172,7 +172,7 @@ class MainWindow( QMainWindow ):
                 background-color: #3d8b40;
             }
         """ )
-        add_canvas_btn.clicked.connect( self.add_new_canvas )
+        add_canvas_btn.clicked.connect( self.addNewCanvas )
         add_canvas_btn.setToolTip( "Add new canvas" )
         top_layout.addWidget( add_canvas_btn )
 
@@ -197,7 +197,7 @@ class MainWindow( QMainWindow ):
                 color: #888888;
             }
         """ )
-        self.delete_canvas_btn.clicked.connect( self.delete_current_canvas )
+        self.delete_canvas_btn.clicked.connect( self.deleteCurrentCanvas )
         self.delete_canvas_btn.setToolTip( "Delete current canvas" )
         self.delete_canvas_btn.setEnabled( len( self.canvases) > 1 )
         top_layout.addWidget( self.delete_canvas_btn)
@@ -236,7 +236,7 @@ class MainWindow( QMainWindow ):
             }
         """ )
 
-        self.prev_btn.clicked.connect( self.prev_canvas )
+        self.prev_btn.clicked.connect( self.prevCanvas )
         self.prev_btn.setEnabled( False )
         canvas_horizontal_layout.addWidget( self.prev_btn )
         
@@ -262,7 +262,7 @@ class MainWindow( QMainWindow ):
                 color: #888888;
             }
         """ )
-        self.next_btn.clicked.connect( self.next_canvas )
+        self.next_btn.clicked.connect( self.nextCanvas )
         self.next_btn.setEnabled( False )
         canvas_horizontal_layout.addWidget( self.next_btn )
         canvas_nav_layout.addLayout(canvas_horizontal_layout)
@@ -275,16 +275,16 @@ class MainWindow( QMainWindow ):
         central_layout.addWidget( self.canvas_nav_container )
         central_layout.addStretch( 1 )
         
-        self.setup_canvases_in_container()
+        self.setupCanvasesInContainer()
         
         if self.canvases:
-            self.show_canvas( 0 )
+            self.showCanvas( 0 )
 
-    def delete_current_canvas( self ):
+    def deleteCurrentCanvas( self ):
         if len( self.canvases ) <= 1:
             return
 
-        current_canvas = self.get_current_canvas()
+        current_canvas = self.getCurrentCanvas()
         if not current_canvas:
             return
 
@@ -301,16 +301,16 @@ class MainWindow( QMainWindow ):
             return
         
         if self.canvas_properties_visible:
-            self.hide_canvas_properties()
+            self.hideCanvasProperties()
 
-        self.deselect_all_shapes()
-        self.hide_shape_properties()
+        self.deselectAllShapes()
+        self.hideShapeProperties()
 
         if current_canvas_id in self.canvas_widgets:
             widgets = self.canvas_widgets[ current_canvas_id ]
 
             for widget in widgets:
-                self.delete_widget_from_dicts( widget )
+                self.deleteWidgetFromDicts( widget )
                 widget.deleteLater()
 
             del self.canvas_widgets[ current_canvas_id ]
@@ -321,17 +321,17 @@ class MainWindow( QMainWindow ):
         if current_canvas_id in self.all_canvas_dicts:
             del self.all_canvas_dicts[ current_canvas_id ]
 
-        self.renumber_canvases()
+        self.renumberCanvases()
 
         if self.current_canvas_index >= len( self.canvases ):
             self.current_canvas_index = len( self.canvases ) - 1
 
         if self.canvases:
-            self.show_canvas( self.current_canvas_index )
+            self.showCanvas( self.current_canvas_index )
 
         self.delete_canvas_btn.setEnabled( len( self.canvases ) > 1 )
 
-    def delete_widget_from_dicts( self, widget ):
+    def deleteWidgetFromDicts( self, widget ):
         if isinstance( widget, LineWidget ) and hasattr( self, 'all_line_dicts' ):
             if hasattr( widget, 'custom_name' ):
                 self.all_line_dicts.pop( widget.custom_name, None )
@@ -396,7 +396,7 @@ class MainWindow( QMainWindow ):
             if hasattr( widget, 'custom_name' ):
                 self.all_numeric_dicts.pop( widget.custom_name, None )
 
-    def renumber_canvases( self ):
+    def renumberCanvases( self ):
         new_canvases = []
         new_canvas_widgets = {}
         new_all_canvas_dicts = {}
@@ -421,7 +421,7 @@ class MainWindow( QMainWindow ):
         self.canvas_widgets = new_canvas_widgets
         self.all_canvas_dicts = new_all_canvas_dicts
         
-    def setup_canvases_in_container( self ):
+    def setupCanvasesInContainer( self ):
         if not hasattr( self, 'canvas_display_container' ) or not hasattr( self, 'canvases' ):
             return
             
@@ -433,7 +433,7 @@ class MainWindow( QMainWindow ):
             container_layout.addWidget( canvas )
             canvas.hide()
         
-    def add_widgets_to_icons_panel( self, widgets_icon_widget ):
+    def addWidgetsToIconsPanel( self, widgets_icon_widget ):
         widgets_layout = QVBoxLayout( widgets_icon_widget )
         widgets_layout.setContentsMargins( 10, 10, 10, 10 )
         widgets_layout.setAlignment( Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignCenter )
@@ -462,48 +462,48 @@ class MainWindow( QMainWindow ):
 
         widgets_layout.addWidget( icons_container )
         
-    def add_new_canvas( self ):
-        canvas_id = self.create_new_canvas()
+    def addNewCanvas( self ):
+        canvas_id = self.createNewCanvas()
         
         if hasattr( self, 'canvas_display_container' ):
             self.canvas_display_container.layout().addWidget( self.canvases[ -1 ] )
         
-        self.show_canvas( canvas_id )
+        self.showCanvas( canvas_id )
         self.delete_canvas_btn.setEnabled( len( self.canvases ) > 1 )
         
-    def prev_canvas( self ):
+    def prevCanvas( self ):
         if self.current_canvas_index > 0:
-            self.show_canvas( self.current_canvas_index - 1 )
+            self.showCanvas( self.current_canvas_index - 1 )
             
-    def next_canvas( self ):
+    def nextCanvas( self ):
         if self.current_canvas_index < len( self.canvases ) - 1:
-            self.show_canvas( self.current_canvas_index + 1 )
+            self.showCanvas( self.current_canvas_index + 1 )
             
-    def get_current_canvas( self ):
+    def getCurrentCanvas( self ):
         if 0 <= self.current_canvas_index < len( self.canvases ):
             return self.canvases[ self.current_canvas_index ]
         
         return None
         
-    def get_current_canvas_widgets( self ):
-        current_canvas = self.get_current_canvas()
+    def getCurrentCanvasWidgets( self ):
+        current_canvas = self.getCurrentCanvas()
 
         if current_canvas:
             return self.canvas_widgets.get( current_canvas.canvas_id, [] )
         
         return []
         
-    def on_canvas_clicked( self, event ):
+    def onCanvasClicked( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             if not self.current_shape:
-                current_canvas = self.get_current_canvas()
+                current_canvas = self.getCurrentCanvas()
 
                 if current_canvas:
                     showCanvasProperties( self, current_canvas )
                     self.canvas_properties_visible = True
                     self.shape_properties_visible = False
                     
-    def update_canvas_dict( self, canvas ):
+    def updateCanvasDict( self, canvas ):
         if hasattr( self, 'all_canvas_dicts' ):
             canvas_id = canvas.canvas_id
             
@@ -511,12 +511,12 @@ class MainWindow( QMainWindow ):
             canvas_props[ 'widgets' ] = [ widget.getPropertiesDict() for widget in self.canvas_widgets.get( canvas_id, [] ) if hasattr( widget, 'getPropertiesDict' ) ]
             self.all_canvas_dicts[ canvas_id ] = canvas_props
             
-    def on_main_widget_click( self, event ):
+    def onMainWidgetClick( self, event ):
         if not self.canvases:
             QWidget.mousePressEvent( self.main_widget, event )
             return
 
-        current_canvas = self.get_current_canvas()
+        current_canvas = self.getCurrentCanvas()
 
         if not current_canvas:
             QWidget.mousePressEvent( self.main_widget, event )
@@ -531,7 +531,7 @@ class MainWindow( QMainWindow ):
 
         if canvas_global.contains( global_pos ):
             clicked_on_shape = False
-            current_widgets = self.get_current_canvas_widgets()
+            current_widgets = self.getCurrentCanvasWidgets()
 
             for shape in current_widgets:
                 global_shape = shape.frameGeometry()
@@ -545,20 +545,20 @@ class MainWindow( QMainWindow ):
                 pass
 
             elif self.selected_shape and self.object_attached:
-                self.add_shape_to_canvas( global_pos )
+                self.addShapeToCanvas( global_pos )
 
             else:
-                self.deselect_all_shapes()
-                self.hide_shape_properties()
+                self.deselectAllShapes()
+                self.hideShapeProperties()
 
         if ( not canvas_global.contains( global_pos ) and not properties_global.contains( global_pos ) ):
-            self.hide_canvas_properties()
-            self.deselect_all_shapes()
-            self.hide_shape_properties()
+            self.hideCanvasProperties()
+            self.deselectAllShapes()
+            self.hideShapeProperties()
 
         QWidget.mousePressEvent( self.main_widget, event )
 
-    def hide_canvas_properties( self ):
+    def hideCanvasProperties( self ):
         if not self.canvas_properties_visible:
             return
             
@@ -572,8 +572,8 @@ class MainWindow( QMainWindow ):
         
         self.canvas_properties_visible = False
 
-    def deselect_all_shapes( self ):
-        current_widgets = self.get_current_canvas_widgets()
+    def deselectAllShapes( self ):
+        current_widgets = self.getCurrentCanvasWidgets()
 
         for shape in current_widgets:
             if shape:
@@ -583,14 +583,14 @@ class MainWindow( QMainWindow ):
 
     def keyPressEvent( self, event ):
         if event.key() == Qt.Key.Key_Delete and self.current_shape:
-            self.delete_selected_shape()
+            self.deleteSelectedShape()
 
         else:
             super().keyPressEvent( event )
     
-    def delete_selected_shape( self ):
+    def deleteSelectedShape( self ):
         if self.current_shape:
-            current_canvas = self.get_current_canvas()
+            current_canvas = self.getCurrentCanvas()
 
             if not current_canvas:
                 return
@@ -667,14 +667,14 @@ class MainWindow( QMainWindow ):
 
             self.current_shape.deleteLater()
             self.current_shape = None
-            self.hide_shape_properties()
-            self.deselect_all_shapes()
-            self.renumber_stack_orders()
+            self.hideShapeProperties()
+            self.deselectAllShapes()
+            self.renumberStackOrders()
             renumberAllWidgets( self )
-            self.update_canvas_dict( current_canvas )
+            self.updateCanvasDict( current_canvas )
 
-    def renumber_stack_orders( self ):
-        current_widgets = self.get_current_canvas_widgets()
+    def renumberStackOrders( self ):
+        current_widgets = self.getCurrentCanvasWidgets()
 
         if not current_widgets:
             return
@@ -685,7 +685,7 @@ class MainWindow( QMainWindow ):
 
         self.sortWidgetsByStackOrder()
 
-    def hide_shape_properties( self ):
+    def hideShapeProperties( self ):
         if not self.shape_properties_visible:
             return
         
@@ -699,16 +699,16 @@ class MainWindow( QMainWindow ):
 
         self.shape_properties_visible = False
 
-    def select_shape( self, shape ):
-        self.deselect_all_shapes()
+    def selectShape( self, shape ):
+        self.deselectAllShapes()
         shape.setSelected( True )
         self.current_shape = shape
         self.main_widget.setFocus()
-        self.hide_canvas_properties()
-        self.show_shape_properties()
+        self.hideCanvasProperties()
+        self.showShapeProperties()
 
-    def add_shape_to_canvas( self, global_pos ):
-        current_canvas = self.get_current_canvas()
+    def addShapeToCanvas( self, global_pos ):
+        current_canvas = self.getCurrentCanvas()
 
         if not current_canvas:
             return
@@ -739,9 +739,9 @@ class MainWindow( QMainWindow ):
             end_x = container_pos.x() + 100
             end_y = container_pos.y()
             shape.setLinePoints( start_x, start_y, end_x, end_y )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Line" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
             if not hasattr( self, 'all_line_dicts' ):
@@ -752,9 +752,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Rectangle":
             shape = RectangleWidget( 100, 80, widget_container )
             shape.move( container_pos.x() - 50, container_pos.y() - 40 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Rectangle" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
             if not hasattr( self, 'all_rectangle_dicts' ):
@@ -765,9 +765,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Circle":
             shape = CircleWidget( 100, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Circle" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.updateCenterPosition()
             shape.tag = generateAutoTag( self, shape )
 
@@ -777,27 +777,27 @@ class MainWindow( QMainWindow ):
             self.all_circle_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Ellipse":
-            shape = EllipseWidget(98, 78, widget_container)
-            shape.move(container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2)
-            shape.clicked.connect(self.select_shape)
+            shape = EllipseWidget( 98, 78, widget_container )
+            shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
+            shape.clicked.connect( self.selectShape )
 
             shape.custom_name = generateWidgetName(self, "Ellipse")
-            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
-            shape.tag = generateAutoTag(self, shape)
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
+            shape.tag = generateAutoTag( self, shape )
 
-            if not hasattr(self, 'all_ellipse_dicts'):
+            if not hasattr( self, 'all_ellipse_dicts' ):
                 self.all_ellipse_dicts = {}
 
-            self.all_ellipse_dicts[shape.custom_name] = shape.getPropertiesDict()
+            self.all_ellipse_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Button":
             shape = ButtonWidget( 100, 50, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
             shape.custom_name = generateWidgetName( self, "Button" )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.setMouseTracking( True )
             shape.raise_()
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.updatePropertiesDict()
 
             if not hasattr( self, 'all_button_dicts' ):
@@ -810,9 +810,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Keys":
             shape = KeysWidget( 200, 120, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Keys" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
             if not hasattr( self, 'all_keys_dicts' ):
                 self.all_keys_dicts = {}
@@ -822,9 +822,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Clock":
             shape = ClockWidget( 100, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Clock" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.updatePropertiesDict()
 
             if not hasattr(self, 'all_clock_dicts'):
@@ -835,9 +835,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Gauge":
             shape = GaugeWidget( 80, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Gauge" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
             shape.updatePropertiesDict()
 
@@ -849,9 +849,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Dial":
             shape = DialWidget( 80, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Dial" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
             if not hasattr(self, 'all_dial_dicts'):
@@ -862,9 +862,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Toggle":
             shape = ToggleWidget( 80, 30, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Toggle" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
             if not hasattr(self, 'all_toggle_dicts'):
@@ -875,9 +875,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Scroll bar":
             shape = ScrollBarWidget( 150, 10, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect(self.select_shape)
+            shape.clicked.connect(self.selectShape)
             shape.custom_name = generateWidgetName( self, "ScrollBar" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
             if not hasattr( self, 'all_scrollbar_dicts' ):
@@ -888,9 +888,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Slider":
             shape = SliderWidget( 200, 50, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Slider" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
             if not hasattr(self, 'all_slider_dicts'):
@@ -901,9 +901,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Progress bar":
             shape = ProgressBarWidget( 150, 10, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "ProgressBar" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.updatePropertiesDict()
 
             if not hasattr( self, 'all_progressbar_dicts' ):
@@ -914,9 +914,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Image":
             shape = ImageWidget( 100, 100, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName(self, "Image")
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
             if not hasattr( self, 'all_image_dicts' ):
                 self.all_image_dicts = {}
@@ -926,9 +926,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Label":
             shape = LabelWidget( 100, 40, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect(self.select_shape)
+            shape.clicked.connect(self.selectShape)
             shape.custom_name = generateWidgetName( self, "Label" )
-            shape.stack_order = len(self.get_current_canvas_widgets()) + 1
+            shape.stack_order = len(self.getCurrentCanvasWidgets()) + 1
 
             if not hasattr( self, 'all_label_dicts' ):
                 self.all_label_dicts = {}
@@ -938,9 +938,9 @@ class MainWindow( QMainWindow ):
         elif self.selected_shape == "Numeric":
             shape = NumericWidget( 100, 40, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
-            shape.clicked.connect( self.select_shape )
+            shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Numeric" )
-            shape.stack_order = len( self.get_current_canvas_widgets() ) + 1
+            shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
             if not hasattr( self, 'all_numeric_dicts' ):
                 self.all_numeric_dicts = {}
@@ -949,16 +949,16 @@ class MainWindow( QMainWindow ):
 
             shape.show()
             self.canvas_widgets[ current_canvas.canvas_id ].append( shape )
-            self.update_widgets_z_order()
-            self.select_shape( shape )
+            self.updateWidgetsZOrder()
+            self.selectShape( shape )
             QApplication.restoreOverrideCursor()
             self.object_attached = False
             self.selected_shape = None
-            self.update_canvas_dict( current_canvas )
+            self.updateCanvasDict( current_canvas )
             return
 
         if shape:
-            current_widgets_count = len( self.get_current_canvas_widgets() )
+            current_widgets_count = len( self.getCurrentCanvasWidgets() )
             shape.stack_order = current_widgets_count + 1
 
             shape.show()
@@ -966,16 +966,16 @@ class MainWindow( QMainWindow ):
             
             self.canvas_widgets[ current_canvas.canvas_id ].append( shape )
             self.sortWidgetsByStackOrder()
-            self.select_shape( shape )
+            self.selectShape( shape )
             
             QApplication.restoreOverrideCursor()
             self.object_attached = False
             self.selected_shape = None
             
-            self.update_canvas_dict( current_canvas )
+            self.updateCanvasDict( current_canvas )
 
-    def update_widgets_z_order( self ):
-        current_widgets = self.get_current_canvas_widgets()
+    def updateWidgetsZOrder( self ):
+        current_widgets = self.getCurrentCanvasWidgets()
         sorted_widgets = sorted( current_widgets, key = lambda x: x.stack_order )
 
         for widget in current_widgets:
@@ -984,9 +984,9 @@ class MainWindow( QMainWindow ):
         for widget in sorted_widgets:
             widget.raise_()
 
-    def show_shape_properties( self ):
-        self.hide_shape_properties()
-        self.hide_canvas_properties()
+    def showShapeProperties( self ):
+        self.hideShapeProperties()
+        self.hideCanvasProperties()
         
         stack_order_attrs = [
             'stack_order_spin_rect', 'stack_order_spin_circle', 'stack_order_spin_button',
@@ -1108,13 +1108,13 @@ class MainWindow( QMainWindow ):
 
         self.shape_properties_visible = True
 
-    def update_stack_order( self, value ):
+    def updateStackOrder( self, value ):
         if self.current_shape:
             self.current_shape.stack_order = value
             self.sortWidgetsByStackOrder()
 
     def sortWidgetsByStackOrder( self ):
-        current_widgets = self.get_current_canvas_widgets()
+        current_widgets = self.getCurrentCanvasWidgets()
 
         if not current_widgets:
             return
@@ -1135,11 +1135,11 @@ class MainWindow( QMainWindow ):
                 widget_name = 'Unknown'
 
 
-    def update_shape_position( self ):
+    def updateShapePosition( self ):
         if self.current_shape:
             self.current_shape.move( self.pos_x_spin.value(), self.pos_y_spin.value() )
 
-    def change_shape_color( self ):
+    def changeShapeColor( self ):
         if ( self.current_shape and not isinstance( self.current_shape, ( GaugeWidget, ClockWidget, ProgressBarWidget ) ) ):
             if hasattr( self.current_shape, 'color' ):
                 current_color = self.current_shape.color
@@ -1157,11 +1157,11 @@ class MainWindow( QMainWindow ):
                 self.current_shape.setColor( color )
                 self.color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
 
-    def update_shape_border_width( self ):
+    def updateShapeBorderWidth( self ):
         if ( self.current_shape and not isinstance( self.current_shape, ( GaugeWidget, ClockWidget, ProgressBarWidget ) ) and  hasattr( self.current_shape, 'setBorderWidth' ) ):
             self.current_shape.setBorderWidth( self.border_width_spin.value() )
 
-    def set_tag( self, tag_value ):
+    def setTag( self, tag_value ):
         self.tag = tag_value
         self.updatePropertiesDict()
         main_window = self.findMainWindow()
@@ -1215,7 +1215,7 @@ class MainWindow( QMainWindow ):
             elif isinstance( self, NumericWidget ) and hasattr( main_window, 'all_numeric_dicts' ):
                 main_window.all_numeric_dicts[ self.custom_name ] = self.getPropertiesDict()
 
-    def generate_resources( self ):
+    def generateResources( self ):
         all_images = []
         
         for canvas_id in range( len( self.canvases ) ):
@@ -1235,14 +1235,16 @@ class MainWindow( QMainWindow ):
 
         h_content = ""
 
-        h_content += f"#ifndef NECTO_DESIGNER_RESOURCE_H"
-        h_content += f"#define NECTO_DESIGNER_RESOURCE_H"
-        h_content += f"#include \"stdint.h\""
+        h_content += f"#ifndef NECTO_DESIGNER_RESOURCE_H\n"
+        h_content += f"#define NECTO_DESIGNER_RESOURCE_H\n"
+        h_content += f"#include \"stdint.h\"\n"
+        h_content += "\n"
 
 
         c_content = ""
-        c_content += f"#include <stdint.h>"
-        c_content += f"#include \"resource.h\""
+        c_content += f"#include \"stdint.h\"\n"
+        c_content += f"#include \"resource.h\"\n"
+        c_content += "\n"
 
         generated_count = 0
 
@@ -1280,7 +1282,7 @@ class MainWindow( QMainWindow ):
                 else:
                     var_name = f"image_{ generated_count }_hex"
 
-                h_content += f"extern const code uint8_t { var_name }[ { size } ];\n\n"
+                h_content += f"extern const code uint8_t { var_name }[ { size } ];\n"
 
                 c_content += f"const code uint8_t { var_name }[ { size } ] = {{\n"
 
@@ -1295,6 +1297,7 @@ class MainWindow( QMainWindow ):
             except Exception as e:
                 pass
 
+        h_content += "\n"
         h_content += "#endif\n"
 
         try:
@@ -1307,7 +1310,7 @@ class MainWindow( QMainWindow ):
         except Exception as e:
             QMessageBox.critical( self, "Error", f"Failed to generate resource files:\n{ str( e ) }" )
 
-    def generate_components( self ):
+    def generateComponents( self ):
         canvas_data = []
         for canvas_id, canvas_props in self.all_canvas_dicts.items():
             canvas_info = canvas_props.copy()
@@ -1347,7 +1350,7 @@ class MainWindow( QMainWindow ):
 
             with open( f"{ out_dir }/components.c", "w", encoding='utf-8' ) as c_file:
                 c_file.write( c_content )
-                
+
         except:
             pass
 
@@ -1416,9 +1419,9 @@ class MainWindow( QMainWindow ):
             if key not in widget_dict:
                 widget_dict[ key ] = value    
 
-    def generate_all_files(self):
-        self.generate_resources()
-        self.generate_components()
+    def generateAllFiles(self):
+        self.generateResources()
+        self.generateComponents()
 
 if __name__ == "__main__":
     QGuiApplication.setHighDpiScaleFactorRoundingPolicy( Qt.HighDpiScaleFactorRoundingPolicy.PassThrough )
