@@ -30,7 +30,12 @@ def changeGridColor( main_window, canvas, color_rect ):
         updateCanvasDict( main_window, canvas )
 
 def changeGridType( main_window, canvas, text ):
-    grid_type = "lines" if text == "Lines" else "dots"
+    if text == "Lines":
+        grid_type = "lines"  
+
+    else: 
+       grid_type = "dots"
+
     canvas.setGridType( grid_type )
     updateCanvasDict( main_window, canvas )
 
@@ -1603,7 +1608,7 @@ def updateProgressBarStatic( main_window, state ):
         main_window.current_shape.setStatic( static )
         main_window.current_shape.updatePropertiesDict()
 
-def updateProgressBarThreeD( main_window, state ):
+def updateProgressBar3D( main_window, state ):
     if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
         _3d = ( state == Qt.CheckState.Checked.value )
         main_window.current_shape.set3d( _3d )

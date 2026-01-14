@@ -3796,7 +3796,7 @@ def showProgressBarProperties( main_window, current_index ):
     _3d_layout.addStretch( 1 )
     main_window.progress_3d_checkbox = QCheckBox()
     main_window.progress_3d_checkbox.setChecked( main_window.current_shape._3d )
-    main_window.progress_3d_checkbox.stateChanged.connect( lambda state: updateProgressBarThreeD( main_window, state ) )
+    main_window.progress_3d_checkbox.stateChanged.connect( lambda state: updateProgressBar3D( main_window, state ) )
     main_window.progress_3d_checkbox.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
     _3d_layout.addWidget( main_window.progress_3d_checkbox )
     _3d_widget = QWidget()
