@@ -2044,7 +2044,7 @@ def renumberAllWidgets( main_window ):
 
 def generateWidgetName( main_window, widget_type ):
     if hasattr( main_window, 'canvas_widgets' ):
-        current_canvas = main_window.get_current_canvas()
+        current_canvas = main_window.getCurrentCanvas()
 
         if current_canvas:
             current_widgets = main_window.canvas_widgets.get( current_canvas.canvas_id, [] )
