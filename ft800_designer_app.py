@@ -1433,6 +1433,6 @@ if __name__ == "__main__":
     splash.show()
     app.processEvents()
     window = MainWindow()
-    QTimer.singleShot( 3000, lambda: ( splash.finish(window), window.show() ) )
-    window.resize( 1024, 720 )
+    QTimer.singleShot( 3000, lambda: ( splash.finish( window ), window.show() ) )
+    window.resize( 1024, 720 ) 
     sys.exit( app.exec() )
