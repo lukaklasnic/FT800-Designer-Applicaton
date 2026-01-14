@@ -1327,7 +1327,7 @@ class MainWindow( QMainWindow ):
                         widget_type = 'ProgressBar'
                     widget_dict[ 'type' ] = widget_type
 
-                    self._ensure_widget_fields( widget_dict )
+                    self.ensureWidgetFields( widget_dict )
                     canvas_widgets.append( widget_dict )
 
             canvas_info[ 'widgets' ] = canvas_widgets
@@ -1354,7 +1354,7 @@ class MainWindow( QMainWindow ):
         except:
             pass
 
-    def _ensure_widget_fields( self, widget_dict ):
+    def ensureWidgetFields( self, widget_dict ):
         widget_type = widget_dict.get( 'type' )
 
         if 'visible' not in widget_dict:
