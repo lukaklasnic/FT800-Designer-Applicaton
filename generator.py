@@ -748,7 +748,6 @@ def generateComponents( main_window, out_dir=None ):
 
                 widget_dict[ 'type' ] = widget_type
 
-                #ensureWidgetFields( widget_dict )
                 canvas_widgets.append( widget_dict )
 
         canvas_info[ 'widgets' ] = canvas_widgets
