@@ -1,3 +1,8 @@
+from PyQt6.QtWidgets import ( QFileDialog, QMessageBox )
+from widgets import ImageWidget
+from PyQt6.QtGui import QImage
+from PyQt6.QtCore import Qt
+
 def getWidgetMapping():
     return {
         'Line': 'ft800_designer_line',
@@ -528,3 +533,176 @@ def generateComponentsC(canvas_data, widgets_data):
             content += "}\n"
     
     return content
+
+def generateResourcesH( self, all_images ):
+    if not all_images:
+        return None
+    
+    h_content = ""
+    h_content += f"#ifndef NECTO_DESIGNER_RESOURCE_H\n"
+    h_content += f"#define NECTO_DESIGNER_RESOURCE_H\n"
+    h_content += f"#include \"stdint.h\"\n"
+    h_content += "\n"
+    
+    generated_count = 0
+    
+    for img_widget in all_images:
+        try:
+            if not hasattr( img_widget, 'pixmap' ) or img_widget.pixmap.isNull():
+                continue
+            
+            if hasattr( img_widget, 'custom_name' ) and img_widget.custom_name:
+                clean_name = img_widget.custom_name.replace( ' ', '_' ).replace( '-', '_' )
+                var_name = f"{ clean_name }_hex"
+
+            else:
+                var_name = f"image_{ generated_count }_hex"
+            
+            h_content += f"extern const code uint8_t { var_name }[];\n"
+            generated_count += 1
+            
+        except Exception as e:
+            continue
+        
+    h_content += "\n"
+    h_content += "#endif\n"
+    
+    return h_content
+
+def generateResourcesC( self, all_images ):
+    if not all_images:
+        return None
+
+    c_content = ""
+    c_content += f"#include \"stdint.h\"\n"
+    c_content += f"#include \"resource.h\"\n"
+    c_content += "\n"
+
+    generated_count = 0
+
+    for img_widget in all_images:
+        try:
+            if not hasattr( img_widget, 'pixmap' ) or img_widget.pixmap.isNull():
+                continue
+            
+            image = img_widget.pixmap.toImage()
+            width = img_widget.getWidth()
+            height = img_widget.getHeight()
+            scaled_image = image.scaled( width, height, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation )
+            rgb888_image = scaled_image.convertToFormat( QImage.Format.Format_RGB888 )
+            rgb565 = bytearray()
+
+            for y in range( height ):
+                for x in range( width ):
+                    c = rgb888_image.pixelColor( x, y )
+
+                    r = min( max( c.red(), 0 ), 255 ) >> 3
+                    g = min( max( c.green(), 0 ), 255 ) >> 2
+                    b = min( max( c.blue(), 0 ), 255 ) >> 3
+
+                    value = ( r << 11 ) | ( g << 5 ) | b
+                    rgb565.append( value & 0xFF )
+                    rgb565.append( ( value >> 8 ) & 0xFF )
+
+            size = len( rgb565 )
+
+            if hasattr( img_widget, 'custom_name' ) and img_widget.custom_name:
+                clean_name = img_widget.custom_name.replace( ' ', '_' ).replace( '-', '_' )
+                var_name = f" {clean_name }_hex"
+
+            else:
+                var_name = f"image_{ generated_count }_hex"
+
+            c_content += f"const code uint8_t { var_name }[] = {{\n"
+
+            for i in range( 0, size, 16 ):
+                line = ", ".join( f"0x{b:02X}" for b in rgb565[ i:i+16 ] )
+                c_content += f"    { line },\n"
+
+            c_content += "};\n\n"
+            generated_count += 1
+
+        except Exception as e:
+            continue
+        
+    return c_content
+
+def generateResources( main_window, out_dir=None ):
+    all_images = []
+        
+    for canvas_id in range( len( main_window.canvases ) ):
+        canvas_widgets = main_window.canvases[ canvas_id ].getWidgetContainer().children()
+            
+        for widget in canvas_widgets:
+            if isinstance( widget, ImageWidget ):
+                all_images.append( widget )
+        
+    if not all_images:
+        return
+    
+    if out_dir is None:
+        out_dir = QFileDialog.getExistingDirectory( main_window, "Select output directory for resource files" )
+        
+        if not out_dir:
+            return
+    
+    try:
+        h_content = generateResourcesH(main_window, all_images)
+        c_content = generateResourcesC(main_window, all_images)
+            
+        if h_content:
+            with open(f"{out_dir}/resource.h", "w", encoding='utf-8') as h_file:
+                h_file.write(h_content)
+            
+        if c_content:
+            with open(f"{out_dir}/resource.c", "w", encoding='utf-8') as c_file:
+                c_file.write(c_content)
+                    
+    except Exception as e:
+        QMessageBox.critical( main_window, "Error",  f"Failed to generate resource files:\n{ str( e ) }" )
+
+def generateComponents( main_window, out_dir=None ):
+    canvas_data = []
+
+    for canvas_id, canvas_props in main_window.all_canvas_dicts.items():
+        canvas_info = canvas_props.copy()
+        canvas_widgets = []
+        widgets = main_window.canvas_widgets.get( canvas_id, [] )
+
+        for widget in widgets:
+            if hasattr( widget, 'getPropertiesDict' ):
+                widget_dict = widget.getPropertiesDict()
+                widget_type = type( widget ).__name__.replace( 'Widget', '' )
+
+                if widget_type == 'ScrollBar':
+                    widget_type = 'ScrollBar'
+
+                elif widget_type == 'ProgressBar':
+                    widget_type = 'ProgressBar'
+
+                widget_dict[ 'type' ] = widget_type
+
+                main_window.ensureWidgetFields( widget_dict )
+                canvas_widgets.append( widget_dict )
+
+        canvas_info[ 'widgets' ] = canvas_widgets
+        canvas_data.append( canvas_info )
+
+    if not canvas_data:
+        return
+
+    if not out_dir:
+        return
+
+    try:
+        h_content = generateComponentsH( canvas_data, {} )
+        c_content = generateComponentsC( canvas_data, {} )
+
+        with open( f"{ out_dir }/components.h", "w", encoding='utf-8' ) as h_file:
+            h_file.write( h_content )
+
+        with open( f"{ out_dir }/components.c", "w", encoding='utf-8' ) as c_file:
+            c_file.write( c_content )
+
+    except Exception as e:
+        QMessageBox.critical( main_window, "Error",  f"Failed to generate component files:\n{ str( e ) }" )

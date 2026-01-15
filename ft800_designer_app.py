@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import ( QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QFrame, QPushButton, QColorDialog, QSplashScreen, QFileDialog, QMessageBox )
-from generator import ( generateComponentsC, generateComponentsH )
+from generator import ( generateComponentsC, generateComponentsH, generateResources, generateComponents )
 from PyQt6.QtGui import ( QPixmap, QIcon, QGuiApplication, QImage )
 from PyQt6.QtCore import ( Qt, QTimer )
 from ui_components import *
@@ -11,10 +11,13 @@ import sys
 class MainWindow( QMainWindow ):
     def __init__( self ):
         super().__init__()
+        self.output_dir = None 
+        self.output_dir_label = None 
         self.initMultipleCanvas()
         self.setTitleBar()
         self.setScrollArea()
         self.setMainLayouts()
+
         
     def setTitleBar( self ):
         self.setWindowTitle( "FT800 Designer application" )
@@ -155,56 +158,6 @@ class MainWindow( QMainWindow ):
         top_layout.addWidget( generate_button )
         top_layout.addStretch( 1 )
 
-        add_canvas_btn = QPushButton( "+" )
-        add_canvas_btn.setFixedSize( 30, 30 )
-        add_canvas_btn.setStyleSheet( """
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                font-weight: bold;
-                border-radius: 15px;
-                font-size: 16px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:pressed {
-                background-color: #3d8b40;
-            }
-        """ )
-        add_canvas_btn.clicked.connect( self.addNewCanvas )
-        add_canvas_btn.setToolTip( "Add new canvas" )
-        top_layout.addWidget( add_canvas_btn )
-
-        self.delete_canvas_btn = QPushButton( "-" )
-        self.delete_canvas_btn.setFixedSize( 30, 30 )
-        self.delete_canvas_btn.setStyleSheet( """
-            QPushButton {
-                background-color: #f44336;
-                color: white;
-                font-weight: bold;
-                border-radius: 15px;
-                font-size: 16px;
-            }
-            QPushButton:hover {
-                background-color: #d32f2f;
-            }
-            QPushButton:pressed {
-                background-color: #b71c1c;
-            }
-            QPushButton:disabled {
-                background-color: #666666;
-                color: #888888;
-            }
-        """ )
-        self.delete_canvas_btn.clicked.connect( self.deleteCurrentCanvas )
-        self.delete_canvas_btn.setToolTip( "Delete current canvas" )
-        self.delete_canvas_btn.setEnabled( len( self.canvases) > 1 )
-        top_layout.addWidget( self.delete_canvas_btn)
-
-        central_layout.addLayout( top_layout )
-        central_layout.addStretch( 1 )
-
         central_layout.addLayout( top_layout )
         central_layout.addStretch( 1 )
 
@@ -212,7 +165,7 @@ class MainWindow( QMainWindow ):
         canvas_nav_layout = QVBoxLayout( self.canvas_nav_container )
         canvas_nav_layout.setContentsMargins( 0, 0, 0, 0 )
         canvas_nav_layout.setSpacing( 10 )
-        
+
         canvas_horizontal_layout = QHBoxLayout()
         canvas_horizontal_layout.setContentsMargins( 0, 0, 0, 0 )
         canvas_horizontal_layout.setSpacing( 10 )
@@ -239,11 +192,11 @@ class MainWindow( QMainWindow ):
         self.prev_btn.clicked.connect( self.prevCanvas )
         self.prev_btn.setEnabled( False )
         canvas_horizontal_layout.addWidget( self.prev_btn )
-        
+
         self.canvas_display_container = QWidget()
         self.canvas_display_container.setFixedSize( 500, 300 )
         canvas_horizontal_layout.addWidget( self.canvas_display_container )
-        
+
         self.next_btn = QPushButton( "→" )
         self.next_btn.setFixedSize( 30, 30 )
         self.next_btn.setStyleSheet( """
@@ -266,19 +219,113 @@ class MainWindow( QMainWindow ):
         self.next_btn.setEnabled( False )
         canvas_horizontal_layout.addWidget( self.next_btn )
         canvas_nav_layout.addLayout(canvas_horizontal_layout)
-        
-        self.canvas_counter_label = QLabel( "Canvas 1/1" )
-        self.canvas_counter_label.setStyleSheet( "color: white; font-size: 12px;" )
-        self.canvas_counter_label.setAlignment( Qt.AlignmentFlag.AlignCenter )
-        canvas_nav_layout.addWidget( self.canvas_counter_label )
-        
+
+        canvas_buttons_layout = QHBoxLayout()
+        canvas_buttons_layout.setContentsMargins( 0, 10, 0, 0 )
+        canvas_buttons_layout.setSpacing( 10 )
+        canvas_buttons_layout.setAlignment( Qt.AlignmentFlag.AlignCenter )
+
+        add_canvas_btn = QPushButton( "+" )
+        add_canvas_btn.setFixedSize( 30, 30 )
+        add_canvas_btn.setStyleSheet( """
+            QPushButton {
+                background-color: #666666;
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            QPushButton:hover:enabled {
+                background-color: #888888;
+            }
+            QPushButton:disabled {
+                background-color: #444444;
+                color: #888888;
+            }
+        """ )
+        add_canvas_btn.clicked.connect( self.addNewCanvas )
+        add_canvas_btn.setToolTip( "Add new canvas" )
+        canvas_buttons_layout.addWidget( add_canvas_btn )
+
+        self.delete_canvas_btn = QPushButton( "-" )
+        self.delete_canvas_btn.setFixedSize( 30, 30 )
+        self.delete_canvas_btn.setStyleSheet( """
+            QPushButton {
+                background-color: #666666;
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            QPushButton:hover:enabled {
+                background-color: #888888;
+            }
+            QPushButton:disabled {
+                background-color: #444444;
+                color: #888888;
+            }
+        """ )
+        self.delete_canvas_btn.clicked.connect( self.deleteCurrentCanvas )
+        self.delete_canvas_btn.setToolTip( "Delete current canvas" )
+        self.delete_canvas_btn.setEnabled( len( self.canvases) > 1 )
+        canvas_buttons_layout.addWidget( self.delete_canvas_btn )
+
+        canvas_nav_layout.addLayout( canvas_buttons_layout )
+
         central_layout.addWidget( self.canvas_nav_container )
         central_layout.addStretch( 1 )
-        
+
+        bottom_container = QWidget()
+        bottom_layout = QHBoxLayout( bottom_container )
+        bottom_layout.setContentsMargins( 5, 5, 5, 5 )
+        bottom_layout.setSpacing( 10 )
+
+        self.output_dir_label = QLabel( "Output: Not selected" )
+        self.output_dir_label.setStyleSheet( """
+            QLabel {
+                color: white;
+                font-size: 11px;
+                background-color: #333333;
+                padding: 5px;
+                border-radius: 3px;
+                border: 1px solid #555555;
+            }
+        """ )
+        self.output_dir_label.setMinimumHeight( 30 )
+        self.output_dir_label.setAlignment( Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter )
+        bottom_layout.addWidget( self.output_dir_label, 1 ) 
+
+        browse_button = QPushButton( "Browse..." )
+        browse_button.setFixedSize( 80, 30 )
+        browse_button.setStyleSheet( """
+            QPushButton {
+                background-color: #666666;
+                color: white;
+                font-weight: normal;
+                border: 1px solid #777777;
+                border-radius: 3px;
+                font-size: 11px;
+            }
+            QPushButton:hover {
+                background-color: #777777;
+                border: 1px solid #888888;
+            }
+            QPushButton:pressed {
+                background-color: #555555;
+                border: 1px solid #666666;
+            }
+        """ )
+        browse_button.clicked.connect( self.chooseOutputDirectory )
+        browse_button.setToolTip( "Change output directory" )
+        bottom_layout.addWidget( browse_button )
+        central_layout.addWidget( bottom_container )
+
         self.setupCanvasesInContainer()
-        
+
         if self.canvases:
             self.showCanvas( 0 )
+            
+        self.updateOutputDirLabel()
 
     def deleteCurrentCanvas( self ):
         if len( self.canvases ) <= 1:
@@ -1215,145 +1262,6 @@ class MainWindow( QMainWindow ):
             elif isinstance( self, NumericWidget ) and hasattr( main_window, 'all_numeric_dicts' ):
                 main_window.all_numeric_dicts[ self.custom_name ] = self.getPropertiesDict()
 
-    def generateResources( self ):
-        all_images = []
-        
-        for canvas_id in range( len( self.canvases ) ):
-            canvas_widgets = self.canvases[ canvas_id ].getWidgetContainer().children()
-
-            for widget in canvas_widgets:
-                if isinstance( widget, ImageWidget ):
-                    all_images.append( widget )
-
-        if not all_images:
-            return
-
-        out_dir = QFileDialog.getExistingDirectory( self, "Select output directory for resource files" )
-
-        if not out_dir:
-            return
-
-        h_content = ""
-
-        h_content += f"#ifndef NECTO_DESIGNER_RESOURCE_H\n"
-        h_content += f"#define NECTO_DESIGNER_RESOURCE_H\n"
-        h_content += f"#include \"stdint.h\"\n"
-        h_content += "\n"
-
-
-        c_content = ""
-        c_content += f"#include \"stdint.h\"\n"
-        c_content += f"#include \"resource.h\"\n"
-        c_content += "\n"
-
-        generated_count = 0
-
-        for img_widget in all_images:
-            try:
-                if not hasattr( img_widget, 'pixmap' ) or img_widget.pixmap.isNull():
-                    continue
-                
-                image = img_widget.pixmap.toImage()
-                width = img_widget.getWidth()
-                height = img_widget.getHeight()
-                scaled_image = image.scaled( width, height, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation )
-                rgb888_image = scaled_image.convertToFormat(QImage.Format.Format_RGB888)
-                rgb565 = bytearray()
-
-                for y in range( height ):
-                    for x in range( width ):
-                        c = rgb888_image.pixelColor( x, y )
-
-                        r = min( max( c.red(), 0 ), 255 ) >> 3
-                        g = min( max( c.green(), 0 ), 255 ) >> 2
-                        b = min( max( c.blue(), 0 ), 255 ) >> 3
-
-                        value = (r << 11) | (g << 5) | b
-
-                        rgb565.append( value & 0xFF )
-                        rgb565.append( ( value >> 8 ) & 0xFF )
-
-                size = len( rgb565 )
-
-                if hasattr( img_widget, 'custom_name' ) and img_widget.custom_name:
-                    clean_name = img_widget.custom_name.replace( ' ', '_' ).replace( '-', '_' )
-                    var_name = f"{ clean_name }_hex"
-
-                else:
-                    var_name = f"image_{ generated_count }_hex"
-
-                h_content += f"extern const code uint8_t { var_name }[ { size } ];\n"
-
-                c_content += f"const code uint8_t { var_name }[ { size } ] = {{\n"
-
-                for i in range( 0, size, 16 ):
-                    line = ", ".join( f"0x{b:02X}" for b in rgb565[ i:i+16 ] )
-                    c_content += f"    { line },\n"
-
-                c_content += "};\n\n"
-
-                generated_count += 1
-
-            except Exception as e:
-                pass
-
-        h_content += "\n"
-        h_content += "#endif\n"
-
-        try:
-            with open( f"{ out_dir }/resource.h", "w" ) as h_file:
-                h_file.write( h_content )
-
-            with open( f"{ out_dir }/resource.c", "w" ) as c_file:
-                c_file.write( c_content )
-
-        except Exception as e:
-            QMessageBox.critical( self, "Error", f"Failed to generate resource files:\n{ str( e ) }" )
-
-    def generateComponents( self ):
-        canvas_data = []
-        for canvas_id, canvas_props in self.all_canvas_dicts.items():
-            canvas_info = canvas_props.copy()
-            canvas_widgets = []
-            widgets = self.canvas_widgets.get( canvas_id, [] )
-
-            for widget in widgets:
-                if hasattr( widget, 'getPropertiesDict' ):
-                    widget_dict = widget.getPropertiesDict()
-                    widget_type = type( widget ).__name__.replace( 'Widget', '' )
-                    if widget_type == 'ScrollBar':
-                        widget_type = 'ScrollBar'
-                    elif widget_type == 'ProgressBar':
-                        widget_type = 'ProgressBar'
-                    widget_dict[ 'type' ] = widget_type
-
-                    self.ensureWidgetFields( widget_dict )
-                    canvas_widgets.append( widget_dict )
-
-            canvas_info[ 'widgets' ] = canvas_widgets
-            canvas_data.append( canvas_info )
-
-        if not canvas_data:
-            return
-
-        out_dir = QFileDialog.getExistingDirectory( self, "Select output directory for component files" )
-
-        if not out_dir:
-            return
-
-        try:
-            h_content = generateComponentsH( canvas_data, {} )
-            c_content = generateComponentsC( canvas_data, {} )
-
-            with open( f"{ out_dir }/components.h", "w", encoding='utf-8' ) as h_file:
-                h_file.write( h_content )
-
-            with open( f"{ out_dir }/components.c", "w", encoding='utf-8' ) as c_file:
-                c_file.write( c_content )
-
-        except:
-            pass
-
     def ensureWidgetFields( self, widget_dict ):
         widget_type = widget_dict.get( 'type' )
 
@@ -1419,9 +1327,40 @@ class MainWindow( QMainWindow ):
             if key not in widget_dict:
                 widget_dict[ key ] = value    
 
-    def generateAllFiles(self):
-        self.generateResources()
-        self.generateComponents()
+    def updateOutputDirLabel( self ):
+        if not hasattr(self, 'output_dir_label') or not self.output_dir_label:
+            return
+
+        if hasattr( self, 'output_dir' ) and self.output_dir:
+            display_path = self.output_dir
+
+            if len( display_path ) > 50:
+                display_path = display_path[ :20 ] + "..." + display_path[ -27: ]
+
+            self.output_dir_label.setText( f"Output: { display_path }" )
+            self.output_dir_label.setToolTip(self.output_dir)
+
+        else:
+            self.output_dir_label.setText( "Output: Not selected" )
+            self.output_dir_label.setToolTip("")
+
+    def chooseOutputDirectory( self ):
+        dir_path = QFileDialog.getExistingDirectory( self, "Select output directory for generated files" )
+
+        if dir_path:
+            self.output_dir = dir_path
+            self.updateOutputDirLabel()
+
+    def generateAllFiles( self ):
+        if not self.output_dir:
+            self.chooseOutputDirectory()
+
+        if not self.output_dir:
+            return
+
+        self.updateOutputDirLabel()
+        generateResources( self, self.output_dir )
+        generateComponents( self, self.output_dir )
 
 if __name__ == "__main__":
     QGuiApplication.setHighDpiScaleFactorRoundingPolicy( Qt.HighDpiScaleFactorRoundingPolicy.PassThrough )
