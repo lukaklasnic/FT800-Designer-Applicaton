@@ -15,8 +15,8 @@ class LineWidget( QWidget ):
         self._end_x = 100
         self._end_y = 100
         
-        self.line_width = 10
-        self.line_color = QColor( 255, 0, 0 ) 
+        self.line_width = 5
+        self.line_color = QColor( 0, 0, 0 ) 
         
         self.active = True
         self.visible = True
@@ -409,7 +409,7 @@ class RectangleWidget( QWidget ):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        self.border_width = 3
+        self.border_width = 5
         self.filled = False 
         self.fill_color = QColor( 200, 200, 200 )
         
@@ -747,11 +747,11 @@ class CircleWidget( QWidget ):
         self.diameter = diameter
         self.setFixedSize( diameter, diameter )
         
-        self.line_color = QColor( 255, 0, 0 )
-        self.line_thickness = 2
+        self.line_color = QColor( 0, 0, 0 )
+        self.line_edges_width = 5
         self.is_selected = False
         
-        self.fill_color = QColor( 0, 255, 0 ) 
+        self.fill_color = QColor( 255, 0, 0 ) 
         self.filled = False 
         
         self.active = True
@@ -782,7 +782,7 @@ class CircleWidget( QWidget ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
-        rect_size = min( self.width(), self.height() ) - self.line_thickness
+        rect_size = min( self.width(), self.height() ) - self.line_edges_width
 
         x_offset = ( self.width() - rect_size ) // 2
         y_offset = ( self.height() - rect_size ) // 2
@@ -794,7 +794,7 @@ class CircleWidget( QWidget ):
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( circle_rect )
 
-        pen = QPen( self.line_color, self.line_thickness )
+        pen = QPen( self.line_color, self.line_edges_width )
         pen.setJoinStyle( Qt.PenJoinStyle.RoundJoin )
         pen.setCapStyle( Qt.PenCapStyle.RoundCap )
         painter.setPen( pen )
@@ -921,7 +921,7 @@ class CircleWidget( QWidget ):
         self.updatePropertiesDict()
     
     def setLineEdgeWidth( self, thickness ):
-        self.line_thickness = thickness
+        self.line_edges_width = thickness
         self.update()
         self.updatePropertiesDict()
     
@@ -961,7 +961,7 @@ class CircleWidget( QWidget ):
         return self.line_color
     
     def getBorderWidth( self ):
-        return self.line_thickness
+        return self.line_edges_width
     
     def getPropertiesDict( self ):
         self.updatePropertiesDict()
@@ -981,7 +981,7 @@ class CircleWidget( QWidget ):
             'height': self.diameter,
             'diameter': self.diameter,
             'line_color': self.line_color.name(),
-            'line_thickness': self.line_thickness,
+            'line_edges_width': self.line_edges_width,
             'filled': self.filled,
             'fill_color': self.fill_color.name(),
         }
@@ -1085,12 +1085,12 @@ class EllipseWidget( QWidget ):
         self.stack_order = 1
 
         self.border_color = QColor( 0, 0, 0 )
-        self.border_width = 2
+        self.border_width = 5
         self.fill_enabled = False
         self.gradient_enabled = True
         self.gradient_type = "Top-Bottom"
-        self.gradient_start_color = QColor( 0, 0, 255 )
-        self.gradient_end_color = QColor( 0, 0, 128 )
+        self.gradient_start_color = QColor( 255, 0, 0 )
+        self.gradient_end_color = QColor( 0, 0, 255 )
         
         self.is_selected = False
         self.dragging = False
@@ -1442,8 +1442,8 @@ class ButtonWidget( QWidget ):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
 
-        self.start_color = QColor( 0, 0, 255 )
-        self.end_color = QColor( 0, 0, 136 )
+        self.start_color = QColor( 255, 255, 255 )
+        self.end_color = QColor( 0, 0, 255 )
         self.text_color = QColor( 255, 255, 255 )
         self.button_text = "Press"
         self.text_size = 4
@@ -1777,8 +1777,8 @@ class KeysWidget( QWidget ):
         self.key_width = 20
         self.key_height = 20
         
-        self.key_color_top = QColor( 0, 0, 255 ) 
-        self.key_color_bottom = QColor( 0, 0, 136 )
+        self.key_color_top = QColor( 255, 255, 255 ) 
+        self.key_color_bottom = QColor( 0, 0, 255 )
         self.text_color = QColor( 255, 255, 255 ) 
         self.border_color = QColor( 0, 0, 0 ) 
         
@@ -2332,10 +2332,7 @@ class ClockWidget( QWidget ):
         self.diameter = diameter
         self.setFixedSize( diameter, diameter )
         
-        self.outer_color = QColor( 0, 32, 64 )
-        self.inner_color = QColor( 117, 117, 115 )
-        self.needle_color = QColor( 0, 0, 0 )
-        self.background_color = QColor( 0, 32, 64 )
+        self.background_color = QColor( 0, 0, 255 )
         
         self.active = True
         self.visible = True
@@ -2394,7 +2391,7 @@ class ClockWidget( QWidget ):
         painter.drawEllipse( QPointF( center_x, center_y ), radius, radius )
 
         if self.use_3d:
-            pen = QPen( self.inner_color )
+            pen = QPen( QColor( 0, 0, 0 ) )
             pen.setWidth( base_line_width )
             painter.setPen( pen )
             painter.drawArc( center_x - radius, center_y - radius, radius * 2, radius * 2, 16 * 35, -16 * 175 )
@@ -2410,7 +2407,7 @@ class ClockWidget( QWidget ):
         minutes_angle = ( self.minutes * 6 ) + ( self.seconds * 0.1 )  
         hours_angle = ( ( self.hours % 12 ) * 30 ) + ( self.minutes * 0.5 ) 
 
-        big_pen = QPen( self.inner_color )
+        big_pen = QPen( QColor( 0, 0, 0 ) )
         big_pen.setWidth( big_mark_width )
         painter.setPen( big_pen )
         painter.rotate(-180)
@@ -2422,7 +2419,7 @@ class ClockWidget( QWidget ):
         painter.rotate(-360 + 180)
 
         painter.rotate( hours_angle )
-        needle_pen = QPen( self.needle_color )
+        needle_pen = QPen( QColor( 0, 0, 0 ) )
         needle_pen.setWidth( needle3_width )
         painter.setPen( needle_pen )
         painter.drawLine( 0, 0, 0, -needle3_length )
@@ -2537,9 +2534,6 @@ class ClockWidget( QWidget ):
             'hours': self.hours,
             'minutes': self.minutes,
             'seconds': self.seconds,
-            'outer_color': self.outer_color.name(),
-            'inner_color': self.inner_color.name(),
-            'needle_color': self.needle_color.name()
         }
 
     def getCornerAt( self, pos ):
@@ -2568,14 +2562,6 @@ class ClockWidget( QWidget ):
     def setDiameter( self, diameter ):
         self.diameter = diameter
         self.setFixedSize( diameter, diameter )
-        self.update()
-
-    def setOuterColor( self, color ):
-        self.outer_color = color
-        self.update()
-
-    def setInnerColor( self, color ):
-        self.inner_color = color
         self.update()
 
     def setNeedleColor( self, color ):
@@ -2743,10 +2729,7 @@ class GaugeWidget( QWidget ):
         self.diameter = diameter
         self.setFixedSize( diameter, diameter )
         
-        self.outer_color = QColor( 0, 32, 64 )
-        self.inner_color = QColor( 0, 0, 0 )
-        self.needle_color = QColor( 0, 0, 0 )
-        self.background_color = QColor( 0, 32, 64 )
+        self.background_color = QColor( 0, 0, 255 )
         
         self.active = True
         self.visible = True
@@ -2818,13 +2801,13 @@ class GaugeWidget( QWidget ):
 
         for i in range( total_divisions + 1 ):
             if i % ( self.minor_subdivision + 1 ) == 0:
-                big_pen = QPen( self.inner_color )
+                big_pen = QPen( QColor( 0, 0, 0 ) )
                 big_pen.setWidth( big_mark_width )
                 painter.setPen( big_pen )
                 painter.drawLine( 0, big_mark_start, 0, big_mark_end )
 
             else:
-                small_pen = QPen( self.inner_color )
+                small_pen = QPen( QColor( 0, 0, 0 ) )
                 small_pen.setWidth( small_mark_width )
                 painter.setPen( small_pen )
                 painter.drawLine( 0, small_mark_start, 0, small_mark_end )
@@ -2840,7 +2823,7 @@ class GaugeWidget( QWidget ):
             needle_angle = - 135
 
         painter.rotate( needle_angle )
-        needle_pen = QPen( self.needle_color )
+        needle_pen = QPen( QColor( 0, 0, 0 ) )
         needle_pen.setWidth( needle_width )
         painter.setPen( needle_pen )
         painter.drawLine( 0, 0, 0, needle_length )
@@ -2958,9 +2941,6 @@ class GaugeWidget( QWidget ):
             'minor_subdivision': self.minor_subdivision,
             'range_value': self.range_value,
             'value': self.value,
-            'outer_color': self.outer_color.name(),
-            'inner_color': self.inner_color.name(),
-            'needle_color': self.needle_color.name()
         }
     
     def setSelected( self, selected ):
@@ -2970,18 +2950,6 @@ class GaugeWidget( QWidget ):
     def setDiameter( self, diameter ):
         self.diameter = diameter
         self.setFixedSize( diameter, diameter )
-        self.update()
-
-    def setOuterColor( self, color ):
-        self.outer_color = color
-        self.update()
-
-    def setInnerColor( self, color ):
-        self.inner_color = color
-        self.update()
-
-    def setNeedleColor( self, color ):
-        self.needle_color = color
         self.update()
 
     def setBackgroundColor( self, color ):
@@ -3554,7 +3522,7 @@ class ToggleWidget( QWidget ):
         self.border_color = QColor( 0, 0, 0 ) 
         self.white_border_color = QColor( 236, 238, 241 )
         self.text_color = QColor( 255, 255, 255 ) 
-        self.background_color = QColor( 0, 32, 64 )
+        self.background_color = QColor( 0, 0, 255 )
         
         self.is_on = True
         
@@ -3960,7 +3928,7 @@ class ScrollBarWidget( QWidget ):
         self._height = height
         self.setFixedSize( width, height )
         
-        self.track_color = QColor( 0, 32, 64 ) 
+        self.track_color = QColor( 0, 0, 255 ) 
         self.thumb_color = QColor( 0, 64, 128 )
         self.border_color = QColor( 0, 0, 0 )
         self.white_border_color = QColor( 236, 238, 241 )
@@ -3974,7 +3942,7 @@ class ScrollBarWidget( QWidget ):
         
         self.range_value = 100 
         self.current_value = 50
-        self.knob_size = 30
+        self.thumb_size = 30
         
         self.selected = False
         self.selection_color = QColor( 255, 0, 0 )
@@ -4141,8 +4109,8 @@ class ScrollBarWidget( QWidget ):
     def getCurrentValue( self ):
         return self.current_value
 
-    def getKnobSize( self ):
-        return self.knob_size
+    def getThumbSize( self ):
+        return self.thumb_size
     
     def getWidth( self ):
         return self._width
@@ -4183,7 +4151,7 @@ class ScrollBarWidget( QWidget ):
     def getThumbRect( self ):
         track_rect = self.getTrackRect()
         
-        thumb_width = int( track_rect.width() * ( self.knob_size / 100.0 ) )
+        thumb_width = int( track_rect.width() * ( self.thumb_size / 100.0 ) )
         thumb_width = max( 20, min( track_rect.width(), thumb_width ) )
         
         max_position = track_rect.width() - thumb_width
@@ -4214,7 +4182,7 @@ class ScrollBarWidget( QWidget ):
             '_3d': getattr( self, '_3d', True ),
             'range_value': getattr( self, 'range_value', 100 ),
             'current_value': getattr( self, 'current_value', 50 ),
-            'knob_size': getattr( self, 'knob_size', 30 ),
+            'thumb_size': getattr( self, 'thumb_size', 30 ),
             'thumb_color': self.thumb_color.name(),
             'track_color': self.track_color.name(),
             'border_color': self.border_color.name(),
@@ -4264,8 +4232,8 @@ class ScrollBarWidget( QWidget ):
         self.current_value = max( 0, min( self.range_value, value ) )
         self.update()
 
-    def setKnobSize( self, size ):
-        self.knob_size = max( 10, min( 100, size ) )
+    def setThumbSize( self, size ):
+        self.thumb_size = max( 10, min( 100, size ) )
         self.update()
 
     def updatePropertiesSize( self ):
@@ -4317,10 +4285,10 @@ class ScrollBarWidget( QWidget ):
                 main_window.current_value_spin_scrollbar.setValue( self.current_value )
                 main_window.current_value_spin_scrollbar.blockSignals( False )
                 
-            if hasattr( main_window, 'knob_size_spin_scrollbar' ):
-                main_window.knob_size_spin_scrollbar.blockSignals( True )
-                main_window.knob_size_spin_scrollbar.setValue( self.knob_size )
-                main_window.knob_size_spin_scrollbar.blockSignals( False )
+            if hasattr( main_window, 'thumb_size_spin_scrollbar' ):
+                main_window.thumb_size_spin_scrollbar.blockSignals( True )
+                main_window.thumb_size_spin_scrollbar.setValue( self.thumb_size )
+                main_window.thumb_size_spin_scrollbar.blockSignals( False )
 
     def updateAllProperties( self ):
         self.updatePropertiesSize()
@@ -4364,10 +4332,10 @@ class ScrollBarWidget( QWidget ):
                 main_window.current_value_spin_scrollbar.setValue( self.current_value )
                 main_window.current_value_spin_scrollbar.blockSignals( False )
                 
-            if hasattr( main_window, 'knob_size_spin_scrollbar' ):
-                main_window.knob_size_spin_scrollbar.blockSignals( True )
-                main_window.knob_size_spin_scrollbar.setValue( self.knob_size )
-                main_window.knob_size_spin_scrollbar.blockSignals( False )
+            if hasattr( main_window, 'thumb_size_spin_scrollbar' ):
+                main_window.thumb_size_spin_scrollbar.blockSignals( True )
+                main_window.thumb_size_spin_scrollbar.setValue( self.thumb_size )
+                main_window.thumb_size_spin_scrollbar.blockSignals( False )
             
             if hasattr( main_window, 'name_edit_scrollbar' ):
                 main_window.name_edit_scrollbar.blockSignals( True )
@@ -4774,7 +4742,7 @@ class SliderWidget( QWidget ):
             'static': getattr( self, 'static', False ),
             '_3d': getattr( self, '_3d', False ),
             'value': self.value,
-            'knob_color': self.progress_color.name(),         
+            'thumb_color': self.progress_color.name(),         
             'background_left_color': self.thumb_color.name(),  
             'background_right_color': self.track_color.name(),
             'border_color': self.border_color.name()
@@ -4804,6 +4772,10 @@ class SliderWidget( QWidget ):
 
     def setBorderColor( self, color ):
         self.border_color = color
+        self.update()
+
+    def setRange( self, value ):
+        self.range_value = max(1, value)
         self.update()
 
     def setValue( self, value ):
@@ -4882,7 +4854,12 @@ class SliderWidget( QWidget ):
                 main_window._3d_checkbox_slider.blockSignals( True )
                 main_window._3d_checkbox_slider.setChecked( self._3d )
                 main_window._3d_checkbox_slider.blockSignals( False )
-            
+
+            if hasattr( main_window, 'range_spin_slider' ):
+                main_window.value_spin_dial.blockSignals( True )
+                main_window.value_spin_dial.setValue( self.value )
+                main_window.value_spin_dial.blockSignals( False )
+
             if hasattr( main_window, 'value_spin_slider' ):
                 main_window.value_spin_slider.blockSignals( True )
                 main_window.value_spin_slider.setValue( self.value )
@@ -4908,8 +4885,8 @@ class SliderWidget( QWidget ):
             if hasattr( main_window, 'bg_right_color_rect_slider' ):
                 main_window.bg_right_color_rect_slider.setStyleSheet( f"background-color: { self.track_color.name()} ; border: 1px solid #ccc;" )
                 
-            if hasattr(main_window, 'knob_color_rect_slider'):
-                main_window.knob_color_rect_slider.setStyleSheet( f"background-color: { self.progress_color.name() }; border: 1px solid #ccc;" )
+            if hasattr(main_window, 'thumb_color_rect_slider'):
+                main_window.thumb_color_rect_slider.setStyleSheet( f"background-color: { self.progress_color.name() }; border: 1px solid #ccc;" )
 
     def updatePropertiesDict( self ):
         main_window = self.findMainWindow()
@@ -5015,7 +4992,7 @@ class ProgressBarWidget( QWidget ):
         self._height = height
         self.setFixedSize( width, height )
         
-        self.bar_color = QColor( 0, 32, 64 ) 
+        self.bar_color = QColor( 0, 0, 255 ) 
         self.progress_color = QColor( 255, 255, 255 )
         self.border_color = QColor( 0, 0, 0 ) 
         self.white_border_color = QColor( 236, 238, 241 )
@@ -5414,7 +5391,7 @@ class ImageWidget( QWidget ):
         
         self.frame_enabled = False
         self.frame_color = QColor( 0, 0, 0 )
-        self.frame_width = 1
+        self.frame_width = 5
         
         self.background_color = QColor( 240, 240, 240 )
         
@@ -5851,7 +5828,7 @@ class LabelWidget( QWidget ):
         self.visible = True
         self.static = False
         
-        self.text_size = 12
+        self.text_size = 20
         self.text_font = "Arial"
         self.text_alignment = "Left"
         
@@ -6080,7 +6057,7 @@ class NumericWidget( QWidget ):
         
         self.number = 123
         self.number_color = QColor( 0, 0, 0 )
-        self.number_size = 12
+        self.number_size = 20
         self.number_alignment = "Left" 
         self.number_font = "Arial"
         

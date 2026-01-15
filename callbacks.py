@@ -1328,14 +1328,14 @@ def updateToggleStackOrder( main_window, value ):
         
         main_window.sortWidgetsByStackOrder()
 
-def changeToggleKnobColor( main_window ):
+def changeToggleThumbColor( main_window ):
     if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
         color = QColorDialog.getColor( main_window.current_shape.thumb_color )
         if color.isValid():
             main_window.current_shape.setThumbColor( color )
 
-            if hasattr( main_window, 'knob_color_rect_toggle' ):
-                main_window.knob_color_rect_toggle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+            if hasattr( main_window, 'thumb_color_rect_toggle' ):
+                main_window.thumb_color_rect_toggle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
 
             if hasattr( main_window, 'all_toggle_dicts' ):
                 main_window.all_toggle_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
@@ -1468,9 +1468,9 @@ def updateScrollbarCurrentValue( main_window, value ):
     if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
         main_window.current_shape.setCurrentValue( value )
 
-def updateScrollbarKnobSize( main_window, value ):
+def updateScrollbarThumbSize( main_window, value ):
     if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        main_window.current_shape.setKnobSize( value )
+        main_window.current_shape.setThumbSize( value )
 
 #------------------------------------------------------------SLIDER--------------------------------------------------------------
 
@@ -1571,13 +1571,13 @@ def updateSliderSize( main_window, value ):
             if hasattr( main_window, 'all_slider_dicts' ):
                 main_window.all_slider_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
 
-def changeSliderKnobColor( main_window ):
+def changeSliderThumbColor( main_window ):
     if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
         color = QColorDialog.getColor( main_window.current_shape.progress_color )
 
         if color.isValid():
             main_window.current_shape.setProgressColor( color )
-            main_window.knob_color_rect_slider.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+            main_window.thumb_color_rect_slider.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
 
             if hasattr( main_window, 'all_slider_dicts' ):
                 main_window.all_slider_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
@@ -1672,12 +1672,11 @@ def changeProgressBarBackgroundColor( main_window ):
 
 def updateProgressBarRange( main_window ):
     if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        min_val = main_window.progress_min_spin.value()
         max_val = main_window.progress_max_spin.value()
 
-        if min_val < max_val:
-            main_window.current_shape.setRange( min_val, max_val )
-            main_window.progress_value_spin.setRange( min_val, max_val )
+        if 0 < max_val:
+            main_window.current_shape.setRange( 0, max_val )
+            main_window.progress_value_spin.setRange( 0, max_val )
             main_window.current_shape.updatePropertiesDict()
 
 def updateProgressBarValue( main_window ):

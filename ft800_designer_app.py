@@ -299,7 +299,7 @@ class MainWindow( QMainWindow ):
         browse_button.setStyleSheet( """
             QPushButton {
                 background-color: #666666;
-                color: white;
+                color: lightsalmon;
                 font-weight: normal;
                 border: 1px solid #777777;
                 border-radius: 3px;
@@ -723,26 +723,26 @@ class MainWindow( QMainWindow ):
         if hasattr( main_window, 'canvas_widgets' ):
             for canvas_id, widgets in main_window.canvas_widgets.items():
                 sorted_widgets = sorted(widgets, key = lambda x: x.stack_order)
-                
+
                 for i, widget in enumerate( sorted_widgets, 1 ):
                     widget.stack_order = i
-                
+
                 for widget in widgets:
                     widget.lower()
-    
+
                 for widget in sorted_widgets:
                     widget.raise_()
-    
+
         else:
-        
+
             if not hasattr(main_window, 'all_shapes'):
                 return
-            
+
             for i, shape in enumerate( main_window.all_shapes, 1 ):
                 shape.stack_order = i
-            
+
             sorted_widgets = sorted( main_window.all_shapes, key = lambda x: x.stack_order )
-    
+
             for widget in main_window.all_shapes:
                 widget.lower()
             for widget in sorted_widgets:
@@ -812,7 +812,7 @@ class MainWindow( QMainWindow ):
             start_x = container_pos.x() 
             start_y = container_pos.y()
             end_x = container_pos.x() + 100
-            end_y = container_pos.y()
+            end_y = container_pos.y() + 100
             shape.setLinePoints( start_x, start_y, end_x, end_y )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Line" )
@@ -826,7 +826,7 @@ class MainWindow( QMainWindow ):
 
         elif self.selected_shape == "Rectangle":
             shape = RectangleWidget( 100, 80, widget_container )
-            shape.move( container_pos.x() - 50, container_pos.y() - 40 )
+            shape.move( container_pos.x(), container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Rectangle" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
@@ -852,7 +852,7 @@ class MainWindow( QMainWindow ):
             self.all_circle_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Ellipse":
-            shape = EllipseWidget( 98, 78, widget_container )
+            shape = EllipseWidget( 120, 80, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
             shape.clicked.connect( self.selectShape )
 
@@ -867,7 +867,7 @@ class MainWindow( QMainWindow ):
 
         elif self.selected_shape == "Button":
             shape = ButtonWidget( 100, 50, widget_container )
-            shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
+            shape.move( container_pos.x() , container_pos.y() )
             shape.custom_name = generateWidgetName( self, "Button" )
             shape.clicked.connect( self.selectShape )
             shape.setMouseTracking( True )
@@ -884,7 +884,7 @@ class MainWindow( QMainWindow ):
 
         elif self.selected_shape == "Keys":
             shape = KeysWidget( 200, 120, widget_container )
-            shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
+            shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Keys" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
@@ -908,7 +908,7 @@ class MainWindow( QMainWindow ):
             self.all_clock_dicts[shape.custom_name] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Gauge":
-            shape = GaugeWidget( 80, widget_container )
+            shape = GaugeWidget( 100, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Gauge" )
@@ -936,7 +936,7 @@ class MainWindow( QMainWindow ):
 
         elif self.selected_shape == "Toggle":
             shape = ToggleWidget( 80, 30, widget_container )
-            shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
+            shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Toggle" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
@@ -948,8 +948,8 @@ class MainWindow( QMainWindow ):
             self.all_toggle_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Scroll bar":
-            shape = ScrollBarWidget( 150, 10, widget_container )
-            shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
+            shape = ScrollBarWidget( 200, 15, widget_container )
+            shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect(self.selectShape)
             shape.custom_name = generateWidgetName( self, "ScrollBar" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
@@ -961,8 +961,8 @@ class MainWindow( QMainWindow ):
             self.all_scrollbar_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Slider":
-            shape = SliderWidget( 200, 50, widget_container )
-            shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
+            shape = SliderWidget( 200, 30, widget_container )
+            shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Slider" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
@@ -974,8 +974,8 @@ class MainWindow( QMainWindow ):
             self.all_slider_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Progress bar":
-            shape = ProgressBarWidget( 150, 10, widget_container )
-            shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
+            shape = ProgressBarWidget( 200, 15, widget_container )
+            shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "ProgressBar" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
@@ -988,7 +988,7 @@ class MainWindow( QMainWindow ):
 
         elif self.selected_shape == "Image":
             shape = ImageWidget( 100, 100, widget_container )
-            shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
+            shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName(self, "Image")
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
@@ -1000,7 +1000,7 @@ class MainWindow( QMainWindow ):
 
         elif self.selected_shape == "Label":
             shape = LabelWidget( 100, 40, widget_container )
-            shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
+            shape.move( container_pos.x(), container_pos.y() )
             shape.clicked.connect(self.selectShape)
             shape.custom_name = generateWidgetName( self, "Label" )
             shape.stack_order = len(self.getCurrentCanvasWidgets()) + 1
@@ -1012,7 +1012,7 @@ class MainWindow( QMainWindow ):
 
         elif self.selected_shape == "Numeric":
             shape = NumericWidget( 100, 40, widget_container )
-            shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
+            shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Numeric" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
@@ -1168,6 +1168,7 @@ class MainWindow( QMainWindow ):
         else:
             self.output_dir_label.setText( "Output: Not selected" )
             self.output_dir_label.setToolTip("")
+            self.output_dir_label.setStyleSheet( "color: red; background-color: #383838;" )
 
     def chooseOutputDirectory( self ):
         dir_path = QFileDialog.getExistingDirectory( self, "Select output directory for generated files" )

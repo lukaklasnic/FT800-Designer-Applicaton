@@ -54,7 +54,7 @@ class WidgetIcon( QFrame ):
             shape_drawers[ self.shape ]( painter )
 
     def drawLine( self, painter ):
-        painter.drawLine( 20, 20, 80, 60 )
+        painter.drawLine( 20, 20, 80, 80 )
 
     def drawRectangle( self, painter ):
         painter.drawRect( 20, 20, 60, 50 )
@@ -184,35 +184,56 @@ class WidgetIcon( QFrame ):
         painter.drawRoundedRect( rect, 5, 5 )
 
     def createCustomCursor( self ):
-        pix = QPixmap( 100, 100 )
+        pix = QPixmap( 210, 130 )
         pix.fill( Qt.GlobalColor.transparent )
         painter = QPainter( pix )
         painter.setPen( QPen( QColor( 150, 202, 232 ), 2 ) )
         
         cursor_actions = {
-            "Line": lambda: painter.drawLine( 10, 10, 80, 80 ),
-            "Rectangle": lambda: painter.drawRect( 0, 0, 60, 50 ),
+            "Line": lambda: painter.drawLine( 0, 0, 100, 100 ),
+            "Rectangle": lambda: painter.drawRect( 0, 0, 100, 80 ),
             "Circle": lambda: painter.drawEllipse( QPoint( 50, 50 ), 50, 50 ),
-            "Ellipse":lambda: painter.drawEllipse( QPoint( 50, 50 ), 48, 38 ),
+            "Ellipse":lambda: painter.drawEllipse( QPoint( 62, 42 ), 60, 40 ),
             "Button": lambda: painter.drawRoundedRect( 0, 0, 100, 50, 5, 5 ),
-            "Keys": lambda: painter.drawRect( 0, 0, 40, 40 ),
+            "Keys": lambda: painter.drawRect( 0, 0, 200, 120 ),
             "Clock": lambda: painter.drawEllipse( QPoint( 50, 50 ), 50, 50 ),
-            "Gauge": lambda: painter.drawEllipse( QPoint( 50, 45 ), 25, 25 ),
-            "Dial": lambda: painter.drawEllipse( QPoint( 50, 45 ), 25, 25 ),
-            "Toggle": lambda: painter.drawRoundedRect( 0, 0, 40, 20, 10, 10 ),
-            "Scroll bar": lambda: painter.drawRoundedRect( 0, 0, 60, 10, 3, 3 ),
-            "Slider": lambda: painter.drawRoundedRect( 0, 0, 60, 10, 3, 3 ),
-            "Progress bar": lambda: painter.drawRoundedRect( 0, 0, 60, 10, 3, 3 ),
-            "Image": lambda: painter.drawRect( 0, 0, 60, 50 ),
-            "Label": lambda: painter.drawRect( 0, 0, 50, 20 ),
-            "Numeric": lambda: painter.drawRect( 0, 0, 50, 50 ),
+            "Gauge": lambda: painter.drawEllipse( QPoint( 50, 50 ), 50, 50 ),
+            "Dial": lambda: painter.drawEllipse( QPoint( 50, 50 ), 40, 40 ),
+            "Toggle": lambda: painter.drawRoundedRect( 0, 0, 80, 30, 10, 10 ),
+            "Scroll bar": lambda: painter.drawRoundedRect( 0, 0, 200, 15, 3, 3 ),
+            "Slider": lambda: painter.drawRoundedRect( 0, 0, 200, 30, 3, 3 ),
+            "Progress bar": lambda: painter.drawRoundedRect( 0, 0, 200, 15, 3, 3 ),
+            "Image": lambda: painter.drawRect( 0, 0, 100, 100 ),
+            "Label": lambda: painter.drawRect( 0, 0, 100, 40 ),
+            "Numeric": lambda: painter.drawRect( 0, 0, 65, 40 )
         }
         
         if self.shape in cursor_actions:
             cursor_actions[ self.shape ]()
         
         painter.end()
-        QApplication.setOverrideCursor( QCursor( pix, 16, 16 ) )
+        hot_spots = {
+
+            "Line": ( 0, 0 ),  
+            "Rectangle": ( 0, 0 ),
+            "Circle": ( 50, 50 ),
+            "Ellipse": ( 62, 42 ),             
+            "Button": ( 0, 0 ),
+            "Keys": ( 0, 0 ), 
+            "Clock": ( 50, 50 ),                        
+            "Gauge": ( 50, 50 ), 
+            "Dial": ( 50, 50 ), 
+            "Toggle": ( 0, 0 ), 
+            "Scroll bar": ( 0, 0 ), 
+            "Slider": ( 0, 0 ), 
+            "Progress bar": ( 0, 0 ), 
+            "Image": ( 0, 0 ), 
+            "Label": ( 0, 0 ), 
+            "Numeric": ( 0, 0 ), 
+        }
+    
+        hot_spot_x, hot_spot_y = hot_spots.get( self.shape, ( 16, 16 ) )
+        QApplication.setOverrideCursor( QCursor( pix, hot_spot_x, hot_spot_y ) )
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -251,7 +272,7 @@ class ColorRectangle( QLabel ):
         self.setCursor( Qt.CursorShape.PointingHandCursor )
         
     def updateDisplay( self ):
-        self.setStyleSheet( f"background-color: { self._color }; border: 1px solid #ccc;" )
+        self.setStyleSheet( f"background-color: { self._color }; border: 1px solid #383838;" )
     
     def getColor( self ):
         return self._color

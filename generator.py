@@ -149,7 +149,7 @@ def generateWidgetStructure( widget_type, name, widget_data ):
         content += f"    { name }.cy_coord = { widget_data.get( 'center_y', 100 ) };\n"
         content += f"    { name }.diameter = { widget_data.get( 'diameter', 100 ) };\n"
         content += f"    { name }.pen.color = { convertColorToHex( widget_data.get( 'line_color', 0xFF0000 ) ) };\n"
-        content += f"    { name }.pen.width = { widget_data.get( 'line_thickness', 1 ) };\n"
+        content += f"    { name }.pen.width = { widget_data.get( 'line_edges_width', 1 ) };\n"
         content += f"    { name }.gradient.filled = { convertBool( widget_data.get( 'filled', True ) ) };\n"
         content += f"    { name }.gradient.start_color = { convertColorToHex( widget_data.get( 'fill_color', 0x0000FF ) ) };\n"
         content += f"    { name }.tag = { widget_data[ 'tag' ] };\n"
@@ -239,7 +239,7 @@ def generateWidgetStructure( widget_type, name, widget_data ):
         content += f"    { name }.x_coord = { widget_data.get( 'x', 50 ) };\n"
         content += f"    { name }.y_coord = { widget_data.get( 'y', 50 ) };\n"
         content += f"    { name }.width = { widget_data.get( 'width', 40 ) };\n"
-        content += f"    { name }.knob_color = { convertColorToHex( widget_data.get( 'thumb_color', 0xFF00FF ) ) };\n"
+        content += f"    { name }.thumb_color = { convertColorToHex( widget_data.get( 'thumb_color', 0xFF00FF ) ) };\n"
         content += f"    { name }.background_color = { convertColorToHex( widget_data.get( 'background_color', 0x0000FF ) ) };\n"
         content += f"    { name }._3d = { convert3dEnabled( widget_data.get( '3d_enable', True ) ) };\n"
         content += f"    { name }.state = { convertToggleState( widget_data.get( 'is_on', False ) ) };\n"
@@ -252,12 +252,12 @@ def generateWidgetStructure( widget_type, name, widget_data ):
         content += f"    { name }.y_coord = { widget_data.get( 'y', 100 ) };\n"
         content += f"    { name }.width = { widget_data.get( 'width', 100 ) };\n"
         content += f"    { name }.height = { widget_data.get( 'height', 10 ) };\n"
-        content += f"    { name }.knob_color = { convertColorToHex( widget_data.get( 'thumb_color', 0x0000FF ) ) };\n"
+        content += f"    { name }.thumb_color = { convertColorToHex( widget_data.get( 'thumb_color', 0x0000FF ) ) };\n"
         content += f"    { name }.background_color = { convertColorToHex( widget_data.get( 'track_color', 0xFFFF00 ) ) };\n"
         content += f"    { name }._3d = { convert3dEnabled( widget_data.get( '3d_enable', True ) ) };\n"
         content += f"    { name }.range = { widget_data.get(' range_value', 65535 ) };\n"
         content += f"    { name }.val = { widget_data.get( 'current_val', 32767 ) };\n"
-        content += f"    { name }.size = { widget_data.get( 'knob_size', 1000 ) };\n"
+        content += f"    { name }.size = { widget_data.get( 'thumb_size', 1000 ) };\n"
         content += f"    { name }.tag = { widget_data[ 'tag' ] };\n"
         content += "\n"
     
@@ -267,7 +267,7 @@ def generateWidgetStructure( widget_type, name, widget_data ):
         content += f"    { name }.y_coord = { widget_data.get( 'y', 100 ) };\n"
         content += f"    { name }.width = { widget_data.get( 'width', 100 ) };\n"
         content += f"    { name }.height = { widget_data.get( 'height', 10 ) };\n"
-        content += f"    { name }.knob_color = { convertColorToHex( widget_data.get( 'knob_color', 0x00FF00 ) ) };\n"
+        content += f"    { name }.thumb_color = { convertColorToHex( widget_data.get( 'thumb_color', 0x00FF00 ) ) };\n"
         content += f"    { name }.background_color_left = { convertColorToHex( widget_data.get( 'background_left_color', 0xFF0000 ) ) };\n"
         content += f"    { name }.background_color_right = { convertColorToHex( widget_data.get( 'background_right_color', 0x0000FF ) ) };\n"
         content += f"    { name }._3d = { convert3dEnabled( widget_data.get( '3d_enable', True ) ) };\n"
@@ -343,7 +343,7 @@ def ensureWidgetFields( self, widget_dict ):
        defaults = { 'x': 0, 'y': 0, 'width': 100, 'height': 100, 'edges_color': 0xFF0000, 'thickness': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 2, 'gradient_enable': False, 'gradient_type': 'left_right', 'gradient_start_color': 0xFF0000, 'gradient_end_color': 0x0000FF }
 
     elif widget_type == 'Circle':
-       defaults = { 'center_x': 100, 'center_y': 100, 'diameter': 100, 'line_color': 0xFF0000, 'line_thickness': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 3 }
+       defaults = { 'center_x': 100, 'center_y': 100, 'diameter': 100, 'line_color': 0xFF0000, 'line_edges_width': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 3 }
 
     elif widget_type == 'Ellipse':
        defaults = { 'center_x': 100, 'center_y': 100, 'width': 150, 'height': 75, 'border_color': 0xCA75FE, 'border_width': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 4, 'gradient_enable': False, 'gradient_type': 'top_bottom', 'gradient_start_color': 0xFF0000, 'gradient_end_color': 0x0000FF }
@@ -367,10 +367,10 @@ def ensureWidgetFields( self, widget_dict ):
        defaults = { 'x': 50, 'y': 50, 'width': 40, 'thumb_color': 0xFF00FF, 'background_color': 0x0000FF, '3d_enable': True, 'is_on': False, 'tag': 7 }
 
     elif widget_type == 'ScrollBar':
-       defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'thumb_color': 0x0000FF, 'track_color': 0xFFFF00, '3d_enable': True, 'range_value': 65535, 'current_val': 32767, 'knob_size': 1000, 'tag': 8 }
+       defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'thumb_color': 0x0000FF, 'track_color': 0xFFFF00, '3d_enable': True, 'range_value': 65535, 'current_val': 32767, 'thumb_size': 1000, 'tag': 8 }
 
     elif widget_type == 'Slider':
-       defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'knob_color': 0x00FF00, 'background_left_color': 0xFF0000, 'background_right_color': 0x0000FF, '3d_enable': True, 'range_value': 65535, 'value': 32767, 'tag': 9 }
+       defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'thumb_color': 0x00FF00, 'background_left_color': 0xFF0000, 'background_right_color': 0x0000FF, '3d_enable': True, 'range_value': 65535, 'value': 32767, 'tag': 9 }
 
     elif widget_type == 'ProgressBar':
        defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'progress_color': 0xFFFFFF, 'background_color': 0xFF0000, '3d_enable': True, 'max_value': 100, 'value': 50 }
