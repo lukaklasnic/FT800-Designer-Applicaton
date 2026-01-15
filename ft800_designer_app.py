@@ -1,10 +1,10 @@
-from PyQt6.QtWidgets import ( QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QFrame, QPushButton, QColorDialog, QSplashScreen, QFileDialog, QMessageBox )
-from generator import ( generateComponentsC, generateComponentsH, generateResources, generateComponents )
-from PyQt6.QtGui import ( QPixmap, QIcon, QGuiApplication, QImage )
+from PyQt6.QtWidgets import ( QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QFrame, QPushButton, QSplashScreen, QFileDialog, QMessageBox )
+from generator import ( generateResources, generateComponents )
+from PyQt6.QtGui import ( QPixmap, QIcon, QGuiApplication )
 from PyQt6.QtCore import ( Qt, QTimer )
 from ui_components import *
-from pathlib import Path
 from properties import * 
+from pathlib import Path
 from widgets import *
 import sys
 
@@ -18,10 +18,9 @@ class MainWindow( QMainWindow ):
         self.setScrollArea()
         self.setMainLayouts()
 
-        
     def setTitleBar( self ):
         self.setWindowTitle( "FT800 Designer application" )
-        self.setWindowIcon( QIcon( "B:\Dokumenti\Fakultet\Merno Informacioni Sistemi i Smart Tehnologije\FT800-Designer-Applicaton\designer_logo_ic" ) )
+        self.setWindowIcon( QIcon( "designer_logo_ic" ) )
 
     def setScrollArea( self ):
         self.scroll_area = QScrollArea()
@@ -717,8 +716,37 @@ class MainWindow( QMainWindow ):
             self.hideShapeProperties()
             self.deselectAllShapes()
             self.renumberStackOrders()
-            renumberAllWidgets( self )
+            self.renumberAllWidgets()
             self.updateCanvasDict( current_canvas )
+
+    def renumberAllWidgets( main_window ):
+        if hasattr( main_window, 'canvas_widgets' ):
+            for canvas_id, widgets in main_window.canvas_widgets.items():
+                sorted_widgets = sorted(widgets, key = lambda x: x.stack_order)
+                
+                for i, widget in enumerate( sorted_widgets, 1 ):
+                    widget.stack_order = i
+                
+                for widget in widgets:
+                    widget.lower()
+    
+                for widget in sorted_widgets:
+                    widget.raise_()
+    
+        else:
+        
+            if not hasattr(main_window, 'all_shapes'):
+                return
+            
+            for i, shape in enumerate( main_window.all_shapes, 1 ):
+                shape.stack_order = i
+            
+            sorted_widgets = sorted( main_window.all_shapes, key = lambda x: x.stack_order )
+    
+            for widget in main_window.all_shapes:
+                widget.lower()
+            for widget in sorted_widgets:
+                widget.raise_()
 
     def renumberStackOrders( self ):
         current_widgets = self.getCurrentCanvasWidgets()
@@ -1054,58 +1082,6 @@ class MainWindow( QMainWindow ):
         current_index = 0
 
         if isinstance( self.current_shape, LineWidget ):
-            shape_label = QLabel( "Line Properties" )
-
-        elif isinstance( self.current_shape, RectangleWidget ):
-            shape_label = QLabel( "Rectangle Properties" )
-
-        elif isinstance( self.current_shape, CircleWidget ):
-            shape_label = QLabel( "Circle Properties" )
-
-        elif isinstance( self.current_shape, EllipseWidget ):
-            shape_label = QLabel( "Ellipse Properties" )
-
-        elif isinstance( self.current_shape, ButtonWidget ):
-            shape_label = QLabel( "Button Properties" )
-
-        elif isinstance( self.current_shape, KeysWidget ):
-            shape_label = QLabel( "Keyboard Properties" )
-
-        elif isinstance( self.current_shape, ClockWidget ):
-            shape_label = QLabel( "Clock Properties" )
-
-        elif isinstance( self.current_shape, GaugeWidget ):
-            shape_label = QLabel( "Gauge Properties" )
-
-        elif isinstance( self.current_shape, DialWidget ):
-            shape_label = QLabel( "Dial Properties" )
-
-        elif isinstance( self.current_shape, ToggleWidget ):
-            shape_label = QLabel( "Toggle Properties" )
-
-        elif isinstance( self.current_shape, ScrollBarWidget ):
-            shape_label = QLabel( "Scroll bar Properties" )
-
-        elif isinstance( self.current_shape, SliderWidget ):
-            shape_label = QLabel( "Slider Properties" )
-
-        elif isinstance( self.current_shape, ProgressBarWidget ):
-            shape_label = QLabel( "Progress bar Properties" )
-
-        elif isinstance( self.current_shape, ImageWidget ):
-            shape_label = QLabel( "Image Properties" )
-
-        elif isinstance( self.current_shape, LabelWidget ):
-            shape_label = QLabel( "Label Properties" )
-
-        elif isinstance( self.current_shape, NumericWidget ):
-            shape_label = QLabel( "Numeric Widget Properties" )
-
-        shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
-        self.properties_layout.insertWidget( current_index, shape_label )
-        current_index += 1
-
-        if isinstance( self.current_shape, LineWidget ):
             current_index = showLineProperties( self, current_index )
 
         elif isinstance( self.current_shape, RectangleWidget ):
@@ -1155,11 +1131,6 @@ class MainWindow( QMainWindow ):
 
         self.shape_properties_visible = True
 
-    def updateStackOrder( self, value ):
-        if self.current_shape:
-            self.current_shape.stack_order = value
-            self.sortWidgetsByStackOrder()
-
     def sortWidgetsByStackOrder( self ):
         current_widgets = self.getCurrentCanvasWidgets()
 
@@ -1180,152 +1151,6 @@ class MainWindow( QMainWindow ):
 
             else:
                 widget_name = 'Unknown'
-
-
-    def updateShapePosition( self ):
-        if self.current_shape:
-            self.current_shape.move( self.pos_x_spin.value(), self.pos_y_spin.value() )
-
-    def changeShapeColor( self ):
-        if ( self.current_shape and not isinstance( self.current_shape, ( GaugeWidget, ClockWidget, ProgressBarWidget ) ) ):
-            if hasattr( self.current_shape, 'color' ):
-                current_color = self.current_shape.color
-
-            elif hasattr( self.current_shape, 'line_color' ):
-
-                current_color = self.current_shape.line_color
-
-            else:
-                return
-
-            color = QColorDialog.getColor( current_color )
-
-            if color.isValid():
-                self.current_shape.setColor( color )
-                self.color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-
-    def updateShapeBorderWidth( self ):
-        if ( self.current_shape and not isinstance( self.current_shape, ( GaugeWidget, ClockWidget, ProgressBarWidget ) ) and  hasattr( self.current_shape, 'setBorderWidth' ) ):
-            self.current_shape.setBorderWidth( self.border_width_spin.value() )
-
-    def setTag( self, tag_value ):
-        self.tag = tag_value
-        self.updatePropertiesDict()
-        main_window = self.findMainWindow()
-
-        if main_window:
-            if isinstance( self, LineWidget ) and hasattr( main_window, 'all_line_dicts' ):
-                main_window.all_line_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, RectangleWidget ) and hasattr( main_window, 'all_rectangle_dicts' ):
-                main_window.all_rectangle_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, CircleWidget ) and hasattr( main_window, 'all_circle_dicts' ):
-                main_window.all_circle_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, EllipseWidget ) and hasattr( main_window, 'all_ellipse_dicts' ):
-                main_window.all_ellipse_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, ButtonWidget ) and hasattr( main_window, 'all_button_dicts' ):
-                main_window.all_button_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, KeysWidget ) and hasattr( main_window, 'all_keys_dicts' ):
-                main_window.all_keys_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, ClockWidget ) and hasattr( main_window, 'all_clock_dicts' ):
-                main_window.all_clock_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, GaugeWidget ) and hasattr( main_window, 'all_gauge_dicts' ):
-                main_window.all_gauge_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, DialWidget ) and hasattr( main_window, 'all_dial_dicts' ):
-                main_window.all_dial_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, ToggleWidget ) and hasattr( main_window, 'all_toggle_dicts' ):
-                main_window.all_keys_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, ScrollBarWidget ) and hasattr( main_window, 'all_scroll_bar_dicts' ):
-                main_window.all_scroll_bar_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, SliderWidget ) and hasattr( main_window, 'all_slider_dicts' ):
-                main_window.all_slider_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, ProgressBarWidget ) and hasattr( main_window, 'all_progress_bar_dicts' ):
-                main_window.all_prgress_bar_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, ImageWidget ) and hasattr( main_window, 'all_image_dicts' ):
-                main_window.all_image_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-            elif isinstance( self, LabelWidget ) and hasattr( main_window, 'all_label_dicts' ):
-                main_window.all_label_dicts[self.custom_name] = self.getPropertiesDict()
-
-            elif isinstance( self, NumericWidget ) and hasattr( main_window, 'all_numeric_dicts' ):
-                main_window.all_numeric_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-    def ensureWidgetFields( self, widget_dict ):
-        widget_type = widget_dict.get( 'type' )
-
-        if 'visible' not in widget_dict:
-            widget_dict[ 'visible' ] = True
-        if 'active' not in widget_dict:
-            widget_dict[ 'active' ] = True
-        if 'static' not in widget_dict:
-            widget_dict[ 'static' ] = False
-        if 'stack_order' not in widget_dict:
-            widget_dict[ 'stack_order' ] = 1
-        defaults = {}
-
-        if widget_type == 'Line':
-            defaults = { 'x1': 0, 'y1': 0, 'x2': 100, 'y2': 0, 'color': 0xFF0000, 'width': 1, 'tag': 1 } 
-
-        elif widget_type == 'Rectangle':
-            defaults = { 'x': 0, 'y': 0, 'width': 100, 'height': 100, 'edges_color': 0xFF0000, 'thickness': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 2, 'gradient_enable': False, 'gradient_type': 'left_right', 'gradient_start_color': 0xFF0000, 'gradient_end_color': 0x0000FF }
-
-        elif widget_type == 'Circle':
-            defaults = { 'center_x': 100, 'center_y': 100, 'diameter': 100, 'line_color': 0xFF0000, 'line_thickness': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 3 }
-
-        elif widget_type == 'Ellipse':
-            defaults = { 'center_x': 100, 'center_y': 100, 'width': 150, 'height': 75, 'border_color': 0xCA75FE, 'border_width': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 4, 'gradient_enable': False, 'gradient_type': 'top_bottom', 'gradient_start_color': 0xFF0000, 'gradient_end_color': 0x0000FF }
-
-        elif widget_type == 'Button':
-            defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 100, 'start_color': 0xFF0000, 'end_color': 0x00FF00, '3d_enable': True, 'text': 'Press', 'text_size': 28, 'text_color': 0xFF0000, 'tag': 5 }
-
-        elif widget_type == 'Keys':
-            defaults = { 'x': 10, 'y': 10, 'width': 300, 'height': 60, 'key_color_top': 0xFFFF00, 'key_color_bottom': 0xFFFF00, 'text_color': 0x00FF00, '3d_enable': True, 'key_type': 'NUM', 'text_size': 27 }
-
-        elif widget_type == 'Clock':
-            defaults = { 'center_x': 240, 'center_y': 136, 'diameter': 100, 'background_color': 0x0000FF, '3d_enable': True, 'hours': 9, 'minutes': 53, 'seconds': 0 }
-
-        elif widget_type == 'Gauge':
-            defaults = { 'center_x': 100, 'center_y': 100, 'diameter': 100, 'background_color': 0xFF0000, '3d_enable': True, 'major_subdivision': 6, 'minor_subdivision': 3, 'range_value': 100, 'value': 50 }
-
-        elif widget_type == 'Dial':
-            defaults = { 'center_x': 240, 'center_y': 130, 'diameter': 50, '3d_enable': True, 'value': 0.5, 'tag': 6 }
-
-        elif widget_type == 'Toggle':
-            defaults = { 'x': 50, 'y': 50, 'width': 40, 'thumb_color': 0xFF00FF, 'background_color': 0x0000FF, '3d_enable': True, 'is_on': False, 'tag': 7 }
-
-        elif widget_type == 'ScrollBar':
-            defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'thumb_color': 0x0000FF, 'track_color': 0xFFFF00, '3d_enable': True, 'range_value': 65535, 'current_val': 32767, 'knob_size': 1000, 'tag': 8 }
-
-        elif widget_type == 'Slider':
-            defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'knob_color': 0x00FF00, 'background_left_color': 0xFF0000, 'background_right_color': 0x0000FF, '3d_enable': True, 'range_value': 65535, 'value': 32767, 'tag': 9 }
-
-        elif widget_type == 'ProgressBar':
-            defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'progress_color': 0xFFFFFF, 'background_color': 0xFF0000, '3d_enable': True, 'max_value': 100, 'value': 50 }
-
-        elif widget_type == 'Image':
-            defaults = { 'x': 50, 'y': 50, 'width': 200, 'height': 100, 'frame_enable': False, 'frame_color': 0xFF0000, 'frame_width': 2 }
-
-        elif widget_type == 'Label':
-            defaults = { 'x': 100, 'y': 100, 'text_color': 0x0000FF, 'text': 'Labela', 'text_size': 30, 'alignment': 'right' }
-
-        elif widget_type == 'Numeric':
-            defaults = { 'x': 100, 'y': 100, 'number_color': 0xFF00EF, 'number': 3110, 'number_size': 30, 'alignment': 'right' }
-
-        for key, value in defaults.items():
-            if key not in widget_dict:
-                widget_dict[ key ] = value    
 
     def updateOutputDirLabel( self ):
         if not hasattr(self, 'output_dir_label') or not self.output_dir_label:

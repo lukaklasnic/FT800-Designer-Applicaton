@@ -1,11 +1,8 @@
 from PyQt6.QtWidgets import ( QLabel, QHBoxLayout, QWidget, QSpinBox, QLineEdit, QCheckBox, QComboBox, QPushButton )
 from ui_components import ColorRectangle
-from widgets import ButtonWidget
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt
 from callbacks import*
-
-button_counter = 0 
 
 #------------------------------------------------------------CANVAS--------------------------------------------------------------
 
@@ -18,7 +15,7 @@ def showCanvasProperties( main_window, canvas, start_index=0 ):
             main_window.properties_layout.removeWidget( widget )
             widget.deleteLater()
     
-    properties_name = QLabel( f"Screen Properties (ID: { canvas.canvas_id })" )
+    properties_name = QLabel( f"Screen Properties (ID: { canvas.canvas_id } )" )
     properties_name.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( start_index, properties_name )
     start_index += 1
@@ -196,6 +193,11 @@ def showCanvasProperties( main_window, canvas, start_index=0 ):
 def showLineProperties( main_window, current_index ):
     if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
         main_window.current_shape.custom_name = generateWidgetName( main_window, "Line" )
+
+    shape_label = QLabel( "Line Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
 
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
@@ -434,6 +436,11 @@ def showLineProperties( main_window, current_index ):
 def showRectangleProperties(main_window, current_index):
     if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
         main_window.current_shape.custom_name = generateWidgetName( main_window, "Rectangle" )
+
+    shape_label = QLabel( "Rectangle Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
 
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
@@ -773,6 +780,11 @@ def showCircleProperties( main_window, current_index ):
     if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
         main_window.current_shape.custom_name = generateWidgetName( main_window, "Circle" )
 
+    shape_label = QLabel( "Circle Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
@@ -1046,6 +1058,12 @@ def showCircleProperties( main_window, current_index ):
 #-------------------------------------------------------ELLIPSE--------------------------------------------------------------
 
 def showEllipseProperties(main_window, current_index):
+
+    shape_label = QLabel( "Ellipse Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel("Status")
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
@@ -1339,29 +1357,15 @@ def showEllipseProperties(main_window, current_index):
     return current_index
 #----------------------------------------------------------------Button----------------------------------------------------------------
 
-def updateButtonSize( main_window ):
-    if hasattr( main_window, 'width_spin' ) and hasattr( main_window, 'height_spin' ):
-        main_window.current_shape.setFixedSize( main_window.width_spin.value(), main_window.height_spin.value() )
-        updateButtonGradient( main_window )
-        main_window.current_shape.updatePropertiesDict()
-        
-        if hasattr( main_window, 'all_button_dicts' ):
-            main_window.all_button_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
-
 def showButtonProperties( main_window, current_index ):
     if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
-        if hasattr( main_window, 'generate_button_name' ):
-            main_window.current_shape.custom_name = main_window.generate_button_name()
+        main_window.current_shape.custom_name = generateWidgetName( main_window, "Button" )
 
-        else:
-            button_count = 0
+    shape_label = QLabel( "Button Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
 
-            for shape in main_window.all_shapes:
-                if isinstance( shape, ButtonWidget ):
-                    button_count += 1
-
-            main_window.current_shape.custom_name = f"Button_{button_count}"
-    
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
@@ -1686,6 +1690,11 @@ def showKeysProperties( main_window, current_index ):
     if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
         main_window.current_shape.custom_name = generateWidgetName( main_window, "Keys" )
 
+    shape_label = QLabel( "Keys Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
@@ -1970,6 +1979,11 @@ def showClockProperties( main_window, current_index ):
     if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
         main_window.current_shape.custom_name = generateWidgetName( main_window, "Clock" )
 
+    shape_label = QLabel( "Clock Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
@@ -2229,6 +2243,11 @@ def showClockProperties( main_window, current_index ):
 def showGaugeProperties( main_window, current_index ):
     if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
         main_window.current_shape.custom_name = generateWidgetName( main_window, "Gauge" )
+
+    shape_label = QLabel( "Gauge Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
 
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
@@ -2505,6 +2524,11 @@ def showGaugeProperties( main_window, current_index ):
 #------------------------------------------------------------DIAL--------------------------------------------------------------
 
 def showDialProperties( main_window, current_index) :
+    shape_label = QLabel( "Dial Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
@@ -2728,6 +2752,11 @@ def showDialProperties( main_window, current_index) :
 #------------------------------------------------------------TOGGLE--------------------------------------------------------------
 
 def showToggleProperties( main_window, current_index ):
+    shape_label = QLabel( "Toggle Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
@@ -2974,6 +3003,11 @@ def showToggleProperties( main_window, current_index ):
 def showScrollBarProperties( main_window, current_index ):
     if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
         main_window.current_shape.custom_name = generateWidgetName( main_window, "ScrollBar" )
+
+    shape_label = QLabel( "Scroll Bar Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
 
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
@@ -3283,6 +3317,11 @@ def showSliderProperties( main_window, current_index ):
     if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
         main_window.current_shape.custom_name = generateWidgetName( main_window, "Slider" )
 
+    shape_label = QLabel( "Slider Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
@@ -3584,6 +3623,11 @@ def showSliderProperties( main_window, current_index ):
 #------------------------------------------------------------PROGRESS BAR--------------------------------------------------------------
 
 def showProgressBarProperties( main_window, current_index ):
+    shape_label = QLabel( "Progress bar Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
@@ -3862,6 +3906,11 @@ def showProgressBarProperties( main_window, current_index ):
 #------------------------------------------------------------IMAGE--------------------------------------------------------------
 
 def showImageProperties( main_window, current_index ):
+    shape_label = QLabel( "Image Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
@@ -4108,10 +4157,15 @@ def showImageProperties( main_window, current_index ):
 
 #------------------------------------------------------------LABEL--------------------------------------------------------------
 
-def showLabelProperties( self, current_index ):
+def showLabelProperties( main_window, current_index ):
+    shape_label = QLabel( "Label Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
-    self.properties_layout.insertWidget(current_index, status_label)
+    main_window.properties_layout.insertWidget(current_index, status_label)
     current_index += 1
 
     active_layout = QHBoxLayout()
@@ -4120,13 +4174,13 @@ def showLabelProperties( self, current_index ):
     active_label.setStyleSheet( "color: white; font-size: 14px;" )
     active_layout.addWidget( active_label )
     active_layout.addStretch( 1 )
-    self.active_checkbox_label = QCheckBox()
-    self.active_checkbox_label.setChecked( getattr( self.current_shape, 'active', True ) )
-    self.active_checkbox_label.stateChanged.connect( lambda state: updateLabelActive( self, state ) )
-    active_layout.addWidget( self.active_checkbox_label )
+    main_window.active_checkbox_label = QCheckBox()
+    main_window.active_checkbox_label.setChecked( getattr( main_window.current_shape, 'active', True ) )
+    main_window.active_checkbox_label.stateChanged.connect( lambda state: updateLabelActive( main_window, state ) )
+    active_layout.addWidget( main_window.active_checkbox_label )
     active_widget = QWidget()
     active_widget.setLayout( active_layout )
-    self.properties_layout.insertWidget( current_index, active_widget )
+    main_window.properties_layout.insertWidget( current_index, active_widget )
     current_index += 1
 
     visible_layout = QHBoxLayout()
@@ -4135,13 +4189,13 @@ def showLabelProperties( self, current_index ):
     visible_label.setStyleSheet( "color: white; font-size: 14px;" )
     visible_layout.addWidget( visible_label )
     visible_layout.addStretch( 1 )
-    self.visible_checkbox_label = QCheckBox()
-    self.visible_checkbox_label.setChecked( getattr( self.current_shape, 'visible', True ) )
-    self.visible_checkbox_label.stateChanged.connect( lambda state: updateLabelVisible( self, state ) )
-    visible_layout.addWidget( self.visible_checkbox_label )
+    main_window.visible_checkbox_label = QCheckBox()
+    main_window.visible_checkbox_label.setChecked( getattr( main_window.current_shape, 'visible', True ) )
+    main_window.visible_checkbox_label.stateChanged.connect( lambda state: updateLabelVisible( main_window, state ) )
+    visible_layout.addWidget( main_window.visible_checkbox_label )
     visible_widget = QWidget()
     visible_widget.setLayout( visible_layout )
-    self.properties_layout.insertWidget( current_index, visible_widget )
+    main_window.properties_layout.insertWidget( current_index, visible_widget )
     current_index += 1
 
     static_layout = QHBoxLayout()
@@ -4150,18 +4204,18 @@ def showLabelProperties( self, current_index ):
     static_label.setStyleSheet( "color: white; font-size: 14px;" )
     static_layout.addWidget( static_label )
     static_layout.addStretch( 1 )
-    self.static_checkbox_label = QCheckBox()
-    self.static_checkbox_label.setChecked( getattr( self.current_shape, 'static', False ) )
-    self.static_checkbox_label.stateChanged.connect( lambda state: updateLabelStatic( self, state ) )
-    static_layout.addWidget( self.static_checkbox_label )
+    main_window.static_checkbox_label = QCheckBox()
+    main_window.static_checkbox_label.setChecked( getattr( main_window.current_shape, 'static', False ) )
+    main_window.static_checkbox_label.stateChanged.connect( lambda state: updateLabelStatic( main_window, state ) )
+    static_layout.addWidget( main_window.static_checkbox_label )
     static_widget = QWidget()
     static_widget.setLayout( static_layout )
-    self.properties_layout.insertWidget( current_index, static_widget )
+    main_window.properties_layout.insertWidget( current_index, static_widget )
     current_index += 1
 
     label_name_label = QLabel( "Label Name" )
     label_name_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
-    self.properties_layout.insertWidget( current_index, label_name_label )
+    main_window.properties_layout.insertWidget( current_index, label_name_label )
     current_index += 1
 
     name_layout = QHBoxLayout()
@@ -4170,15 +4224,15 @@ def showLabelProperties( self, current_index ):
     name_label.setStyleSheet( "color: white; font-size: 14px;" )
     name_layout.addWidget( name_label )
     name_layout.addStretch( 1 )
-    self.label_name_edit = QLineEdit()
-    self.label_name_edit.setText( self.current_shape.custom_name )
-    self.label_name_edit.textChanged.connect( lambda text: updateLabelName( self, text ) )
-    self.label_name_edit.setStyleSheet( "color: black; background-color: white;" )
-    self.label_name_edit.setFixedWidth( 100 )
-    name_layout.addWidget( self.label_name_edit )
+    main_window.label_name_edit = QLineEdit()
+    main_window.label_name_edit.setText( main_window.current_shape.custom_name )
+    main_window.label_name_edit.textChanged.connect( lambda text: updateLabelName( main_window, text ) )
+    main_window.label_name_edit.setStyleSheet( "color: black; background-color: white;" )
+    main_window.label_name_edit.setFixedWidth( 100 )
+    name_layout.addWidget( main_window.label_name_edit )
     name_widget = QWidget()
     name_widget.setLayout( name_layout )
-    self.properties_layout.insertWidget( current_index, name_widget )
+    main_window.properties_layout.insertWidget( current_index, name_widget )
     current_index += 1
 
     stack_order_layout = QHBoxLayout()
@@ -4188,22 +4242,22 @@ def showLabelProperties( self, current_index ):
     stack_order_layout.addWidget( stack_order_label )
     stack_order_layout.addStretch( 1 )
     
-    self.stack_order_spin = QSpinBox()
-    self.stack_order_spin.setRange( 1, 100 )
-    self.stack_order_spin.setValue( self.current_shape.stack_order )
-    self.stack_order_spin.valueChanged.connect( lambda value: updateLabelStackOrder( self, value ) )
-    self.stack_order_spin.setStyleSheet( "color: black; background-color: white;" )
-    self.stack_order_spin.setFixedWidth( 60 )
-    stack_order_layout.addWidget( self.stack_order_spin )
+    main_window.stack_order_spin = QSpinBox()
+    main_window.stack_order_spin.setRange( 1, 100 )
+    main_window.stack_order_spin.setValue( main_window.current_shape.stack_order )
+    main_window.stack_order_spin.valueChanged.connect( lambda value: updateLabelStackOrder( main_window, value ) )
+    main_window.stack_order_spin.setStyleSheet( "color: black; background-color: white;" )
+    main_window.stack_order_spin.setFixedWidth( 60 )
+    stack_order_layout.addWidget( main_window.stack_order_spin )
     
     stack_order_widget = QWidget()
     stack_order_widget.setLayout( stack_order_layout )
-    self.properties_layout.insertWidget( current_index, stack_order_widget )
+    main_window.properties_layout.insertWidget( current_index, stack_order_widget )
     current_index += 1
 
     geometry_label = QLabel( "Geometry" )
     geometry_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
-    self.properties_layout.insertWidget( current_index, geometry_label )
+    main_window.properties_layout.insertWidget( current_index, geometry_label )
     current_index += 1
 
     pos_x_layout = QHBoxLayout()
@@ -4212,16 +4266,16 @@ def showLabelProperties( self, current_index ):
     pos_x_label.setStyleSheet( "color: white; font-size: 14px;" )
     pos_x_layout.addWidget( pos_x_label )
     pos_x_layout.addStretch( 1 )
-    self.pos_x_spin_label = QSpinBox()
-    self.pos_x_spin_label.setRange( 0, 480 )
-    self.pos_x_spin_label.setValue( self.current_shape.x() )
-    self.pos_x_spin_label.valueChanged.connect( lambda: updateLabelPosition( self ) )
-    self.pos_x_spin_label.setStyleSheet( "color: black; background-color: white;" )
-    self.pos_x_spin_label.setFixedWidth( 60 )
-    pos_x_layout.addWidget( self.pos_x_spin_label )
+    main_window.pos_x_spin_label = QSpinBox()
+    main_window.pos_x_spin_label.setRange( 0, 480 )
+    main_window.pos_x_spin_label.setValue( main_window.current_shape.x() )
+    main_window.pos_x_spin_label.valueChanged.connect( lambda: updateLabelPosition( main_window ) )
+    main_window.pos_x_spin_label.setStyleSheet( "color: black; background-color: white;" )
+    main_window.pos_x_spin_label.setFixedWidth( 60 )
+    pos_x_layout.addWidget( main_window.pos_x_spin_label )
     pos_x_widget = QWidget()
     pos_x_widget.setLayout( pos_x_layout )
-    self.properties_layout.insertWidget( current_index, pos_x_widget )
+    main_window.properties_layout.insertWidget( current_index, pos_x_widget )
     current_index += 1
 
     pos_y_layout = QHBoxLayout()
@@ -4230,21 +4284,21 @@ def showLabelProperties( self, current_index ):
     pos_y_label.setStyleSheet( "color: white; font-size: 14px;" )
     pos_y_layout.addWidget( pos_y_label )
     pos_y_layout.addStretch( 1 )
-    self.pos_y_spin_label = QSpinBox()
-    self.pos_y_spin_label.setRange( 0, 272 )
-    self.pos_y_spin_label.setValue( self.current_shape.y() )
-    self.pos_y_spin_label.valueChanged.connect( lambda: updateLabelPosition( self ) )
-    self.pos_y_spin_label.setStyleSheet( "color: black; background-color: white;" )
-    self.pos_y_spin_label.setFixedWidth( 60 )
-    pos_y_layout.addWidget( self.pos_y_spin_label )
+    main_window.pos_y_spin_label = QSpinBox()
+    main_window.pos_y_spin_label.setRange( 0, 272 )
+    main_window.pos_y_spin_label.setValue( main_window.current_shape.y() )
+    main_window.pos_y_spin_label.valueChanged.connect( lambda: updateLabelPosition( main_window ) )
+    main_window.pos_y_spin_label.setStyleSheet( "color: black; background-color: white;" )
+    main_window.pos_y_spin_label.setFixedWidth( 60 )
+    pos_y_layout.addWidget( main_window.pos_y_spin_label )
     pos_y_widget = QWidget()
     pos_y_widget.setLayout( pos_y_layout )
-    self.properties_layout.insertWidget( current_index, pos_y_widget )
+    main_window.properties_layout.insertWidget( current_index, pos_y_widget )
     current_index += 1
 
     color_adjust_label = QLabel( "Color Adjust" )
     color_adjust_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
-    self.properties_layout.insertWidget( current_index, color_adjust_label )
+    main_window.properties_layout.insertWidget( current_index, color_adjust_label )
     current_index += 1
 
     text_color_layout = QHBoxLayout()
@@ -4253,17 +4307,17 @@ def showLabelProperties( self, current_index ):
     text_color_label.setStyleSheet( "color: white; font-size: 14px;" )
     text_color_layout.addWidget( text_color_label )
     text_color_layout.addStretch( 1 )
-    self.text_color_rect_label = ColorRectangle( self.current_shape.text_color.name() )
-    self.text_color_rect_label.mousePressEvent = lambda e: changeLabelTextColor( self )
-    text_color_layout.addWidget( self.text_color_rect_label )
+    main_window.text_color_rect_label = ColorRectangle( main_window.current_shape.text_color.name() )
+    main_window.text_color_rect_label.mousePressEvent = lambda e: changeLabelTextColor( main_window )
+    text_color_layout.addWidget( main_window.text_color_rect_label )
     text_color_widget = QWidget()
     text_color_widget.setLayout( text_color_layout )
-    self.properties_layout.insertWidget( current_index, text_color_widget )
+    main_window.properties_layout.insertWidget( current_index, text_color_widget )
     current_index += 1
 
     text_main_label = QLabel( "Text" )
     text_main_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
-    self.properties_layout.insertWidget( current_index, text_main_label )
+    main_window.properties_layout.insertWidget( current_index, text_main_label )
     current_index += 1
 
     text_layout = QHBoxLayout()
@@ -4272,15 +4326,15 @@ def showLabelProperties( self, current_index ):
     text_field_label.setStyleSheet( "color: white; font-size: 14px;" )
     text_layout.addWidget( text_field_label )
     text_layout.addStretch( 1 )
-    self.text_edit_label = QLineEdit()
-    self.text_edit_label.setText( self.current_shape.text )
-    self.text_edit_label.textChanged.connect( lambda text: updateLabelText( self, text ) )
-    self.text_edit_label.setStyleSheet( "color: black; background-color: white;" )
-    self.text_edit_label.setFixedWidth( 150 )
-    text_layout.addWidget( self.text_edit_label )
+    main_window.text_edit_label = QLineEdit()
+    main_window.text_edit_label.setText( main_window.current_shape.text )
+    main_window.text_edit_label.textChanged.connect( lambda text: updateLabelText( main_window, text ) )
+    main_window.text_edit_label.setStyleSheet( "color: black; background-color: white;" )
+    main_window.text_edit_label.setFixedWidth( 150 )
+    text_layout.addWidget( main_window.text_edit_label )
     text_widget = QWidget()
     text_widget.setLayout( text_layout )
-    self.properties_layout.insertWidget( current_index, text_widget )
+    main_window.properties_layout.insertWidget( current_index, text_widget )
     current_index += 1
 
     text_size_layout = QHBoxLayout()
@@ -4289,16 +4343,16 @@ def showLabelProperties( self, current_index ):
     text_size_label.setStyleSheet( "color: white; font-size: 14px;" )
     text_size_layout.addWidget( text_size_label )
     text_size_layout.addStretch( 1 )
-    self.text_size_spin_label = QSpinBox()
-    self.text_size_spin_label.setRange( 6, 72 )
-    self.text_size_spin_label.setValue( self.current_shape.text_size )
-    self.text_size_spin_label.valueChanged.connect( lambda value: updateLabelTextSize( self, value ) )
-    self.text_size_spin_label.setStyleSheet( "color: black; background-color: white;" )
-    self.text_size_spin_label.setFixedWidth( 60 )
-    text_size_layout.addWidget( self.text_size_spin_label )
+    main_window.text_size_spin_label = QSpinBox()
+    main_window.text_size_spin_label.setRange( 6, 72 )
+    main_window.text_size_spin_label.setValue( main_window.current_shape.text_size )
+    main_window.text_size_spin_label.valueChanged.connect( lambda value: updateLabelTextSize( main_window, value ) )
+    main_window.text_size_spin_label.setStyleSheet( "color: black; background-color: white;" )
+    main_window.text_size_spin_label.setFixedWidth( 60 )
+    text_size_layout.addWidget( main_window.text_size_spin_label )
     text_size_widget = QWidget()
     text_size_widget.setLayout( text_size_layout )
-    self.properties_layout.insertWidget( current_index, text_size_widget )
+    main_window.properties_layout.insertWidget( current_index, text_size_widget )
     current_index += 1
 
     alignment_layout = QHBoxLayout()
@@ -4307,16 +4361,16 @@ def showLabelProperties( self, current_index ):
     alignment_label.setStyleSheet( "color: white; font-size: 14px;" )
     alignment_layout.addWidget( alignment_label )
     alignment_layout.addStretch( 1 )
-    self.alignment_combo = QComboBox()
-    self.alignment_combo.addItems( [ "Left", "Center", "Right", "Top", "Bottom" ] )
-    self.alignment_combo.setCurrentText( self.current_shape.text_alignment )
-    self.alignment_combo.currentTextChanged.connect( lambda text: updateLabelAlignment( self, text ) )
-    self.alignment_combo.setStyleSheet( "color: black; background-color: white;" )
-    self.alignment_combo.setFixedWidth( 100 )
-    alignment_layout.addWidget( self.alignment_combo )
+    main_window.alignment_combo = QComboBox()
+    main_window.alignment_combo.addItems( [ "Left", "Center", "Right", "Top", "Bottom" ] )
+    main_window.alignment_combo.setCurrentText( main_window.current_shape.text_alignment )
+    main_window.alignment_combo.currentTextChanged.connect( lambda text: updateLabelAlignment( main_window, text ) )
+    main_window.alignment_combo.setStyleSheet( "color: black; background-color: white;" )
+    main_window.alignment_combo.setFixedWidth( 100 )
+    alignment_layout.addWidget( main_window.alignment_combo )
     alignment_widget = QWidget()
     alignment_widget.setLayout( alignment_layout )
-    self.properties_layout.insertWidget( current_index, alignment_widget )
+    main_window.properties_layout.insertWidget( current_index, alignment_widget )
     current_index += 1
 
     return current_index
@@ -4324,6 +4378,11 @@ def showLabelProperties( self, current_index ):
 #------------------------------------------------------------NUMERIC--------------------------------------------------------------
 
 def showNumericProperties( main_window, current_index) :
+    shape_label = QLabel( "Numeric Properties" )
+    shape_label.setStyleSheet( "color: white; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
+    current_index += 1
+
     status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: white; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )

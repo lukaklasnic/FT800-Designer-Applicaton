@@ -806,6 +806,15 @@ def changeButtonTextColor( main_window ):
             if hasattr( main_window, 'all_button_dicts' ):
                 main_window.all_button_dicts[ main_window.current_shape.custom_name ] = main_window.current_shape.getPropertiesDict()
 
+def updateButtonSize( main_window ):
+    if hasattr( main_window, 'width_spin' ) and hasattr( main_window, 'height_spin' ):
+        main_window.current_shape.setFixedSize( main_window.width_spin.value(), main_window.height_spin.value() )
+        updateButtonGradient( main_window )
+        main_window.current_shape.updatePropertiesDict()
+        
+        if hasattr( main_window, 'all_button_dicts' ):
+            main_window.all_button_dicts[main_window.current_shape.custom_name] = main_window.current_shape.getPropertiesDict()
+
 #------------------------------------------------------------KEYS--------------------------------------------------------------
 
 def updateKeysFontSize( main_window, value ):
@@ -1997,50 +2006,6 @@ def generateAutoTag( main_window, current_shape ):
             return i
     
     return 0
-
-def sortWidgetsByStackOrder( main_window ):
-    if not hasattr( main_window, 'all_shapes' ) or not main_window.all_shapes:
-        return
-    
-    sorted_widgets = sorted( main_window.all_shapes, key = lambda x: x.stack_order )
-    
-    for widget in main_window.all_shapes:
-        widget.lower()
-    
-    for widget in sorted_widgets:
-        widget.raise_()
-    
-    if hasattr( main_window, 'current_shape' ) and main_window.current_shape:
-        main_window.current_shape.raise_()
-
-def renumberAllWidgets( main_window ):
-    if hasattr( main_window, 'canvas_widgets' ):
-        for canvas_id, widgets in main_window.canvas_widgets.items():
-            sorted_widgets = sorted(widgets, key = lambda x: x.stack_order)
-            
-            for i, widget in enumerate( sorted_widgets, 1 ):
-                widget.stack_order = i
-            
-            for widget in widgets:
-                widget.lower()
-
-            for widget in sorted_widgets:
-                widget.raise_()
-
-    else:
-
-        if not hasattr(main_window, 'all_shapes'):
-            return
-        
-        for i, shape in enumerate( main_window.all_shapes, 1 ):
-            shape.stack_order = i
-        
-        sorted_widgets = sorted( main_window.all_shapes, key = lambda x: x.stack_order )
-
-        for widget in main_window.all_shapes:
-            widget.lower()
-        for widget in sorted_widgets:
-            widget.raise_()
 
 def generateWidgetName( main_window, widget_type ):
     if hasattr( main_window, 'canvas_widgets' ):

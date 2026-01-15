@@ -323,6 +323,72 @@ def generateWidgetStructure( widget_type, name, widget_data ):
     
     return content
 
+def ensureWidgetFields( self, widget_dict ):
+    widget_type = widget_dict.get( 'type' )
+
+    if 'visible' not in widget_dict:
+       widget_dict[ 'visible' ] = True
+    if 'active' not in widget_dict:
+       widget_dict[ 'active' ] = True
+    if 'static' not in widget_dict:
+       widget_dict[ 'static' ] = False
+    if 'stack_order' not in widget_dict:
+       widget_dict[ 'stack_order' ] = 1
+    defaults = {}
+
+    if widget_type == 'Line':
+       defaults = { 'x1': 0, 'y1': 0, 'x2': 100, 'y2': 0, 'color': 0xFF0000, 'width': 1, 'tag': 1 } 
+
+    elif widget_type == 'Rectangle':
+       defaults = { 'x': 0, 'y': 0, 'width': 100, 'height': 100, 'edges_color': 0xFF0000, 'thickness': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 2, 'gradient_enable': False, 'gradient_type': 'left_right', 'gradient_start_color': 0xFF0000, 'gradient_end_color': 0x0000FF }
+
+    elif widget_type == 'Circle':
+       defaults = { 'center_x': 100, 'center_y': 100, 'diameter': 100, 'line_color': 0xFF0000, 'line_thickness': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 3 }
+
+    elif widget_type == 'Ellipse':
+       defaults = { 'center_x': 100, 'center_y': 100, 'width': 150, 'height': 75, 'border_color': 0xCA75FE, 'border_width': 1, 'filled': True, 'fill_color': 0x0000FF, 'tag': 4, 'gradient_enable': False, 'gradient_type': 'top_bottom', 'gradient_start_color': 0xFF0000, 'gradient_end_color': 0x0000FF }
+
+    elif widget_type == 'Button':
+       defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 100, 'start_color': 0xFF0000, 'end_color': 0x00FF00, '3d_enable': True, 'text': 'Press', 'text_size': 28, 'text_color': 0xFF0000, 'tag': 5 }
+
+    elif widget_type == 'Keys':
+       defaults = { 'x': 10, 'y': 10, 'width': 300, 'height': 60, 'key_color_top': 0xFFFF00, 'key_color_bottom': 0xFFFF00, 'text_color': 0x00FF00, '3d_enable': True, 'key_type': 'NUM', 'text_size': 27 }
+
+    elif widget_type == 'Clock':
+       defaults = { 'center_x': 240, 'center_y': 136, 'diameter': 100, 'background_color': 0x0000FF, '3d_enable': True, 'hours': 9, 'minutes': 53, 'seconds': 0 }
+
+    elif widget_type == 'Gauge':
+       defaults = { 'center_x': 100, 'center_y': 100, 'diameter': 100, 'background_color': 0xFF0000, '3d_enable': True, 'major_subdivision': 6, 'minor_subdivision': 3, 'range_value': 100, 'value': 50 }
+
+    elif widget_type == 'Dial':
+       defaults = { 'center_x': 240, 'center_y': 130, 'diameter': 50, '3d_enable': True, 'value': 0.5, 'tag': 6 }
+
+    elif widget_type == 'Toggle':
+       defaults = { 'x': 50, 'y': 50, 'width': 40, 'thumb_color': 0xFF00FF, 'background_color': 0x0000FF, '3d_enable': True, 'is_on': False, 'tag': 7 }
+
+    elif widget_type == 'ScrollBar':
+       defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'thumb_color': 0x0000FF, 'track_color': 0xFFFF00, '3d_enable': True, 'range_value': 65535, 'current_val': 32767, 'knob_size': 1000, 'tag': 8 }
+
+    elif widget_type == 'Slider':
+       defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'knob_color': 0x00FF00, 'background_left_color': 0xFF0000, 'background_right_color': 0x0000FF, '3d_enable': True, 'range_value': 65535, 'value': 32767, 'tag': 9 }
+
+    elif widget_type == 'ProgressBar':
+       defaults = { 'x': 100, 'y': 100, 'width': 100, 'height': 10, 'progress_color': 0xFFFFFF, 'background_color': 0xFF0000, '3d_enable': True, 'max_value': 100, 'value': 50 }
+
+    elif widget_type == 'Image':
+       defaults = { 'x': 50, 'y': 50, 'width': 200, 'height': 100, 'frame_enable': False, 'frame_color': 0xFF0000, 'frame_width': 2 }
+
+    elif widget_type == 'Label':
+       defaults = { 'x': 100, 'y': 100, 'text_color': 0x0000FF, 'text': 'Labela', 'text_size': 30, 'alignment': 'right' }
+
+    elif widget_type == 'Numeric':
+       defaults = { 'x': 100, 'y': 100, 'number_color': 0xFF00EF, 'number': 3110, 'number_size': 30, 'alignment': 'right' }
+
+    for key, value in defaults.items():
+       if key not in widget_dict:
+           widget_dict[ key ] = value    
+
+
 def generateComponentsH(canvas_data, widgets_data):
     content = ""
 
@@ -682,7 +748,7 @@ def generateComponents( main_window, out_dir=None ):
 
                 widget_dict[ 'type' ] = widget_type
 
-                main_window.ensureWidgetFields( widget_dict )
+                #ensureWidgetFields( widget_dict )
                 canvas_widgets.append( widget_dict )
 
         canvas_info[ 'widgets' ] = canvas_widgets
