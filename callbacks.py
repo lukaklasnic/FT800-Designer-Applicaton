@@ -918,6 +918,9 @@ def updateToggleSize( main_window, value ):
     if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
         main_window.current_shape.setSize( value, 30 )
 
+def updateToggleName( main_window, text ):
+    pass
+
 #------------------------------------------------------------SCROLL BAR--------------------------------------------------------------
 
 def updateScrollbarTag( main_window, value ):
