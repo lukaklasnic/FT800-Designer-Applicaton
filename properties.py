@@ -327,9 +327,8 @@ def showLineProperties( main_window, current_index ):
     start_x_layout.addStretch( 1 )
     main_window.start_x_spin_line = QSpinBox()
     main_window.start_x_spin_line.setRange( 0, 480 )
-    start_x, start_y, end_x, end_y = main_window.current_shape.getLinePoints()
-    main_window.start_x_spin_line.setValue( start_x )
-    main_window.start_x_spin_line.valueChanged.connect( lambda value: updateLinePoints( main_window ) )
+    main_window.start_x_spin_line.setValue( main_window.current_shape.start_x )
+    main_window.start_x_spin_line.valueChanged.connect( lambda value: updateLinePosition( main_window ) )
     main_window.start_x_spin_line.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.start_x_spin_line.setFixedWidth( 60 )
     start_x_layout.addWidget( main_window.start_x_spin_line )
@@ -346,8 +345,8 @@ def showLineProperties( main_window, current_index ):
     start_y_layout.addStretch( 1 )
     main_window.start_y_spin_line = QSpinBox()
     main_window.start_y_spin_line.setRange( 0, 272 )
-    main_window.start_y_spin_line.setValue( start_y )
-    main_window.start_y_spin_line.valueChanged.connect( lambda value: updateLinePoints( main_window ) )
+    main_window.start_y_spin_line.setValue( main_window.current_shape.start_y  )
+    main_window.start_y_spin_line.valueChanged.connect( lambda value: updateLinePosition( main_window ) )
     main_window.start_y_spin_line.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.start_y_spin_line.setFixedWidth( 60 )
     start_y_layout.addWidget( main_window.start_y_spin_line )
@@ -364,8 +363,8 @@ def showLineProperties( main_window, current_index ):
     end_x_layout.addStretch( 1 )
     main_window.end_x_spin_line = QSpinBox()
     main_window.end_x_spin_line.setRange( 0, 480 )
-    main_window.end_x_spin_line.setValue( end_x )
-    main_window.end_x_spin_line.valueChanged.connect( lambda value: updateLinePoints( main_window ) )
+    main_window.end_x_spin_line.setValue( main_window.current_shape.end_x )
+    main_window.end_x_spin_line.valueChanged.connect( lambda value: updateLinePosition( main_window ) )
     main_window.end_x_spin_line.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.end_x_spin_line.setFixedWidth( 60 )
     end_x_layout.addWidget( main_window.end_x_spin_line )
@@ -382,8 +381,8 @@ def showLineProperties( main_window, current_index ):
     end_y_layout.addStretch( 1 )
     main_window.end_y_spin_line = QSpinBox()
     main_window.end_y_spin_line.setRange( 0, 272 )
-    main_window.end_y_spin_line.setValue( end_y )
-    main_window.end_y_spin_line.valueChanged.connect( lambda value: updateLinePoints( main_window ) )
+    main_window.end_y_spin_line.setValue( main_window.current_shape.end_y )
+    main_window.end_y_spin_line.valueChanged.connect( lambda value: updateLinePosition( main_window ) )
     main_window.end_y_spin_line.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.end_y_spin_line.setFixedWidth( 60 )
     end_y_layout.addWidget( main_window.end_y_spin_line )
@@ -404,7 +403,7 @@ def showLineProperties( main_window, current_index ):
     color_layout.addWidget( color_picker_label )
     color_layout.addStretch( 1 )
     main_window.color_rect_line = ColorRectangle( main_window.current_shape.line_color.name() )
-    main_window.color_rect_line.mousePressEvent = lambda e: changeLineColor( main_window )
+    main_window.color_rect_line.mousePressEvent = lambda e: updateLineColor( main_window )
     color_layout.addWidget( main_window.color_rect_line )
     color_widget = QWidget()
     color_widget.setLayout( color_layout )
@@ -645,14 +644,9 @@ def showRectangleProperties(main_window, current_index):
     edges_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     edges_color_layout.addWidget( edges_color_label )
     edges_color_layout.addStretch( 1 )
-
-    if hasattr( main_window.current_shape, 'color' ):
-        edge_color_hex = main_window.current_shape.color.name()
-    else:
-        edge_color_hex = "#FF0000"
-
+    edge_color_hex = main_window.current_shape.edges_color.name()
     main_window.edges_color_rect_rect = ColorRectangle( edge_color_hex )
-    main_window.edges_color_rect_rect.mousePressEvent = lambda e: changeRectangleEdgesColor( main_window )
+    main_window.edges_color_rect_rect.mousePressEvent = lambda e: updateRectangleEdgesColor( main_window )
     main_window.edges_color_rect_rect.setCursor( Qt.CursorShape.PointingHandCursor )
     edges_color_layout.addWidget( main_window.edges_color_rect_rect )
 
@@ -669,7 +663,7 @@ def showRectangleProperties(main_window, current_index):
     edges_width_layout.addStretch( 1 )
     main_window.edges_width_spin_rect = QSpinBox()
     main_window.edges_width_spin_rect.setRange( 1, 50 )
-    main_window.edges_width_spin_rect.setValue( main_window.current_shape.border_width )
+    main_window.edges_width_spin_rect.setValue( main_window.current_shape.edges_width )
     main_window.edges_width_spin_rect.valueChanged.connect( lambda value: updateRectangleEdgesWidth( main_window, value ) )
     main_window.edges_width_spin_rect.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.edges_width_spin_rect.setFixedWidth( 60 )
@@ -731,15 +725,9 @@ def showRectangleProperties(main_window, current_index):
     start_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     start_color_layout.addWidget( start_color_label )
     start_color_layout.addStretch( 1 )
-    
-    if hasattr( main_window.current_shape, 'gradient_color1' ):
-        start_color_hex = main_window.current_shape.gradient_color1.name()
-
-    else:
-        start_color_hex = "#FF0000"
-    
+    start_color_hex = main_window.current_shape.start_color.name()
     main_window.start_color_rect_rect = ColorRectangle( start_color_hex )
-    main_window.start_color_rect_rect.mousePressEvent = lambda e: changeRectangleGradientStartColor( main_window )
+    main_window.start_color_rect_rect.mousePressEvent = lambda e: updateRectangleGradientStartColor( main_window )
     main_window.start_color_rect_rect.setCursor( Qt.CursorShape.PointingHandCursor )
     start_color_layout.addWidget( main_window.start_color_rect_rect )
     
@@ -754,15 +742,9 @@ def showRectangleProperties(main_window, current_index):
     end_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     end_color_layout.addWidget( end_color_label )
     end_color_layout.addStretch( 1 )
-    
-    if hasattr( main_window.current_shape, 'gradient_color2' ):
-        end_color_hex = main_window.current_shape.gradient_color2.name()
-
-    else:
-        end_color_hex = "#0000FF"
-    
+    end_color_hex = main_window.current_shape.end_color.name()
     main_window.end_color_rect_rect = ColorRectangle( end_color_hex )
-    main_window.end_color_rect_rect.mousePressEvent = lambda e: changeRectangleGradientEndColor( main_window )
+    main_window.end_color_rect_rect.mousePressEvent = lambda e: updateRectangleGradientEndColor( main_window )
     main_window.end_color_rect_rect.setCursor( Qt.CursorShape.PointingHandCursor )
     end_color_layout.addWidget( main_window.end_color_rect_rect )
     
@@ -770,8 +752,6 @@ def showRectangleProperties(main_window, current_index):
     end_color_widget.setLayout( end_color_layout )
     main_window.properties_layout.insertWidget( current_index, end_color_widget )
     current_index += 1
-
-    updateRectangleGradientAppearance(main_window)
 
     return current_index
 #----------------------------------------------------------------CIRCLE----------------------------------------------------------------
@@ -969,10 +949,7 @@ def showCircleProperties( main_window, current_index ):
     edges_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     edges_color_layout.addWidget( edges_color_label )
     edges_color_layout.addStretch( 1 ) 
-
-    if hasattr( main_window.current_shape, 'line_color' ):
-        line_color_hex = main_window.current_shape.line_color.name()
-
+    line_color_hex = main_window.current_shape.edges_color.name()
     main_window.edges_color_rect_circle = ColorRectangle( line_color_hex )
     main_window.edges_color_rect_circle.mousePressEvent = lambda e: changeCircleLineColor( main_window )
     main_window.edges_color_rect_circle.setCursor( Qt.CursorShape.PointingHandCursor )
@@ -991,7 +968,7 @@ def showCircleProperties( main_window, current_index ):
     edges_width_layout.addStretch(1)
     main_window.edges_width_spin_circle = QSpinBox()
     main_window.edges_width_spin_circle.setRange(1, 50)
-    main_window.edges_width_spin_circle.setValue( main_window.current_shape.line_edges_width )
+    main_window.edges_width_spin_circle.setValue( main_window.current_shape.edges_width )
     main_window.edges_width_spin_circle.valueChanged.connect( lambda value: updateCircleEdgeWidth( main_window, value ) )
     main_window.edges_width_spin_circle.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.edges_width_spin_circle.setFixedWidth( 60 )
@@ -1274,7 +1251,7 @@ def showEllipseProperties(main_window, current_index):
     edges_width_layout.addStretch( 1 )
     main_window.edges_width_spin_ellipse = QSpinBox()
     main_window.edges_width_spin_ellipse.setRange( 1, 20 )
-    main_window.edges_width_spin_ellipse.setValue( main_window.current_shape.border_width )
+    main_window.edges_width_spin_ellipse.setValue( main_window.current_shape.edges_width )
     main_window.edges_width_spin_ellipse.valueChanged.connect( lambda value: updateEllipseEdgeWidth( main_window, value ) )
     main_window.edges_width_spin_ellipse.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.edges_width_spin_ellipse.setFixedWidth( 60 )

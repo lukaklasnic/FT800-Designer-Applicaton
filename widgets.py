@@ -10,43 +10,40 @@ class LineWidget( QWidget ):
     def __init__( self, parent = None ):
         super().__init__( parent )
 
-        self._start_x = 0
-        self._start_y = 0
-        self._end_x = 100
-        self._end_y = 100
-        
-        self.line_width = 5
-        self.line_color = QColor( 0, 0, 0 ) 
-        
+        self.defaultValues()
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+
+    def defaultValues( self ):
         self.active = True
         self.visible = True
         self.static = False
-        self.custom_name = None
+        self.custom_name = ""
+        self.stack_order = 1
+        self.tag = 0
+        self.start_x = 0
+        self.start_y = 0
+        self.end_x = 100
+        self.end_y = 100
+        self.line_color = QColor( 0, 0, 0 ) 
+        self.line_width = 5
+
         self.selected = False
-        
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
-        self.resize_start_points = None
+        self.resize_start_size = None
         self.resize_corner = None
         self.drag_start_pos = QPoint()
 
-        self.tag = 0
-
-        self.updateWidgetSize()
-        
-        self.setMouseTracking( True )
-        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
-        self.stack_order = 1
-    
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
-        local_start_x = self._start_x - self.x()
-        local_start_y = self._start_y - self.y()
-        local_end_x = self._end_x - self.x()
-        local_end_y = self._end_y - self.y()
+        local_start_x = self.start_x - self.x()
+        local_start_y = self.start_y - self.y()
+        local_end_x = self.end_x - self.x()
+        local_end_y = self.end_y - self.y()
         
         pen = QPen( self.line_color )
         pen.setWidth( self.line_width )
@@ -59,29 +56,25 @@ class LineWidget( QWidget ):
             self.drawSelectionHandles( painter, local_start_x, local_start_y, local_end_x, local_end_y )
     
     def drawSelectionHandles( self, painter, start_x, start_y, end_x, end_y ):
-        handle_size = 12
+        handle_size = 10
         half_size = handle_size // 2
-        
+
         painter.setBrush( QColor( 0, 255, 0 ) )
         painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
-        
         painter.drawEllipse( start_x - half_size, start_y - half_size, handle_size, handle_size )
-        
         painter.drawEllipse( end_x - half_size, end_y - half_size, handle_size, handle_size )
-        
         painter.setBrush( QColor( 255, 255, 255 ) )
         painter.setPen( Qt.PenStyle.NoPen )
-        
         painter.drawEllipse( start_x - 1, start_y - 1, 2, 2 )
         painter.drawEllipse( end_x - 1, end_y - 1, 2, 2 )
     
     def drawSelectionBorder(self, painter):
-        margin = 10
+        margin = 2
     
-        local_start_x = self._start_x - self.x()
-        local_start_y = self._start_y - self.y()
-        local_end_x = self._end_x - self.x()
-        local_end_y = self._end_y - self.y()
+        local_start_x = self.start_x - self.x()
+        local_start_y = self.start_y - self.y()
+        local_end_x = self.end_x - self.x()
+        local_end_y = self.end_y - self.y()
         
         min_x = min( local_start_x, local_end_x ) - margin
         min_y = min( local_start_y, local_end_y ) - margin
@@ -100,29 +93,29 @@ class LineWidget( QWidget ):
         painter.drawRect( border_rect )
 
     def handleResize( self, global_pos ):
-        if not self.resize_corner or not self.resize_start_points:
+        if not self.resize_corner or not self.resize_start_size:
             return
 
         delta = global_pos - self.resize_start_pos
         
-        start_x_start, start_y_start, end_x_start, end_y_start = self.resize_start_points
+        start_x_start, start_y_start, end_x_start, end_y_start = self.resize_start_size
         
         if self.resize_corner == "start":
-            self._start_x = start_x_start + delta.x()
-            self._start_y = start_y_start + delta.y()
+            self.start_x = start_x_start + delta.x()
+            self.start_y = start_y_start + delta.y()
+
         elif self.resize_corner == "end":
-            self._end_x = end_x_start + delta.x()
-            self._end_y = end_y_start + delta.y()
+            self.end_x = end_x_start + delta.x()
+            self.end_y = end_y_start + delta.y()
         
-        self.updateWidgetSize()
+        self.updateLineSize()
         self.update()
 
     def isPointOnLine( self, pos ):
-
         global_x = pos.x() + self.x()
         global_y = pos.y() + self.y()
         
-        x1, y1, x2, y2 = self._start_x, self._start_y, self._end_x, self._end_y
+        x1, y1, x2, y2 = self.start_x, self.start_y, self.end_x, self.end_y
         
         if x1 == x2 and y1 == y2:
             distance = math.sqrt( ( global_x - x1 ) ** 2 + ( global_y - y1 ) ** 2 )
@@ -142,8 +135,10 @@ class LineWidget( QWidget ):
         
         if param < 0:
             xx, yy = x1, y1
+
         elif param > 1:
             xx, yy = x2, y2
+            
         else:
             xx = x1 + param * C
             yy = y1 + param * D
@@ -151,76 +146,66 @@ class LineWidget( QWidget ):
         distance = math.sqrt( ( global_x - xx ) ** 2 + ( global_y - yy ) ** 2 )
         
         return distance <= self.line_width / 2 + 5
-    
-    def setLinePoints( self, start_x, start_y, end_x, end_y ):
-        self._start_x = start_x
-        self._start_y = start_y
-        self._end_x = end_x
-        self._end_y = end_y
-        
-        self.updateWidgetSize()
-        self.update()
-    
-    def setLineWidth( self, width ):
-        self.line_width = max( 1, width )
-        self.update()
-    
-    def setLineColor( self, color ):
-        self.line_color = color
-        self.update()
-    
-    def setSelected( self, selected ):
-        self.selected = selected
-        self.update()
-    
-    def setVisibleLine( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-        self.update()
-    
-    def getPointAt( self, pos ):
+
+    def getCornerAt( self, pos ):
         handle_size = 16
         
         global_pos = QPoint( pos.x() + self.x(), pos.y() + self.y() )
         
-        start_rect = QRect( self._start_x - handle_size // 2, self._start_y - handle_size // 2, handle_size, handle_size )
+        start_rect = QRect( self.start_x - handle_size // 2, self.start_y - handle_size // 2, handle_size, handle_size )
 
         if start_rect.contains( global_pos ):
             return "start"
         
-        end_rect = QRect( self._end_x - handle_size // 2, self._end_y - handle_size // 2, handle_size, handle_size ) 
+        end_rect = QRect( self.end_x - handle_size // 2, self.end_y - handle_size // 2, handle_size, handle_size ) 
 
         if end_rect.contains( global_pos ):
             return "end"
         
         return None
 
-    def getLinePoints( self ):
-        return ( self._start_x, self._start_y, self._end_x, self._end_y )
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
+
+    def setVisibleLine( self, visible ):
+        self.visible = visible
+        self.setVisible( visible )
+        self.update()
+
+    def setLinePosition( self, start_x, start_y, end_x, end_y ):
+        self.start_x = start_x
+        self.start_y = start_y
+        self.end_x = end_x
+        self.end_y = end_y
+        self.updateLineSize()
+        self.update()
+
+    def setLineColor( self, color ):
+        self.line_color = color
+        self.update()
     
-    def updateWidgetSize( self ):
+    def setLineWidth( self, width ):
+        self.line_width = max( 1, width )
+        self.update()   
+
+    def updateLineSize( self ):
         margin = 20 
         
-        min_x = min( self._start_x, self._end_x ) - self.x()
-        min_y = min( self._start_y, self._end_y ) - self.y()
-        max_x = max( self._start_x, self._end_x ) - self.x()
-        max_y = max( self._start_y, self._end_y ) - self.y()
+        min_x = min( self.start_x, self.end_x ) - self.x()
+        min_y = min( self.start_y, self.end_y ) - self.y()
+        max_x = max( self.start_x, self.end_x ) - self.x()
+        max_y = max( self.start_y, self.end_y ) - self.y()
         
         width = max( 20, max_x - min_x ) + 2 * margin
         height = max( 20, max_y - min_y ) + 2 * margin
         
         self.setFixedSize( width, height )
-        
-        self.updatePosition()
-
-    def updatePosition( self ):
-        
-        center_x = ( self._start_x + self._end_x ) // 2
-        center_y = ( self._start_y + self._end_y ) // 2
-        
+        center_x = ( self.start_x + self.end_x ) // 2
+        center_y = ( self.start_y + self.end_y ) // 2
         self.move( center_x - self.width() // 2, center_y - self.height() // 2 )
 
-    def updatePropertiesPoints( self ):
+    def updateLinePositionPropertiesPosition( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
@@ -230,67 +215,23 @@ class LineWidget( QWidget ):
             
             if hasattr( main_window, 'start_x_spin_line' ):
                 main_window.start_x_spin_line.blockSignals( True )
-                main_window.start_x_spin_line.setValue( self._start_x )
+                main_window.start_x_spin_line.setValue( self.start_x )
                 main_window.start_x_spin_line.blockSignals( False )
                 
             if hasattr( main_window, 'start_y_spin_line' ):
                 main_window.start_y_spin_line.blockSignals( True )
-                main_window.start_y_spin_line.setValue( self._start_y )
+                main_window.start_y_spin_line.setValue( self.start_y )
                 main_window.start_y_spin_line.blockSignals( False )
                 
             if hasattr( main_window, 'end_x_spin_line' ):
                 main_window.end_x_spin_line.blockSignals( True )
-                main_window.end_x_spin_line.setValue( self._end_x )
+                main_window.end_x_spin_line.setValue( self.end_x )
                 main_window.end_x_spin_line.blockSignals( False )
                 
             if hasattr( main_window, 'end_y_spin_line' ):
                 main_window.end_y_spin_line.blockSignals( True )
-                main_window.end_y_spin_line.setValue( self._end_y )
+                main_window.end_y_spin_line.setValue( self.end_y )
                 main_window.end_y_spin_line.blockSignals( False )
-
-
-    def updateAllProperties( self ):
-        self.updatePropertiesPoints()
-
-        main_window = self.findMainWindow()
-
-        if not main_window:
-            return
-
-        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
-
-            if hasattr( main_window, 'active_checkbox_line' ):
-                main_window.active_checkbox_line.blockSignals( True )
-                main_window.active_checkbox_line.setChecked( self.active )
-                main_window.active_checkbox_line.blockSignals( False )
-
-            if hasattr( main_window, 'visible_checkbox_line' ):
-                main_window.visible_checkbox_line.blockSignals( True )
-                main_window.visible_checkbox_line.setChecked( self.visible )
-                main_window.visible_checkbox_line.blockSignals( False )
-
-            if hasattr( main_window, 'static_checkbox_line' ):
-                main_window.static_checkbox_line.blockSignals( True )
-                main_window.static_checkbox_line.setChecked( self.static )
-                main_window.static_checkbox_line.blockSignals( False )
-
-            if hasattr( main_window, 'name_edit_line' ):
-                main_window.name_edit_line.blockSignals( True )
-                main_window.name_edit_line.setText( self.custom_name )
-                main_window.name_edit_line.blockSignals( False )
-
-            if hasattr( main_window, 'stack_order_spin_line' ):
-                main_window.stack_order_spin_line.blockSignals( True )
-                main_window.stack_order_spin_line.setValue( self.stack_order )
-                main_window.stack_order_spin_line.blockSignals( False )
-
-            if hasattr( main_window, 'color_rect_line' ):
-                main_window.color_rect_line.setStyleSheet( f"background-color: { self.line_color.name() }; border: 1px solid #ccc;" )
-
-            if hasattr( main_window, 'line_width_spin_line' ):
-                main_window.line_width_spin_line.blockSignals( True )
-                main_window.line_width_spin_line.setValue( self.line_width )
-                main_window.line_width_spin_line.blockSignals( False )
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -305,21 +246,19 @@ class LineWidget( QWidget ):
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
-            
-            self.resize_corner = self.getPointAt( mouse_pos )
+            self.resize_corner = self.getCornerAt( mouse_pos )
             
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
-                self.resize_start_points = ( self._start_x, self._start_y, self._end_x, self._end_y )
+                self.resize_start_size = ( self.start_x, self.start_y, self.end_x, self.end_y )
+
             else:
                 if self.isPointOnLine( mouse_pos ):
-
                     self.dragging = True
                     self.drag_start_pos = mouse_pos
                 
                 self.clicked.emit( self )
-                self.updateAllProperties()
 
         event.accept()
 
@@ -328,123 +267,119 @@ class LineWidget( QWidget ):
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
-            self.resize_start_points = None
+            self.resize_start_size = None
 
         event.accept()
 
     def mouseMoveEvent( self, event ):
         mouse_pos = event.pos()
-        
-        point = self.getPointAt( mouse_pos )
+        point = self.getCornerAt( mouse_pos )
+
         if point:
             self.setCursor( Qt.CursorShape.SizeAllCursor )
+
         elif self.isPointOnLine( mouse_pos ):
             self.setCursor( Qt.CursorShape.SizeAllCursor )
+
         else:
             self.setCursor( Qt.CursorShape.ArrowCursor )
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize( event.globalPosition().toPoint() )
-            self.updatePropertiesPoints()
-        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            self.updateLinePositionPropertiesPosition()
 
+        elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-            
-            self._start_x += delta.x()
-            self._start_y += delta.y()
-            self._end_x += delta.x()
-            self._end_y += delta.y()
-            
-            self.updatePosition()
-            
+            self.start_x += delta.x()
+            self.start_y += delta.y()
+            self.end_x += delta.x()
+            self.end_y += delta.y()
+
             self.drag_start_pos = mouse_pos
-            
+                    
+            center_x = ( self.start_x + self.end_x ) // 2
+            center_y = ( self.start_y + self.end_y ) // 2
+            self.move( center_x - self.width() // 2, center_y - self.height() // 2 )
+
             self.update()
-            self.updatePropertiesPoints()
+            self.updateLinePositionPropertiesPosition()
         
         event.accept()
 
 class RectangleWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, w = 100, h = 80, parent = None ):
+    def __init__( self, width, height, parent = None ):
         super().__init__( parent )
 
-        self.setFixedSize( w, h )
-        self.color = QColor( 0, 0, 0 )
-        self.is_selected = False
+        self.setFixedSize( width, height )
+        self.defaultValues()
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
+        
+    def defaultValues( self ):
+        self.active = True
+        self.visible = True
+        self.static = False
+        self.custom_name = ""
+        self.stack_order = 1
+        self.tag = 0 
+        self.edges_color = QColor( 0, 0, 0 )
+        self.edges_width = 5
+        self.filled = False 
+        self.gradient_direction = "top_to_bottom"
+        self.start_color = QColor( 255, 0, 0 )
+        self.end_color = QColor( 0, 0, 255 )
+
+        self.selected = False
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
         self.resize_start_size = QSize()
         self.resize_corner = None
         self.drag_start_pos = QPoint()
-        
-        self.border_width = 5
-        self.filled = False 
-        self.fill_color = QColor( 200, 200, 200 )
-        
-        self.gradient_enabled = True
-        self.gradient_color1 = QColor( 255, 0, 0 )
-        self.gradient_color2 = QColor( 0, 0, 255 )
-        self.gradient_direction = "top_to_bottom"
-        
-        self.active = True
-        self.visible = True
-        self.static = False
-        self.custom_name = ""
-        self.stack_order = 1
-
-        self.tag = 0 
-        
-        self.setMouseTracking( True )
-        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
 
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
         if self.filled:
+            gradient = None
+            
+            if self.gradient_direction == "top_to_bottom":
+                gradient = QLinearGradient( 0, 0, 0, self.height() )
 
-            if self.gradient_enabled:
-                gradient = None
-                
-                if self.gradient_direction == "top_to_bottom":
-                    gradient = QLinearGradient( 0, 0, 0, self.height() )
-                elif self.gradient_direction == "bottom_to_top":
-                    gradient = QLinearGradient( 0, self.height(), 0, 0 )
-                elif self.gradient_direction == "left_to_right":
-                    gradient = QLinearGradient( 0, 0, self.width(), 0 )
-                elif self.gradient_direction == "right_to_left":
-                    gradient = QLinearGradient( self.width(), 0, 0, 0 )
-                
-                if gradient:
-                    gradient.setColorAt( 0, self.gradient_color1 )
-                    gradient.setColorAt( 1, self.gradient_color2 )
-                    painter.fillRect( self.rect(), gradient )
-                else:
-                    painter.fillRect( self.rect(), self.gradient_color1 )
-            else:
-                painter.fillRect( self.rect(), self.fill_color )
+            elif self.gradient_direction == "bottom_to_top":
+                gradient = QLinearGradient( 0, self.height(), 0, 0 )
+
+            elif self.gradient_direction == "left_to_right":
+                gradient = QLinearGradient( 0, 0, self.width(), 0 )
+
+            elif self.gradient_direction == "right_to_left":
+                gradient = QLinearGradient( self.width(), 0, 0, 0 )
+            
+            gradient.setColorAt( 0, self.start_color )
+            gradient.setColorAt( 1, self.end_color )
+            painter.fillRect( self.rect(), gradient )
+
         
-        pen = QPen( self.color )
-        pen.setWidth( self.border_width )
+        pen = QPen( self.edges_color )
+        pen.setWidth( self.edges_width )
         painter.setPen( pen )
         painter.setBrush( Qt.BrushStyle.NoBrush )
         painter.drawRect( 0, 0, self.width() , self.height() )
         
-        if self.is_selected:
+        if self.selected:
             self.drawSelectionBorder( painter )
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        handle_size = 8
+        handle_size = 10
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 0, 255, 0 ) )
         painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
-
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
@@ -496,42 +431,10 @@ class RectangleWidget( QWidget ):
 
         self.setFixedSize( new_width, new_height )
         self.update()
-        self.updatePropertiesSize()
-
-    def resize( self, width, height ):
-        super().resize( width, height )
-        main_window = self.findMainWindow()
-
-        if main_window and main_window.current_shape == self:
-
-            if hasattr( main_window, 'width_spin_rect' ):
-                main_window.width_spin_rect.blockSignals( True )
-                main_window.width_spin_rect.setValue( width )
-                main_window.width_spin_rect.blockSignals( False )
-
-            if hasattr( main_window, 'height_spin_rect' ):
-                main_window.height_spin_rect.blockSignals( True )
-                main_window.height_spin_rect.setValue( height )
-                main_window.height_spin_rect.blockSignals( False )
-
-    def move( self, x, y ):
-        super().move( x, y )
-        main_window = self.findMainWindow()
-
-        if main_window and main_window.current_shape == self:
-
-            if hasattr( main_window, 'pos_x_spin_rect' ):
-                main_window.pos_x_spin_rect.blockSignals( True )
-                main_window.pos_x_spin_rect.setValue( x )
-                main_window.pos_x_spin_rect.blockSignals( False )
-
-            if hasattr( main_window, 'pos_y_spin_rect' ):
-                main_window.pos_y_spin_rect.blockSignals( True )
-                main_window.pos_y_spin_rect.setValue( y )
-                main_window.pos_y_spin_rect.blockSignals( False )
+        self.updateRectangleSize()
 
     def getCornerAt( self, pos ):
-        handle_size = 12
+        handle_size = 16
         half_size = handle_size // 2
         
         corners = {
@@ -548,61 +451,67 @@ class RectangleWidget( QWidget ):
                 return corner_name
         
         return None
-    
+
+    def resizeRectangle( self, width, height ):
+        super().resize( width, height )
+        main_window = self.findMainWindow()
+
+        if main_window and main_window.current_shape == self:
+            if hasattr( main_window, 'width_spin_rect' ):
+                main_window.width_spin_rect.blockSignals( True )
+                main_window.width_spin_rect.setValue( width )
+                main_window.width_spin_rect.blockSignals( False )
+
+            if hasattr( main_window, 'height_spin_rect' ):
+                main_window.height_spin_rect.blockSignals( True )
+                main_window.height_spin_rect.setValue( height )
+                main_window.height_spin_rect.blockSignals( False )
+
+    def moveRectangle( self, x, y ):
+        super().move( x, y )
+        main_window = self.findMainWindow()
+
+        if main_window and main_window.current_shape == self:
+            if hasattr( main_window, 'pos_x_spin_rect' ):
+                main_window.pos_x_spin_rect.blockSignals( True )
+                main_window.pos_x_spin_rect.setValue( x )
+                main_window.pos_x_spin_rect.blockSignals( False )
+
+            if hasattr( main_window, 'pos_y_spin_rect' ):
+                main_window.pos_y_spin_rect.blockSignals( True )
+                main_window.pos_y_spin_rect.setValue( y )
+                main_window.pos_y_spin_rect.blockSignals( False )
+
     def setSelected( self, selected ):
-        self.is_selected = selected
+        self.selected = selected
         self.update()
 
-    def setColor( self, color ):
-        self.color = color
-        self.update()
-
-    def setBorderWidth( self, width ):
-        self.border_width = width
-        self.update()
-    
-    def setFilled( self, filled ):
-        self.filled = filled
-        self.update()
-    
-    def setGradientColor1( self, color ):
-        self.gradient_color1 = color
-        self.update()
-    
-    def setGradientColor2( self, color ):
-        self.gradient_color2 = color
-        self.update()
-    
-    def setGradientDirection( self, direction ):
-        self.gradient_direction = direction
-        self.update()
-    
-    def setFillColor( self, color ):
-        self.fill_color = color
-
-        if not self.gradient_enabled:
-            self.update()
-    
-    def setActive( self, active ):
-        self.active = active
-        self.update()
-    
-    def setVisibleRectangle( self, visible ):
+    def setRectangleVisible( self, visible ):
         self.visible = visible
         self.setVisible( visible )
         self.update()
-    
-    def setStatic( self, static ):
-        self.static = static
+
+    def setRectangleEdgesColor( self, color ):
+        self.edges_color = color
+        self.update()
+
+    def setRectangleEdgesWidth( self, width ):
+        self.edges_width = width
         self.update()
     
-    def setCustomName( self, name ):
-        self.custom_name = name
+    def setRectangleStartColor( self, color ):
+        self.start_color = color
+        self.update()
     
-    def setStackOrder( self, order ):
-        self.stack_order = order
-
-    def updatePropertiesSize( self ):
+    def setRectangleEndColor( self, color ):
+        self.end_color = color
+        self.update()
+    
+    def setRectangleGradientDirection( self, direction ):
+        self.gradient_direction = direction
+        self.update()
+    
+    def updateRectangleSize( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
@@ -612,7 +521,7 @@ class RectangleWidget( QWidget ):
             main_window.width_spin_rect.setValue( self.width() )
             main_window.height_spin_rect.setValue( self.height() )
 
-    def updatePropertiesPosition( self ):
+    def updateRectanglePosition( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
@@ -656,8 +565,8 @@ class RectangleWidget( QWidget ):
             self.dragging = False
             self.resize_corner = None
 
-            self.updatePropertiesSize()
-            self.updatePropertiesPosition()
+            self.updateRectangleSize()
+            self.updateRectanglePosition()
 
         event.accept()
 
@@ -683,7 +592,7 @@ class RectangleWidget( QWidget ):
             new_y = self.y() + delta.y()
 
             self.move( new_x, new_y )
-            self.updatePropertiesPosition()
+            self.updateRectanglePosition()
         
         event.accept()
 
@@ -693,23 +602,20 @@ class CircleWidget( QWidget ):
     def __init__( self, diameter, parent = None ):
         super().__init__( parent )
 
-        self.diameter = diameter
+        
         self.setFixedSize( diameter, diameter )
         
-        self.line_color = QColor( 0, 0, 0 )
-        self.line_edges_width = 5
+        
+        
         self.is_selected = False
         
-        self.fill_color = QColor( 255, 0, 0 ) 
-        self.filled = False 
         
-        self.active = True
-        self.visible = True
-        self.static = False
-        self.custom_name = ""
-        self.center_x = 0
-        self.center_y = 0
         
+        
+
+        
+
+        self.defaultValues()
         self.dragging = False
         self.drag_start_position = QPoint()
         self.resizing = False
@@ -718,10 +624,25 @@ class CircleWidget( QWidget ):
         self.resize_start_diameter = 0
         
         self.setMouseTracking( True )
-        self.tag = 0
         
+        
+        
+
+    def defaultValues( self ):
+        self.active = True
+        self.visible = True
+        self.static = False
+        self.custom_name = ""
         self.stack_order = 1
-        
+        self.tag = 0
+        self.center_x = 0
+        self.center_y = 0
+        self.diameter = 100
+        self.edges_color = QColor( 0, 0, 0 )
+        self.edges_width = 5
+        self.filled = False 
+        self.fill_color = QColor( 255, 0, 0 ) 
+
     def paintEvent( self, event ):
         if not self.visible:
             return
@@ -729,7 +650,7 @@ class CircleWidget( QWidget ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
-        rect_size = min( self.width(), self.height() ) - self.line_edges_width
+        rect_size = min( self.width(), self.height() ) - self.edges_width
 
         x_offset = ( self.width() - rect_size ) // 2
         y_offset = ( self.height() - rect_size ) // 2
@@ -741,7 +662,7 @@ class CircleWidget( QWidget ):
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( circle_rect )
 
-        pen = QPen( self.line_color, self.line_edges_width )
+        pen = QPen( self.edges_color, self.edges_width )
         pen.setJoinStyle( Qt.PenJoinStyle.RoundJoin )
         pen.setCapStyle( Qt.PenCapStyle.RoundCap )
         painter.setPen( pen )
@@ -854,11 +775,11 @@ class CircleWidget( QWidget ):
         self.stack_order = order
     
     def setColor( self, color ):
-        self.line_color = color
+        self.edges_color = color
         self.update()
     
     def setLineEdgeWidth( self, thickness ):
-        self.line_edges_width = thickness
+        self.edges_width = thickness
         self.update()
     
     def setDiameter(self, diameter):
@@ -890,10 +811,10 @@ class CircleWidget( QWidget ):
         return None
     
     def getColor( self ):
-        return self.line_color
+        return self.edges_color
     
     def getBorderWidth( self ):
-        return self.line_edges_width
+        return self.edges_width
     
     def updateCenterPosition( self ):
         self.center_x = self.x() + self.width() // 2
@@ -991,7 +912,7 @@ class EllipseWidget( QWidget ):
         self.stack_order = 1
 
         self.border_color = QColor( 0, 0, 0 )
-        self.border_width = 5
+        self.edges_width = 5
         self.fill_enabled = False
         self.gradient_enabled = True
         self.gradient_type = "Top-Bottom"
@@ -1016,7 +937,7 @@ class EllipseWidget( QWidget ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
-        margin = self.border_width // 2
+        margin = self.edges_width // 2
         ellipse_rect = QRect( margin, margin, self._width - 2 * margin, self._height - 2 * margin )
 
         if self.fill_enabled and self.gradient_enabled:
@@ -1037,7 +958,7 @@ class EllipseWidget( QWidget ):
         else:
             painter.setBrush( Qt.BrushStyle.NoBrush )
 
-        painter.setPen( QPen( self.border_color, self.border_width ) )
+        painter.setPen( QPen( self.border_color, self.edges_width ) )
         painter.drawEllipse( ellipse_rect )
 
         if self.is_selected:
@@ -1112,6 +1033,7 @@ class EllipseWidget( QWidget ):
         self._height = height
         
         main_window = self.findMainWindow()
+
         if main_window and main_window.current_shape == self:
             try:
                 if hasattr( main_window, 'width_spin_ellipse' ):
@@ -1205,7 +1127,7 @@ class EllipseWidget( QWidget ):
         self.update()
     
     def setBorderWidth( self, width ):
-        self.border_width = max( 1, min( 20, width ) )
+        self.edges_width = max( 1, min( 20, width ) )
         self.update()
     
     def setFillEnabled( self, enabled ):
@@ -1301,7 +1223,7 @@ class ButtonWidget( QWidget ):
         self.end_color = QColor( 0, 0, 136 )
         self.text_color = QColor( 255, 255, 255 )
         self.border_color = QColor( 0, 0, 0 )
-        self.border_width = 1
+        self.edges_width = 1
         self.button_text = "Press"
         self.text_size = 20
         self.is_selected = False
@@ -1483,7 +1405,7 @@ class ButtonWidget( QWidget ):
         self.update()
 
     def setBorderWidth( self, width ):
-        self.border_width = width
+        self.edges_width = width
         self.update()
 
     def setButtonText( self, text ):
@@ -1511,7 +1433,7 @@ class ButtonWidget( QWidget ):
     def setStackOrder( self, order ):
         self.stack_order = order
 
-    def setColor( self, color ):
+    def setRectangleColor( self, color ):
         self.start_color = color
         self.update()
 

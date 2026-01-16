@@ -659,7 +659,7 @@ class MainWindow( QMainWindow ):
             start_y = container_pos.y()
             end_x = container_pos.x() + 100
             end_y = container_pos.y() + 100
-            shape.setLinePoints( start_x, start_y, end_x, end_y )
+            shape.setLinePosition( start_x, start_y, end_x, end_y )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Line" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
