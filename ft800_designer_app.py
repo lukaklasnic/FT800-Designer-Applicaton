@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import ( QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QFrame, QPushButton, QSplashScreen, QFileDialog, QMessageBox )
-from generator import ( generateResources, generateComponents )
+#from generator import ( generateResources, generateComponents )
 from PyQt6.QtGui import ( QPixmap, QIcon, QGuiApplication )
 from PyQt6.QtCore import ( Qt, QTimer )
 from ui_components import *
@@ -83,7 +83,6 @@ class MainWindow( QMainWindow ):
     def initMultipleCanvas( self ):
         self.canvases = []
         self.current_canvas_index = 0 
-        self.all_canvas_dicts = {} 
         self.canvas_widgets = {}
         
         self.createNewCanvas()
@@ -92,11 +91,8 @@ class MainWindow( QMainWindow ):
         canvas_id = len( self.canvases )
         canvas = Canvas( canvas_id = canvas_id )
         canvas.clicked.connect( self.onCanvasClicked )
-        canvas.properties_changed.connect( lambda: self.updateCanvasDict( canvas ) )
-        
         self.canvases.append( canvas )
         self.canvas_widgets[ canvas_id ] = []
-        self.all_canvas_dicts[ canvas_id ] = canvas.getCanvasProperties()
         
         return canvas_id
         
@@ -152,7 +148,7 @@ class MainWindow( QMainWindow ):
                 border: 2px solid #cc5500;
             }
         """ )
-        generate_button.clicked.connect( self.printAllCanvasAndWidgetData )
+        #generate_button.clicked.connect( self.printAllCanvasAndWidgetData )
 
         top_layout.addWidget( generate_button )
         top_layout.addStretch( 1 )
@@ -356,16 +352,12 @@ class MainWindow( QMainWindow ):
             widgets = self.canvas_widgets[ current_canvas_id ]
 
             for widget in widgets:
-                self.deleteWidgetFromDicts( widget )
                 widget.deleteLater()
 
             del self.canvas_widgets[ current_canvas_id ]
 
         canvas_to_delete = self.canvases.pop( self.current_canvas_index )
         canvas_to_delete.deleteLater()
-
-        if current_canvas_id in self.all_canvas_dicts:
-            del self.all_canvas_dicts[ current_canvas_id ]
 
         self.renumberCanvases()
 
@@ -377,75 +369,9 @@ class MainWindow( QMainWindow ):
 
         self.delete_canvas_btn.setEnabled( len( self.canvases ) > 1 )
 
-    def deleteWidgetFromDicts( self, widget ):
-        if isinstance( widget, LineWidget ) and hasattr( self, 'all_line_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_line_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, RectangleWidget ) and hasattr( self, 'all_rectangle_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_rectangle_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, CircleWidget ) and hasattr( self, 'all_circle_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_circle_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, EllipseWidget ) and hasattr( self, 'all_ellipse_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_ellipse_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, ButtonWidget ) and hasattr( self, 'all_button_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_button_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, KeysWidget ) and hasattr( self, 'all_keys_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_keys_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, ClockWidget ) and hasattr( self, 'all_clock_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_clock_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, GaugeWidget ) and hasattr( self, 'all_gauge_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_gauge_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, DialWidget ) and hasattr( self, 'all_dial_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_dial_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, ToggleWidget ) and hasattr( self, 'all_toggle_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_toggle_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, ScrollBarWidget ) and hasattr( self, 'all_scrollbar_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_scrollbar_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, SliderWidget ) and hasattr( self, 'all_slider_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_label_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, ProgressBarWidget ) and hasattr( self, 'all_progressbar_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_progressbar_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, ImageWidget ) and hasattr( self, 'all_image_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_image_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, LabelWidget ) and hasattr( self, 'all_label_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_label_dicts.pop( widget.custom_name, None )
-
-        elif isinstance( widget, NumericWidget ) and hasattr( self, 'all_numeric_dicts' ):
-            if hasattr( widget, 'custom_name' ):
-                self.all_numeric_dicts.pop( widget.custom_name, None )
-
     def renumberCanvases( self ):
         new_canvases = []
         new_canvas_widgets = {}
-        new_all_canvas_dicts = {}
 
         for i, canvas in enumerate( self.canvases ):
             old_id = canvas.canvas_id
@@ -455,17 +381,10 @@ class MainWindow( QMainWindow ):
             if old_id in self.canvas_widgets:
                 new_canvas_widgets[ i ] = self.canvas_widgets[ old_id ]
 
-            if old_id in self.all_canvas_dicts:
-                canvas_props = self.all_canvas_dicts[ old_id ]
-                canvas_props[ 'id' ] = i
-                canvas_props[ 'name' ] = f"Screen_{ i }"
-                new_all_canvas_dicts[ i ] = canvas_props
-
             new_canvases.append( canvas )
 
         self.canvases = new_canvases
         self.canvas_widgets = new_canvas_widgets
-        self.all_canvas_dicts = new_all_canvas_dicts
         
     def setupCanvasesInContainer( self ):
         if not hasattr( self, 'canvas_display_container' ) or not hasattr( self, 'canvases' ):
@@ -549,14 +468,6 @@ class MainWindow( QMainWindow ):
                     self.canvas_properties_visible = True
                     self.shape_properties_visible = False
                     
-    def updateCanvasDict( self, canvas ):
-        if hasattr( self, 'all_canvas_dicts' ):
-            canvas_id = canvas.canvas_id
-            
-            canvas_props = canvas.getCanvasProperties()
-            canvas_props[ 'widgets' ] = [ widget.getPropertiesDict() for widget in self.canvas_widgets.get( canvas_id, [] ) if hasattr( widget, 'getPropertiesDict' ) ]
-            self.all_canvas_dicts[ canvas_id ] = canvas_props
-            
     def onMainWidgetClick( self, event ):
         if not self.canvases:
             QWidget.mousePressEvent( self.main_widget, event )
@@ -647,77 +558,12 @@ class MainWindow( QMainWindow ):
             if self.current_shape in current_widgets:
                 current_widgets.remove( self.current_shape )
 
-            if isinstance( self.current_shape, LineWidget ) and hasattr( self, 'all_line_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_line_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, RectangleWidget ) and hasattr( self, 'all_rectangle_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_rectangle_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, CircleWidget ) and hasattr( self, 'all_circle_dicts' ):
-                 if hasattr( self.current_shape, 'custom_name' ):
-                     self.all_circle_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, EllipseWidget ) and hasattr( self, 'all_ellipse_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_ellipse_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, ButtonWidget ) and hasattr(self, 'all_button_dicts'):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_button_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, KeysWidget ) and hasattr( self, 'all_keys_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_keys_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, ClockWidget ) and hasattr( self, 'all_clock_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_clock_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, GaugeWidget ) and hasattr( self, 'all_gauge_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_gauge_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, DialWidget ) and hasattr( self, 'all_dial_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_dial_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, ToggleWidget ) and hasattr( self, 'all_toggle_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_toggle_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, ScrollBarWidget ) and hasattr( self, 'all_scrollbar_dicts' ):
-                if hasattr(self.current_shape, 'custom_name'):
-                    self.all_scrollbar_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, SliderWidget ) and hasattr( self, 'all_slider_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_slider_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, ProgressBarWidget ) and hasattr( self, 'all_progressbar_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_progressbar_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, ImageWidget ) and hasattr( self, 'all_image_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_image_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, LabelWidget ) and hasattr( self, 'all_label_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_label_dicts.pop( self.current_shape.custom_name, None )
-
-            elif isinstance( self.current_shape, NumericWidget ) and hasattr( self, 'all_numeric_dicts' ):
-                if hasattr( self.current_shape, 'custom_name' ):
-                    self.all_numeric_dicts.pop( self.current_shape.custom_name, None )
-
             self.current_shape.deleteLater()
             self.current_shape = None
             self.hideShapeProperties()
             self.deselectAllShapes()
             self.renumberStackOrders()
             self.renumberAllWidgets()
-            self.updateCanvasDict( current_canvas )
 
     def renumberAllWidgets( main_window ):
         if hasattr( main_window, 'canvas_widgets' ):
@@ -819,11 +665,6 @@ class MainWindow( QMainWindow ):
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
-            if not hasattr( self, 'all_line_dicts' ):
-                self.all_line_dicts = {}
-
-            self.all_line_dicts[ shape.custom_name ] = shape.getPropertiesDict()
-
         elif self.selected_shape == "Rectangle":
             shape = RectangleWidget( 100, 80, widget_container )
             shape.move( container_pos.x(), container_pos.y() )
@@ -831,11 +672,6 @@ class MainWindow( QMainWindow ):
             shape.custom_name = generateWidgetName( self, "Rectangle" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
-
-            if not hasattr( self, 'all_rectangle_dicts' ):
-                self.all_rectangle_dicts = {}
-
-            self.all_rectangle_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Circle":
             shape = CircleWidget( 100, widget_container )
@@ -845,11 +681,6 @@ class MainWindow( QMainWindow ):
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
-            if not hasattr( self, 'all_circle_dicts' ):
-                self.all_circle_dicts = {}
-
-            self.all_circle_dicts[ shape.custom_name ] = shape.getPropertiesDict()
-
         elif self.selected_shape == "Ellipse":
             shape = EllipseWidget( 120, 80, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
@@ -857,11 +688,6 @@ class MainWindow( QMainWindow ):
             shape.custom_name = generateWidgetName(self, "Ellipse")
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
-
-            if not hasattr( self, 'all_ellipse_dicts' ):
-                self.all_ellipse_dicts = {}
-
-            self.all_ellipse_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Button":
             shape = ButtonWidget( 100, 50, widget_container )
@@ -871,22 +697,12 @@ class MainWindow( QMainWindow ):
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
-            if not hasattr( self, 'all_button_dicts' ):
-                self.all_button_dicts = {}
-
-            self.all_button_dicts[ shape.custom_name ] = shape.getPropertiesDict()
-
         elif self.selected_shape == "Keys":
             shape = KeysWidget( 200, 120, widget_container )
             shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Keys" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
-
-            if not hasattr( self, 'all_keys_dicts' ):
-                self.all_keys_dicts = {}
-
-            self.all_keys_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Clock":
             shape = ClockWidget( 100, widget_container )
@@ -895,22 +711,12 @@ class MainWindow( QMainWindow ):
             shape.custom_name = generateWidgetName( self, "Clock" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
-            if not hasattr(self, 'all_clock_dicts'):
-                self.all_clock_dicts = {}
-
-            self.all_clock_dicts[shape.custom_name] = shape.getPropertiesDict()
-
         elif self.selected_shape == "Gauge":
             shape = GaugeWidget( 100, widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Gauge" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
-
-            if not hasattr( self, 'all_gauge_dicts' ):
-                self.all_gauge_dicts = {}
-
-            self.all_gauge_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Dial":
             shape = DialWidget( 80, widget_container )
@@ -920,11 +726,6 @@ class MainWindow( QMainWindow ):
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
-            if not hasattr(self, 'all_dial_dicts'):
-                self.all_dial_dicts = {}
-
-            self.all_dial_dicts[ shape.custom_name ] = shape.getPropertiesDict()
-
         elif self.selected_shape == "Toggle":
             shape = ToggleWidget( 80, 30, widget_container )
             shape.move( container_pos.x() , container_pos.y() )
@@ -932,11 +733,6 @@ class MainWindow( QMainWindow ):
             shape.custom_name = generateWidgetName( self, "Toggle" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
-
-            if not hasattr(self, 'all_toggle_dicts'):
-                self.all_toggle_dicts = {}
-
-            self.all_toggle_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Scroll bar":
             shape = ScrollBarWidget( 200, 15, widget_container )
@@ -946,11 +742,6 @@ class MainWindow( QMainWindow ):
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
-            if not hasattr( self, 'all_scrollbar_dicts' ):
-                self.all_scrollbar_dicts = {}
-
-            self.all_scrollbar_dicts[ shape.custom_name ] = shape.getPropertiesDict()
-
         elif self.selected_shape == "Slider":
             shape = SliderWidget( 200, 30, widget_container )
             shape.move( container_pos.x() , container_pos.y() )
@@ -959,22 +750,12 @@ class MainWindow( QMainWindow ):
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
-            if not hasattr(self, 'all_slider_dicts'):
-                self.all_slider_dicts = {}
-
-            self.all_slider_dicts[ shape.custom_name ] = shape.getPropertiesDict()
-
         elif self.selected_shape == "Progress bar":
             shape = ProgressBarWidget( 200, 15, widget_container )
             shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "ProgressBar" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
-
-            if not hasattr( self, 'all_progressbar_dicts' ):
-                self.all_progressbar_dicts = {}
-
-            self.all_progressbar_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Image":
             shape = ImageWidget( 100, 100, widget_container )
@@ -983,22 +764,12 @@ class MainWindow( QMainWindow ):
             shape.custom_name = generateWidgetName(self, "Image")
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
-            if not hasattr( self, 'all_image_dicts' ):
-                self.all_image_dicts = {}
-
-            self.all_image_dicts[ shape.custom_name ] = shape.getPropertiesDict()
-
         elif self.selected_shape == "Label":
             shape = LabelWidget( 100, 40, widget_container )
             shape.move( container_pos.x(), container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Label" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
-
-            if not hasattr( self, 'all_label_dicts' ):
-                self.all_label_dicts = {}
-
-            self.all_label_dicts[ shape.custom_name ] = shape.getPropertiesDict()
 
         elif self.selected_shape == "Numeric":
             shape = NumericWidget( 100, 40, widget_container )
@@ -1007,11 +778,6 @@ class MainWindow( QMainWindow ):
             shape.custom_name = generateWidgetName( self, "Numeric" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
-            if not hasattr( self, 'all_numeric_dicts' ):
-                self.all_numeric_dicts = {}
-
-            self.all_numeric_dicts[ shape.custom_name ] = shape.getPropertiesDict()
-
             shape.show()
             self.canvas_widgets[ current_canvas.canvas_id ].append( shape )
             self.updateWidgetsZOrder()
@@ -1019,7 +785,6 @@ class MainWindow( QMainWindow ):
             QApplication.restoreOverrideCursor()
             self.object_attached = False
             self.selected_shape = None
-            self.updateCanvasDict( current_canvas )
             return
 
         if shape:
@@ -1037,8 +802,6 @@ class MainWindow( QMainWindow ):
             self.object_attached = False
             self.selected_shape = None
             
-            self.updateCanvasDict( current_canvas )
-
     def updateWidgetsZOrder( self ):
         current_widgets = self.getCurrentCanvasWidgets()
         sorted_widgets = sorted( current_widgets, key = lambda x: x.stack_order )
@@ -1175,130 +938,130 @@ class MainWindow( QMainWindow ):
             return
 
         self.updateOutputDirLabel()
-        generateResources( self, self.output_dir )
-        generateComponents( self, self.output_dir )
+        #generateResources( self, self.output_dir )
+        #generateComponents( self, self.output_dir )
 
-    def printAllCanvasAndWidgetData(self):
-        """Ispisuje sve vrednosti iz recnika za sve aktivne canvase i widgete"""
-        print("\n" + "="*80)
-        print("DEBUG: SVE VREDNOSTI IZ RECNIKA ZA CANVASE I WIDGETE")
-        print("="*80)
-
-        # Proveri da li all_canvas_dicts postoji
-        if not hasattr(self, 'all_canvas_dicts'):
-            print("ERROR: all_canvas_dicts ne postoji!")
-            return
-
-        print(f"\nBroj canvasa u all_canvas_dicts: {len(self.all_canvas_dicts)}")
-
-        # Prikazi svaki canvas
-        for canvas_id, canvas_props in self.all_canvas_dicts.items():
-            print(f"\n{'='*60}")
-            print(f"CANVAS {canvas_id}:")
-            print(f"{'='*60}")
-
-            # Prikazi osnovne informacije o canvasu
-            print(f"  ID: {canvas_id}")
-            print(f"  Naziv: {canvas_props.get('name', 'N/A')}")
-            print(f"  Aktivan: {canvas_props.get('active', True)}")
-            print(f"  Vidljiv: {canvas_props.get('visible', True)}")
-            print(f"  Static: {canvas_props.get('static', False)}")
-            print(f"  Stack order: {canvas_props.get('stack_order', 1)}")
-            print(f"  Background color: {canvas_props.get('background_color', 'N/A')}")
-            print(f"  Grid enable: {canvas_props.get('grid_enable', False)}")
-            print(f"  Grid color: {canvas_props.get('grid_color', 'N/A')}")
-            print(f"  Grid type: {canvas_props.get('grid_type', 'N/A')}")
-            print(f"  Grid size: {canvas_props.get('grid_size', 20)}")
-
-            # Prikazi widgete na ovom canvasu
-            widgets = canvas_props.get('widgets', [])
-            print(f"\n  Broj widgeta: {len(widgets)}")
-
-            if widgets:
-                for i, widget in enumerate(widgets):
-                    print(f"\n  --- WIDGET {i+1} ---")
-                    print(f"    Tip: {widget.get('type', 'Nepoznato')}")
-                    print(f"    Naziv: {widget.get('name', 'N/A')}")
-                    print(f"    Aktivan: {widget.get('active', True)}")
-                    print(f"    Vidljiv: {widget.get('visible', True)}")
-                    print(f"    Static: {widget.get('static', False)}")
-                    print(f"    Stack order: {widget.get('stack_order', 1)}")
-
-                    # Prikazi specificna polja za svaki tip widgeta
-                    widget_type = widget.get('type', '')
-
-                    if widget_type == 'Rectangle':
-                        print(f"    X: {widget.get('x', 'N/A')}")
-                        print(f"    Y: {widget.get('y', 'N/A')}")
-                        print(f"    Width: {widget.get('width', 'N/A')}")
-                        print(f"    Height: {widget.get('height', 'N/A')}")
-                        print(f"    Edges color: {widget.get('edges_color', 'N/A')}")
-                        print(f"    Thickness: {widget.get('thickness', 'N/A')}")
-                        print(f"    Filled: {widget.get('filled', 'N/A')}")
-                        print(f"    Fill color: {widget.get('fill_color', 'N/A')}")
-                        print(f"    Tag: {widget.get('tag', 'N/A')}")
-
-                    elif widget_type == 'Button':
-                        print(f"    X: {widget.get('x', 'N/A')}")
-                        print(f"    Y: {widget.get('y', 'N/A')}")
-                        print(f"    Width: {widget.get('width', 'N/A')}")
-                        print(f"    Height: {widget.get('height', 'N/A')}")
-                        print(f"    Text: {widget.get('text', 'N/A')}")
-                        print(f"    Tag: {widget.get('tag', 'N/A')}")
-
-                    elif widget_type == 'Line':
-                        print(f"    X1: {widget.get('x1', 'N/A')}")
-                        print(f"    Y1: {widget.get('y1', 'N/A')}")
-                        print(f"    X2: {widget.get('x2', 'N/A')}")
-                        print(f"    Y2: {widget.get('y2', 'N/A')}")
-                        print(f"    Tag: {widget.get('tag', 'N/A')}")
-
-                    elif widget_type == 'Circle':
-                        print(f"    Center X: {widget.get('center_x', 'N/A')}")
-                        print(f"    Center Y: {widget.get('center_y', 'N/A')}")
-                        print(f"    Diameter: {widget.get('diameter', 'N/A')}")
-                        print(f"    Tag: {widget.get('tag', 'N/A')}")
-
-                    elif widget_type == 'Label':
-                        print(f"    X: {widget.get('x', 'N/A')}")
-                        print(f"    Y: {widget.get('y', 'N/A')}")
-                        print(f"    Text: {widget.get('text', 'N/A')}")
-                        print(f"    Text size: {widget.get('text_size', 'N/A')}")
-
-                    elif widget_type == 'Image':
-                        print(f"    X: {widget.get('x', 'N/A')}")
-                        print(f"    Y: {widget.get('y', 'N/A')}")
-                        print(f"    Width: {widget.get('width', 'N/A')}")
-                        print(f"    Height: {widget.get('height', 'N/A')}")
-
-                    # Prikazi sva polja za debug
-                    print(f"\n    Sva polja u widget dict-u:")
-                    for key, value in widget.items():
-                        print(f"      {key}: {value}")
-            else:
-                print("  Nema widgeta na ovom canvasu.")
-
-        print(f"\n{'='*80}")
-
-        # Takodje prikazi canvas_widgets strukturu
-        print(f"\nDEBUG: canvas_widgets struktura:")
-        print(f"{'='*80}")
-
-        if hasattr(self, 'canvas_widgets'):
-            for canvas_id, widget_list in self.canvas_widgets.items():
-                print(f"\nCanvas {canvas_id} ima {len(widget_list)} widget objekata:")
-                for i, widget in enumerate(widget_list):
-                    print(f"  Widget {i+1}: {type(widget).__name__}")
-                    print(f"    Pozicija: ({widget.x()}, {widget.y()})")
-                    print(f"    Velicina: {widget.width()} x {widget.height()}")
-                    if hasattr(widget, 'custom_name'):
-                        print(f"    Ime: {widget.custom_name}")
-        else:
-            print("canvas_widgets ne postoji!")
-
-        print(f"\n{'='*80}")
-        print("KRAJ DEBUG ISPISA")
-        print("="*80)    
+#    def printAllCanvasAndWidgetData(self):
+#        """Ispisuje sve vrednosti iz recnika za sve aktivne canvase i widgete"""
+#        print("\n" + "="*80)
+#        print("DEBUG: SVE VREDNOSTI IZ RECNIKA ZA CANVASE I WIDGETE")
+#        print("="*80)
+#
+#        # Proveri da li all_canvas_dicts postoji
+#        if not hasattr(self, 'all_canvas_dicts'):
+#            print("ERROR: all_canvas_dicts ne postoji!")
+#            return
+#
+#        print(f"\nBroj canvasa u all_canvas_dicts: {len(self.all_canvas_dicts)}")
+#
+#        # Prikazi svaki canvas
+#        for canvas_id, canvas_props in self.all_canvas_dicts.items():
+#            print(f"\n{'='*60}")
+#            print(f"CANVAS {canvas_id}:")
+#            print(f"{'='*60}")
+#
+#            # Prikazi osnovne informacije o canvasu
+#            print(f"  ID: {canvas_id}")
+#            print(f"  Naziv: {canvas_props.get('name', 'N/A')}")
+#            print(f"  Aktivan: {canvas_props.get('active', True)}")
+#            print(f"  Vidljiv: {canvas_props.get('visible', True)}")
+#            print(f"  Static: {canvas_props.get('static', False)}")
+#            print(f"  Stack order: {canvas_props.get('stack_order', 1)}")
+#            print(f"  Background color: {canvas_props.get('background_color', 'N/A')}")
+#            print(f"  Grid enable: {canvas_props.get('grid_enable', False)}")
+#            print(f"  Grid color: {canvas_props.get('grid_color', 'N/A')}")
+#            print(f"  Grid type: {canvas_props.get('grid_type', 'N/A')}")
+#            print(f"  Grid size: {canvas_props.get('grid_size', 20)}")
+#
+#            # Prikazi widgete na ovom canvasu
+#            widgets = canvas_props.get('widgets', [])
+#            print(f"\n  Broj widgeta: {len(widgets)}")
+#
+#            if widgets:
+#                for i, widget in enumerate(widgets):
+#                    print(f"\n  --- WIDGET {i+1} ---")
+#                    print(f"    Tip: {widget.get('type', 'Nepoznato')}")
+#                    print(f"    Naziv: {widget.get('name', 'N/A')}")
+#                    print(f"    Aktivan: {widget.get('active', True)}")
+#                    print(f"    Vidljiv: {widget.get('visible', True)}")
+#                    print(f"    Static: {widget.get('static', False)}")
+#                    print(f"    Stack order: {widget.get('stack_order', 1)}")
+#
+#                    # Prikazi specificna polja za svaki tip widgeta
+#                    widget_type = widget.get('type', '')
+#
+#                    if widget_type == 'Rectangle':
+#                        print(f"    X: {widget.get('x', 'N/A')}")
+#                        print(f"    Y: {widget.get('y', 'N/A')}")
+#                        print(f"    Width: {widget.get('width', 'N/A')}")
+#                        print(f"    Height: {widget.get('height', 'N/A')}")
+#                        print(f"    Edges color: {widget.get('edges_color', 'N/A')}")
+#                        print(f"    Thickness: {widget.get('thickness', 'N/A')}")
+#                        print(f"    Filled: {widget.get('filled', 'N/A')}")
+#                        print(f"    Fill color: {widget.get('fill_color', 'N/A')}")
+#                        print(f"    Tag: {widget.get('tag', 'N/A')}")
+#
+#                    elif widget_type == 'Button':
+#                        print(f"    X: {widget.get('x', 'N/A')}")
+#                        print(f"    Y: {widget.get('y', 'N/A')}")
+#                        print(f"    Width: {widget.get('width', 'N/A')}")
+#                        print(f"    Height: {widget.get('height', 'N/A')}")
+#                        print(f"    Text: {widget.get('text', 'N/A')}")
+#                        print(f"    Tag: {widget.get('tag', 'N/A')}")
+#
+#                    elif widget_type == 'Line':
+#                        print(f"    X1: {widget.get('x1', 'N/A')}")
+#                        print(f"    Y1: {widget.get('y1', 'N/A')}")
+#                        print(f"    X2: {widget.get('x2', 'N/A')}")
+#                        print(f"    Y2: {widget.get('y2', 'N/A')}")
+#                        print(f"    Tag: {widget.get('tag', 'N/A')}")
+#
+#                    elif widget_type == 'Circle':
+#                        print(f"    Center X: {widget.get('center_x', 'N/A')}")
+#                        print(f"    Center Y: {widget.get('center_y', 'N/A')}")
+#                        print(f"    Diameter: {widget.get('diameter', 'N/A')}")
+#                        print(f"    Tag: {widget.get('tag', 'N/A')}")
+#
+#                    elif widget_type == 'Label':
+#                        print(f"    X: {widget.get('x', 'N/A')}")
+#                        print(f"    Y: {widget.get('y', 'N/A')}")
+#                        print(f"    Text: {widget.get('text', 'N/A')}")
+#                        print(f"    Text size: {widget.get('text_size', 'N/A')}")
+#
+#                    elif widget_type == 'Image':
+#                        print(f"    X: {widget.get('x', 'N/A')}")
+#                        print(f"    Y: {widget.get('y', 'N/A')}")
+#                        print(f"    Width: {widget.get('width', 'N/A')}")
+#                        print(f"    Height: {widget.get('height', 'N/A')}")
+#
+#                    # Prikazi sva polja za debug
+#                    print(f"\n    Sva polja u widget dict-u:")
+#                    for key, value in widget.items():
+#                        print(f"      {key}: {value}")
+#            else:
+#                print("  Nema widgeta na ovom canvasu.")
+#
+#        print(f"\n{'='*80}")
+#
+#        # Takodje prikazi canvas_widgets strukturu
+#        print(f"\nDEBUG: canvas_widgets struktura:")
+#        print(f"{'='*80}")
+#
+#        if hasattr(self, 'canvas_widgets'):
+#            for canvas_id, widget_list in self.canvas_widgets.items():
+#                print(f"\nCanvas {canvas_id} ima {len(widget_list)} widget objekata:")
+#                for i, widget in enumerate(widget_list):
+#                    print(f"  Widget {i+1}: {type(widget).__name__}")
+#                    print(f"    Pozicija: ({widget.x()}, {widget.y()})")
+#                    print(f"    Velicina: {widget.width()} x {widget.height()}")
+#                    if hasattr(widget, 'custom_name'):
+#                        print(f"    Ime: {widget.custom_name}")
+#        else:
+#            print("canvas_widgets ne postoji!")
+#
+#        print(f"\n{'='*80}")
+#        print("KRAJ DEBUG ISPISA")
+#        print("="*80)    
 
 
 if __name__ == "__main__":

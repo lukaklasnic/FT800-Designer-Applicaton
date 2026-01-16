@@ -197,23 +197,6 @@ class LineWidget( QWidget ):
 
     def getLinePoints( self ):
         return ( self._start_x, self._start_y, self._end_x, self._end_y )
-
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Line',
-            'name': getattr( self, 'custom_name', 'Line_0' ),
-            'stack_order': getattr( self, 'stack_order', 0 ),
-            'tag': self.tag,
-            'start_x': self._start_x,
-            'start_y': self._start_y,
-            'end_x': self._end_x,
-            'end_y': self._end_y,
-            'line_width': self.line_width,
-            'color': self.line_color.name(),
-            'active': getattr( self, 'active', True ),
-            'visible': getattr( self, 'visible', True ),
-            'static': getattr( self, 'static', False )
-        }
     
     def updateWidgetSize( self ):
         margin = 20 
@@ -265,15 +248,6 @@ class LineWidget( QWidget ):
                 main_window.end_y_spin_line.setValue( self._end_y )
                 main_window.end_y_spin_line.blockSignals( False )
 
-    def updatePropertiesDict( self ):
-        main_window = self.findMainWindow()
-
-        if not main_window:
-            return
-            
-        if hasattr( main_window, 'all_line_dicts' ):
-            if self.custom_name in main_window.all_line_dicts:
-                main_window.all_line_dicts[ self.custom_name ] = self.getPropertiesDict()
 
     def updateAllProperties( self ):
         self.updatePropertiesPoints()
@@ -355,8 +329,6 @@ class LineWidget( QWidget ):
             self.dragging = False
             self.resize_corner = None
             self.resize_start_points = None
-            
-            self.updatePropertiesDict()
 
         event.accept()
 
@@ -576,29 +548,6 @@ class RectangleWidget( QWidget ):
                 return corner_name
         
         return None
-
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Rectangle',
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'name': self.custom_name,
-            'stack_order': self.stack_order,
-            'tag': self.tag,
-            'x': self.x(),
-            'y': self.y(),
-            'width': self.width(),
-            'height': self.height(),
-            'edges_color': self.color.name(),
-            'thickness': self.border_width,
-            'filled': self.filled,
-            'gradient_enabled': self.gradient_enabled,
-            'gradient_direction': self.gradient_direction,
-            'gradient_start_color': self.gradient_color1.name(),
-            'gradient_end_color': self.gradient_color2.name(),
-            'fill_color': self.fill_color.name()
-        }
     
     def setSelected( self, selected ):
         self.is_selected = selected
@@ -771,8 +720,6 @@ class CircleWidget( QWidget ):
         self.setMouseTracking( True )
         self.tag = 0
         
-        self.properties_dict = {}
-        self.updatePropertiesDict()
         self.stack_order = 1
         
     def paintEvent( self, event ):
@@ -874,21 +821,17 @@ class CircleWidget( QWidget ):
     
     def resize( self, width, height ):
         super().resize( width, height )
-        self.updatePropertiesDict()
 
     def move( self, x, y ):
         super().move( x, y )
-        self.updatePropertiesDict()
     
     def setFilled( self, filled ):
         self.filled = filled
         self.update()
-        self.updatePropertiesDict()
 
     def setFillColor( self, color ):
         self.fill_color = color
         self.update()
-        self.updatePropertiesDict()
 
     def setSelected( self, selected ):
         self.is_selected = selected
@@ -896,45 +839,34 @@ class CircleWidget( QWidget ):
     
     def setActive( self, active ):
         self.active = active
-        self.updatePropertiesDict()
     
     def setVisibleCircle( self, visible ):
         self.visible = visible
         self.setVisible( visible )
-        self.updatePropertiesDict()
     
     def setStatic( self, static ):
         self.static = static
-        self.updatePropertiesDict()
     
     def setCustomName( self, name ):
         self.custom_name = name
-        self.updatePropertiesDict()
     
     def setStackOrder( self, order ):
         self.stack_order = order
-        self.updatePropertiesDict()
     
     def setColor( self, color ):
         self.line_color = color
         self.update()
-        self.updatePropertiesDict()
     
     def setLineEdgeWidth( self, thickness ):
         self.line_edges_width = thickness
         self.update()
-        self.updatePropertiesDict()
     
     def setDiameter(self, diameter):
         self.diameter = diameter
         self.setFixedSize(diameter, diameter)
         self.update()
-        self.updatePropertiesDict()
         main_window = self.findMainWindow()
 
-        if main_window and hasattr( main_window, 'all_circle_dicts' ) and self.custom_name:
-            main_window.all_circle_dicts[ self.custom_name ] = self.getPropertiesDict()
-    
     def setBorderWidth( self, width ):
         self.setLineThickness( width )
 
@@ -963,33 +895,9 @@ class CircleWidget( QWidget ):
     def getBorderWidth( self ):
         return self.line_edges_width
     
-    def getPropertiesDict( self ):
-        self.updatePropertiesDict()
-        return self.properties_dict.copy()  
-
-    def updatePropertiesDict( self ):
-        self.properties_dict = {
-            'type': 'Circle',
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'tag': self.tag,
-            'name': self.custom_name,
-            'x': self.x(),
-            'y': self.y(),
-            'width': self.diameter,
-            'height': self.diameter,
-            'diameter': self.diameter,
-            'line_color': self.line_color.name(),
-            'line_edges_width': self.line_edges_width,
-            'filled': self.filled,
-            'fill_color': self.fill_color.name(),
-        }
-    
     def updateCenterPosition( self ):
         self.center_x = self.x() + self.width() // 2
         self.center_y = self.y() + self.height() // 2
-        self.updatePropertiesDict()
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -1024,8 +932,6 @@ class CircleWidget( QWidget ):
             self.dragging = False
             self.resize_corner = None
             self.resize_start_diameter = 0
-
-            self.updatePropertiesDict()
 
         event.accept()
 
@@ -1200,8 +1106,6 @@ class EllipseWidget( QWidget ):
 
         self.setSize( new_width, new_height )
 
-        self.updatePropertiesDict()
-
     def resize( self, width, height ):
         super().resize( width, height )
         self._width = width
@@ -1271,27 +1175,6 @@ class EllipseWidget( QWidget ):
         
         return None
     
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Ellipse',
-            'name': getattr( self, 'custom_name', 'Ellipse_0' ),
-            'stack_order': getattr( self, 'stack_order', 0 ),
-            'tag': self.tag,
-            'position': ( self.x(), self.y() ),
-            'width': self._width,
-            'height': self._height,
-            'border_color': self.border_color.name(),
-            'border_width': self.border_width,
-            'fill_enabled': self.fill_enabled,
-            'gradient_enabled': self.gradient_enabled,
-            'gradient_type': self.gradient_type,
-            'gradient_start_color': self.gradient_start_color.name() if self.gradient_enabled else None,
-            'gradient_end_color': self.gradient_end_color.name() if self.gradient_enabled else None,
-            'active': getattr( self, 'active', True ),
-            'visible': getattr( self, 'visible', True ),
-            'static': getattr( self, 'static', False )
-        }
-    
     def setSize( self, width, height ):
         self._width = max( 20, width )
         self._height = max( 20, height )
@@ -1348,13 +1231,6 @@ class EllipseWidget( QWidget ):
         self.visible = visible
         self.setVisible( visible )
         self.update()
-
-    def updatePropertiesDict( self ):
-        main_window = self.findMainWindow()
-        if not main_window or not hasattr( main_window, 'all_ellipse_dicts' ):
-            return
-            
-        main_window.all_ellipse_dicts[ self.custom_name ] = self.getPropertiesDict()
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -1467,9 +1343,6 @@ class ButtonWidget( QWidget ):
         self.resize_start_size = QSize()
         self.resize_corner = None
         self.drag_start_pos = QPoint()
-        
-        self.properties_dict = {}
-        self.updatePropertiesDict()
 
     def paintEvent( self, event ):
         painter = QPainter( self )
@@ -1562,15 +1435,9 @@ class ButtonWidget( QWidget ):
 
     def resize( self, width, height ):
         super().resize( width, height )
-        self.updatePropertiesDict()
 
     def move( self, x, y ):
         super().move( x, y )
-        self.updatePropertiesDict()
-
-    def getPropertiesDict(self):
-        self.updatePropertiesDict()
-        return self.properties_dict.copy()
 
     def getCornerAt( self, pos ):
         handle_size = 12 
@@ -1606,12 +1473,10 @@ class ButtonWidget( QWidget ):
                 self.end_color = gradient.stops()[ -1 ][ 1 ]
 
         self.update()
-        self.updatePropertiesDict()
 
     def setTextColor( self, color ):
         self.text_color = color
         self.update()
-        self.updatePropertiesDict() 
 
     def setBorderColor( self, color ):
         self.border_color = color
@@ -1624,58 +1489,31 @@ class ButtonWidget( QWidget ):
     def setButtonText( self, text ):
         self.button_text = text
         self.update()
-        self.updatePropertiesDict()
 
     def setTextSize( self, size ):
         self.text_size = size
         self.update()
-        self.updatePropertiesDict()
 
     def setRadius( self, radius ):
         self.r = radius
         self.update()
-        self.updatePropertiesDict()
 
     def setActive( self, active ):
         self.active = active
-        self.updatePropertiesDict()
 
     def setVisibleButton( self, visible ):
         self.visible = visible
         self.setVisible( visible )
-        self.updatePropertiesDict()
 
     def setStatic( self, static ):
         self.static = static
-        self.updatePropertiesDict()
 
     def setStackOrder( self, order ):
         self.stack_order = order
-        self.updatePropertiesDict() 
 
     def setColor( self, color ):
         self.start_color = color
         self.update()
-
-    def updatePropertiesDict(self):
-        self.properties_dict = {
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'name': self.custom_name,
-            'stack_order': self.stack_order,
-            'tag': self.tag,
-            'position_x': self.x(),
-            'position_y': self.y(),
-            'width': self.width(),
-            'height': self.height(),
-            'start_color': self.start_color.name(),
-            'end_color': self.end_color.name(),
-            '3d': self.use_3d,
-            'text': self.button_text,
-            'text_size': self.text_size+25,
-            'text_color': self.text_color.name(),
-        }
 
     def updatePropertiesSize( self ):
         main_window = self.findMainWindow()
@@ -2078,26 +1916,6 @@ class KeysWidget( QWidget ):
         
         return None
 
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Keys',
-            'name': getattr( self, 'custom_name', 'Keys_0' ),
-            'stack_order': getattr( self, 'stack_order', 0 ),
-            'position': ( self.x(), self.y() ),
-            'width': self._width,
-            'height': self._height,
-            'key_type': self.key_type,
-            'is_3d': self.is_3d,
-            'font_size': self.font_size,
-            'key_color_top': self.key_color_top.name(),
-            'key_color_bottom': self.key_color_bottom.name(),
-            'text_color': self.text_color.name(),
-            'border_color': self.border_color.name(),
-            'active': getattr( self, 'active', True ),
-            'visible': getattr( self, 'visible', True ),
-            'static': getattr( self, 'static', False )
-        }
-
     def setSize( self, width, height ):
         self._width = max( 100, width )
         self._height = max( 80, height )
@@ -2241,16 +2059,6 @@ class KeysWidget( QWidget ):
             if hasattr( main_window, 'font_color_rect_keys' ):
                 main_window.font_color_rect_keys.setStyleSheet( f"background-color: { self.text_color.name() }; border: 1px solid #ccc;" )
 
-    def updatePropertiesDict( self ):
-        main_window = self.findMainWindow()
-
-        if not main_window:
-            return
-            
-        if hasattr( main_window, 'all_keys_dicts' ):
-            if self.custom_name in main_window.all_keys_dicts:
-                main_window.all_keys_dicts[ self.custom_name ] = self.getPropertiesDict()
-
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -2288,7 +2096,6 @@ class KeysWidget( QWidget ):
 
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
-            self.updatePropertiesDict()
 
         event.accept()
     
@@ -2518,24 +2325,6 @@ class ClockWidget( QWidget ):
         scale_factor = self.diameter / 720.0
         return int( original_value * scale_factor )
 
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Clock',
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'name': self.custom_name,
-            'stack_order': self.stack_order,
-            'x': self.x(),
-            'y': self.y(),
-            'diameter': self.diameter,
-            'background_color': self.background_color.name(),
-            'use_3d': self.use_3d,
-            'hours': self.hours,
-            'minutes': self.minutes,
-            'seconds': self.seconds,
-        }
-
     def getCornerAt( self, pos ):
         handle_size = 12
         half_size = handle_size // 2
@@ -2650,9 +2439,6 @@ class ClockWidget( QWidget ):
             main_window.pos_y_spin_clock.blockSignals( True )
             main_window.pos_y_spin_clock.setValue( self.y() )
             main_window.pos_y_spin_clock.blockSignals( False )
-
-    def updatePropertiesDict( self ):
-        pass
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -2924,25 +2710,6 @@ class GaugeWidget( QWidget ):
         scale_factor = self.diameter / 500.0
         return int( original_value * scale_factor )
 
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Gauge',
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'name': self.custom_name,
-            'stack_order': self.stack_order,
-            'x': self.x(),
-            'y': self.y(),
-            'diameter': self.diameter,
-            'background_color': self.background_color.name(),
-            'use_3d': self.use_3d,
-            'major_subdivision': self.major_subdivision,
-            'minor_subdivision': self.minor_subdivision,
-            'range_value': self.range_value,
-            'value': self.value,
-        }
-    
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
@@ -2997,9 +2764,6 @@ class GaugeWidget( QWidget ):
     def setValue( self, value ):
         self.value = max( 0, min( value, self.range_value ) )
         self.update()
-
-    def updatePropertiesDict( self ):
-        pass
 
     def updatePropertiesSize( self ):
         main_window = self.findMainWindow()
@@ -3266,25 +3030,6 @@ class DialWidget( QWidget ):
         scale_factor = self.diameter / 100.0
         return int( original_value * scale_factor )
 
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Dial',
-            'name': getattr( self, 'custom_name', 'Dial_0' ),
-            'stack_order': getattr( self, 'stack_order', 0 ),
-            'tag': self.tag,
-            'position': ( self.x(), self.y() ),
-            'diameter': self.diameter,
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            '3d': self._3d,
-            'value': self.value,
-            'dial_color': self.dial_color.name(),
-            'arc_color': self.arc_color.name(),
-            'line_color': self.line_color.name(),
-            'background_color': self.background_color.name()
-        }
-
     def getCornerAt( self, pos ):
         handle_size = 12
         half_size = handle_size // 2
@@ -3354,13 +3099,6 @@ class DialWidget( QWidget ):
     def setValue( self, value ):
         self.value = max( 0, min( value, 100 ) )
         self.update()
-
-    def updatePropertiesDict( self ):
-        if hasattr( self, 'custom_name' ) and hasattr( self.window(), 'all_dial_dicts' ):
-            main_window = self.window()
-
-            if self.custom_name in main_window.all_dial_dicts:
-                main_window.all_dial_dicts[ self.custom_name ] = self.getPropertiesDict()
 
     def updatePropertiesSize( self ):
         main_window = self.findMainWindow()
@@ -3476,7 +3214,6 @@ class DialWidget( QWidget ):
 
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
-            self.updatePropertiesDict()
 
         event.accept()
 
@@ -3708,28 +3445,6 @@ class ToggleWidget( QWidget ):
     
     def getState( self ):
         return self.is_on
-    
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Toggle',
-            'name': getattr( self, 'custom_name', 'Toggle_0' ),
-            'stack_order': getattr( self, 'stack_order', 0 ),
-            'tag': self.tag,
-            'position': ( self.x(), self.y() ),
-            'width': self._width,
-            'height': self._height,
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            '3d': self._3d,
-            'state': self.is_on,
-            'track_color': self.track_color.name(),
-            'thumb_color': self.thumb_color.name(),
-            'border_color': self.border_color.name(),
-            'white_border_color': self.white_border_color.name(),
-            'text_color': self.text_color.name(),
-            'background_color': self.background_color.name()
-        }
 
     def getCornerAt( self, pos ):
         handle_size = 12 
@@ -3783,7 +3498,6 @@ class ToggleWidget( QWidget ):
             except RuntimeError:
                 pass
         
-        self.updatePropertiesDict()
         self.update()
 
     def setTrackColor( self, color ):
@@ -3844,13 +3558,6 @@ class ToggleWidget( QWidget ):
         self._3d = _3d
         self.update()
 
-    def updatePropertiesDict( self ):
-        if hasattr( self, 'custom_name' ) and hasattr( self.window(), 'all_toggle_dicts' ):
-            main_window = self.window()
-
-            if self.custom_name in main_window.all_toggle_dicts:
-                main_window.all_toggle_dicts[ self.custom_name ] = self.getPropertiesDict()
-
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -3881,7 +3588,6 @@ class ToggleWidget( QWidget ):
 
                 if thumb_rect.contains( event.pos() ):
                     self.toggleState()
-                    self.updatePropertiesDict()
 
                 self.clicked.emit(self)
 
@@ -3892,8 +3598,6 @@ class ToggleWidget( QWidget ):
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
-
-            self.updatePropertiesDict()
 
         event.accept()
 
@@ -4166,28 +3870,6 @@ class ScrollBarWidget( QWidget ):
         thumb_y = ( h - thumb_height ) // 2
         
         return QRect( thumb_x, thumb_y, thumb_width, thumb_height )
-
-    def getPropertiesDict( self ):
-        return {
-            'type': 'ScrollBar',
-            'name': getattr( self, 'custom_name', 'ScrollBar_0' ),
-            'stack_order': getattr( self, 'stack_order', 0 ),
-            'tag': self.tag,
-            'position': ( self.x(), self.y() ),
-            'width': self._width,
-            'height': self._height,
-            'active': getattr( self, 'active', True ),
-            'visible': getattr( self, 'visible', True ),
-            'static': getattr( self, 'static', False ),
-            '_3d': getattr( self, '_3d', True ),
-            'range_value': getattr( self, 'range_value', 100 ),
-            'current_value': getattr( self, 'current_value', 50 ),
-            'thumb_size': getattr( self, 'thumb_size', 30 ),
-            'thumb_color': self.thumb_color.name(),
-            'track_color': self.track_color.name(),
-            'border_color': self.border_color.name(),
-            'white_border_color': self.white_border_color.name()
-        }
     
     def setSelected( self, selected ):
         self.selected = selected
@@ -4363,16 +4045,6 @@ class ScrollBarWidget( QWidget ):
             if hasattr( main_window, 'white_border_color_rect_scrollbar' ):
                 main_window.white_border_color_rect_scrollbar.setStyleSheet( f"background-color: { self.white_border_color.name() }; border: 1px solid #ccc;" )
 
-    def updatePropertiesDict( self ):
-        main_window = self.findMainWindow()
-
-        if not main_window:
-            return
-            
-        if hasattr( main_window, 'all_scrollbar_dicts' ):
-            if self.custom_name in main_window.all_scrollbar_dicts:
-                main_window.all_scrollbar_dicts[ self.custom_name ] = self.getPropertiesDict()
-
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -4428,7 +4100,6 @@ class ScrollBarWidget( QWidget ):
 
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
-            self.updatePropertiesDict()
 
         event.accept()
 
@@ -4728,26 +4399,6 @@ class SliderWidget( QWidget ):
         
         return QRect( thumb_x, thumb_y, thumb_diameter, thumb_diameter )
 
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Slider',
-            'name': getattr( self, 'custom_name', 'Slider_0' ),
-            'stack_order': getattr( self, 'stack_order', 0 ),
-            'tag': self.tag,
-            'position': ( self.x(), self.y() ),
-            'width': self._width,
-            'height': self._height,
-            'active': getattr( self, 'active', True ),
-            'visible': getattr( self, 'visible', True ),
-            'static': getattr( self, 'static', False ),
-            '_3d': getattr( self, '_3d', False ),
-            'value': self.value,
-            'thumb_color': self.progress_color.name(),         
-            'background_left_color': self.thumb_color.name(),  
-            'background_right_color': self.track_color.name(),
-            'border_color': self.border_color.name()
-        }
-
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
@@ -4888,15 +4539,6 @@ class SliderWidget( QWidget ):
             if hasattr(main_window, 'thumb_color_rect_slider'):
                 main_window.thumb_color_rect_slider.setStyleSheet( f"background-color: { self.progress_color.name() }; border: 1px solid #ccc;" )
 
-    def updatePropertiesDict( self ):
-        main_window = self.findMainWindow()
-
-        if not main_window:
-            return
-            
-        if hasattr( main_window, 'all_slider_dicts' ):
-            if self.custom_name in main_window.all_slider_dicts:
-                main_window.all_slider_dicts[ self.custom_name ] = self.getPropertiesDict()
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -4949,7 +4591,6 @@ class SliderWidget( QWidget ):
 
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
-            self.updatePropertiesDict()
 
         event.accept()
 
@@ -5188,27 +4829,6 @@ class ProgressBarWidget( QWidget ):
         
         return None
 
-    def getPropertiesDict( self ):
-        return {
-            'type': 'ProgressBar',
-            'name': self.custom_name,
-            'stack_order': self.stack_order,
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'position': (self.x(), self.y()),
-            'size': ( self.getWidth(), self.getHeight() ),
-            'progress_color': self.progress_color.name(),
-            'background_color': self.bar_color.name(),
-            '_3d': self._3d,
-            'value': self.value,
-            'min_value': self.min_value,
-            'max_value': self.max_value,
-            'border_color': self.border_color.name(),
-            'white_border_color': self.white_border_color.name(),
-            'progress_value': self.progress_value
-        }
-
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
@@ -5239,7 +4859,6 @@ class ProgressBarWidget( QWidget ):
             except RuntimeError:
                 pass
         
-        self.updatePropertiesDict()
         self.update()
 
     def setBarColor( self, color ):
@@ -5299,12 +4918,6 @@ class ProgressBarWidget( QWidget ):
 
         self.update()
 
-    def updatePropertiesDict( self ):
-        main_window = self.findMainWindow()
-
-        if main_window and hasattr( main_window, 'all_progressbar_dicts' ):
-            main_window.all_progressbar_dicts[self.custom_name] = self.getPropertiesDict()
-
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -5340,8 +4953,6 @@ class ProgressBarWidget( QWidget ):
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
-
-            self.updatePropertiesDict()
 
         event.accept()
 
@@ -5410,8 +5021,6 @@ class ImageWidget( QWidget ):
         self.setFixedSize( self._width, self._height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
-        
-        self.updatePropertiesDict()
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -5559,25 +5168,6 @@ class ImageWidget( QWidget ):
     def getHeight( self ):
         return self._height
 
-    def getPropertiesDict(self):
-        return {
-            'type': 'Image',
-            'name': getattr( self, 'custom_name', 'Image_0' ),
-            'stack_order': getattr( self, 'stack_order', 0 ),
-            'position':  (self.x(), self.y() ),
-            'width': self._width,
-            'height': self._height,
-            'frame_enabled': self.frame_enabled,
-            'frame_color': self.frame_color.name(),
-            'frame_width': self.frame_width,
-            'background_color': self.background_color.name(),
-            'image_path': self.image_path,
-            'scale_to_fit': self.getScaleToFit,
-            'active': getattr( self, 'active', True ),
-            'visible': getattr( self, 'visible', True ),
-            'static': getattr( self, 'static', False )
-        }
-
     def setSize( self, width, height ):
         self._width = max( 20, width )
         self._height = max( 20, height )
@@ -5648,16 +5238,6 @@ class ImageWidget( QWidget ):
         self.visible = visible
         self.setVisible( visible )
         self.update()
-
-    def updatePropertiesDict( self ):
-        main_window = self.findMainWindow()
-
-        if not main_window:
-            return
-            
-        if hasattr( main_window, 'all_image_dicts' ):
-            if self.custom_name in main_window.all_image_dicts:
-                main_window.all_image_dicts[ self.custom_name ] = self.getPropertiesDict()
 
     def updatePropertiesSize( self ):
         main_window = self.findMainWindow()
@@ -5807,7 +5387,6 @@ class ImageWidget( QWidget ):
 
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
-            self.updatePropertiesDict()
 
         event.accept()
 
@@ -5916,26 +5495,6 @@ class LabelWidget( QWidget ):
 
             except RuntimeError:
                 pass
-        
-        self.updatePropertiesDict()
-    
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Label',
-            'name': getattr( self, 'custom_name', 'Label_0' ),
-            'stack_order': getattr( self, 'stack_order', 0 ), 
-            'position': ( self.x(), self.y() ),
-            'width': self._width,
-            'height': self._height,
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'text': self.text,
-            'text_color': self.text_color.name(),
-            'text_size': self.text_size,
-            'text_font': self.text_font,
-            'text_alignment': self.text_alignment
-        }
 
     def getWidth( self ):
         return self._width
@@ -5998,12 +5557,6 @@ class LabelWidget( QWidget ):
     def setStatic( self, static ):
         self.static = static
         self.update()
-
-    def updatePropertiesDict( self ):
-        main_window = self.findMainWindow()
-
-        if main_window and hasattr( main_window, 'all_label_dicts' ):
-            main_window.all_label_dicts[ self.custom_name ] = self.getPropertiesDict()
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -6162,24 +5715,6 @@ class NumericWidget( QWidget ):
     def getHeight( self ):
         return self._height
 
-    def getPropertiesDict( self ):
-        return {
-            'type': 'Numeric',
-            'name': getattr( self, 'custom_name', 'Numeric_0' ),
-            'stack_order': getattr( self, 'stack_order', 0 ),
-            'position': ( self.x(), self.y() ),
-            'width': self._width,
-            'height': self._height,
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'number': self.number,
-            'number_color': self.number_color.name(),
-            'number_size': self.number_size,
-            'number_alignment': self.number_alignment,
-            'number_font': self.number_font
-        }
-
     def updateDisplayText( self ):
         self.display_text = str(self.number)
 
@@ -6196,17 +5731,6 @@ class NumericWidget( QWidget ):
         self.setFixedSize( self._width, self._height )
         
         painter.end()
-
-    def updatePropertiesDict( self ):
-        if hasattr( self, 'custom_name' ):
-            main_window = self.findMainWindow()
-
-            if main_window and hasattr( main_window, 'all_numeric_dicts' ):
-                if self.custom_name in main_window.all_numeric_dicts:
-                    main_window.all_numeric_dicts[ self.custom_name ] = self.getPropertiesDict()
-
-                else:
-                    main_window.all_numeric_dicts[ self.custom_name ] = self.getPropertiesDict()
 
     def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
@@ -6258,7 +5782,6 @@ class NumericWidget( QWidget ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = False
             self.updatePropertiesPosition()
-            self.updatePropertiesDict()
 
         event.accept()
 
