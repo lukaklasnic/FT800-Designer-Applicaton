@@ -1,6 +1,6 @@
 from PyQt6.QtGui import ( QPainter, QPen, QColor, QLinearGradient, QFont, QBrush, QPixmap, QFontMetrics )
 from PyQt6.QtCore import ( Qt, QPoint, QRect, QPointF, pyqtSignal, QSize, QRectF )
-from PyQt6.QtWidgets import ( QWidget, QMainWindow )
+from PyQt6.QtWidgets import ( QWidget, QMainWindow, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QCheckBox )
 import math
 import os
         
@@ -547,7 +547,7 @@ class CircleWidget( QWidget ):
         super().__init__( parent )
 
         self.defaultValues()
-        self.setFixedSize( self.circle_diameter, self.circle_diameter )
+        self.setFixedSize( self.diameter, self.diameter )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
@@ -560,7 +560,7 @@ class CircleWidget( QWidget ):
         self.tag = 0
         self.center_x = 0
         self.center_y = 0
-        self.circle_diameter = 100
+        self.diameter = 100
         self.edges_color = QColor( 0, 0, 0 )
         self.edges_width = 5
         self.filled = False 
@@ -570,7 +570,7 @@ class CircleWidget( QWidget ):
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
-        self.drag_start_position = QPoint()
+        self.drag_start_pos = QPoint()
         self.resize_corner = None
         self.resize_start_diameter = QPoint()
 
@@ -601,7 +601,7 @@ class CircleWidget( QWidget ):
             self.drawSelectionHandles( painter )
             
     def drawSelectionHandles( self, painter ):
-        handle_size = 8
+        handle_size = 10
         half_handle = handle_size // 2
 
         painter.setBrush( QColor( 0, 255, 0 ) )
@@ -638,9 +638,9 @@ class CircleWidget( QWidget ):
             new_diameter = max( 20, self.resize_start_diameter - delta.x() )
 
         else:
-            new_diameter = self.circle_diameter
+            new_diameter = self.diameter
 
-        self.circle_diameter = new_diameter
+        self.diameter = new_diameter
         self.setFixedSize( new_diameter, new_diameter )
         self.update()
 
@@ -684,14 +684,14 @@ class CircleWidget( QWidget ):
 
         if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr(main_window, 'diameter_spin_circle' ) ):
             main_window.diameter_spin_circle.blockSignals( True )
-            main_window.diameter_spin_circle.setValue( self.circle_diameter )
+            main_window.diameter_spin_circle.setValue( self.diameter )
             main_window.diameter_spin_circle.blockSignals( False )
 
     def updateCircleCenterPosition( self ):
         main_window = self.findMainWindow()
 
-        self.center_x = self.x() + self.circle_diameter // 2
-        self.center_y = self.y() + self.circle_diameter // 2
+        self.center_x = self.x() + self.diameter // 2
+        self.center_y = self.y() + self.diameter // 2
 
         if hasattr( main_window, 'pos_x_spin_circle' ) and main_window.pos_x_spin_circle:
             main_window.pos_x_spin_circle.blockSignals( True )
@@ -721,11 +721,11 @@ class CircleWidget( QWidget ):
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
-                self.resize_start_diameter = self.circle_diameter
+                self.resize_start_diameter = self.diameter
 
             else:
                 self.dragging = True
-                self.drag_start_position = mouse_pos
+                self.drag_start_pos = mouse_pos
                 self.clicked.emit( self )
                 
             self.updateCircleCenterPosition()
@@ -759,7 +759,7 @@ class CircleWidget( QWidget ):
             self.handleResize( event.globalPosition().toPoint())
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            delta = mouse_pos - self.drag_start_position
+            delta = mouse_pos - self.drag_start_pos
             new_x = max( 0, self.x() + delta.x() )
             new_y = max( 0, self.y() + delta.y() )
             self.move( new_x, new_y )
@@ -771,76 +771,79 @@ class CircleWidget( QWidget ):
 class EllipseWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, width = 98, height = 78, parent = None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
-        self._width = width
-        self._height = height
 
+        self.defaultValues()
+        self.setFixedSize( self.ellipse_width, self.ellipse_height )
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+
+    def defaultValues( self ):
         self.active = True
         self.visible = True
         self.static = False
         self.custom_name = None
         self.stack_order = 1
-
-        self.border_color = QColor( 0, 0, 0 )
+        self.tag = 0
+        self.ellipse_width = 120
+        self.ellipse_height = 80
+        self.center_x = 0
+        self.center_y = 0
+        self.edges_color = QColor( 0, 0, 0 )
         self.edges_width = 5
-        self.fill_enabled = False
-        self.gradient_enabled = True
-        self.gradient_type = "Top-Bottom"
+        self.filled = False
+        self.show_ellipse_warning = True
+        self.gradient_type = "top_bottom"
         self.gradient_start_color = QColor( 255, 0, 0 )
         self.gradient_end_color = QColor( 0, 0, 255 )
-        
-        self.is_selected = False
-        self.dragging = False
-        self.resizing = False
-        self.resize_corner = None
-        self.drag_start_pos = QPoint()
-        self.resize_start_pos = QPoint()
-        self.resize_start_size = QSize()
 
-        self.tag = 0
-        
-        self.setFixedSize( self._width, self._height )
-        self.setMouseTracking( True )
-        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.selected = False
+        self.resizing = False
+        self.dragging = False
+        self.resize_start_pos = QPoint()
+        self.drag_start_pos = QPoint()
+        self.resize_corner = None
+        self.resize_start_size = QSize()
 
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
         margin = self.edges_width // 2
-        ellipse_rect = QRect( margin, margin, self._width - 2 * margin, self._height - 2 * margin )
+        ellipse_rect = QRect( margin, margin, self.ellipse_width - 2 * margin, self.ellipse_height - 2 * margin )
+        if self.filled:
+            if self.gradient_type == "top_bottom":
+                gradient = QLinearGradient( 0, 0, 0, self.ellipse_height )
 
-        if self.fill_enabled and self.gradient_enabled:
-            if self.gradient_type == "Top-Bottom":
-                gradient = QLinearGradient( 0, 0, 0, self._height )
-            elif self.gradient_type == "Bottom-Top":
-                gradient = QLinearGradient( 0, self._height, 0, 0 )
-            elif self.gradient_type == "Left-Right":
-                gradient = QLinearGradient( 0, 0, self._width, 0 )
-            elif self.gradient_type == "Right-Left":
-                gradient = QLinearGradient( self._width, 0, 0, 0 )
+            elif self.gradient_type == "bottom_top":
+                gradient = QLinearGradient( 0, self.ellipse_height, 0, 0 )
+
+            elif self.gradient_type == "left_right":
+                gradient = QLinearGradient( 0, 0, self.ellipse_width, 0 )
+
+            elif self.gradient_type == "right_left":
+                gradient = QLinearGradient( self.ellipse_width, 0, 0, 0 )
+
             else:
                 gradient = QLinearGradient( 0, 0, 0, self._height )
 
             gradient.setColorAt( 0, self.gradient_start_color )
             gradient.setColorAt( 1, self.gradient_end_color )
             painter.setBrush( QBrush( gradient ) )
+            
         else:
             painter.setBrush( Qt.BrushStyle.NoBrush )
 
-        painter.setPen( QPen( self.border_color, self.edges_width ) )
+        painter.setPen( QPen( self.edges_color, self.edges_width ) )
         painter.drawEllipse( ellipse_rect )
 
-        if self.is_selected:
+        if self.selected:
             self.drawSelectionBorder( painter )
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        if not self.is_selected:
-            return
-            
-        handle_size = 8
+        handle_size = 10
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 0, 255, 0 ) )
@@ -850,7 +853,6 @@ class EllipseWidget( QWidget ):
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-
             painter.setBrush( QColor( 255, 255, 255 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
@@ -858,9 +860,6 @@ class EllipseWidget( QWidget ):
             painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
     
     def drawSelectionBorder( self, painter ):
-        if not self.is_selected:
-            return
-            
         margin = 2
         border_rect = QRect(margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
 
@@ -874,80 +873,27 @@ class EllipseWidget( QWidget ):
         painter.drawRect( border_rect )
 
     def handleResize( self, global_pos ):
-        if not self.resize_corner:
-            return
-
         delta = global_pos - self.resize_start_pos
-
         new_width = self.resize_start_size.width()
         new_height = self.resize_start_size.height()
 
         if self.resize_corner == "bottom_right":
             new_width = max( 20, self.resize_start_size.width() + delta.x() )
             new_height = max( 20, self.resize_start_size.height() + delta.y() )
+
         elif self.resize_corner == "top_right":
             new_width = max( 20, self.resize_start_size.width() + delta.x() )
             new_height = max( 20, self.resize_start_size.height() - delta.y() )
+
         elif self.resize_corner == "bottom_left":
             new_width = max( 20, self.resize_start_size.width() - delta.x() )
             new_height = max( 20, self.resize_start_size.height() + delta.y() )
+
         elif self.resize_corner == "top_left":
             new_width = max( 20, self.resize_start_size.width() - delta.x() )
             new_height = max( 20, self.resize_start_size.height() - delta.y() )
 
-
         self.setSize( new_width, new_height )
-
-    def resize( self, width, height ):
-        super().resize( width, height )
-        self._width = width
-        self._height = height
-        
-        main_window = self.findMainWindow()
-
-        if main_window and main_window.current_shape == self:
-            try:
-                if hasattr( main_window, 'width_spin_ellipse' ):
-                    main_window.width_spin_ellipse.blockSignals( True )
-                    main_window.width_spin_ellipse.setValue( width )
-                    main_window.width_spin_ellipse.blockSignals( False )
-            except RuntimeError:
-                pass
-            
-            try:
-                if hasattr( main_window, 'height_spin_ellipse' ):
-                    main_window.height_spin_ellipse.blockSignals( True )
-                    main_window.height_spin_ellipse.setValue( height )
-                    main_window.height_spin_ellipse.blockSignals( False )
-            except RuntimeError:
-                pass
-
-    def move( self, x, y ):
-        super().move( x, y )
-        
-        main_window = self.findMainWindow()
-        if main_window and main_window.current_shape == self:
-            try:
-                if hasattr( main_window, 'pos_x_spin_ellipse' ):
-                    main_window.pos_x_spin_ellipse.blockSignals( True )
-                    main_window.pos_x_spin_ellipse.setValue( x )
-                    main_window.pos_x_spin_ellipse.blockSignals( False )
-            except RuntimeError:
-                pass
-            
-            try:
-                if hasattr( main_window, 'pos_y_spin_ellipse' ):
-                    main_window.pos_y_spin_ellipse.blockSignals( True )
-                    main_window.pos_y_spin_ellipse.setValue( y )
-                    main_window.pos_y_spin_ellipse.blockSignals( False )
-            except RuntimeError:
-                pass
-
-    def getWidth( self ):
-        return self._width
-    
-    def getHeight( self ):
-        return self._height
     
     def getCornerAt( self, pos ):
         handle_size = 12
@@ -969,16 +915,22 @@ class EllipseWidget( QWidget ):
         return None
     
     def setSize( self, width, height ):
-        self._width = max( 20, width )
-        self._height = max( 20, height )
-        self.setFixedSize( self._width, self._height )
-
+        self.ellipse_width = max( 20, width )
+        self.ellipse_height = max( 20, height )
+        self.setFixedSize( self.ellipse_width, self.ellipse_height )
+        self.update()
+    
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
+    
+    def updateEllipseSize( self ):
         main_window = self.findMainWindow()
         if main_window and main_window.current_shape == self:
             try:
                 if hasattr( main_window, 'width_spin_ellipse' ):
                     main_window.width_spin_ellipse.blockSignals( True )
-                    main_window.width_spin_ellipse.setValue( self._width )
+                    main_window.width_spin_ellipse.setValue( self.ellipse_width )
                     main_window.width_spin_ellipse.blockSignals( False )
             except RuntimeError:
                 pass
@@ -986,44 +938,72 @@ class EllipseWidget( QWidget ):
             try:
                 if hasattr( main_window, 'height_spin_ellipse' ):
                     main_window.height_spin_ellipse.blockSignals( True )
-                    main_window.height_spin_ellipse.setValue( self._height )
+                    main_window.height_spin_ellipse.setValue( self.ellipse_height )
                     main_window.height_spin_ellipse.blockSignals( False )
             except RuntimeError:
                 pass
             
-        self.update()
-    
-    def setBorderColor( self, color ):
-        self.border_color = color
-        self.update()
-    
-    def setBorderWidth( self, width ):
-        self.edges_width = max( 1, min( 20, width ) )
-        self.update()
-    
-    def setFillEnabled( self, enabled ):
-        self.fill_enabled = enabled
-        if enabled:
-            self.gradient_enabled = True
-        self.update()
-    
-    def setGradientType( self, gradient_type ):
-        self.gradient_type = gradient_type
-        self.update()
-    
-    def setGradientColors( self, start_color, end_color ):
-        self.gradient_start_color = start_color
-        self.gradient_end_color = end_color
-        self.update()
-    
-    def setSelected( self, selected ):
-        self.is_selected = selected
-        self.update()
-    
-    def setVisibleEllipse( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-        self.update()
+    def updateEllipsePosition( self ):
+        main_window = self.findMainWindow()
+        self.center_x = self.x() + self.ellipse_width // 2
+        self.center_y = self.y() + self.ellipse_height // 2
+        if main_window and main_window.current_shape == self:
+            try:
+                if hasattr( main_window, 'pos_x_spin_ellipse' ):
+                    main_window.pos_x_spin_ellipse.blockSignals( True )
+                    main_window.pos_x_spin_ellipse.setValue( self.center_x )
+                    main_window.pos_x_spin_ellipse.blockSignals( False )
+            except RuntimeError:
+                pass
+            
+            try:
+                if hasattr( main_window, 'pos_y_spin_ellipse' ):
+                    main_window.pos_y_spin_ellipse.blockSignals( True )
+                    main_window.pos_y_spin_ellipse.setValue( self.center_y )
+                    main_window.pos_y_spin_ellipse.blockSignals( False )
+            except RuntimeError:
+                pass
+
+    def showFilledWarning( self, state ):
+        state == Qt.CheckState.Checked.value 
+
+        if state and self.show_ellipse_warning:
+            warning_dialog = QDialog( self )
+            warning_dialog.setWindowTitle( "Information" )
+            warning_dialog.setFixedSize( 400, 200 )
+            layout = QVBoxLayout( warning_dialog )
+            info_label = QLabel( "This option is resource intensive and may cause unpredictable display behavior." )
+            info_label.setWordWrap( True )
+            info_label.setStyleSheet( "color: white; font-size: 12px; padding: 10px;" )
+            layout.addWidget( info_label )
+
+            dont_show_layout = QHBoxLayout()
+            dont_show_checkbox = QCheckBox( "Do not show again" )
+            dont_show_checkbox.setStyleSheet( "color: white;" )
+            dont_show_layout.addWidget( dont_show_checkbox )
+            dont_show_layout.addStretch(1)
+            layout.addLayout( dont_show_layout )
+
+            button_layout = QHBoxLayout()
+            ok_button = QPushButton( "OK" )
+            ok_button.clicked.connect( warning_dialog.accept )
+            ok_button.setFixedWidth( 80 )
+            button_layout.addStretch( 1 )
+            button_layout.addWidget( ok_button )
+            layout.addLayout( button_layout )
+            warning_dialog.exec()
+
+            if dont_show_checkbox.isChecked():
+                self.show_ellipse_warning = False
+
+        if hasattr( self, 'gradient_combo_ellipse' ):
+            self.gradient_combo_ellipse.setEnabled( state )
+
+        if hasattr( self, 'start_color_rect_ellipse' ):
+            self.start_color_rect_ellipse.setEnabled( state )
+
+        if hasattr( self, 'end_color_rect_ellipse' ):
+            self.end_color_rect_ellipse.setEnabled( state )
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -1080,6 +1060,7 @@ class EllipseWidget( QWidget ):
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
             self.move( new_x, new_y )
+            self.updateEllipsePosition()
         
         event.accept()
     
@@ -1960,7 +1941,7 @@ class ClockWidget( QWidget ):
         self.setMouseTracking( True )
         self.dragging = False
         self.resizing = False
-        self.drag_start_position = QPoint()
+        self.drag_start_pos = QPoint()
         self.original_geometry = QRect()
 
     def paintEvent( self, event ):

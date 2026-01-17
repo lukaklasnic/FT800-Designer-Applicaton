@@ -1,9 +1,7 @@
-from PyQt6.QtWidgets import ( QLabel, QHBoxLayout, QColorDialog, QCheckBox, QFileDialog, QPushButton, QDialog, QVBoxLayout )
+from PyQt6.QtWidgets import ( QColorDialog, QFileDialog )
 from PyQt6.QtGui import ( QLinearGradient, QColor )
 from PyQt6.QtCore import Qt
 from widgets import*  
-
-show_ellipse_warning = True
 
 #------------------------------------------------------------CANVAS--------------------------------------------------------------
 
@@ -236,131 +234,88 @@ def updateCircleFillColor( main_window ):
 
     if color.isValid():
         main_window.current_shape.fill_color = color
-        main_window.current_shape.update()
         main_window.fill_color_rect_circle.setStyleSheet( f"background-color: { color.name() }; "f"border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
 #------------------------------------------------------------ELLIPSE--------------------------------------------------------------
 
-def updateEllipseTag( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        main_window.current_shape.tag = value
 
-def showFilledWarning( main_window, state ):
-    global show_ellipse_warning
-    is_filled = ( state == Qt.CheckState.Checked.value )
-    
-    if is_filled and show_ellipse_warning:
-        warning_dialog = QDialog( main_window )
-        warning_dialog.setWindowTitle( "Information" )
-        warning_dialog.setFixedSize( 400, 200 )
-        layout = QVBoxLayout( warning_dialog )
-        info_label = QLabel( "This option is resource intensive and may cause unpredictable display behavior." )
-        info_label.setWordWrap( True )
-        info_label.setStyleSheet( "color: white; font-size: 12px; padding: 10px;" )
-        layout.addWidget( info_label )
-        
-        dont_show_layout = QHBoxLayout()
-        dont_show_checkbox = QCheckBox( "Do not show again" )
-        dont_show_checkbox.setStyleSheet( "color: white;" )
-        dont_show_layout.addWidget( dont_show_checkbox )
-        dont_show_layout.addStretch(1)
-        layout.addLayout( dont_show_layout )
-        
-        button_layout = QHBoxLayout()
-        ok_button = QPushButton( "OK" )
-        ok_button.clicked.connect( warning_dialog.accept )
-        ok_button.setFixedWidth( 80 )
-        button_layout.addStretch( 1 )
-        button_layout.addWidget( ok_button )
-        layout.addLayout( button_layout )
-        warning_dialog.exec()
-        
-        if dont_show_checkbox.isChecked():
-            show_ellipse_warning = False
-
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        main_window.current_shape.setFillEnabled( is_filled )
-    
-    if hasattr( main_window, 'gradient_combo_ellipse' ):
-        main_window.gradient_combo_ellipse.setEnabled( is_filled )
-    
-    if hasattr( main_window, 'start_color_rect_ellipse' ):
-        main_window.start_color_rect_ellipse.setEnabled( is_filled )
-    
-    if hasattr( main_window, 'end_color_rect_ellipse' ):
-        main_window.end_color_rect_ellipse.setEnabled( is_filled )
-
-    main_window.current_shape.update()
 
 def updateEllipseActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        is_active = (state == Qt.CheckState.Checked.value)
-        main_window.current_shape.active = is_active
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateEllipseVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        is_visible = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setVisibleEllipse( is_visible )
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.visible = state
+    main_window.current_shape.update()
 
 def updateEllipseStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        is_static = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.static = is_static
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateEllipseName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        main_window.current_shape.custom_name = text
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update()
 
 def updateEllipseStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        main_window.current_shape.stack_order = value
-        
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
+
+def updateEllipseTag( main_window, value ):
+    main_window.current_shape.tag = value
+    main_window.current_shape.update()
 
 def updateEllipsePosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        if hasattr( main_window, 'pos_x_spin_ellipse' ) and hasattr( main_window, 'pos_y_spin_ellipse' ):
-            main_window.current_shape.move( main_window.pos_x_spin_ellipse.value(), main_window.pos_y_spin_ellipse.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_ellipse.value(), main_window.pos_y_spin_ellipse.value() )
+    main_window.current_shape.update()
 
 def updateEllipseSize( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-
-        if hasattr( main_window, 'width_spin_ellipse' ) and hasattr( main_window, 'height_spin_ellipse' ):
-            width = main_window.width_spin_ellipse.value()
-            height = main_window.height_spin_ellipse.value()
-            main_window.current_shape.setSize( width, height )
+    width = main_window.width_spin_ellipse.value()
+    height = main_window.height_spin_ellipse.value()
+    main_window.current_shape.setSize( width, height )
+    main_window.current_shape.update()
 
 def changeEllipseEdgesColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.border_color )
+    color = QColorDialog.getColor( main_window.current_shape.edges_color )
 
-        if color.isValid():
-            main_window.current_shape.setBorderColor( color )
-            main_window.edges_color_rect_ellipse.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.edges_color = color 
+        main_window.edges_color_rect_ellipse.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
 def updateEllipseEdgeWidth( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        main_window.current_shape.setBorderWidth( value )
+    main_window.current_shape.edges_width = value 
+    main_window.current_shape.update()
+
+def updateEllipseFilled( main_window, state ):
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.filled = state
+    main_window.current_shape.showFilledWarning( state )
+    main_window.current_shape.update()
 
 def updateEllipseGradientType( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        main_window.current_shape.setGradientType( text )
+    main_window.current_shape.gradient_type = text 
+    main_window.current_shape.update()
 
 def changeEllipseStartColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.gradient_start_color )
+    color = QColorDialog.getColor( main_window.current_shape.gradient_start_color )
 
-        if color.isValid():
-            main_window.current_shape.setGradientColors( color, main_window.current_shape.gradient_end_color )
-            main_window.start_color_rect_ellipse.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.gradient_start_color = main_window.current_shape.gradient_end_color 
+        main_window.start_color_rect_ellipse.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
 def changeEllipseEndColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, EllipseWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.gradient_end_color )
+    color = QColorDialog.getColor( main_window.current_shape.gradient_end_color )
 
-        if color.isValid():
-            main_window.current_shape.setGradientColors( main_window.current_shape.gradient_start_color, color )
-            main_window.end_color_rect_ellipse.setStyleSheet( f"background-color: {color.name()}; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.gradient_end_color = main_window.current_shape.gradient_start_color
+        main_window.end_color_rect_ellipse.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
 #------------------------------------------------------------BUTTON--------------------------------------------------------------
 

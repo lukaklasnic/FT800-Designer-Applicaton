@@ -191,9 +191,6 @@ def showCanvasProperties( main_window, canvas, start_index=0 ):
 #----------------------------------------------------------------LINE----------------------------------------------------------------
 
 def showLineProperties( main_window, current_index ):
-    if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
-        main_window.current_shape.custom_name = generateWidgetName( main_window, "Line" )
-
     shape_label = QLabel( "LINE PROPERTIES" )
     shape_label.setStyleSheet( "color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, shape_label )
@@ -433,9 +430,6 @@ def showLineProperties( main_window, current_index ):
 #----------------------------------------------------------------RECTANGLE----------------------------------------------------------------
 
 def showRectangleProperties(main_window, current_index):
-    if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
-        main_window.current_shape.custom_name = generateWidgetName( main_window, "Rectangle" )
-
     shape_label = QLabel( "RECTANGLE PROPERTIES" )
     shape_label.setStyleSheet( "color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, shape_label )
@@ -757,9 +751,6 @@ def showRectangleProperties(main_window, current_index):
 #----------------------------------------------------------------CIRCLE----------------------------------------------------------------
 
 def showCircleProperties( main_window, current_index ):
-    if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
-        main_window.current_shape.custom_name = generateWidgetName( main_window, "Circle" )
-
     shape_label = QLabel( "CIRCLE PROPERTIES" )
     shape_label.setStyleSheet( "color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, shape_label )
@@ -1017,13 +1008,12 @@ def showCircleProperties( main_window, current_index ):
 #-------------------------------------------------------ELLIPSE--------------------------------------------------------------
 
 def showEllipseProperties(main_window, current_index):
-
     shape_label = QLabel( "ELLIPSE PROPERTIES" )
     shape_label.setStyleSheet( "color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, shape_label )
     current_index += 1
 
-    status_label = QLabel("Status")
+    status_label = QLabel( "Status" )
     status_label.setStyleSheet( "color: darkorange; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, status_label )
     current_index += 1
@@ -1184,7 +1174,7 @@ def showEllipseProperties(main_window, current_index):
     width_layout.addStretch( 1 )
     main_window.width_spin_ellipse = QSpinBox()
     main_window.width_spin_ellipse.setRange( 20, 480 )
-    main_window.width_spin_ellipse.setValue( main_window.current_shape.getWidth() )
+    main_window.width_spin_ellipse.setValue( main_window.current_shape.ellipse_width )
     main_window.width_spin_ellipse.valueChanged.connect( lambda: updateEllipseSize( main_window ) )
     main_window.width_spin_ellipse.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.width_spin_ellipse.setFixedWidth( 70 )
@@ -1202,7 +1192,7 @@ def showEllipseProperties(main_window, current_index):
     height_layout.addStretch( 1 )
     main_window.height_spin_ellipse = QSpinBox()
     main_window.height_spin_ellipse.setRange( 20, 272 )
-    main_window.height_spin_ellipse.setValue( main_window.current_shape.getHeight() ) 
+    main_window.height_spin_ellipse.setValue( main_window.current_shape.ellipse_height ) 
     main_window.height_spin_ellipse.valueChanged.connect( lambda: updateEllipseSize( main_window ) )
     main_window.height_spin_ellipse.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.height_spin_ellipse.setFixedWidth( 70 )
@@ -1223,7 +1213,7 @@ def showEllipseProperties(main_window, current_index):
     edges_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     edges_color_layout.addWidget( edges_color_label )
     edges_color_layout.addStretch( 1 )
-    main_window.edges_color_rect_ellipse = ColorRectangle( main_window.current_shape.border_color.name() )
+    main_window.edges_color_rect_ellipse = ColorRectangle( main_window.current_shape.edges_color.name() )
     main_window.edges_color_rect_ellipse.mousePressEvent = lambda e: changeEllipseEdgesColor( main_window )
     edges_color_layout.addWidget( main_window.edges_color_rect_ellipse )
     edges_color_widget = QWidget()
@@ -1256,8 +1246,8 @@ def showEllipseProperties(main_window, current_index):
     filled_layout.addWidget( filled_label )
     filled_layout.addStretch( 1 )
     main_window.filled_checkbox_ellipse = QCheckBox()
-    main_window.filled_checkbox_ellipse.setChecked( main_window.current_shape.fill_enabled )
-    main_window.filled_checkbox_ellipse.stateChanged.connect( lambda state: showFilledWarning( main_window, state ) )
+    main_window.filled_checkbox_ellipse.setChecked( main_window.current_shape.filled )
+    main_window.filled_checkbox_ellipse.stateChanged.connect( lambda state: updateEllipseFilled( main_window, state ) )
     filled_layout.addWidget( main_window.filled_checkbox_ellipse )
     filled_widget = QWidget()
     filled_widget.setLayout( filled_layout )
@@ -1271,10 +1261,10 @@ def showEllipseProperties(main_window, current_index):
     gradient_type_layout.addWidget( gradient_type_label )
     gradient_type_layout.addStretch( 1 )
     main_window.gradient_combo_ellipse = QComboBox()
-    main_window.gradient_combo_ellipse.addItems( [ "Top-Bottom", "Bottom-Top", "Left-Right", "Right-Left" ] )
+    main_window.gradient_combo_ellipse.addItems( [ "top_bottom", "bottom_top", "left_right", "right_left" ] )
     main_window.gradient_combo_ellipse.setCurrentText(main_window.current_shape.gradient_type)
     main_window.gradient_combo_ellipse.currentTextChanged.connect( lambda text: updateEllipseGradientType( main_window, text ) )
-    main_window.gradient_combo_ellipse.setEnabled( main_window.current_shape.fill_enabled )
+    main_window.gradient_combo_ellipse.setEnabled( main_window.current_shape.filled )
     main_window.gradient_combo_ellipse.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.gradient_combo_ellipse.setFixedWidth( 100 )
     gradient_type_layout.addWidget( main_window.gradient_combo_ellipse )
@@ -1291,7 +1281,7 @@ def showEllipseProperties(main_window, current_index):
     start_color_layout.addStretch( 1 )
     main_window.start_color_rect_ellipse = ColorRectangle( main_window.current_shape.gradient_start_color.name() )
     main_window.start_color_rect_ellipse.mousePressEvent = lambda e: changeEllipseStartColor( main_window )
-    main_window.start_color_rect_ellipse.setEnabled( main_window.current_shape.fill_enabled )
+    main_window.start_color_rect_ellipse.setEnabled( main_window.current_shape.filled )
     start_color_layout.addWidget( main_window.start_color_rect_ellipse )
     start_color_widget = QWidget()
     start_color_widget.setLayout( start_color_layout )
@@ -1306,7 +1296,7 @@ def showEllipseProperties(main_window, current_index):
     end_color_layout.addStretch( 1 )
     main_window.end_color_rect_ellipse = ColorRectangle( main_window.current_shape.gradient_end_color.name() )
     main_window.end_color_rect_ellipse.mousePressEvent = lambda e: changeEllipseEndColor( main_window )
-    main_window.end_color_rect_ellipse.setEnabled( main_window.current_shape.fill_enabled )
+    main_window.end_color_rect_ellipse.setEnabled( main_window.current_shape.filled )
     end_color_layout.addWidget( main_window.end_color_rect_ellipse )
     end_color_widget = QWidget()
     end_color_widget.setLayout( end_color_layout )

@@ -678,7 +678,7 @@ class MainWindow( QMainWindow ):
             shape.tag = generateAutoTag( self, shape )
 
         elif self.selected_shape == "Ellipse":
-            shape = EllipseWidget( 120, 80, widget_container )
+            shape = EllipseWidget( widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName(self, "Ellipse")
