@@ -32,7 +32,7 @@ class LineWidget( QWidget ):
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
-        self.resize_start_size = None
+        self.resize_start_size = QPoint()
         self.resize_corner = None
         self.drag_start_pos = QPoint()
 
@@ -81,7 +81,7 @@ class LineWidget( QWidget ):
         max_x = max( local_start_x, local_end_x ) + margin
         max_y = max( local_start_y, local_end_y ) + margin
         
-        border_rect = QRect( min_x, min_y, max_x - min_x, max_y - min_y )
+        selection_rect = QRect( min_x, min_y, max_x - min_x, max_y - min_y )
         
         selection_pen = QPen( QColor( 255, 0, 0 ) )
         selection_pen.setWidth( 2 )
@@ -90,7 +90,7 @@ class LineWidget( QWidget ):
         
         painter.setPen( selection_pen )
         painter.setBrush( Qt.BrushStyle.NoBrush )
-        painter.drawRect( border_rect )
+        painter.drawRect( selection_rect )
 
     def handleResize( self, global_pos ):
         if not self.resize_corner or not self.resize_start_size:
@@ -168,10 +168,7 @@ class LineWidget( QWidget ):
         self.selected = selected
         self.update()
 
-    def setVisibleLine( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-        self.update()
+
 
     def setLinePosition( self, start_x, start_y, end_x, end_y ):
         self.start_x = start_x
@@ -180,14 +177,6 @@ class LineWidget( QWidget ):
         self.end_y = end_y
         self.updateLineSize()
         self.update()
-
-    def setLineColor( self, color ):
-        self.line_color = color
-        self.update()
-    
-    def setLineWidth( self, width ):
-        self.line_width = max( 1, width )
-        self.update()   
 
     def updateLineSize( self ):
         margin = 20 
@@ -309,11 +298,11 @@ class LineWidget( QWidget ):
 class RectangleWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, width, height, parent = None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
 
-        self.setFixedSize( width, height )
         self.defaultValues()
+        self.setFixedSize( self.rectangle_width, self.rectangle_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
@@ -324,7 +313,9 @@ class RectangleWidget( QWidget ):
         self.static = False
         self.custom_name = ""
         self.stack_order = 1
-        self.tag = 0 
+        self.tag = 0
+        self.rectangle_width = 100 
+        self.rectangle_height = 80 
         self.edges_color = QColor( 0, 0, 0 )
         self.edges_width = 5
         self.filled = False 
@@ -392,7 +383,7 @@ class RectangleWidget( QWidget ):
 
     def drawSelectionBorder(  self, painter ):
         margin = 2
-        border_rect = QRect(margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        selection_rect = QRect(margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
 
         selection_pen = QPen( QColor( 255, 0, 0 ) )
         selection_pen.setWidth( 3 )
@@ -401,7 +392,7 @@ class RectangleWidget( QWidget ):
 
         painter.setPen( selection_pen )
         painter.setBrush( Qt.BrushStyle.NoBrush )
-        painter.drawRect( border_rect )
+        painter.drawRect( selection_rect )
 
     def handleResize( self, global_pos ):
 
@@ -429,8 +420,10 @@ class RectangleWidget( QWidget ):
             new_width = max( 20, self.resize_start_size.width() - delta.x() )
             new_height = max( 20, self.resize_start_size.height() - delta.y() )
 
+        self.rectangle_width = new_width
+        self.rectangle_height = new_height
+
         self.setFixedSize( new_width, new_height )
-        self.update()
         self.updateRectangleSize()
 
     def getCornerAt( self, pos ):
@@ -452,65 +445,10 @@ class RectangleWidget( QWidget ):
         
         return None
 
-    def resizeRectangle( self, width, height ):
-        super().resize( width, height )
-        main_window = self.findMainWindow()
-
-        if main_window and main_window.current_shape == self:
-            if hasattr( main_window, 'width_spin_rect' ):
-                main_window.width_spin_rect.blockSignals( True )
-                main_window.width_spin_rect.setValue( width )
-                main_window.width_spin_rect.blockSignals( False )
-
-            if hasattr( main_window, 'height_spin_rect' ):
-                main_window.height_spin_rect.blockSignals( True )
-                main_window.height_spin_rect.setValue( height )
-                main_window.height_spin_rect.blockSignals( False )
-
-    def moveRectangle( self, x, y ):
-        super().move( x, y )
-        main_window = self.findMainWindow()
-
-        if main_window and main_window.current_shape == self:
-            if hasattr( main_window, 'pos_x_spin_rect' ):
-                main_window.pos_x_spin_rect.blockSignals( True )
-                main_window.pos_x_spin_rect.setValue( x )
-                main_window.pos_x_spin_rect.blockSignals( False )
-
-            if hasattr( main_window, 'pos_y_spin_rect' ):
-                main_window.pos_y_spin_rect.blockSignals( True )
-                main_window.pos_y_spin_rect.setValue( y )
-                main_window.pos_y_spin_rect.blockSignals( False )
-
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
 
-    def setRectangleVisible( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-        self.update()
-
-    def setRectangleEdgesColor( self, color ):
-        self.edges_color = color
-        self.update()
-
-    def setRectangleEdgesWidth( self, width ):
-        self.edges_width = width
-        self.update()
-    
-    def setRectangleStartColor( self, color ):
-        self.start_color = color
-        self.update()
-    
-    def setRectangleEndColor( self, color ):
-        self.end_color = color
-        self.update()
-    
-    def setRectangleGradientDirection( self, direction ):
-        self.gradient_direction = direction
-        self.update()
-    
     def updateRectangleSize( self ):
         main_window = self.findMainWindow()
 
@@ -518,8 +456,14 @@ class RectangleWidget( QWidget ):
             return
         
         if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'width_spin_rect' ) and hasattr( main_window, 'height_spin_rect' ) ):
-            main_window.width_spin_rect.setValue( self.width() )
-            main_window.height_spin_rect.setValue( self.height() )
+            main_window.width_spin_rect.blockSignals( True )
+            main_window.width_spin_rect.setValue( self.rectangle_width )
+            main_window.width_spin_rect.blockSignals( False )
+
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and  hasattr( main_window, 'height_spin_rect' ) ):
+            main_window.height_spin_rect.blockSignals( True )
+            main_window.height_spin_rect.setValue( self.rectangle_height )
+            main_window.height_spin_rect.blockSignals( False )
 
     def updateRectanglePosition( self ):
         main_window = self.findMainWindow()
@@ -588,8 +532,8 @@ class RectangleWidget( QWidget ):
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
+            new_x = max( 0, self.x() + delta.x() )
+            new_y = max( 0, self.y() + delta.y() )
 
             self.move( new_x, new_y )
             self.updateRectanglePosition()
@@ -599,35 +543,14 @@ class RectangleWidget( QWidget ):
 class CircleWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, diameter, parent = None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
 
-        
-        self.setFixedSize( diameter, diameter )
-        
-        
-        
-        self.is_selected = False
-        
-        
-        
-        
-
-        
-
         self.defaultValues()
-        self.dragging = False
-        self.drag_start_position = QPoint()
-        self.resizing = False
-        self.resize_corner = None
-        self.resize_start_pos = QPoint()
-        self.resize_start_diameter = 0
-        
+        self.setFixedSize( self.circle_diameter, self.circle_diameter )
         self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
-        
-        
-
     def defaultValues( self ):
         self.active = True
         self.visible = True
@@ -637,19 +560,23 @@ class CircleWidget( QWidget ):
         self.tag = 0
         self.center_x = 0
         self.center_y = 0
-        self.diameter = 100
+        self.circle_diameter = 100
         self.edges_color = QColor( 0, 0, 0 )
         self.edges_width = 5
         self.filled = False 
         self.fill_color = QColor( 255, 0, 0 ) 
 
+        self.selected = False
+        self.resizing = False
+        self.dragging = False
+        self.resize_start_pos = QPoint()
+        self.drag_start_position = QPoint()
+        self.resize_corner = None
+        self.resize_start_diameter = QPoint()
+
     def paintEvent( self, event ):
-        if not self.visible:
-            return
-            
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
-
         rect_size = min( self.width(), self.height() ) - self.edges_width
 
         x_offset = ( self.width() - rect_size ) // 2
@@ -669,14 +596,10 @@ class CircleWidget( QWidget ):
         painter.setBrush( Qt.BrushStyle.NoBrush )
         painter.drawEllipse( circle_rect )
 
-        if self.is_selected:
-            selection_rect = QRectF( 2, 2, self.width() - 4, self.height() - 4 )
-            painter.setPen( QPen( QColor( 255, 0, 0 ), 3, Qt.PenStyle.DashLine ) )
-            painter.setBrush( Qt.BrushStyle.NoBrush )
-            painter.drawRect( selection_rect )
-            
+        if self.selected:
+            self.drawSelectionBorder( painter )
             self.drawSelectionHandles( painter )
-
+            
     def drawSelectionHandles( self, painter ):
         handle_size = 8
         half_handle = handle_size // 2
@@ -694,6 +617,14 @@ class CircleWidget( QWidget ):
             painter.setBrush( QColor( 0, 255, 0 ) )
             painter.setPen( QPen( QColor( 0, 255, 0 ), 1 ) )
 
+    def drawSelectionBorder(  self, painter ):
+        margin = 2
+
+        selection_rect = QRectF( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        painter.setPen( QPen( QColor( 255, 0, 0 ), 3, Qt.PenStyle.DashLine ) )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( selection_rect )
+
     def handleResize( self, global_pos ):
         if not self.resize_corner:
             return
@@ -707,9 +638,12 @@ class CircleWidget( QWidget ):
             new_diameter = max( 20, self.resize_start_diameter - delta.x() )
 
         else:
-            new_diameter = self.diameter
+            new_diameter = self.circle_diameter
 
-        self.setDiameter( new_diameter )
+        self.circle_diameter = new_diameter
+        self.setFixedSize( new_diameter, new_diameter )
+        self.update()
+
 
         if "left" in self.resize_corner:
             delta_x = self.resize_start_diameter - new_diameter
@@ -719,77 +653,8 @@ class CircleWidget( QWidget ):
             delta_y = self.resize_start_diameter - new_diameter
             self.move( self.x(), self.y() + delta_y )
 
-        self.update()
-        main_window = self.findMainWindow()
-
-        if main_window:
-            if hasattr( main_window, 'diameter_spin_circle' ) and main_window.diameter_spin_circle:
-                main_window.diameter_spin_circle.blockSignals( True )
-                main_window.diameter_spin_circle.setValue( self.diameter )
-                main_window.diameter_spin_circle.blockSignals( False )
-
-            self.updateCenterPosition()
-
-            if hasattr( main_window, 'pos_x_spin_circle' ) and main_window.pos_x_spin_circle:
-                main_window.pos_x_spin_circle.blockSignals( True )
-                main_window.pos_x_spin_circle.setValue( self.center_x )
-                main_window.pos_x_spin_circle.blockSignals( False )
-
-            if hasattr( main_window, 'pos_y_spin_circle' ) and main_window.pos_y_spin_circle:
-                main_window.pos_y_spin_circle.blockSignals( True )
-                main_window.pos_y_spin_circle.setValue( self.center_y )
-                main_window.pos_y_spin_circle.blockSignals( False )
-    
-    def resize( self, width, height ):
-        super().resize( width, height )
-
-    def move( self, x, y ):
-        super().move( x, y )
-    
-    def setFilled( self, filled ):
-        self.filled = filled
-        self.update()
-
-    def setFillColor( self, color ):
-        self.fill_color = color
-        self.update()
-
-    def setSelected( self, selected ):
-        self.is_selected = selected
-        self.update()
-    
-    def setActive( self, active ):
-        self.active = active
-    
-    def setVisibleCircle( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-    
-    def setStatic( self, static ):
-        self.static = static
-    
-    def setCustomName( self, name ):
-        self.custom_name = name
-    
-    def setStackOrder( self, order ):
-        self.stack_order = order
-    
-    def setColor( self, color ):
-        self.edges_color = color
-        self.update()
-    
-    def setLineEdgeWidth( self, thickness ):
-        self.edges_width = thickness
-        self.update()
-    
-    def setDiameter(self, diameter):
-        self.diameter = diameter
-        self.setFixedSize(diameter, diameter)
-        self.update()
-        main_window = self.findMainWindow()
-
-    def setBorderWidth( self, width ):
-        self.setLineThickness( width )
+        self.updateCircleSize()
+        self.updateCircleCenterPosition()
 
     def getCornerAt( self, pos ):
         handle_size = 12 
@@ -809,16 +674,34 @@ class CircleWidget( QWidget ):
                 return corner_name
         
         return None
+
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
     
-    def getColor( self ):
-        return self.edges_color
-    
-    def getBorderWidth( self ):
-        return self.edges_width
-    
-    def updateCenterPosition( self ):
-        self.center_x = self.x() + self.width() // 2
-        self.center_y = self.y() + self.height() // 2
+    def updateCircleSize( self ):
+        main_window = self.findMainWindow()
+
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr(main_window, 'diameter_spin_circle' ) ):
+            main_window.diameter_spin_circle.blockSignals( True )
+            main_window.diameter_spin_circle.setValue( self.circle_diameter )
+            main_window.diameter_spin_circle.blockSignals( False )
+
+    def updateCircleCenterPosition( self ):
+        main_window = self.findMainWindow()
+
+        self.center_x = self.x() + self.circle_diameter // 2
+        self.center_y = self.y() + self.circle_diameter // 2
+
+        if hasattr( main_window, 'pos_x_spin_circle' ) and main_window.pos_x_spin_circle:
+            main_window.pos_x_spin_circle.blockSignals( True )
+            main_window.pos_x_spin_circle.setValue( self.center_x )
+            main_window.pos_x_spin_circle.blockSignals( False )
+
+        if hasattr( main_window, 'pos_y_spin_circle' ) and main_window.pos_y_spin_circle:
+            main_window.pos_y_spin_circle.blockSignals( True )
+            main_window.pos_y_spin_circle.setValue( self.center_y )
+            main_window.pos_y_spin_circle.blockSignals( False )
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -834,17 +717,18 @@ class CircleWidget( QWidget ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
-
+            
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
-                self.resize_start_diameter = self.diameter
+                self.resize_start_diameter = self.circle_diameter
 
             else:
                 self.dragging = True
                 self.drag_start_position = mouse_pos
                 self.clicked.emit( self )
-
+                
+            self.updateCircleCenterPosition()
             event.accept()
 
     def mouseReleaseEvent( self, event ):
@@ -876,26 +760,13 @@ class CircleWidget( QWidget ):
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_position
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-            self.move(new_x, new_y)
-
-            main_window = self.findMainWindow()
-
-            if main_window:
-                self.updateCenterPosition()
-
-                if hasattr( main_window, 'pos_x_spin_circle' ) and main_window.pos_x_spin_circle:
-                    main_window.pos_x_spin_circle.blockSignals( True )
-                    main_window.pos_x_spin_circle.setValue( self.center_x )
-                    main_window.pos_x_spin_circle.blockSignals( False )
-
-                if hasattr( main_window, 'pos_y_spin_circle' ) and main_window.pos_y_spin_circle:
-                    main_window.pos_y_spin_circle.blockSignals( True )
-                    main_window.pos_y_spin_circle.setValue( self.center_y )
-                    main_window.pos_y_spin_circle.blockSignals( False )
+            new_x = max( 0, self.x() + delta.x() )
+            new_y = max( 0, self.y() + delta.y() )
+            self.move( new_x, new_y )
+            self.updateCircleCenterPosition()
 
         event.accept()
+
 
 class EllipseWidget( QWidget ):
     clicked = pyqtSignal( object )

@@ -891,8 +891,8 @@ def showCircleProperties( main_window, current_index ):
     pos_x_layout.addWidget( pos_x_label )
     pos_x_layout.addStretch( 1 )
     main_window.pos_x_spin_circle = QSpinBox()
-    main_window.pos_x_spin_circle.setRange( 0, 480 )
-    main_window.pos_x_spin_circle.setValue( main_window.current_shape.center_x )
+    main_window.pos_x_spin_circle.setRange( main_window.current_shape.circle_diameter // 2, 9999 )
+    main_window.pos_x_spin_circle.setValue( main_window.current_shape.x() + main_window.current_shape.circle_diameter // 2 )
     main_window.pos_x_spin_circle.valueChanged.connect( lambda value: updateCirclePosition( main_window ) )
     main_window.pos_x_spin_circle.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.pos_x_spin_circle.setFixedWidth( 70 )
@@ -909,9 +909,9 @@ def showCircleProperties( main_window, current_index ):
     pos_y_layout.addWidget( pos_y_label )
     pos_y_layout.addStretch( 1 )
     main_window.pos_y_spin_circle  = QSpinBox()
-    main_window.pos_y_spin_circle.setRange( 0, 272 )
-    main_window.pos_y_spin_circle.setValue( main_window.current_shape.center_y )
-    main_window.pos_y_spin_circle.valueChanged.connect( lambda value: updateCirclePosition( main_window ) )
+    main_window.pos_y_spin_circle.setRange( main_window.current_shape.circle_diameter // 2, 9999 )
+    main_window.pos_y_spin_circle.setValue( main_window.current_shape.y() + main_window.current_shape.circle_diameter // 2 )
+    main_window.pos_y_spin_circle.valueChanged.connect( lambda value:  updateCirclePosition( main_window ) )
     main_window.pos_y_spin_circle.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.pos_y_spin_circle.setFixedWidth( 70 )
     pos_y_layout.addWidget( main_window.pos_y_spin_circle )
@@ -928,8 +928,8 @@ def showCircleProperties( main_window, current_index ):
     diameter_layout.addStretch( 1 )
     main_window.diameter_spin_circle = QSpinBox()
     main_window.diameter_spin_circle.setRange( 10, 480 )
-    main_window.diameter_spin_circle.setValue( main_window.current_shape.diameter )
-    main_window.diameter_spin_circle.valueChanged.connect( lambda value: updateCircleSize( main_window ) )
+    main_window.diameter_spin_circle.setValue( main_window.current_shape.circle_diameter )
+    main_window.diameter_spin_circle.valueChanged.connect( lambda value: updateCircleSize( main_window, value ) )
     main_window.diameter_spin_circle.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.diameter_spin_circle.setFixedWidth( 70 )
     diameter_layout.addWidget( main_window.diameter_spin_circle )
@@ -937,7 +937,7 @@ def showCircleProperties( main_window, current_index ):
     diameter_widget.setLayout( diameter_layout )
     main_window.properties_layout.insertWidget( current_index, diameter_widget )
     current_index += 1
-
+    
     color_adjust_label = QLabel( "Color adjust" )
     color_adjust_label.setStyleSheet( "color: darkorange; font-size: 12px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, color_adjust_label )
@@ -951,7 +951,7 @@ def showCircleProperties( main_window, current_index ):
     edges_color_layout.addStretch( 1 ) 
     line_color_hex = main_window.current_shape.edges_color.name()
     main_window.edges_color_rect_circle = ColorRectangle( line_color_hex )
-    main_window.edges_color_rect_circle.mousePressEvent = lambda e: changeCircleLineColor( main_window )
+    main_window.edges_color_rect_circle.mousePressEvent = lambda e: updateCircleLineColor( main_window )
     main_window.edges_color_rect_circle.setCursor( Qt.CursorShape.PointingHandCursor )
     edges_color_layout.addWidget( main_window.edges_color_rect_circle )
 
@@ -984,15 +984,8 @@ def showCircleProperties( main_window, current_index ):
     filled_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     filled_layout.addWidget( filled_label )
     filled_layout.addStretch( 1 )
-
     main_window.filled_checkbox_circle = QCheckBox()
-
-    if hasattr( main_window.current_shape, 'filled' ):
-        is_filled = main_window.current_shape.filled 
-
-    else:
-        is_filled = False 
-
+    is_filled = main_window.current_shape.filled 
     main_window.filled_checkbox_circle.setChecked( is_filled )
     main_window.filled_checkbox_circle.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
     main_window.filled_checkbox_circle.stateChanged.connect( lambda state: updateCircleFilled( main_window, state ) )
@@ -1008,21 +1001,16 @@ def showCircleProperties( main_window, current_index ):
     fill_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     fill_color_layout.addWidget( fill_color_label )
     fill_color_layout.addStretch( 1 )
+    fill_color_hex = main_window.current_shape.fill_color.name()
+    main_window.fill_color_rect_circle = ColorRectangle( fill_color_hex )
+    main_window.fill_color_rect_circle.mousePressEvent = lambda e: updateCircleFillColor( main_window )
+    main_window.fill_color_rect_circle.setCursor( Qt.CursorShape.PointingHandCursor )
     
-    if hasattr( main_window.current_shape, 'fill_color' ):
-        fill_color_hex = main_window.current_shape.fill_color.name()
-    
-    main_window.fill_color_circle = ColorRectangle( fill_color_hex )
-    main_window.fill_color_circle.mousePressEvent = lambda e: changeCircleFillColor( main_window )
-    main_window.fill_color_circle.setCursor( Qt.CursorShape.PointingHandCursor )
-    
-    fill_color_layout.addWidget( main_window.fill_color_circle )
+    fill_color_layout.addWidget( main_window.fill_color_rect_circle )
     fill_color_widget = QWidget()
     fill_color_widget.setLayout( fill_color_layout )
     main_window.properties_layout.insertWidget( current_index, fill_color_widget )
     current_index += 1
-
-    updateCircleFillColorAppearance(main_window)
 
     return current_index
 

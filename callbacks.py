@@ -53,244 +53,191 @@ def changeCanvasName( main_window, canvas, text ):
 #------------------------------------------------------------LINE--------------------------------------------------------------
 
 def updateLineActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LineWidget ):
-        active =  (state == Qt.CheckState.Checked.value )
-        main_window.current_shape.active = active
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateLineVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LineWidget ):
-        visible = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setVisibleLine( visible )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.visible = state 
+    main_window.current_shape.update()
 
 def updateLineStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LineWidget ):
-        static = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.static = static
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateLineName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LineWidget ):
-        main_window.current_shape.custom_name = text
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update()
 
 def updateLineStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LineWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
 
 def updateLineTag( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LineWidget ):
-        main_window.current_shape.tag = value
+     main_window.current_shape.tag = value
+     main_window.current_shape.update()
 
 def updateLinePosition (main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LineWidget ):
-        if ( hasattr( main_window, 'start_x_spin_line' ) and hasattr( main_window, 'start_y_spin_line' ) and hasattr( main_window, 'end_x_spin_line' ) and hasattr( main_window, 'end_y_spin_line' ) ):
-            start_x = main_window.start_x_spin_line.value()
-            start_y = main_window.start_y_spin_line.value()
-            end_x = main_window.end_x_spin_line.value()
-            end_y = main_window.end_y_spin_line.value()
-            main_window.current_shape.setLinePosition( start_x, start_y, end_x, end_y )
+    start_x = main_window.start_x_spin_line.value()
+    start_y = main_window.start_y_spin_line.value()
+    end_x = main_window.end_x_spin_line.value()
+    end_y = main_window.end_y_spin_line.value()
+    main_window.current_shape.setLinePosition( start_x, start_y, end_x, end_y )
 
 def updateLineColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LineWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.line_color )
+    color = QColorDialog.getColor( main_window.current_shape.line_color )
 
-        if color.isValid():
-            main_window.current_shape.setLineColor( color )
-            main_window.color_rect_line.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.line_color = color 
+        main_window.color_rect_line.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
 def updateLineEdgesWidth( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LineWidget ):
-        main_window.current_shape.setLineWidth( value )
+    main_window.current_shape.line_width = value
+    main_window.current_shape.update()
 
 #------------------------------------------------------------RECTANGLE--------------------------------------------------------------
 
 def updateRectangleActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        active =  (state == Qt.CheckState.Checked.value )
-        main_window.current_shape.active = active
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.active = state
 
-def updateRectangleVisible(main_window, state):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        main_window.current_shape.setRectangleVisible( state == Qt.CheckState.Checked.value )
+def updateRectangleVisible( main_window, state ):
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateRectangleStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        static = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.static = static
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.static = state
 
 def updateRectangleName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        main_window.current_shape.custom_name = text
+    main_window.current_shape.custom_name = text
 
 def updateRectangleStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
 
 def updateRectangleTag( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        main_window.current_shape.tag = value
+    main_window.current_shape.tag = value
 
 def updateRectanglePosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        if hasattr( main_window, 'pos_x_spin_rect' ) and hasattr( main_window, 'pos_y_spin_rect' ):
-            main_window.current_shape.move( main_window.pos_x_spin_rect.value(), main_window.pos_y_spin_rect.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_rect.value(), main_window.pos_y_spin_rect.value() )
 
 def updateRectangleSize( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        if hasattr( main_window, 'width_spin_rect' ) and hasattr( main_window, 'height_spin_rect' ):
-            main_window.current_shape.setFixedSize( main_window.width_spin_rect.value(), main_window.height_spin_rect.value() )
+    main_window.current_shape.setFixedSize( main_window.width_spin_rect.value(), main_window.height_spin_rect.value() )
 
 def updateRectangleEdgesColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.edges_color )
+    color = QColorDialog.getColor( main_window.current_shape.edges_color )
 
-        if color.isValid():
-            main_window.current_shape.setRectangleEdgesColor( color )
-            main_window.edges_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.edges_color =  color
+        main_window.edges_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
 def updateRectangleEdgesWidth( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        main_window.current_shape.setRectangleEdgesWidth( value )
+    main_window.current_shape.edges_width = value
+    main_window.current_shape.update()
 
 def updateRectangleFilled( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        filled = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.filled = filled
+        state == Qt.CheckState.Checked.value
+        main_window.current_shape.filled = state
         main_window.current_shape.update()
 
 def updateRectangleGradientDirection( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        text_to_direction = {
-            "Top to Bottom": "top_to_bottom",
-            "Bottom to Top": "bottom_to_top",
-            "Left to Right": "left_to_right",
-            "Right to Left": "right_to_left"
-        }
+    text_to_direction = {
+        "Top to Bottom": "top_to_bottom",
+        "Bottom to Top": "bottom_to_top",
+        "Left to Right": "left_to_right",
+        "Right to Left": "right_to_left"
+    }
         
-        direction = text_to_direction.get( text, "top_to_bottom" )
-        main_window.current_shape.gradient_direction = direction
-        main_window.current_shape.update()
+    main_window.current_shape.gradient_direction = text_to_direction.get( text, "top_to_bottom" )
+    main_window.current_shape.update()
 
 def updateRectangleGradientStartColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.start_color )
-        if color.isValid():
-            main_window.current_shape.start_color = color
-            main_window.current_shape.update()
-            
-            if hasattr( main_window, 'start_color_rect_rect' ):
-                main_window.start_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; "f"border: 2px solid #666;" )
+    color = QColorDialog.getColor( main_window.current_shape.start_color )
+
+    if color.isValid():
+        main_window.current_shape.start_color = color
+        main_window.start_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; "f"border: 2px solid #666;" )
+        main_window.current_shape.update()
             
 def updateRectangleGradientEndColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, RectangleWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.end_color )
+    color = QColorDialog.getColor( main_window.current_shape.end_color )
 
-        if color.isValid():
-            main_window.current_shape.end_color = color
-            main_window.current_shape.update()
-            
-            if hasattr(main_window, 'end_color_rect_rect'):
-                main_window.end_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; "f"border: 2px solid #666;" )
+    if color.isValid():
+        main_window.current_shape.end_color = color
+        main_window.end_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; "f"border: 2px solid #666;" )
+        main_window.current_shape.update()
         
 #------------------------------------------------------------CIRCLE--------------------------------------------------------------
 
-def updateCircleTag( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        main_window.current_shape.tag = value
-
 def updateCircleActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        main_window.current_shape.setActive( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateCircleVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        main_window.current_shape.setVisibleCircle( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateCircleStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        main_window.current_shape.setStatic( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateCircleName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        main_window.current_shape.setCustomName( text )
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update() 
 
 def updateCircleStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        main_window.current_shape.stack_order = value
-        
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
+
+def updateCircleTag( main_window, value ):
+    main_window.current_shape.tag = value
+    main_window.current_shape.update()
 
 def updateCirclePosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        if hasattr( main_window, 'pos_x_spin_circle' ) and hasattr( main_window, 'pos_y_spin_circle' ):
-            center_x = main_window.pos_x_spin_circle.value()
-            center_y = main_window.pos_y_spin_circle.value()
-            
-            x = center_x - main_window.current_shape.diameter // 2
-            y = center_y - main_window.current_shape.diameter // 2
-            
-            main_window.current_shape.move( x, y )
-            main_window.current_shape.updateCenterPosition()
-            
+    main_window.current_shape.move( main_window.pos_x_spin_circle.value() - main_window.current_shape.circle_diameter // 2, main_window.pos_y_spin_circle.value() - main_window.current_shape.circle_diameter // 2 )
 
-def updateCircleSize( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        if hasattr( main_window, 'diameter_spin_circle' ):
-            diameter = main_window.diameter_spin_circle.value()
-            main_window.current_shape.setDiameter( diameter )
-            
-            if hasattr( main_window, 'pos_x_spin_circle' ) and hasattr( main_window, 'pos_y_spin_circle' ):
-                main_window.pos_x_spin_circle.blockSignals( True )
-                main_window.pos_y_spin_circle.blockSignals( True )
-                main_window.pos_x_spin_circle.setValue( main_window.current_shape.center_x )
-                main_window.pos_y_spin_circle.setValue( main_window.current_shape.center_y )
-                main_window.pos_x_spin_circle.blockSignals( False )
-                main_window.pos_y_spin_circle.blockSignals( False )
-        
-def changeCircleLineColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        current_color = main_window.current_shape.edges_color
-        color = QColorDialog.getColor( current_color )
+def updateCircleSize( main_window, value ):
+    main_window.current_shape.setFixedSize( value, value )
+    main_window.current_shape.update()
 
-        if color.isValid():
-            main_window.current_shape.setColor( color )
-            main_window.edges_color_rect_circle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+def updateCircleLineColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.edges_color )
+
+    if color.isValid():
+        main_window.current_shape.edges_color = color
+        main_window.current_shape.update() 
+        main_window.edges_color_rect_circle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
 
 def updateCircleEdgeWidth( main_window, value ):
-
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        main_window.current_shape.setLineEdgeWidth( value )
+    main_window.current_shape.edges_width = value 
+    main_window.current_shape.update() 
 
 def updateCircleFilled( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, CircleWidget ):
-        filled = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.filled
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.filled = state
+    main_window.current_shape.update()
 
-def updateCircleFillColorAppearance( main_window ):
-    if not hasattr( main_window, 'current_shape' ) or not main_window.current_shape:
-        return
-    
-    if hasattr( main_window, 'fill_color_rect_circle' ):
-        main_window.fill_color_rect_circle.setStyleSheet( f"background-color: { main_window.current_shape.fill_color.name() }; "f"border: 1px solid #ccc;" )
-        main_window.fill_color_rect_circle.setCursor(Qt.CursorShape.PointingHandCursor)
+def updateCircleFillColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.fill_color )
 
-def changeCircleFillColor( main_window ):
-    current_color = main_window.current_shape.fill_color
-    color = QColorDialog.getColor( current_color )
-
-    if not main_window.current_shape:
-        return
-    
-    if hasattr (main_window, 'filled_checkbox_circle' ):
-        if not main_window.filled_checkbox_circle.isChecked():
-            return
-    
-    if isinstance( main_window.current_shape, CircleWidget ):
-        if color.isValid():
-            main_window.current_shape.setFillColor( color )
-            
-            if hasattr(main_window, 'fill_color_rect_circle'):
-                main_window.fill_color_rect_circle.setStyleSheet( f"background-color: { color.name() }; "f"border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.fill_color = color
+        main_window.current_shape.update()
+        main_window.fill_color_rect_circle.setStyleSheet( f"background-color: { color.name() }; "f"border: 1px solid #ccc;" )
 
 #------------------------------------------------------------ELLIPSE--------------------------------------------------------------
 

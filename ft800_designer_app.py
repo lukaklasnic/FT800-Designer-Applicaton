@@ -655,18 +655,14 @@ class MainWindow( QMainWindow ):
 
         if self.selected_shape == "Line":
             shape = LineWidget( widget_container )
-            start_x = container_pos.x() 
-            start_y = container_pos.y()
-            end_x = container_pos.x() + 100
-            end_y = container_pos.y() + 100
-            shape.setLinePosition( start_x, start_y, end_x, end_y )
+            shape.setLinePosition( container_pos.x() , container_pos.y(), container_pos.x() + 100, container_pos.y() + 100 )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Line" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
         elif self.selected_shape == "Rectangle":
-            shape = RectangleWidget( 100, 80, widget_container )
+            shape = RectangleWidget( widget_container )
             shape.move( container_pos.x(), container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Rectangle" )
@@ -674,7 +670,7 @@ class MainWindow( QMainWindow ):
             shape.tag = generateAutoTag( self, shape )
 
         elif self.selected_shape == "Circle":
-            shape = CircleWidget( 100, widget_container )
+            shape = CircleWidget( widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Circle" )
