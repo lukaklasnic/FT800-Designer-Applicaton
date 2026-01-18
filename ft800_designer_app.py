@@ -681,12 +681,12 @@ class MainWindow( QMainWindow ):
             shape = EllipseWidget( widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
             shape.clicked.connect( self.selectShape )
-            shape.custom_name = generateWidgetName(self, "Ellipse")
+            shape.custom_name = generateWidgetName( self, "Ellipse" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
             shape.tag = generateAutoTag( self, shape )
 
         elif self.selected_shape == "Button":
-            shape = ButtonWidget( 100, 50, widget_container )
+            shape = ButtonWidget( widget_container )
             shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Button" )
@@ -694,7 +694,7 @@ class MainWindow( QMainWindow ):
             shape.tag = generateAutoTag( self, shape )
 
         elif self.selected_shape == "Keys":
-            shape = KeysWidget( 200, 120, widget_container )
+            shape = KeysWidget( widget_container )
             shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Keys" )

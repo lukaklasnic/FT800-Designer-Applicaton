@@ -46,7 +46,7 @@ class LineWidget( QWidget ):
         local_end_y = self.end_y - self.y()
         
         pen = QPen( self.line_color )
-        pen.setWidth( self.line_width )
+        pen.setWidth( 2 * self.line_width )
         pen.setCapStyle( Qt.PenCapStyle.RoundCap )
         painter.setPen( pen )
         painter.drawLine( local_start_x, local_start_y, local_end_x, local_end_y )
@@ -319,7 +319,7 @@ class RectangleWidget( QWidget ):
         self.edges_color = QColor( 0, 0, 0 )
         self.edges_width = 5
         self.filled = False 
-        self.gradient_direction = "top_to_bottom"
+        self.gradient_direction = "Top-Bottom"
         self.start_color = QColor( 255, 0, 0 )
         self.end_color = QColor( 0, 0, 255 )
 
@@ -338,25 +338,26 @@ class RectangleWidget( QWidget ):
         if self.filled:
             gradient = None
             
-            if self.gradient_direction == "top_to_bottom":
+            if self.gradient_direction == "Top-Bottom":
                 gradient = QLinearGradient( 0, 0, 0, self.height() )
 
-            elif self.gradient_direction == "bottom_to_top":
+            elif self.gradient_direction == "Bottom-Top":
                 gradient = QLinearGradient( 0, self.height(), 0, 0 )
 
-            elif self.gradient_direction == "left_to_right":
+            elif self.gradient_direction == "Left-Right":
                 gradient = QLinearGradient( 0, 0, self.width(), 0 )
 
-            elif self.gradient_direction == "right_to_left":
+            elif self.gradient_direction == "Right-Left":
                 gradient = QLinearGradient( self.width(), 0, 0, 0 )
-            
-            gradient.setColorAt( 0, self.start_color )
-            gradient.setColorAt( 1, self.end_color )
+
+            gradient.setColorAt( 0.0, self.start_color )
+            gradient.setColorAt( 0.6, self.end_color )
+            gradient.setColorAt( 1.0, self.end_color )    
             painter.fillRect( self.rect(), gradient )
 
         
         pen = QPen( self.edges_color )
-        pen.setWidth( self.edges_width )
+        pen.setWidth( 2* self.edges_width )
         painter.setPen( pen )
         painter.setBrush( Qt.BrushStyle.NoBrush )
         painter.drawRect( 0, 0, self.width() , self.height() )
@@ -424,7 +425,7 @@ class RectangleWidget( QWidget ):
         self.rectangle_height = new_height
 
         self.setFixedSize( new_width, new_height )
-        self.updateRectangleSize()
+        self.updateRectanglePropertiesSize()
 
     def getCornerAt( self, pos ):
         handle_size = 16
@@ -449,7 +450,7 @@ class RectangleWidget( QWidget ):
         self.selected = selected
         self.update()
 
-    def updateRectangleSize( self ):
+    def updateRectanglePropertiesSize( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
@@ -465,7 +466,7 @@ class RectangleWidget( QWidget ):
             main_window.height_spin_rect.setValue( self.rectangle_height )
             main_window.height_spin_rect.blockSignals( False )
 
-    def updateRectanglePosition( self ):
+    def updateRectanglePropertiesPosition( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
@@ -509,8 +510,8 @@ class RectangleWidget( QWidget ):
             self.dragging = False
             self.resize_corner = None
 
-            self.updateRectangleSize()
-            self.updateRectanglePosition()
+            self.updateRectanglePropertiesSize()
+            self.updateRectanglePropertiesPosition()
 
         event.accept()
 
@@ -536,7 +537,7 @@ class RectangleWidget( QWidget ):
             new_y = max( 0, self.y() + delta.y() )
 
             self.move( new_x, new_y )
-            self.updateRectanglePosition()
+            self.updateRectanglePropertiesPosition()
         
         event.accept()
 
@@ -577,7 +578,7 @@ class CircleWidget( QWidget ):
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
-        rect_size = min( self.width(), self.height() ) - self.edges_width
+        rect_size = min( self.width(), self.height() ) - 2 * self.edges_width
 
         x_offset = ( self.width() - rect_size ) // 2
         y_offset = ( self.height() - rect_size ) // 2
@@ -589,7 +590,7 @@ class CircleWidget( QWidget ):
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( circle_rect )
 
-        pen = QPen( self.edges_color, self.edges_width )
+        pen = QPen( self.edges_color, 2 * self.edges_width )
         pen.setJoinStyle( Qt.PenJoinStyle.RoundJoin )
         pen.setCapStyle( Qt.PenCapStyle.RoundCap )
         painter.setPen( pen )
@@ -653,8 +654,8 @@ class CircleWidget( QWidget ):
             delta_y = self.resize_start_diameter - new_diameter
             self.move( self.x(), self.y() + delta_y )
 
-        self.updateCircleSize()
-        self.updateCircleCenterPosition()
+        self.updateCirclePropertiesSize()
+        self.updateCirclePropertiesCenterPosition()
 
     def getCornerAt( self, pos ):
         handle_size = 12 
@@ -679,7 +680,7 @@ class CircleWidget( QWidget ):
         self.selected = selected
         self.update()
     
-    def updateCircleSize( self ):
+    def updateCirclePropertiesSize( self ):
         main_window = self.findMainWindow()
 
         if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr(main_window, 'diameter_spin_circle' ) ):
@@ -687,7 +688,7 @@ class CircleWidget( QWidget ):
             main_window.diameter_spin_circle.setValue( self.diameter )
             main_window.diameter_spin_circle.blockSignals( False )
 
-    def updateCircleCenterPosition( self ):
+    def updateCircleCenterPositionProperties( self ):
         main_window = self.findMainWindow()
 
         self.center_x = self.x() + self.diameter // 2
@@ -728,7 +729,7 @@ class CircleWidget( QWidget ):
                 self.drag_start_pos = mouse_pos
                 self.clicked.emit( self )
                 
-            self.updateCircleCenterPosition()
+            self.updateCircleCenterPositionProperties()
             event.accept()
 
     def mouseReleaseEvent( self, event ):
@@ -763,10 +764,9 @@ class CircleWidget( QWidget ):
             new_x = max( 0, self.x() + delta.x() )
             new_y = max( 0, self.y() + delta.y() )
             self.move( new_x, new_y )
-            self.updateCircleCenterPosition()
+            self.updateCircleCenterPositionProperties()
 
         event.accept()
-
 
 class EllipseWidget( QWidget ):
     clicked = pyqtSignal( object )
@@ -794,7 +794,7 @@ class EllipseWidget( QWidget ):
         self.edges_width = 5
         self.filled = False
         self.show_ellipse_warning = True
-        self.gradient_type = "top_bottom"
+        self.gradient_direction = "Top-Bottom"
         self.gradient_start_color = QColor( 255, 0, 0 )
         self.gradient_end_color = QColor( 0, 0, 255 )
 
@@ -810,19 +810,20 @@ class EllipseWidget( QWidget ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
-        margin = self.edges_width // 2
+        margin = self.edges_width
         ellipse_rect = QRect( margin, margin, self.ellipse_width - 2 * margin, self.ellipse_height - 2 * margin )
+
         if self.filled:
-            if self.gradient_type == "top_bottom":
+            if self.gradient_direction == "Top-Bottom":
                 gradient = QLinearGradient( 0, 0, 0, self.ellipse_height )
 
-            elif self.gradient_type == "bottom_top":
+            elif self.gradient_direction == "Bottom-Top":
                 gradient = QLinearGradient( 0, self.ellipse_height, 0, 0 )
 
-            elif self.gradient_type == "left_right":
+            elif self.gradient_direction == "Left-Right":
                 gradient = QLinearGradient( 0, 0, self.ellipse_width, 0 )
 
-            elif self.gradient_type == "right_left":
+            elif self.gradient_direction == "Right-Left":
                 gradient = QLinearGradient( self.ellipse_width, 0, 0, 0 )
 
             else:
@@ -835,7 +836,7 @@ class EllipseWidget( QWidget ):
         else:
             painter.setBrush( Qt.BrushStyle.NoBrush )
 
-        painter.setPen( QPen( self.edges_color, self.edges_width ) )
+        painter.setPen( QPen( self.edges_color, 2 * self.edges_width ) )
         painter.drawEllipse( ellipse_rect )
 
         if self.selected:
@@ -868,6 +869,8 @@ class EllipseWidget( QWidget ):
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
+        self.setFixedSize( self.ellipse_width, self.ellipse_height )
+
         painter.setPen( selection_pen )
         painter.setBrush( Qt.BrushStyle.NoBrush )
         painter.drawRect( border_rect )
@@ -893,7 +896,12 @@ class EllipseWidget( QWidget ):
             new_width = max( 20, self.resize_start_size.width() - delta.x() )
             new_height = max( 20, self.resize_start_size.height() - delta.y() )
 
-        self.setSize( new_width, new_height )
+        self.ellipse_width = max( 20, new_width )
+        self.ellipse_height = max( 20, new_height )
+
+        self.setFixedSize( self.ellipse_width, self.ellipse_height )
+        self.updateEllipsePropertiesCenterPosition()
+        self.updateEllipsePropertiesSize()
     
     def getCornerAt( self, pos ):
         handle_size = 12
@@ -914,55 +922,39 @@ class EllipseWidget( QWidget ):
         
         return None
     
-    def setSize( self, width, height ):
-        self.ellipse_width = max( 20, width )
-        self.ellipse_height = max( 20, height )
-        self.setFixedSize( self.ellipse_width, self.ellipse_height )
-        self.update()
-    
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
     
-    def updateEllipseSize( self ):
+    def updateEllipsePropertiesSize( self ):
         main_window = self.findMainWindow()
+
         if main_window and main_window.current_shape == self:
-            try:
-                if hasattr( main_window, 'width_spin_ellipse' ):
-                    main_window.width_spin_ellipse.blockSignals( True )
-                    main_window.width_spin_ellipse.setValue( self.ellipse_width )
-                    main_window.width_spin_ellipse.blockSignals( False )
-            except RuntimeError:
-                pass
+            if hasattr( main_window, 'width_spin_ellipse' ):
+                main_window.width_spin_ellipse.blockSignals( True )
+                main_window.width_spin_ellipse.setValue( self.ellipse_width )
+                main_window.width_spin_ellipse.blockSignals( False )
             
-            try:
-                if hasattr( main_window, 'height_spin_ellipse' ):
-                    main_window.height_spin_ellipse.blockSignals( True )
-                    main_window.height_spin_ellipse.setValue( self.ellipse_height )
-                    main_window.height_spin_ellipse.blockSignals( False )
-            except RuntimeError:
-                pass
+            if hasattr( main_window, 'height_spin_ellipse' ):
+                main_window.height_spin_ellipse.blockSignals( True )
+                main_window.height_spin_ellipse.setValue( self.ellipse_height )
+                main_window.height_spin_ellipse.blockSignals( False )
             
-    def updateEllipsePosition( self ):
+    def updateEllipsePropertiesCenterPosition( self ):
         main_window = self.findMainWindow()
+        
         self.center_x = self.x() + self.ellipse_width // 2
         self.center_y = self.y() + self.ellipse_height // 2
-        if main_window and main_window.current_shape == self:
-            try:
-                if hasattr( main_window, 'pos_x_spin_ellipse' ):
-                    main_window.pos_x_spin_ellipse.blockSignals( True )
-                    main_window.pos_x_spin_ellipse.setValue( self.center_x )
-                    main_window.pos_x_spin_ellipse.blockSignals( False )
-            except RuntimeError:
-                pass
-            
-            try:
-                if hasattr( main_window, 'pos_y_spin_ellipse' ):
-                    main_window.pos_y_spin_ellipse.blockSignals( True )
-                    main_window.pos_y_spin_ellipse.setValue( self.center_y )
-                    main_window.pos_y_spin_ellipse.blockSignals( False )
-            except RuntimeError:
-                pass
+
+        if hasattr( main_window, 'pos_x_spin_ellipse' ):
+            main_window.pos_x_spin_ellipse.blockSignals( True )
+            main_window.pos_x_spin_ellipse.setValue( self.center_x )
+            main_window.pos_x_spin_ellipse.blockSignals( False )
+
+        if hasattr( main_window, 'pos_y_spin_ellipse' ):
+            main_window.pos_y_spin_ellipse.blockSignals( True )
+            main_window.pos_y_spin_ellipse.setValue( self.center_y )
+            main_window.pos_y_spin_ellipse.blockSignals( False )
 
     def showFilledWarning( self, state ):
         state == Qt.CheckState.Checked.value 
@@ -971,15 +963,16 @@ class EllipseWidget( QWidget ):
             warning_dialog = QDialog( self )
             warning_dialog.setWindowTitle( "Information" )
             warning_dialog.setFixedSize( 400, 200 )
+            warning_dialog.setStyleSheet( "QDialog {background-color: #2b2b2b; border: 1px solid #555555;}" )
             layout = QVBoxLayout( warning_dialog )
             info_label = QLabel( "This option is resource intensive and may cause unpredictable display behavior." )
             info_label.setWordWrap( True )
-            info_label.setStyleSheet( "color: white; font-size: 12px; padding: 10px;" )
+            info_label.setStyleSheet( "color: white; font-size: 12px; padding: 10px; border: none;" )
             layout.addWidget( info_label )
 
             dont_show_layout = QHBoxLayout()
             dont_show_checkbox = QCheckBox( "Do not show again" )
-            dont_show_checkbox.setStyleSheet( "color: white;" )
+            dont_show_checkbox.setStyleSheet( "color: white; border: none;" )
             dont_show_layout.addWidget( dont_show_checkbox )
             dont_show_layout.addStretch(1)
             layout.addLayout( dont_show_layout )
@@ -1018,19 +1011,20 @@ class EllipseWidget( QWidget ):
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
-
             self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+
             else:
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
                 self.clicked.emit( self )
 
-        event.accept()
+            self.updateEllipsePropertiesCenterPosition()
+            event.accept()
 
     def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -1042,8 +1036,8 @@ class EllipseWidget( QWidget ):
 
     def mouseMoveEvent( self, event ):
         mouse_pos = event.pos()
-        
         corner = self.getCornerAt( mouse_pos )
+
         if corner:
             if corner in [ "top_left", "bottom_right" ]:
                 self.setCursor( Qt.CursorShape.SizeFDiagCursor )
@@ -1054,98 +1048,86 @@ class EllipseWidget( QWidget ):
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize( event.globalPosition().toPoint() )
+
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-            
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
+            new_x = max( 0, self.x() + delta.x() )
+            new_y = max( 0, self.y() + delta.y() )
             self.move( new_x, new_y )
-            self.updateEllipsePosition()
+            self.updateEllipsePropertiesCenterPosition()
         
         event.accept()
     
 class ButtonWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, w = 100, h = 50, parent = None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
-        self.setFixedSize( w, h )
         
-        self.start_color = QColor( 0, 0, 255 )
-        self.end_color = QColor( 0, 0, 136 )
-        self.text_color = QColor( 255, 255, 255 )
-        self.border_color = QColor( 0, 0, 0 )
-        self.edges_width = 1
-        self.button_text = "Press"
-        self.text_size = 20
-        self.is_selected = False
-        self.use_3d = True
-        self.custom_name = ""
-        
+        self.defaultValues()
+        self.setFixedSize( self.button_width, self.button_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
-        self.resizing = False
-        self.dragging = False 
-        self.resize_start_pos = QPoint()
-        self.resize_start_size = QSize()
-        self.resize_corner = None
-        self.drag_start_pos = QPoint()
-
-        self.start_color = QColor( 255, 255, 255 )
-        self.end_color = QColor( 0, 0, 255 )
-        self.text_color = QColor( 255, 255, 255 )
-        self.button_text = "Press"
-        self.text_size = 4
-        self.is_selected = False
-        self.use_3d = True
-        self.custom_name = ""
-        
+    def defaultValues( self ):
         self.active = True
         self.visible = True
         self.static = False
+        self.custom_name = ""
         self.stack_order = 1
-
         self.tag = 0
-        
-        self.setMouseTracking( True )
-        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
-        
+        self.button_width = 100
+        self.button_height = 50
+        self.gradient_start_color = QColor( 255, 255, 255 )
+        self.gradient_end_color = QColor( 0, 0, 255 )
+        self.color_press = QColor( 0, 0, 255 )
+        self.effect_3d = True
+        self.effect_3d_press = True
+        self.button_text = "Press"
+        self.text_size = 28
+        self.text_color = QColor( 255, 255, 255 )
+
+        self.selected = False
         self.resizing = False
-        self.dragging = False
+        self.dragging = False 
         self.resize_start_pos = QPoint()
-        self.resize_start_size = QSize()
-        self.resize_corner = None
         self.drag_start_pos = QPoint()
+        self.resize_corner = None
+        self.resize_start_size = QSize()
 
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
-        gradient = QLinearGradient( 0, 0, 0, self.height() )
-        gradient.setColorAt( 0.0, self.start_color )
-        gradient.setColorAt( 0.3, self.end_color )   
-        gradient.setColorAt( 1.0, self.end_color ) 
-        painter.setBrush( QBrush( gradient ) )
-        painter.setPen( Qt.PenStyle.NoPen )
-        
-        r = int( ( 7 / 5 ) * self.text_size + 8 / 5 )
+  
+        r = int( 4 / 5 * self.text_size - 89 / 5 )
 
-        painter.drawRoundedRect( 0, 0, self.width(), self.height(), r, r )
+        if self.effect_3d and self.effect_3d_press:
+            gradient = QLinearGradient( 0, 0, 0, self.height() )
+            self.gradient_start_color.setAlpha( 100 )
+            gradient.setColorAt( 0.0, self.gradient_start_color )
+            gradient.setColorAt( 0.4, self.gradient_end_color )   
+            gradient.setColorAt( 1.0, self.gradient_end_color ) 
+            painter.setBrush( QBrush( gradient ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawRoundedRect( 0, 0, self.width(), self.height(), r, r )
 
-        if self.use_3d:
             painter.setPen( QPen( QColor( 0, 0, 0 ), 2 ) )
             painter.drawLine( r, self.height() - 1, self.width() - r, self.height() - 1 )
             painter.drawLine( self.width() - 1, r, self.width() - 1, self.height() - r )
             painter.drawArc( self.width() - 2 * r - 1, self.height() - 2 * r - 1, 2 * r, 2 * r, 270 * 16, 90 * 16 )
 
+        else:
+            painter.setBrush( QBrush( self.color_press ) )
+            painter.drawRoundedRect( 0, 0, self.width(), self.height(), r, r )
+
         painter.setPen( QPen( self.text_color ) )
         font = QFont()
-        font.setPointSize( int( ( 23 / 5 ) * self.text_size + 17 / 5 ) )
+        font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5) )
         painter.setFont( font )
         painter.drawText( self.rect(), Qt.AlignmentFlag.AlignCenter, self.button_text )
 
-        if self.is_selected:
+        if self.selected:
             self.drawSelectionBorder( painter )
             self.drawSelectionHandles( painter )
             
@@ -1205,13 +1187,7 @@ class ButtonWidget( QWidget ):
 
             self.setFixedSize( new_width, new_height )
             self.update()
-            self.updatePropertiesSize()
-
-    def resize( self, width, height ):
-        super().resize( width, height )
-
-    def move( self, x, y ):
-        super().move( x, y )
+            self.updateButtonPropertiesSize()
 
     def getCornerAt( self, pos ):
         handle_size = 12 
@@ -1232,64 +1208,19 @@ class ButtonWidget( QWidget ):
         
         return None
     
-    def getColor( self ):
-        return self.start_color
 
     def setSelected( self, selected ):
-        self.is_selected = selected
+        self.selected = selected
         self.update()
 
-    def setBackgroundGradient( self, gradient ):
-        if gradient.stops():
-            self.start_color = gradient.stops()[ 0 ][ 1 ]
+    def updateButtonProperties3D( self ):
+        main_window = self.findMainWindow()
 
-            if len( gradient.stops() ) > 1:
-                self.end_color = gradient.stops()[ -1 ][ 1 ]
+        main_window.effect_3d_checkbox.blockSignals( True )
+        main_window.effect_3d_checkbox.setChecked( self.effect_3d )
+        main_window.effect_3d_checkbox.blockSignals( False )
 
-        self.update()
-
-    def setTextColor( self, color ):
-        self.text_color = color
-        self.update()
-
-    def setBorderColor( self, color ):
-        self.border_color = color
-        self.update()
-
-    def setBorderWidth( self, width ):
-        self.edges_width = width
-        self.update()
-
-    def setButtonText( self, text ):
-        self.button_text = text
-        self.update()
-
-    def setTextSize( self, size ):
-        self.text_size = size
-        self.update()
-
-    def setRadius( self, radius ):
-        self.r = radius
-        self.update()
-
-    def setActive( self, active ):
-        self.active = active
-
-    def setVisibleButton( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-
-    def setStatic( self, static ):
-        self.static = static
-
-    def setStackOrder( self, order ):
-        self.stack_order = order
-
-    def setRectangleColor( self, color ):
-        self.start_color = color
-        self.update()
-
-    def updatePropertiesSize( self ):
+    def updateButtonPropertiesSize( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
@@ -1298,8 +1229,8 @@ class ButtonWidget( QWidget ):
         if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'width_spin' ) and hasattr(main_window, 'height_spin' ) ):
             main_window.width_spin.setValue( self.width() )
             main_window.height_spin.setValue( self.height() )
-
-    def updatePropertiesPosition( self ):
+        
+    def updateButtonPropertiesPosition( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
@@ -1321,6 +1252,7 @@ class ButtonWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+        
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
 
@@ -1332,18 +1264,26 @@ class ButtonWidget( QWidget ):
             else:
                 self.dragging = True
                 self.drag_start_pos = mouse_pos 
-                self.clicked.emit(self)
+                self.clicked.emit( self )
+                if self.effect_3d:
+                    self.effect_3d_press = False
+                    self.updateButtonProperties3D()
+                    self.update()         
 
         event.accept()
 
     def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
-
-            self.updatePropertiesSize()
-            self.updatePropertiesPosition()
+            if self.effect_3d:
+                self.effect_3d_press = True
+                self.updateButtonProperties3D()
+                self.update()
+            self.updateButtonPropertiesSize()
+            self.updateButtonPropertiesPosition()
 
         event.accept()
 
@@ -1365,61 +1305,58 @@ class ButtonWidget( QWidget ):
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
+            new_x = max( 0, self.x() + delta.x() )
+            new_y = max( 0, self.y() + delta.y() )
 
             self.move(new_x, new_y)
-            self.updatePropertiesPosition()
+            self.updateButtonPropertiesPosition()
         
         event.accept()
 
 class KeysWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, width = 200, height = 120, parent = None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
-        
-        self._width = width
-        self._height = height
-        
-        self.key_type = "QUERTZ"
-        self.is_3d = True
-        self.font_size = 12
-        
-        self.key_width = 20
-        self.key_height = 20
-        
-        self.key_color_top = QColor( 255, 255, 255 ) 
-        self.key_color_bottom = QColor( 0, 0, 255 )
-        self.text_color = QColor( 255, 255, 255 ) 
+
         self.border_color = QColor( 0, 0, 0 ) 
+        self.defaultValues()
+        self.setFixedSize( self.keys_width, self.keys_height )
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
+    def defaultValues( self ):
         self.active = True
         self.visible = True
         self.static = False
-        self.custom_name = None
-        
+        self.custom_name = ""
+        self.stack_order = 1
+        self.keys_width = 200
+        self.keys_height = 120
+        self.gradient_start_color = QColor( 255, 255, 255 ) 
+        self.gradient_end_color = QColor( 0, 0, 255 )
+        self.text_color = QColor( 255, 255, 255 ) 
+        self.effect_3d = True
+        self.key_type = "QUERTZ"
+        self.font_size = 12
+
+        self.key_width = 20
+        self.key_height = 20
+
         self.selected = False
-        
-        self.setFixedSize( self._width, self._height )
-        
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
-        self.resize_start_size = QSize()
-        self.resize_corner = None
         self.drag_start_pos = QPoint()
-        
-        self.setMouseTracking( True )
-        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
-        self.stack_order = 1
+        self.resize_corner = None
+        self.resize_start_size = QSize()
 
     def paintEvent( self, event ):
             painter = QPainter( self )
             painter.setRenderHint( QPainter.RenderHint.Antialiasing )
-            painter.setPen( self.text_color )
 
-            font = QFont( "Arial", self.font_size, QFont.Weight.Bold )
+            font = QFont()
+            font.setPointSize( int( ( 23 / 5 ) * self.font_size - 548 / 5) )
             painter.setFont( font )
 
             margin_x = 10
@@ -1428,23 +1365,28 @@ class KeysWidget( QWidget ):
             current_x = margin_x
             current_y = margin_y
 
+            r = int( 4 / 5 * self.font_size - 89 / 5 )
+            
+
             if self.key_type == "NUM":
                 number = 1
                 for i in range( 3 ):
                     for j in range( 3 ):
                         gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
-                        gradient.setColorAt( 0, self.key_color_top )
-                        gradient.setColorAt( 1, self.key_color_bottom ) 
+                        self.gradient_start_color.setAlpha( 100 )
+                        gradient.setColorAt( 0.0, self.gradient_start_color )
+                        gradient.setColorAt( 0.4, self.gradient_end_color )   
+                        gradient.setColorAt( 1.0, self.gradient_end_color ) 
 
                         painter.setBrush( gradient )
-                        painter.setPen( QPen( self.border_color, 1 ) )
-                        painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, 5, 5 )
+                        painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, r, r )
 
-                        if self.is_3d:
+                        if self.effect_3d:
                             self.draw3dEffect( painter, current_x, current_y, self.key_width, self.key_height )
 
                         text = str( number )
                         text_rect = painter.boundingRect( current_x, current_y, self.key_width, self.key_height, Qt.AlignmentFlag.AlignCenter, text )
+                        painter.setPen( QPen( self.text_color ) )
                         painter.drawText( text_rect, Qt.AlignmentFlag.AlignCenter, text )
 
                         current_x += self.key_width + 4
@@ -1456,34 +1398,38 @@ class KeysWidget( QWidget ):
                 key_width_0 = self.key_width * 2 + 4 
 
                 gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
-                gradient.setColorAt( 0, self.key_color_top )
-                gradient.setColorAt( 1, self.key_color_bottom )
+                self.gradient_start_color.setAlpha( 100 )
+                gradient.setColorAt( 0.0, self.gradient_start_color )
+                gradient.setColorAt( 0.4, self.gradient_end_color )   
+                gradient.setColorAt( 1.0, self.gradient_end_color ) 
 
                 painter.setBrush( gradient )
-                painter.setPen( QPen( self.border_color, 1 ) )
-                painter.drawRoundedRect( current_x, current_y, key_width_0, self.key_height, 5, 5 )
+                painter.drawRoundedRect( current_x, current_y, key_width_0, self.key_height, r, r )
 
-                if self.is_3d:
+                if self.effect_3d:
                     self.draw3dEffect( painter, current_x, current_y, key_width_0, self.key_height )
 
                 text = "0"
                 text_rect = painter.boundingRect( current_x, current_y, key_width_0, self.key_height, Qt.AlignmentFlag.AlignCenter, text )
+                painter.setPen( QPen( self.text_color ) )
                 painter.drawText( text_rect, Qt.AlignmentFlag.AlignCenter, text )
 
                 current_x += key_width_0 + 4
 
                 gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
-                gradient.setColorAt( 0, self.key_color_top )
-                gradient.setColorAt( 1, self.key_color_bottom )
+                self.gradient_start_color.setAlpha( 100 )
+                gradient.setColorAt( 0.0, self.gradient_start_color )
+                gradient.setColorAt( 0.4, self.gradient_end_color )   
+                gradient.setColorAt( 1.0, self.gradient_end_color ) 
 
                 painter.setBrush( gradient )
-                painter.setPen( QPen( self.border_color, 1 ) )
-                painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, 5, 5 )
+                painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, r, r )
 
-                if self.is_3d:
+                if self.effect_3d:
                     self.draw3dEffect( painter, current_x, current_y, self.key_width, self.key_height )
 
                 text = "."
+                painter.setPen( QPen( self.text_color ) )
                 text_rect = painter.boundingRect( current_x, current_y, self.key_width, self.key_height, Qt.AlignmentFlag.AlignCenter, text )
                 painter.drawText( text_rect, Qt.AlignmentFlag.AlignCenter, text )
 
@@ -1492,14 +1438,16 @@ class KeysWidget( QWidget ):
 
                 for key in keys_row_1:
                     gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
-                    gradient.setColorAt( 0, self.key_color_top )
-                    gradient.setColorAt( 1, self.key_color_bottom )
+                    self.gradient_start_color.setAlpha( 100 )
+                    gradient.setColorAt( 0.0, self.gradient_start_color )
+                    gradient.setColorAt( 0.4, self.gradient_end_color )   
+                    gradient.setColorAt( 1.0, self.gradient_end_color ) 
 
                     painter.setBrush( gradient )
                     painter.setPen( QPen( self.border_color, 1 ) )
-                    painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, 5, 5 )
+                    painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, r, r )
 
-                    if self.is_3d:
+                    if self.effect_3d:
                         self.draw3dEffect( painter, current_x, current_y, self.key_width, self.key_height )
 
                     text_rect = painter.boundingRect( current_x, current_y, self.key_width, self.key_height, Qt.AlignmentFlag.AlignCenter, key )
@@ -1512,14 +1460,16 @@ class KeysWidget( QWidget ):
                 keys_row_2 = "ASDFGHJKL"
                 for key in keys_row_2:
                     gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
-                    gradient.setColorAt( 0, self.key_color_top )
-                    gradient.setColorAt( 1, self.key_color_bottom )
+                    self.gradient_start_color.setAlpha( 100 )
+                    gradient.setColorAt( 0.0, self.gradient_start_color )
+                    gradient.setColorAt( 0.4, self.gradient_end_color )   
+                    gradient.setColorAt( 1.0, self.gradient_end_color ) 
 
                     painter.setBrush( gradient )
                     painter.setPen( QPen( self.border_color, 1 ) )
-                    painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, 5, 5 )
+                    painter.drawRoundedRect( current_x, current_y, self.key_width, self.key_height, r, r )
 
-                    if self.is_3d:
+                    if self.effect_3d:
                         self.draw3dEffect(painter, current_x, current_y, self.key_width, self.key_height )
 
                     text_rect = painter.boundingRect( current_x, current_y, self.key_width, self.key_height, Qt.AlignmentFlag.AlignCenter, key )
@@ -1538,18 +1488,20 @@ class KeysWidget( QWidget ):
                         key_width = self.key_width
 
                     gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
-                    gradient.setColorAt( 0, self.key_color_top )
-                    gradient.setColorAt( 1, self.key_color_bottom )
+                    self.gradient_start_color.setAlpha( 100 )
+                    gradient.setColorAt( 0.0, self.gradient_start_color )
+                    gradient.setColorAt( 0.4, self.gradient_end_color )   
+                    gradient.setColorAt( 1.0, self.gradient_end_color ) 
 
                     painter.setBrush( gradient )
                     painter.setPen( QPen( self.border_color, 1 ) )
-                    painter.drawRoundedRect( current_x, current_y, key_width, self.key_height, 5, 5 )
+                    painter.drawRoundedRect( current_x, current_y, key_width, self.key_height, r, r )
 
-                    if self.is_3d:
+                    if self.effect_3d:
                         self.draw3dEffect( painter, current_x, current_y, key_width, self.key_height )
 
                     if key in [ "Ent", "Del" ]:
-                        small_font = QFont("Arial", max( 6, self.font_size - 2 ), QFont.Weight.Bold )
+                        small_font = QFont( "Arial", max( 6, self.font_size - 2 ), QFont.Weight.Bold )
                         painter.setFont( small_font )
 
                     text_rect = painter.boundingRect( current_x, current_y, key_width, self.key_height, Qt.AlignmentFlag.AlignCenter, key )
@@ -1561,17 +1513,19 @@ class KeysWidget( QWidget ):
 
                 current_x = margin_x
                 current_y += self.key_height + 4
-                space_width = self._width - 2 * margin_x
+                space_width = self.keys_width - 2 * margin_x
 
                 gradient = QLinearGradient( current_x, current_y, current_x, current_y + self.key_height )
-                gradient.setColorAt( 0, self.key_color_top )
-                gradient.setColorAt( 1, self.key_color_bottom )
+                self.gradient_start_color.setAlpha( 100 )
+                gradient.setColorAt( 0.0, self.gradient_start_color )
+                gradient.setColorAt( 0.4, self.gradient_end_color )   
+                gradient.setColorAt( 1.0, self.gradient_end_color ) 
 
                 painter.setBrush( gradient )
                 painter.setPen( QPen( self.border_color, 1 ) )
-                painter.drawRoundedRect( current_x, current_y, space_width, self.key_height, 5, 5 )
+                painter.drawRoundedRect( current_x, current_y, space_width, self.key_height, r, r )
 
-                if self.is_3d:
+                if self.effect_3d:
                     self.draw3dEffect( painter, current_x, current_y, space_width, self.key_height )
 
                 space_font = QFont( "Arial", max( 10, self.font_size ), QFont.Weight.Bold )
@@ -1585,11 +1539,11 @@ class KeysWidget( QWidget ):
                 self.drawSelectionHandles( painter )
 
     def draw3dEffect( self, painter, x, y, width, height ):
-        painter.setPen( QPen( QColor( 255, 255, 255 ), 2 ) )
+        painter.setPen( QPen( QColor( 255, 255, 255 ), 1 ) )
         painter.drawLine( x, y, x + width, y )
         painter.drawLine( x, y, x, y + height )
         
-        painter.setPen( QPen( QColor( 0, 0, 0 ), 2 ) )
+        painter.setPen( QPen( QColor( 0, 0, 0 ), 1 ) )
         painter.drawLine( x, y + height, x + width, y + height )
         painter.drawLine( x + width, y, x + width, y + height )
 
@@ -1600,7 +1554,7 @@ class KeysWidget( QWidget ):
         handle_size = 8
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0) )
+        painter.setBrush( QColor( 0, 255, 0 ) )
         painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
@@ -1654,22 +1608,19 @@ class KeysWidget( QWidget ):
             new_width = max( 100, self.resize_start_size.width() - delta.x() )
             new_height = max( 80, self.resize_start_size.height() - delta.y() )
 
-        self.setSize( new_width, new_height )
-    
-    def adjustKeyDimensions( self ):
+        self.keys_width = max( 100, new_width )
+        self.keys_height = max( 80, new_height )
+        
         if self.key_type == "NUM":
-            self.key_width = max( 15, self._width // 3 - 10 )
-            self.key_height = max( 15, self._height // 4 - 8 )
+            self.key_width = max( 15, self.keys_width // 3 - 10 )
+            self.key_height = max( 15, self.keys_height // 4 - 8 )
 
-        else:
-            self.key_width = max( 12, self._width // 10 - 6 )
-            self.key_height = max( 15, self._height // 5 - 8 )
-
-    def getWidth( self ):
-        return self._width
-    
-    def getHeight( self ):
-        return self._height
+        elif self.key_type == "QUERTZ":
+            self.key_width = max( 12, self.keys_width // 10 - 6 )
+            self.key_height = max( 15, self.keys_height // 5 - 8 )
+        
+        self.setFixedSize( self.keys_width, self.keys_height )
+        self.update()
 
     def getCornerAt( self, pos ):
         handle_size = 12
@@ -1690,47 +1641,11 @@ class KeysWidget( QWidget ):
         
         return None
 
-    def setSize( self, width, height ):
-        self._width = max( 100, width )
-        self._height = max( 80, height )
-        
-        self.adjustKeyDimensions()
-        
-        self.setFixedSize( self._width, self._height )
-        self.update()
-
-    def set_key_type( self, key_type ):
-        self.key_type = key_type
-        self.adjustKeyDimensions()
-        self.update()
-    
-    def set3d( self, is_3d ):
-        self.is_3d = is_3d
-        self.update()
-    
-    def setFontSize( self, size ):
-        self.font_size = max( 6, min( 30, size ) )
-        self.update()
-    
-    def setKeyColors( self, top_color, bottom_color ):
-        self.key_color_top = top_color
-        self.key_color_bottom = bottom_color
-        self.update()
-    
-    def setTextColor( self, color ):
-        self.text_color = color
-        self.update()
-    
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
     
-    def setVisibleKeys( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-        self.update()
-
-    def updatePropertiesSize( self ):
+    def updateKeysPropertiesSize( self ):
         main_window = self.findMainWindow()
         if not main_window:
             return
@@ -1739,15 +1654,15 @@ class KeysWidget( QWidget ):
             
             if hasattr( main_window, 'width_spin_keys' ):
                 main_window.width_spin_keys.blockSignals( True )
-                main_window.width_spin_keys.setValue( self._width )
+                main_window.width_spin_keys.setValue( self.keys_width )
                 main_window.width_spin_keys.blockSignals( False )
                 
             if hasattr( main_window, 'height_spin_keys' ):
                 main_window.height_spin_keys.blockSignals( True )
-                main_window.height_spin_keys.setValue( self._height )
+                main_window.height_spin_keys.setValue( self.keys_height )
                 main_window.height_spin_keys.blockSignals( False )
     
-    def updatePropertiesPosition( self ):
+    def updateKeysPropertiesPosition( self ):
         main_window = self.findMainWindow()
         if not main_window:
             return
@@ -1764,75 +1679,6 @@ class KeysWidget( QWidget ):
                 main_window.pos_y_spin_keys.setValue( self.y() )
                 main_window.pos_y_spin_keys.blockSignals( False )
     
-    def updateAllProperties( self ):
-        self.updatePropertiesSize()
-        self.updatePropertiesPosition()
-
-        main_window = self.findMainWindow()
-        if not main_window:
-            return
-
-        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
-            
-            if hasattr( main_window, 'active_checkbox_keys' ):
-                main_window.active_checkbox_keys.blockSignals( True )
-                main_window.active_checkbox_keys.setChecked( self.active )
-                main_window.active_checkbox_keys.blockSignals( False )
-                
-            if hasattr( main_window, 'visible_checkbox_keys' ):
-                main_window.visible_checkbox_keys.blockSignals( True )
-                main_window.visible_checkbox_keys.setChecked( self.visible )
-                main_window.visible_checkbox_keys.blockSignals( False )
-                
-            if hasattr( main_window, 'static_checkbox_keys' ):
-                main_window.static_checkbox_keys.blockSignals( True )
-                main_window.static_checkbox_keys.setChecked( self.static )
-                main_window.static_checkbox_keys.blockSignals( False )
-            
-            if hasattr( main_window, 'name_edit_keys' ):
-                main_window.name_edit_keys.blockSignals( True )
-                main_window.name_edit_keys.setText( self.custom_name )
-                main_window.name_edit_keys.blockSignals( False )
-            
-            if hasattr( main_window, 'stack_order_spin_keys' ):
-                main_window.stack_order_spin_keys.blockSignals( True )
-
-                if main_window.current_shape in main_window.all_shapes:
-                    index = main_window.all_shapes.index( main_window.current_shape ) + 1
-                    main_window.stack_order_spin_keys.setValue( index )
-
-                main_window.stack_order_spin_keys.blockSignals( False )
-            
-            if hasattr( main_window, 'type_combo_keys' ):
-                main_window.type_combo_keys.blockSignals( True )
-                main_window.type_combo_keys.setCurrentText( self.key_type )
-                main_window.type_combo_keys.blockSignals( False )
-            
-            if hasattr( main_window, '_3d_checkbox_keys' ):
-                main_window._3d_checkbox_keys.blockSignals( True )
-                main_window._3d_checkbox_keys.setChecked( self.is_3d )
-                main_window._3d_checkbox_keys.blockSignals( False )
-            
-            if hasattr( main_window, 'color_top_rect_keys' ):
-                main_window.color_top_rect_keys.setStyleSheet( f"background-color: { self.key_color_top.name() }; border: 1px solid #ccc;")
-            
-            if hasattr( main_window, 'color_bottom_rect_keys' ):
-                main_window.color_bottom_rect_keys.setStyleSheet( f"background-color: { self.key_color_bottom.name() }; border: 1px solid #ccc;" )
-
-            if hasattr( main_window, 'font_size_spin_keys' ):
-                main_window.font_size_spin_keys.blockSignals( True )
-                main_window.font_size_spin_keys.setValue( self.font_size )
-                main_window.font_size_spin_keys.blockSignals( False )
-        
-            if hasattr( main_window, 'start_color_rect_keys' ):
-                main_window.start_color_rect_keys.setStyleSheet( f"background-color: { self.key_color_top.name() }; border: 1px solid #ccc;" )
-
-            if hasattr( main_window, 'end_color_rect_keys' ):
-                main_window.end_color_rect_keys.setStyleSheet( f"background-color: { self.key_color_bottom.name() }; border: 1px solid #ccc;" )
-
-            if hasattr( main_window, 'font_color_rect_keys' ):
-                main_window.font_color_rect_keys.setStyleSheet( f"background-color: { self.text_color.name() }; border: 1px solid #ccc;" )
-
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -1858,7 +1704,6 @@ class KeysWidget( QWidget ):
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
                 self.clicked.emit( self )
-                self.updateAllProperties()
 
         event.accept()
 
@@ -1868,8 +1713,8 @@ class KeysWidget( QWidget ):
             self.dragging = False
             self.resize_corner = None
 
-            self.updatePropertiesSize()
-            self.updatePropertiesPosition()
+            self.updateKeysPropertiesSize()
+            self.updateKeysPropertiesPosition()
 
         event.accept()
     
@@ -1889,8 +1734,8 @@ class KeysWidget( QWidget ):
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize( event.globalPosition().toPoint() )
-            self.updatePropertiesSize()
-            self.updatePropertiesPosition()
+            self.updateKeysPropertiesSize()
+            self.updateKeysPropertiesPosition()
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
@@ -1900,7 +1745,7 @@ class KeysWidget( QWidget ):
 
             super().move( new_x, new_y )
             
-            self.updatePropertiesPosition()
+            self.updateKeysPropertiesPosition()
         
         event.accept()
 
@@ -1920,7 +1765,7 @@ class ClockWidget( QWidget ):
         self.static = False
         self.custom_name = ""
         self.stack_order = 1
-        self.use_3d = True
+        self.effect_3d = True
         self.hours = 0
         self.minutes = 0
         self.seconds = 0
@@ -1971,7 +1816,7 @@ class ClockWidget( QWidget ):
         painter.setBrush( self.background_color )
         painter.drawEllipse( QPointF( center_x, center_y ), radius, radius )
 
-        if self.use_3d:
+        if self.effect_3d:
             pen = QPen( QColor( 0, 0, 0 ) )
             pen.setWidth( base_line_width )
             painter.setPen( pen )
@@ -2153,8 +1998,8 @@ class ClockWidget( QWidget ):
     def setStackOrder( self, order ):
         self.stack_order = order
 
-    def set3d( self, use_3d ):
-        self.use_3d = use_3d
+    def set3d( self, effect_3d ):
+        self.effect_3d = effect_3d
         self.update()
 
     def setHours( self, hours ):
@@ -2296,7 +2141,7 @@ class GaugeWidget( QWidget ):
         self.static = False
         self.custom_name = ""
         self.stack_order = 1
-        self.use_3d = True
+        self.effect_3d = True
         
         self.major_subdivision = 6 
         self.minor_subdivision = 4
@@ -2333,7 +2178,7 @@ class GaugeWidget( QWidget ):
         painter.setBrush( self.background_color )
         painter.drawEllipse( 0, 0, r, r )
         
-        if self.use_3d:
+        if self.effect_3d:
             pen = QPen( QColor( 255, 255, 255 ) )
             pen.setWidth( base_line_width )
             painter.setPen( pen )
@@ -2515,8 +2360,8 @@ class GaugeWidget( QWidget ):
     def setStackOrder( self, order ):
         self.stack_order = order
 
-    def set3d( self, use_3d ):
-        self.use_3d = use_3d
+    def set3d( self, effect_3d ):
+        self.effect_3d = effect_3d
         self.update()
 
     def setMajorSubdivision( self, count ):

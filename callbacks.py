@@ -148,14 +148,7 @@ def updateRectangleFilled( main_window, state ):
         main_window.current_shape.update()
 
 def updateRectangleGradientDirection( main_window, text ):
-    text_to_direction = {
-        "Top to Bottom": "top_to_bottom",
-        "Bottom to Top": "bottom_to_top",
-        "Left to Right": "left_to_right",
-        "Right to Left": "right_to_left"
-    }
-        
-    main_window.current_shape.gradient_direction = text_to_direction.get( text, "top_to_bottom" )
+    main_window.current_shape.gradient_direction = text
     main_window.current_shape.update()
 
 def updateRectangleGradientStartColor( main_window ):
@@ -206,7 +199,8 @@ def updateCircleTag( main_window, value ):
     main_window.current_shape.update()
 
 def updateCirclePosition( main_window ):
-    main_window.current_shape.move( main_window.pos_x_spin_circle.value() - main_window.current_shape.circle_diameter // 2, main_window.pos_y_spin_circle.value() - main_window.current_shape.circle_diameter // 2 )
+    main_window.current_shape.move( main_window.pos_x_spin_circle.value() - main_window.current_shape.diameter // 2, main_window.pos_y_spin_circle.value() - main_window.current_shape.diameter // 2 )
+    main_window.current_shape.update()
 
 def updateCircleSize( main_window, value ):
     main_window.current_shape.setFixedSize( value, value )
@@ -239,8 +233,6 @@ def updateCircleFillColor( main_window ):
 
 #------------------------------------------------------------ELLIPSE--------------------------------------------------------------
 
-
-
 def updateEllipseActive( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
@@ -249,6 +241,7 @@ def updateEllipseActive( main_window, state ):
 def updateEllipseVisible( main_window, state ):
     state == Qt.CheckState.Checked.value 
     main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
 
 def updateEllipseStatic( main_window, state ):
@@ -270,13 +263,12 @@ def updateEllipseTag( main_window, value ):
     main_window.current_shape.update()
 
 def updateEllipsePosition( main_window ):
-    main_window.current_shape.move( main_window.pos_x_spin_ellipse.value(), main_window.pos_y_spin_ellipse.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_ellipse.value() - main_window.current_shape.ellipse_width // 2, main_window.pos_y_spin_ellipse.value() - main_window.current_shape.ellipse_height // 2 )
     main_window.current_shape.update()
 
 def updateEllipseSize( main_window ):
-    width = main_window.width_spin_ellipse.value()
-    height = main_window.height_spin_ellipse.value()
-    main_window.current_shape.setSize( width, height )
+    main_window.current_shape.ellipse_width =  main_window.width_spin_ellipse.value() 
+    main_window.current_shape.ellipse_height =  main_window.height_spin_ellipse.value() 
     main_window.current_shape.update()
 
 def changeEllipseEdgesColor( main_window ):
@@ -297,8 +289,8 @@ def updateEllipseFilled( main_window, state ):
     main_window.current_shape.showFilledWarning( state )
     main_window.current_shape.update()
 
-def updateEllipseGradientType( main_window, text ):
-    main_window.current_shape.gradient_type = text 
+def updateEllipseGradientDirection( main_window, text ):
+    main_window.current_shape.gradient_direction = text 
     main_window.current_shape.update()
 
 def changeEllipseStartColor( main_window ):
@@ -319,155 +311,155 @@ def changeEllipseEndColor( main_window ):
 
 #------------------------------------------------------------BUTTON--------------------------------------------------------------
 
-def updateButtonTag( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        main_window.current_shape.tag = value
+def updateButtonActive( main_window, state ):
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
+
+def updateButtonVisible( main_window, state ):
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
+
+def updateButtonStatic( main_window, state ):
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
+
+def updateButtonName( main_window, text ):
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update()
 
 def updateButtonStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
+
+def updateButtonTag( main_window, value ):
+    main_window.current_shape.tag = value
+    main_window.current_shape.update()
 
 def updateButtonPosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        if hasattr( main_window, 'pos_x_spin' ) and hasattr( main_window, 'pos_y_spin' ):
-            main_window.current_shape.move( main_window.pos_x_spin.value(), main_window.pos_y_spin.value() )
+    main_window.current_shape.move( main_window.pos_x_spin.value(), main_window.pos_y_spin.value() )
+    main_window.current_shape.update()
 
-def updateButtonGradient( main_window ):
-    if hasattr( main_window.current_shape, 'start_color' ) and hasattr( main_window.current_shape, 'end_color' ):
-        gradient = QLinearGradient( 0, 0, 0, main_window.current_shape.height() )
-        gradient.setColorAt( 0, main_window.current_shape.start_color )
-        gradient.setColorAt( 1, main_window.current_shape.end_color )
-        main_window.current_shape.setBackgroundGradient( gradient )
+def updateButtonSize( main_window ):
+    main_window.current_shape.setFixedSize( main_window.width_spin.value(), main_window.height_spin.value() )
+    main_window.current_shape.update()
+
+def updateButtonStartColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.gradient_start_color )
+        
+    if color.isValid():
+        main_window.current_shape.gradient_start_color = color
+        main_window.gradient_start_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+    
+def updateButtonEndColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.gradient_end_color )
+
+    if color.isValid():
+        main_window.current_shape.gradient_end_color = color
+        main_window.current_shape.color_press = color
+        main_window.gradient_end_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
 
-def changeStartColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        if hasattr( main_window.current_shape, 'start_color' ):
-            current_color = main_window.current_shape.start_color 
-            color = QColorDialog.getColor( current_color )
-        
-        else:
-            color = QColor( "#0000FF" )
-
-        if color.isValid():
-            main_window.current_shape.start_color = color
-            main_window.start_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-            updateButtonGradient( main_window )
-    
-def changeEndColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        if hasattr( main_window.current_shape, 'end_color'):
-            current_color = main_window.current_shape.end_color  
-            color = QColorDialog.getColor( current_color )
-
-        else: 
-            color = QColor( "#000088" )
-
-        if color.isValid():
-            main_window.current_shape.end_color = color
-            main_window.end_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-            updateButtonGradient( main_window )
-    
-def updateButtonName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        main_window.current_shape.custom_name = text
+def update3DButton( main_window, state ):
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.effect_3d = state
+    main_window.current_shape.update()
 
 def updateButtonText( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        main_window.current_shape.setButtonText( text )
+    main_window.current_shape.button_text = text
+    main_window.current_shape.update() 
         
 def updateButtonTextSize( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        main_window.current_shape.setTextSize( value )
+    main_window.current_shape.text_size = value 
+    main_window.current_shape.update()
 
-def changeButtonTextColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.text_color )
+def updateButtonTextColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.text_color )
 
-        if color.isValid():
-            main_window.current_shape.setTextColor( color )
-            main_window.text_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.text_color = color 
+        main_window.text_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
  
-def updateButtonSize( main_window ):
-    if hasattr( main_window, 'width_spin' ) and hasattr( main_window, 'height_spin' ):
-        main_window.current_shape.setFixedSize( main_window.width_spin.value(), main_window.height_spin.value() )
-        updateButtonGradient( main_window )
-
 #------------------------------------------------------------KEYS--------------------------------------------------------------
 
-def updateKeysFontSize( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        main_window.current_shape.setFontSize( value )
-
-def changeKeysStartColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.key_color_top )
-
-        if color.isValid():
-            main_window.current_shape.setKeyColors( color, main_window.current_shape.key_color_bottom )
-            main_window.start_color_rect_keys.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-
-def changeKeysEndColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.key_color_bottom )
-
-        if color.isValid():
-            main_window.current_shape.setKeyColors( main_window.current_shape.key_color_top, color )
-            main_window.end_color_rect_keys.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-
-def changeKeysFontColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.text_color )
-
-        if color.isValid():
-            main_window.current_shape.setTextColor( color )
-            main_window.font_color_rect_keys.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-
-def updateKeys3d( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        is_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( is_3d )
-
 def updateKeysActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        active = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.active = active
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateKeysVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        visible = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setVisibleKeys( visible )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state 
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateKeysStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        static = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.static = static
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateKeysName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        main_window.current_shape.custom_name = text
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update()
 
 def updateKeysStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
 
 def updateKeysPosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        if hasattr( main_window, 'pos_x_spin_keys' ) and hasattr( main_window, 'pos_y_spin_keys' ):
-            main_window.current_shape.move( main_window.pos_x_spin_keys.value(), main_window.pos_y_spin_keys.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_keys.value(), main_window.pos_y_spin_keys.value() )
+    main_window.current_shape.update()
 
-def updateKeysSize( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        if hasattr( main_window, 'width_spin_keys' ) and hasattr( main_window, 'height_spin_keys' ):
-            width = main_window.width_spin_keys.value()
-            height = main_window.height_spin_keys.value()
-            main_window.current_shape.setSize(width, height)
+def updateKeysSize( main_window):
+    main_window.current_shape.keys_width = main_window.width_spin_keys.value() 
+    main_window.current_shape.keys_height = main_window.height_spin_keys.value() 
+    main_window.current_shape.update()
+
+def changeKeysStartColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.gradient_start_color )
+
+    if color.isValid():
+        main_window.current_shape.gradient_start_color = color
+        main_window.start_color_rect_keys.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def changeKeysEndColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.gradient_end_color )
+
+    if color.isValid():
+        main_window.current_shape.gradient_end_color = color 
+        main_window.end_color_rect_keys.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def update3DKeys( main_window, state ):
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.effect_3d = state
+    main_window.current_shape.update()
 
 def updateKeysType( main_window, text ):
     if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
-        main_window.current_shape.set_key_type( text )
+        main_window.current_shape.key_type = text
+        main_window.current_shape.update()
+
+def updateKeysFontSize( main_window, value ):
+    if main_window.current_shape and isinstance( main_window.current_shape, KeysWidget ):
+        main_window.current_shape.font_size = value 
+        main_window.current_shape.update()
+
+def changeKeysFontColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.text_color )
+
+    if color.isValid():
+        main_window.current_shape.text_color = color 
+        main_window.font_color_rect_keys.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
 #------------------------------------------------------------CLOCK--------------------------------------------------------------
 
@@ -517,8 +509,8 @@ def changeClockBackgroundColor( main_window ):
 
 def updateClock3d( main_window, state ):
     if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        use_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( use_3d )
+        effect_3d = ( state == Qt.CheckState.Checked.value )
+        main_window.current_shape.set3d( effect_3d )
 
 def updateClockHours( main_window, value ):
     if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
@@ -581,8 +573,8 @@ def changeGaugeBackgroundColor( main_window ):
 
 def updateGauge3d( main_window, state ):
     if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        use_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( use_3d )
+        effect_3d = ( state == Qt.CheckState.Checked.value )
+        main_window.current_shape.set3d( effect_3d )
 
 def updateGaugeMajorSubdivision( main_window, value ):
     if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
@@ -647,8 +639,8 @@ def updateDialDiameter( main_window, value ):
 
 def updateDial3d( main_window, state ):
     if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        use_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( use_3d )
+        effect_3d = ( state == Qt.CheckState.Checked.value )
+        main_window.current_shape.set3d( effect_3d )
 
 def updateDialValue( main_window, value ):
     if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
@@ -715,7 +707,7 @@ def updateToggleState( main_window, state ):
 
 def toggle3dEffect( main_window, state ):
     if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        main_window.current_shape.use_3d = ( state == Qt.CheckState.Checked.value )
+        main_window.current_shape.effect_3d = ( state == Qt.CheckState.Checked.value )
         main_window.current_shape.update()
 
 def updateTogglePosition( main_window ):
@@ -789,8 +781,8 @@ def changeScrollbarTrackColor( main_window ):
 
 def updateScrollbar3d( main_window, state ):
     if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        use_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( use_3d )
+        effect_3d = ( state == Qt.CheckState.Checked.value )
+        main_window.current_shape.set3d( effect_3d )
 
 def updateScrollbarRange( main_window, value ):
     if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
@@ -873,8 +865,8 @@ def changeSliderThumbColor( main_window ):
 
 def updateSlider3d( main_window, state ):
     if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        use_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( use_3d )
+        effect_3d = ( state == Qt.CheckState.Checked.value )
+        main_window.current_shape.set3d( effect_3d )
 
 def updateSliderValue( main_window, value ):
     if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
@@ -1055,20 +1047,20 @@ def updateLabelText( self, text ):
         self.current_shape.setTextFont( text )
 
         if hasattr( self, 'width_spin_label' ):
-            self.width_spin_label.setValue( self.current_shape.getWidth() )
+            self.width_spin_label.setValue( self.current_shape.keys_width )
 
         if hasattr (self, 'height_spin_label' ):
-            self.height_spin_label.setValue( self.current_shape.getHeight() )
+            self.height_spin_label.setValue( self.current_shape.keys_height )
 
 def updateLabelTextSize( self, value ):
     if self.current_shape and isinstance( self.current_shape, LabelWidget ):
         self.current_shape.setTextSize( value )
 
         if hasattr( self, 'width_spin_label' ):
-            self.width_spin_label.setValue( self.current_shape.getWidth() )
+            self.width_spin_label.setValue( self.current_shape.keys_width )
 
         if hasattr( self, 'height_spin_label' ):
-            self.height_spin_label.setValue( self.current_shape.getHeight() )
+            self.height_spin_label.setValue( self.current_shape.keys_height )
 
 def updateLabelAlignment( self, text ):
     if self.current_shape and isinstance( self.current_shape, LabelWidget ):
