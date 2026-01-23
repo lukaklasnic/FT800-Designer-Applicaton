@@ -184,7 +184,7 @@ class WidgetIcon( QFrame ):
         painter.drawRoundedRect( rect, 5, 5 )
 
     def createCustomCursor( self ):
-        pix = QPixmap( 210, 130 )
+        pix = QPixmap( 300, 130 )
         pix.fill( Qt.GlobalColor.transparent )
         painter = QPainter( pix )
         painter.setPen( QPen( QColor( 150, 202, 232 ), 2 ) )
@@ -195,7 +195,7 @@ class WidgetIcon( QFrame ):
             "Circle": lambda: painter.drawEllipse( QPoint( 50, 50 ), 50, 50 ),
             "Ellipse":lambda: painter.drawEllipse( QPoint( 62, 42 ), 60, 40 ),
             "Button": lambda: painter.drawRoundedRect( 0, 0, 100, 50, 5, 5 ),
-            "Keys": lambda: painter.drawRect( 0, 0, 200, 120 ),
+            "Keys": lambda: painter.drawRect( 0, 0, 286, 112 ),
             "Clock": lambda: painter.drawEllipse( QPoint( 50, 50 ), 50, 50 ),
             "Gauge": lambda: painter.drawEllipse( QPoint( 50, 50 ), 50, 50 ),
             "Dial": lambda: painter.drawEllipse( QPoint( 50, 50 ), 40, 40 ),

@@ -701,14 +701,14 @@ class MainWindow( QMainWindow ):
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
         elif self.selected_shape == "Clock":
-            shape = ClockWidget( 100, widget_container )
+            shape = ClockWidget( widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Clock" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
         elif self.selected_shape == "Gauge":
-            shape = GaugeWidget( 100, widget_container )
+            shape = GaugeWidget( widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Gauge" )

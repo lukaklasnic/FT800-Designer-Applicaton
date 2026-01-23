@@ -1796,7 +1796,7 @@ def showKeysProperties( main_window, current_index ):
     start_color_layout.addWidget( start_color_label )
     start_color_layout.addStretch( 1 )
     main_window.start_color_rect_keys = ColorRectangle( main_window.current_shape.gradient_start_color.name() )
-    main_window.start_color_rect_keys.mousePressEvent = lambda e: changeKeysStartColor( main_window )
+    main_window.start_color_rect_keys.mousePressEvent = lambda e: updateKeysStartColor( main_window )
     start_color_layout.addWidget( main_window.start_color_rect_keys )
     start_color_widget = QWidget()
     start_color_widget.setLayout( start_color_layout )
@@ -1810,7 +1810,7 @@ def showKeysProperties( main_window, current_index ):
     end_color_layout.addWidget( end_color_label )
     end_color_layout.addStretch( 1 )
     main_window.end_color_rect_keys = ColorRectangle( main_window.current_shape.gradient_end_color.name() ) 
-    main_window.end_color_rect_keys.mousePressEvent = lambda e: changeKeysEndColor( main_window )
+    main_window.end_color_rect_keys.mousePressEvent = lambda e: updateKeysEndColor( main_window )
     end_color_layout.addWidget( main_window.end_color_rect_keys )
     end_color_widget = QWidget()
     end_color_widget.setLayout( end_color_layout )
@@ -1881,7 +1881,7 @@ def showKeysProperties( main_window, current_index ):
     font_color_layout.addWidget( font_color_label )
     font_color_layout.addStretch( 1 )
     main_window.font_color_rect_keys = ColorRectangle( main_window.current_shape.text_color.name() )
-    main_window.font_color_rect_keys.mousePressEvent = lambda e: changeKeysFontColor( main_window )
+    main_window.font_color_rect_keys.mousePressEvent = lambda e: updateKeysFontColor( main_window )
     font_color_layout.addWidget( main_window.font_color_rect_keys )
     font_color_widget = QWidget()
     font_color_widget.setLayout( font_color_layout )
@@ -1893,9 +1893,6 @@ def showKeysProperties( main_window, current_index ):
 #------------------------------------------------------------CLOCK--------------------------------------------------------------
 
 def showClockProperties( main_window, current_index ):
-    if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
-        main_window.current_shape.custom_name = generateWidgetName( main_window, "Clock" )
-
     shape_label = QLabel( "CLOCK PROPERTIES" )
     shape_label.setStyleSheet( "color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, shape_label )
@@ -2009,7 +2006,7 @@ def showClockProperties( main_window, current_index ):
     pos_x_layout.addStretch( 1 )
     main_window.pos_x_spin_clock = QSpinBox()
     main_window.pos_x_spin_clock.setRange( 0, 480 )
-    main_window.pos_x_spin_clock.setValue( main_window.current_shape.x() )
+    main_window.pos_x_spin_clock.setValue( main_window.current_shape.x() + main_window.current_shape.diameter // 2 )
     main_window.pos_x_spin_clock.valueChanged.connect( lambda value: updateClockPosition( main_window ) )
     main_window.pos_x_spin_clock.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.pos_x_spin_clock.setFixedWidth( 70 )
@@ -2027,7 +2024,7 @@ def showClockProperties( main_window, current_index ):
     pos_y_layout.addStretch( 1 )
     main_window.pos_y_spin_clock = QSpinBox()
     main_window.pos_y_spin_clock.setRange( 0, 272 )
-    main_window.pos_y_spin_clock.setValue( main_window.current_shape.y() )
+    main_window.pos_y_spin_clock.setValue( main_window.current_shape.y() + main_window.current_shape.diameter // 2 )
     main_window.pos_y_spin_clock.valueChanged.connect( lambda value: updateClockPosition( main_window ) )
     main_window.pos_y_spin_clock.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.pos_y_spin_clock.setFixedWidth( 70 )
@@ -2046,7 +2043,7 @@ def showClockProperties( main_window, current_index ):
     main_window.diameter_spin_clock = QSpinBox()
     main_window.diameter_spin_clock.setRange( 50, 272 )
     main_window.diameter_spin_clock.setValue( main_window.current_shape.diameter )
-    main_window.diameter_spin_clock.valueChanged.connect( lambda value: updateClockDiameter( main_window, value ) )
+    main_window.diameter_spin_clock.valueChanged.connect( lambda value: updateClockSize( main_window, value ) )
     main_window.diameter_spin_clock.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.diameter_spin_clock.setFixedWidth( 70 )
     diameter_layout.addWidget( main_window.diameter_spin_clock )
@@ -2069,13 +2066,31 @@ def showClockProperties( main_window, current_index ):
 
     bg_color_hex = main_window.current_shape.background_color.name()
     main_window.bg_color_rect_clock = ColorRectangle( bg_color_hex )
-    main_window.bg_color_rect_clock.mousePressEvent = lambda e: changeClockBackgroundColor( main_window )
+    main_window.bg_color_rect_clock.mousePressEvent = lambda e: updateClockBackgroundColor( main_window )
     main_window.bg_color_rect_clock.setCursor( Qt.CursorShape.PointingHandCursor )
     bg_color_layout.addWidget( main_window.bg_color_rect_clock )
 
     bg_color_widget = QWidget()
     bg_color_widget.setLayout( bg_color_layout )
     main_window.properties_layout.insertWidget( current_index, bg_color_widget )
+    current_index += 1
+
+    face_color_layout = QHBoxLayout()
+    face_color_layout.setContentsMargins( 20, 5, 10, 5 )
+    face_color_label = QLabel( "Face color:" )
+    face_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
+    face_color_layout.addWidget( face_color_label )
+    face_color_layout.addStretch( 1 )
+
+    face_color_hex = main_window.current_shape.face_color.name()
+    main_window.face_color_rect_clock = ColorRectangle( face_color_hex )
+    main_window.face_color_rect_clock.mousePressEvent = lambda e: updateClockFaceColor( main_window )
+    main_window.face_color_rect_clock.setCursor( Qt.CursorShape.PointingHandCursor )
+    face_color_layout.addWidget( main_window.face_color_rect_clock )
+
+    face_color_widget = QWidget()
+    face_color_widget.setLayout( face_color_layout )
+    main_window.properties_layout.insertWidget( current_index, face_color_widget )
     current_index += 1
 
     effect_3d_layout = QHBoxLayout()
@@ -2087,7 +2102,7 @@ def showClockProperties( main_window, current_index ):
     main_window.effect_3d_checkbox_clock = QCheckBox()
     main_window.effect_3d_checkbox_clock.setChecked( getattr( main_window.current_shape, 'effect_3d', False ) )
     main_window.effect_3d_checkbox_clock.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
-    main_window.effect_3d_checkbox_clock.stateChanged.connect( lambda state: updateClock3d( main_window, state ) )
+    main_window.effect_3d_checkbox_clock.stateChanged.connect( lambda state: update3DClock( main_window, state ) )
     effect_3d_layout.addWidget( main_window.effect_3d_checkbox_clock )
     effect_3d_widget = QWidget()
     effect_3d_widget.setLayout( effect_3d_layout )
@@ -2158,9 +2173,6 @@ def showClockProperties( main_window, current_index ):
 #------------------------------------------------------------GAUGE--------------------------------------------------------------
 
 def showGaugeProperties( main_window, current_index ):
-    if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
-        main_window.current_shape.custom_name = generateWidgetName( main_window, "Gauge" )
-
     shape_label = QLabel( "GAUGE PROPERTIES" )
     shape_label.setStyleSheet( "color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, shape_label )
@@ -2274,7 +2286,7 @@ def showGaugeProperties( main_window, current_index ):
     pos_x_layout.addStretch( 1 )
     main_window.pos_x_spin_gauge = QSpinBox()
     main_window.pos_x_spin_gauge.setRange( 0, 480 )
-    main_window.pos_x_spin_gauge.setValue( main_window.current_shape.x() )
+    main_window.pos_x_spin_gauge.setValue( main_window.current_shape.x() + main_window.current_shape.diameter // 2 )
     main_window.pos_x_spin_gauge.valueChanged.connect( lambda value: updateGaugePosition( main_window ) )
     main_window.pos_x_spin_gauge.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.pos_x_spin_gauge.setFixedWidth( 70 )
@@ -2292,7 +2304,7 @@ def showGaugeProperties( main_window, current_index ):
     pos_y_layout.addStretch( 1 )
     main_window.pos_y_spin_gauge = QSpinBox()
     main_window.pos_y_spin_gauge.setRange( 0, 272 )
-    main_window.pos_y_spin_gauge.setValue( main_window.current_shape.y() )
+    main_window.pos_y_spin_gauge.setValue( main_window.current_shape.y() + main_window.current_shape.diameter // 2 )
     main_window.pos_y_spin_gauge.valueChanged.connect( lambda value: updateGaugePosition( main_window ) )
     main_window.pos_y_spin_gauge.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.pos_y_spin_gauge.setFixedWidth( 70 )
@@ -2311,7 +2323,7 @@ def showGaugeProperties( main_window, current_index ):
     main_window.diameter_spin_gauge = QSpinBox()
     main_window.diameter_spin_gauge.setRange( 50, 272 )
     main_window.diameter_spin_gauge.setValue( main_window.current_shape.diameter )
-    main_window.diameter_spin_gauge.valueChanged.connect( lambda value: updateGaugeDiameter( main_window, value ) )
+    main_window.diameter_spin_gauge.valueChanged.connect( lambda value: updateGaugeSize( main_window, value ) )
     main_window.diameter_spin_gauge.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.diameter_spin_gauge.setFixedWidth( 70 )
     diameter_layout.addWidget( main_window.diameter_spin_gauge )
@@ -2334,13 +2346,31 @@ def showGaugeProperties( main_window, current_index ):
 
     bg_color_hex = main_window.current_shape.background_color.name()
     main_window.bg_color_rect_gauge = ColorRectangle( bg_color_hex )
-    main_window.bg_color_rect_gauge.mousePressEvent = lambda e: changeGaugeBackgroundColor( main_window )
+    main_window.bg_color_rect_gauge.mousePressEvent = lambda e: updateGaugeBackgroundColor( main_window )
     main_window.bg_color_rect_gauge.setCursor( Qt.CursorShape.PointingHandCursor )
     bg_color_layout.addWidget( main_window.bg_color_rect_gauge )
 
     bg_color_widget = QWidget()
     bg_color_widget.setLayout( bg_color_layout )
     main_window.properties_layout.insertWidget( current_index, bg_color_widget )
+    current_index += 1
+
+    face_color_layout = QHBoxLayout()
+    face_color_layout.setContentsMargins( 20, 5, 10, 5 )
+    face_color_label = QLabel( "Face color:" )
+    face_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
+    face_color_layout.addWidget( face_color_label )
+    face_color_layout.addStretch( 1 )
+
+    face_color_hex = main_window.current_shape.face_color.name()
+    main_window.face_color_rect_gauge = ColorRectangle( face_color_hex )
+    main_window.face_color_rect_gauge.mousePressEvent = lambda e: updateGaugeFaceColor( main_window )
+    main_window.face_color_rect_gauge.setCursor( Qt.CursorShape.PointingHandCursor )
+    face_color_layout.addWidget( main_window.face_color_rect_gauge )
+
+    face_color_widget = QWidget()
+    face_color_widget.setLayout( face_color_layout )
+    main_window.properties_layout.insertWidget( current_index, face_color_widget )
     current_index += 1
 
     effect_3d_layout = QHBoxLayout()
@@ -2350,9 +2380,9 @@ def showGaugeProperties( main_window, current_index ):
     effect_3d_layout.addWidget( effect_3d_label )
     effect_3d_layout.addStretch( 1 )
     main_window.effect_3d_checkbox_gauge = QCheckBox()
-    main_window.effect_3d_checkbox_gauge.setChecked( getattr( main_window.current_shape, 'use_3d', False ) )
+    main_window.effect_3d_checkbox_gauge.setChecked( getattr( main_window.current_shape, 'effect_3d', False ) )
     main_window.effect_3d_checkbox_gauge.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
-    main_window.effect_3d_checkbox_gauge.stateChanged.connect( lambda state: updateGauge3d( main_window, state ) )
+    main_window.effect_3d_checkbox_gauge.stateChanged.connect( lambda state: update3DGauge( main_window, state ) )
     effect_3d_layout.addWidget( main_window.effect_3d_checkbox_gauge )
     effect_3d_widget = QWidget()
     effect_3d_widget.setLayout( effect_3d_layout )

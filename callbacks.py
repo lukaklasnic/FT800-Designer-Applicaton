@@ -418,11 +418,10 @@ def updateKeysPosition( main_window ):
     main_window.current_shape.update()
 
 def updateKeysSize( main_window):
-    main_window.current_shape.keys_width = main_window.width_spin_keys.value() 
-    main_window.current_shape.keys_height = main_window.height_spin_keys.value() 
+    main_window.current_shape.setFixedSize( main_window.width_spin_keys.value(), main_window.height_spin_keys.value() )
     main_window.current_shape.update()
 
-def changeKeysStartColor( main_window ):
+def updateKeysStartColor( main_window ):
     color = QColorDialog.getColor( main_window.current_shape.gradient_start_color )
 
     if color.isValid():
@@ -430,7 +429,7 @@ def changeKeysStartColor( main_window ):
         main_window.start_color_rect_keys.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
 
-def changeKeysEndColor( main_window ):
+def updateKeysEndColor( main_window ):
     color = QColorDialog.getColor( main_window.current_shape.gradient_end_color )
 
     if color.isValid():
@@ -453,7 +452,7 @@ def updateKeysFontSize( main_window, value ):
         main_window.current_shape.font_size = value 
         main_window.current_shape.update()
 
-def changeKeysFontColor( main_window ):
+def updateKeysFontColor( main_window ):
     color = QColorDialog.getColor( main_window.current_shape.text_color )
 
     if color.isValid():
@@ -463,142 +462,143 @@ def changeKeysFontColor( main_window ):
 
 #------------------------------------------------------------CLOCK--------------------------------------------------------------
 
-def updateClockPosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        if hasattr( main_window, 'pos_x_spin_clock' ) and hasattr( main_window, 'pos_y_spin_clock' ):
-            main_window.current_shape.move( main_window.pos_x_spin_clock.value(), main_window.pos_y_spin_clock.value() )
-
 def updateClockActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        main_window.current_shape.setActive( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateClockVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        main_window.current_shape.setVisibleClock( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateClockStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        main_window.current_shape.setStatic( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateClockName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        main_window.current_shape.setCustomName( text )
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update()
 
 def updateClockStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
 
 def updateClockPosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        if hasattr( main_window, 'pos_x_spin_clock' ) and hasattr( main_window, 'pos_y_spin_clock' ):
-            main_window.current_shape.move( main_window.pos_x_spin_clock.value(), main_window.pos_y_spin_clock.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_clock.value() - main_window.current_shape.diameter // 2, main_window.pos_y_spin_clock.value() - main_window.current_shape.diameter // 2 )
+    main_window.current_shape.update()
 
-def updateClockDiameter( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        main_window.current_shape.setDiameter( value )
+def updateClockSize( main_window, value ):
+    main_window.current_shape.diameter = value 
+    main_window.current_shape.setFixedSize( value, value )
+    main_window.current_shape.update()
 
-def changeClockBackgroundColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        current_color = main_window.current_shape.background_color
-        color = QColorDialog.getColor( current_color )
+def updateClockBackgroundColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.background_color )
 
-        if color.isValid():
-            main_window.current_shape.setBackgroundColor( color )
-            main_window.bg_color_rect_clock.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.background_color = color 
+        main_window.bg_color_rect_clock.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
 
-def updateClock3d( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        effect_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( effect_3d )
+def updateClockFaceColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.face_color )
+
+    if color.isValid():
+        main_window.current_shape.face_color = color
+        main_window.face_color_rect_clock.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def update3DClock( main_window, state ):
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.effect_3d = state 
+    main_window.current_shape.update()
 
 def updateClockHours( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        main_window.current_shape.setHours( value )
+    main_window.current_shape.hours = value % 60
+    main_window.current_shape.update()
 
 def updateClockMinutes( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        main_window.current_shape.setMinutes( value )
+    main_window.current_shape.minutes = value % 60
+    main_window.current_shape.update()
 
 def updateClockSeconds( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        main_window.current_shape.setSeconds( value )
-
-def updateClockSize( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ClockWidget ):
-        if hasattr( main_window, 'diameter_spin_clock' ):
-            main_window.current_shape.setDiameter( main_window.diameter_spin_clock.value() )
+    main_window.current_shape.seconds = value % 60
+    main_window.current_shape.update()
 
 #------------------------------------------------------------GAUGE--------------------------------------------------------------
 
 def updateGaugeActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        main_window.current_shape.setActive( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateGaugeVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        main_window.current_shape.setVisibleGauge( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateGaugeStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        main_window.current_shape.setStatic( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateGaugeName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        main_window.current_shape.setCustomName( text )
+    main_window.current_shape.custom_name = text 
+    main_window.current_shape.update()
 
 def updateGaugeStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        main_window.current_shape.stack_order = value
-        
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
 
 def updateGaugePosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        if hasattr( main_window, 'pos_x_spin_gauge' ) and hasattr( main_window, 'pos_y_spin_gauge '):
-            main_window.current_shape.move( main_window.pos_x_spin_gauge.value(), main_window.pos_y_spin_gauge.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_gauge.value() - main_window.current_shape.diameter // 2, main_window.pos_y_spin_gauge.value() - main_window.current_shape.diameter // 2 )
+    main_window.current_shape.update()
 
-def updateGaugeDiameter( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        main_window.current_shape.setDiameter( value )
+def updateGaugeSize( main_window, value ):
+    main_window.current_shape.diameter = value 
+    main_window.current_shape.setFixedSize( value, value )
+    main_window.current_shape.update()
 
-def changeGaugeBackgroundColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        current_color = main_window.current_shape.background_color
-        color = QColorDialog.getColor( current_color )
+def updateGaugeBackgroundColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.background_color )
 
-        if color.isValid():
-            main_window.current_shape.setBackgroundColor( color )
-            main_window.bg_color_rect_gauge.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.background_color = color 
+        main_window.bg_color_rect_gauge.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
 
-def updateGauge3d( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        effect_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( effect_3d )
+def updateGaugeFaceColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.face_color )
+
+    if color.isValid():
+        main_window.current_shape.face_color = color
+        main_window.face_color_rect_gauge.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def update3DGauge( main_window, state ):
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.effect_3d = state 
+    main_window.current_shape.update()
 
 def updateGaugeMajorSubdivision( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        main_window.current_shape.setMajorSubdivision( value )
+    main_window.current_shape.major_subdivision = value 
+    main_window.current_shape.update()
 
 def updateGaugeMinorSubdivision( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        main_window.current_shape.setMinorSubdivision( value )
+    main_window.current_shape.minor_subdivision = value 
+    main_window.current_shape.update()
 
 def updateGaugeRangeValue( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        main_window.current_shape.setRangeValue( value )
-
-        if hasattr( main_window, 'value_spin_gauge' ):
-            main_window.value_spin_gauge.setRange( 0, value )
+    main_window.current_shape.range_value = value
+    main_window.current_shape.update() 
 
 def updateGaugeValue( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        main_window.current_shape.setValue( value )
-
-def updateGaugeSize( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, GaugeWidget ):
-        if hasattr( main_window, 'diameter_spin_gauge' ):
-            main_window.current_shape.setDiameter( main_window.diameter_spin_gauge.value() )
+     main_window.current_shape.value = value 
+     main_window.current_shape.update()
 
 #------------------------------------------------------------DIAL--------------------------------------------------------------
 
