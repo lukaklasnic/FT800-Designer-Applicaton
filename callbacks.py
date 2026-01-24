@@ -341,7 +341,7 @@ def updateButtonTag( main_window, value ):
     main_window.current_shape.update()
 
 def updateButtonPosition( main_window ):
-    main_window.current_shape.move( main_window.pos_x_spin.value(), main_window.pos_y_spin.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_button.value(), main_window.pos_y_spin_button.value() )
     main_window.current_shape.update()
 
 def updateButtonSize( main_window ):
@@ -602,202 +602,215 @@ def updateGaugeValue( main_window, value ):
 
 #------------------------------------------------------------DIAL--------------------------------------------------------------
 
-def updateDialTag( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        main_window.current_shape.tag = value
-
 def updateDialActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        main_window.current_shape.setActive( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateDialVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        main_window.current_shape.setVisibleDial( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateDialStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        main_window.current_shape.setStatic( state == Qt.CheckState.Checked.value )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateDialName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        main_window.current_shape.setCustomName( text )
+    main_window.current_shape.custom_name = text 
+    main_window.current_shape.update()
 
 def updateDialStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        main_window.current_shape.stack_order = value
-        
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
+
+def updateDialTag( main_window, value ):
+    main_window.current_shape.tag = value
+    main_window.current_shape.update()
 
 def updateDialPosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        if hasattr( main_window, 'pos_x_spin_dial' ) and hasattr( main_window, 'pos_y_spin_dial' ):
-            main_window.current_shape.move( main_window.pos_x_spin_dial.value(), main_window.pos_y_spin_dial.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_dial.value() - main_window.current_shape.diameter // 2, main_window.pos_y_spin_dial.value() - main_window.current_shape.diameter // 2 )
 
-def updateDialDiameter( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        main_window.current_shape.setDiameter( value )
+def updateDialSize( main_window, value ):
+    main_window.current_shape.diameter = value 
+    main_window.current_shape.setFixedSize( value, value )
+    main_window.current_shape.update()
 
-def updateDial3d( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        effect_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( effect_3d )
+def updateDialBackgroundColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.background_color )
+
+    if color.isValid():
+        main_window.current_shape.background_color = color 
+        main_window.bg_color_rect_dial.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+
+def updateDialPointerColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.pointer_color )
+
+    if color.isValid():
+        main_window.current_shape.pointer_color = color
+        main_window.face_color_rect_dial.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def updateDial3D( main_window, state ):
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.effect_3d = state 
+    main_window.current_shape.update()
 
 def updateDialValue( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, DialWidget ):
-        main_window.current_shape.setValue( value )
+    main_window.current_shape.value = value 
+    main_window.current_shape.update()
 
 #------------------------------------------------------------TOGGLE--------------------------------------------------------------
 
-def updateToggleTag( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        main_window.current_shape.tag = value
-
-def updateTogglePosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        if hasattr (main_window, 'pos_x_spin_toggle' ) and hasattr( main_window, 'pos_y_spin_toggle' ):
-            main_window.current_shape.move( main_window.pos_x_spin_toggle.value(), main_window.pos_y_spin_toggle.value() )
-
 def updateToggleActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        active = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setActive( active )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateToggleVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        visible = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setVisibleToggle( visible )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateToggleStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        static = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setStatic( static )
-
-def updateToggleStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
-
-def changeToggleThumbColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.thumb_color )
-        if color.isValid():
-            main_window.current_shape.setThumbColor( color )
-
-            if hasattr( main_window, 'thumb_color_rect_toggle' ):
-                main_window.thumb_color_rect_toggle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-
-def changeToggleBackgroundColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.background_color )
-
-        if color.isValid():
-            main_window.current_shape.setBackgroundColor( color )
-            if hasattr( main_window, 'bg_color_rect_toggle' ):
-                main_window.bg_color_rect_toggle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-
-def updateToggle3D( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        _3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( _3d )
-
-def updateToggleState( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        is_on = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setState( is_on )
-
-def toggle3dEffect( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ButtonWidget ):
-        main_window.current_shape.effect_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.update()
-
-def updateTogglePosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        if hasattr( main_window, 'pos_x_spin_toggle' ) and hasattr( main_window, 'pos_y_spin_toggle' ):
-            main_window.current_shape.move( main_window.pos_x_spin_toggle.value(), main_window.pos_y_spin_toggle.value() )
-
-def updateToggleSize( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ToggleWidget ):
-        main_window.current_shape.setSize( value, 30 )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateToggleName( main_window, text ):
-    pass
+    main_window.current_shape.custom_name = text 
+    main_window.current_shape.update()
+
+def updateToggleStackOrder( main_window, value ):
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
+
+def updateToggleTag( main_window, value ):
+    main_window.current_shape.tag = value
+    main_window.current_shape.update()
+
+def updateTogglePosition( main_window ):
+    main_window.current_shape.move( main_window.pos_x_spin_toggle.value(), main_window.pos_y_spin_toggle.value() )
+    main_window.current_shape.update()
+
+def updateToggleSize( main_window, value ):
+    main_window.current_shape.setFixedSize( main_window.width_spin_toggle.value(), 30 )
+    main_window.current_shape.toggle_width = value
+    main_window.current_shape.update()
+
+def updateToggleThumbColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.thumb_color )
+
+    if color.isValid():
+        main_window.current_shape.thumb_color = color 
+        main_window.thumb_color_rect_toggle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def updateToggleBackgroundColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.background_color )
+
+    if color.isValid():
+        main_window.current_shape.background_color = color 
+        main_window.bg_color_rect_toggle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def updateToggleTextColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.text_color )
+
+    if color.isValid():
+        main_window.current_shape.text_color = color 
+        main_window.text_color_rect_toggle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def updateToggle3D( main_window, state ):
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.effect_3d = state 
+    main_window.current_shape.update()
+
+def updateToggleState( main_window, state ):
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.state = state 
+    main_window.current_shape.update()
 
 #------------------------------------------------------------SCROLL BAR--------------------------------------------------------------
 
-def updateScrollbarTag( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        main_window.current_shape.tag = value
-
 def updateScrollbarActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        active = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.active = active
-        main_window.current_shape.update()
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateScrollbarVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        visible = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setVisibleScrollBar( visible )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateScrollbarStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        static = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.static = static
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateScrollbarName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        main_window.current_shape.custom_name = text
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update()
 
 def updateScrollbarStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
+
+def updateScrollbarTag( main_window, value ):
+    main_window.current_shape.tag = value
+    main_window.current_shape.update()
 
 def updateScrollbarPosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        if hasattr( main_window, 'pos_x_spin_scrollbar' ) and hasattr( main_window, 'pos_y_spin_scrollbar' ):
-            main_window.current_shape.move( main_window.pos_x_spin_scrollbar.value(), main_window.pos_y_spin_scrollbar.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_scrollbar.value(), main_window.pos_y_spin_scrollbar.value() )
+    main_window.current_shape.update()
 
 def updateScrollbarSize( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        if hasattr( main_window, 'width_spin_scrollbar' ) and hasattr( main_window, 'height_spin_scrollbar' ):
-            main_window.current_shape.setSize( main_window.width_spin_scrollbar.value(), main_window.height_spin_scrollbar.value() )
+    main_window.current_shape.scroll_bar_width = main_window.width_spin_scrollbar.value()
+    main_window.current_shape.scroll_bar_height = main_window.height_spin_scrollbar.value()
+    main_window.current_shape.setFixedSize( main_window.current_shape.scroll_bar_width, main_window.current_shape.scroll_bar_height  )
+    main_window.current_shape.update()
 
-def changeScrollbarThumbColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.thumb_color )
+def updateScrollbarThumbColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.thumb_color )
 
-        if color.isValid():
-            main_window.current_shape.setThumbColor( color )
-            main_window.thumb_color_rect_scrollbar.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.thumb_color = color 
+        main_window.thumb_color_rect_scrollbar.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
-def changeScrollbarTrackColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.track_color )
+def updateScrollbarBackgroundColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.track_color )
 
-        if color.isValid():
-            main_window.current_shape.setTrackColor( color )
-            main_window.track_color_rect_scrollbar.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.background_color = color 
+        main_window.track_color_rect_scrollbar.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
-def updateScrollbar3d( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        effect_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( effect_3d )
+def updateScrollbar3D( main_window, state ):
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.set3d( state )
+    main_window.current_shape.update()
 
 def updateScrollbarRange( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        main_window.current_shape.setRange( value )
-
-        if hasattr( main_window, 'current_value_spin_scrollbar' ):
-            main_window.current_value_spin_scrollbar.setRange( 0, value )
+    main_window.current_shape.setRange = value 
+    main_window.current_shape.range_value = value 
+    main_window.current_shape.update()
 
 def updateScrollbarCurrentValue( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        main_window.current_shape.setCurrentValue( value )
+    main_window.current_shape.current_value = value 
+    main_window.current_shape.update()
 
 def updateScrollbarThumbSize( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ScrollBarWidget ):
-        main_window.current_shape.setThumbSize( value )
+    main_window.current_shape.thumb_size = value 
+    main_window.current_shape.update()
 
 #------------------------------------------------------------SLIDER--------------------------------------------------------------
 
@@ -891,8 +904,8 @@ def updateProgressBarStatic( main_window, state ):
 
 def updateProgressBar3D( main_window, state ):
     if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        _3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( _3d )
+        effect_3d = ( state == Qt.CheckState.Checked.value )
+        main_window.current_shape.set3d( effect_3d )
 
 def updateProgressBarName( main_window ):
     if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):

@@ -715,7 +715,7 @@ class MainWindow( QMainWindow ):
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
         elif self.selected_shape == "Dial":
-            shape = DialWidget( 80, widget_container )
+            shape = DialWidget( widget_container )
             shape.move( container_pos.x() - shape.width() // 2, container_pos.y() - shape.height() // 2 )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Dial" )
@@ -723,7 +723,7 @@ class MainWindow( QMainWindow ):
             shape.tag = generateAutoTag( self, shape )
 
         elif self.selected_shape == "Toggle":
-            shape = ToggleWidget( 80, 30, widget_container )
+            shape = ToggleWidget( widget_container )
             shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Toggle" )
@@ -731,7 +731,7 @@ class MainWindow( QMainWindow ):
             shape.tag = generateAutoTag( self, shape )
 
         elif self.selected_shape == "Scroll bar":
-            shape = ScrollBarWidget( 200, 15, widget_container )
+            shape = ScrollBarWidget( widget_container )
             shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "ScrollBar" )
