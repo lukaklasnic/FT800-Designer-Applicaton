@@ -1,52 +1,64 @@
 from PyQt6.QtWidgets import ( QColorDialog, QFileDialog )
-from PyQt6.QtGui import ( QLinearGradient, QColor )
+from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt
 from widgets import*  
 
 #------------------------------------------------------------CANVAS--------------------------------------------------------------
 
-def changeCanvasColor( main_window, canvas, color_rect ):
-    color = QColorDialog.getColor( QColor( canvas.canvas_color ) )
+def updateCanvasActive( canvas, state ):
+    state == Qt.CheckState.Checked.value 
+    canvas.active = state
+    canvas.update() 
+
+def updateCanvasVisible( canvas, state ):
+    state == Qt.CheckState.Checked.value
+    canvas.setVisible( state )
+    canvas.visible = state
+    canvas.update()
+
+def updateCanvasStatic( canvas, state ):
+    state == Qt.CheckState.Checked.value
+    canvas.static = state 
+    canvas.update()
+
+def updateCanvasName( canvas, text ):
+    canvas.custom_name = text 
+    canvas.update()
+
+def updateCanvasColor( canvas, canvas_color_rect ):
+    color = QColorDialog.getColor( canvas.canvas_color )
 
     if color.isValid():
-        canvas.setBackgroundColor( color.name() )
-        color_rect.color = color.name()
-        color_rect.update()
+        canvas.canvas_color = color
+        canvas.canvas_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        canvas.update()
 
-def toggleGrid( main_window, canvas, state ):
-    canvas.setGridEnabled( state == Qt.CheckState.Checked.value )
+def updateToggleGrid( canvas, state ):
+    state == Qt.CheckState.Checked.value
+    canvas.canvas_grid_enable = state 
+    canvas.update()
 
-def changeGridColor( main_window, canvas, color_rect ):
-    color = QColorDialog.getColor( QColor( canvas.grid_color ) )
+def updateGridColor( canvas, grid_color_rect ):
+    color = QColorDialog.getColor( canvas.grid_color )
 
     if color.isValid():
-        canvas.setGridColor( color.name() )
-        color_rect.color = color.name()
-        color_rect.update()
+        canvas.grid_color = color
+        canvas.grid_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        canvas.update()
 
-def changeGridType( main_window, canvas, text ):
+def changeGridType( canvas, text ):
     if text == "Lines":
         grid_type = "lines"  
 
-    else: 
+    elif text == "Dots": 
        grid_type = "dots"
 
-    canvas.setGridType( grid_type )
+    canvas.grid_type = grid_type 
+    canvas.update()
 
-def changeGridSize( main_window, canvas, value ):
-    canvas.setGridSize( value )
-
-def changeCanvasActive( main_window, canvas, state ):
-    canvas.setActive( state == Qt.CheckState.Checked.value )
-
-def changeCanvasVisible( main_window, canvas, state ):
-    canvas.setVisibleCanvas( state == Qt.CheckState.Checked.value )
-
-def changeCanvasStatic( main_window, canvas, state ):
-    canvas.setStatic( state == Qt.CheckState.Checked.value )
-
-def changeCanvasName( main_window, canvas, text ):
-    canvas.setName( text )
+def changeGridSize( canvas, value ):
+    canvas.grid_size = value 
+    canvas.update()
 
 #------------------------------------------------------------LINE--------------------------------------------------------------
 
@@ -843,7 +855,9 @@ def updateSliderPosition( main_window ):
     main_window.current_shape.update()
 
 def updateSliderSize( main_window, value ):
-    main_window.current_shape.setSize( main_window.width_spin_slider.value(), main_window.height_spin_slider.value() )
+    main_window.current_shape.slider_width = main_window.width_spin_slider.value()
+    main_window.current_shape.slider_height = main_window.height_spin_slider.value() 
+    main_window.current_shape.setFixedSize( main_window.current_shape.slider_width, main_window.current_shape.slider_height )
     main_window.current_shape.update()
 
 def changeSliderThumbColor( main_window ):

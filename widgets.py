@@ -3849,7 +3849,10 @@ class SliderWidget( QWidget ):
             new_width = max( 0, self.resize_start_size.width() - delta.x() )
             new_height = max( 0, self.resize_start_size.height() - delta.y() )
 
-        self.setSize( new_width, new_height )
+        self.slider_width = new_width
+        self.slider_height = new_height
+        self.setFixedSize( self.slider_width, self.slider_height )
+        self.update()
 
     def getCornerAt( self, pos ):
         handle_size = 12
@@ -3948,19 +3951,8 @@ class SliderWidget( QWidget ):
         
         return QRect( thumb_x, thumb_y, thumb_diameter, thumb_diameter )
 
-    def setValue( self, value ):
-        self.value = max( 0, min( 100, value ) )
-        self.update()
-        self.updatePropertiesValue()
-
     def setSelected( self, selected ):
         self.selected = selected
-        self.update()
-
-    def setSize( self, width, height ):
-        self.slider_width = width
-        self.slider_height = height
-        self.setFixedSize( width, height )
         self.update()
 
     def updatePropertiesSize( self ):
@@ -4004,11 +3996,11 @@ class SliderWidget( QWidget ):
             return
         
         if ( hasattr( main_window, 'current_shape') and main_window.current_shape == self ):
-            if hasattr( main_window, 'value_slider' ):
+            if hasattr( main_window, 'value_spin_slider' ):
                 try:
-                    main_window.value_slider.blockSignals( True )
-                    main_window.value_slider.value =  self.value 
-                    main_window.value_slider.blockSignals( False )
+                    main_window.value_spin_slider.blockSignals( True )
+                    main_window.value_spin_slider.setValue( self.value ) 
+                    main_window.value_spin_slider.blockSignals( False )
 
                 except:
                     pass
@@ -4055,7 +4047,9 @@ class SliderWidget( QWidget ):
                         relative_x = event.pos().x() - track_rect.x()
                         new_value = int( ( relative_x / track_rect.width() ) * 100 )
                     
-                    self.setValue( new_value )
+                    self.value =  max( 0, min( 100, new_value ) )
+                    self.update()
+                    self.updatePropertiesValue()
             
             self.clicked.emit( self )
             self.updatePropertiesValue()
@@ -4071,6 +4065,7 @@ class SliderWidget( QWidget ):
 
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
+            self.updatePropertiesValue()
 
         event.accept()
 
@@ -4096,6 +4091,9 @@ class SliderWidget( QWidget ):
             delta = mouse_pos - self.drag_start_pos
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
+            new_x = max( 0, new_x )
+            new_y = max( 0, new_y )
+        
             super().move( new_x, new_y )
             self.updatePropertiesPosition()
 
@@ -4109,7 +4107,9 @@ class SliderWidget( QWidget ):
                 value_delta = int( ( delta.x() / track_rect.width() ) * 100 )
             
             new_value = self.thumb_drag_start_value + value_delta
-            self.setValue( new_value )
+            self.value =  max( 0, min( 100, new_value ) )
+            self.update()
+            self.updatePropertiesValue()
         
         event.accept()
 

@@ -321,12 +321,12 @@ class Canvas( QWidget ):
         
     def setupProperties( self ):
         self.canvas_grid_enable = False
-        self.canvas_color = "white"
-        self.grid_color = "black"
+        self.canvas_color = QColor( 255, 255, 255)
+        self.grid_color = QColor( 0, 0, 0 )
         self.grid_size = 20
         self.grid_type = "lines"
         
-        self.name = f"Screen_{ self.canvas_id }"
+        self.custom_name = f"Screen_{ self.canvas_id }"
         self.active = True
         self.visible = True
         self.static = False
@@ -402,7 +402,7 @@ class Canvas( QWidget ):
         self.properties_changed.emit()
     
     def setName( self, name ):
-        self.name = name
+        self.custom_name = name
         self.properties_changed.emit()
     
     def setActive( self, active ):
@@ -421,7 +421,7 @@ class Canvas( QWidget ):
     def getCanvasProperties( self ):
         return {
             'id': self.canvas_id,
-            'name': self.name,
+            'custom_name': self.custom_name,
             'active': self.active,
             'visible': self.visible,
             'static': self.static,

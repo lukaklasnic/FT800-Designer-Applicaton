@@ -376,7 +376,7 @@ class MainWindow( QMainWindow ):
         for i, canvas in enumerate( self.canvases ):
             old_id = canvas.canvas_id
             canvas.canvas_id = i
-            canvas.name = f"Screen_{ i }"
+            canvas.custom_name = f"Screen_{ i }"
 
             if old_id in self.canvas_widgets:
                 new_canvas_widgets[ i ] = self.canvas_widgets[ old_id ]
