@@ -737,6 +737,7 @@ def showRectangleProperties(main_window, current_index):
     current_index += 1
 
     return current_index
+
 #----------------------------------------------------------------CIRCLE----------------------------------------------------------------
 
 def showCircleProperties( main_window, current_index ):
@@ -2998,9 +2999,6 @@ def showToggleProperties( main_window, current_index ):
 #------------------------------------------------------------SCROLL BAR--------------------------------------------------------------
 
 def showScrollBarProperties( main_window, current_index ):
-    if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
-        main_window.current_shape.custom_name = generateWidgetName( main_window, "ScrollBar" )
-
     shape_label = QLabel( "SCROLLBAR PROPERTIES" )
     shape_label.setStyleSheet( "color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, shape_label )
@@ -3169,7 +3167,7 @@ def showScrollBarProperties( main_window, current_index ):
     width_layout.addWidget( width_label )
     width_layout.addStretch( 1 )
     main_window.width_spin_scrollbar = QSpinBox()
-    main_window.width_spin_scrollbar.setRange( 100, 480 )
+    main_window.width_spin_scrollbar.setRange( 0, 9999 )
     main_window.width_spin_scrollbar.setValue( main_window.current_shape.scroll_bar_width )
     main_window.width_spin_scrollbar.valueChanged.connect( lambda value: updateScrollbarSize( main_window ) )
     main_window.width_spin_scrollbar.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
@@ -3187,7 +3185,7 @@ def showScrollBarProperties( main_window, current_index ):
     height_layout.addWidget( height_label )
     height_layout.addStretch( 1 )
     main_window.height_spin_scrollbar = QSpinBox()
-    main_window.height_spin_scrollbar.setRange( 10, 272 )
+    main_window.height_spin_scrollbar.setRange( 0, 9999 )
     main_window.height_spin_scrollbar.setValue( main_window.current_shape.scroll_bar_height )
     main_window.height_spin_scrollbar.valueChanged.connect( lambda value: updateScrollbarSize( main_window ) )
     main_window.height_spin_scrollbar.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
@@ -3252,24 +3250,6 @@ def showScrollBarProperties( main_window, current_index ):
     main_window.properties_layout.insertWidget( current_index, value_label )
     current_index += 1
 
-    range_layout = QHBoxLayout()
-    range_layout.setContentsMargins( 20, 5, 10, 5 )
-    range_label = QLabel( "Range:" )
-    range_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
-    range_layout.addWidget( range_label )
-    range_layout.addStretch( 1 )
-    main_window.range_spin_scrollbar = QSpinBox()
-    main_window.range_spin_scrollbar.setRange( 1, 1000 )
-    main_window.range_spin_scrollbar.setValue( main_window.current_shape.range_value )
-    main_window.range_spin_scrollbar.valueChanged.connect( lambda value: updateScrollbarRange( main_window, value ) )
-    main_window.range_spin_scrollbar.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
-    main_window.range_spin_scrollbar.setFixedWidth( 60 )
-    range_layout.addWidget( main_window.range_spin_scrollbar )
-    range_widget = QWidget()
-    range_widget.setLayout( range_layout )
-    main_window.properties_layout.insertWidget( current_index, range_widget )
-    current_index += 1
-
     current_value_layout = QHBoxLayout()
     current_value_layout.setContentsMargins( 20, 5, 10, 5 )
     current_value_label = QLabel( "Current Value:" )
@@ -3277,7 +3257,7 @@ def showScrollBarProperties( main_window, current_index ):
     current_value_layout.addWidget( current_value_label )
     current_value_layout.addStretch( 1 )
     main_window.current_value_spin_scrollbar = QSpinBox()
-    main_window.current_value_spin_scrollbar.setRange( main_window.current_shape.range_value, 0 )
+    main_window.current_value_spin_scrollbar.setRange( 0, 100 )
     main_window.current_value_spin_scrollbar.setValue( main_window.current_shape.current_value )
     main_window.current_value_spin_scrollbar.valueChanged.connect( lambda value: updateScrollbarCurrentValue( main_window, value ) )
     main_window.current_value_spin_scrollbar.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
@@ -3311,9 +3291,6 @@ def showScrollBarProperties( main_window, current_index ):
 #------------------------------------------------------------SLIDER--------------------------------------------------------------
 
 def showSliderProperties( main_window, current_index ):
-    if not hasattr( main_window.current_shape, 'custom_name' ) or not main_window.current_shape.custom_name:
-        main_window.current_shape.custom_name = generateWidgetName( main_window, "Slider" )
-
     shape_label = QLabel( "SLIDER PROPERTIES" )
     shape_label.setStyleSheet( "color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, shape_label )
@@ -3482,8 +3459,8 @@ def showSliderProperties( main_window, current_index ):
     width_layout.addWidget( width_label )
     width_layout.addStretch( 1 )
     main_window.width_spin_slider = QSpinBox()
-    main_window.width_spin_slider.setRange( 100, 480 )
-    main_window.width_spin_slider.setValue( main_window.current_shape.getWidth() )
+    main_window.width_spin_slider.setRange( 0, 9999 )
+    main_window.width_spin_slider.setValue( main_window.current_shape.slider_width )
     main_window.width_spin_slider.valueChanged.connect( lambda value: updateSliderSize( main_window, value ) )
     main_window.width_spin_slider.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.width_spin_slider.setFixedWidth( 70 )
@@ -3500,8 +3477,8 @@ def showSliderProperties( main_window, current_index ):
     height_layout.addWidget( height_label )
     height_layout.addStretch( 1 )
     main_window.height_spin_slider = QSpinBox()
-    main_window.height_spin_slider.setRange( 20, 272 )
-    main_window.height_spin_slider.setValue( main_window.current_shape.getHeight() )
+    main_window.height_spin_slider.setRange( 0, 9999 )
+    main_window.height_spin_slider.setValue( main_window.current_shape.slider_height )
     main_window.height_spin_slider.valueChanged.connect( lambda value: updateSliderSize( main_window, value ) )
     main_window.height_spin_slider.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.height_spin_slider.setFixedWidth( 70 )
@@ -3522,7 +3499,7 @@ def showSliderProperties( main_window, current_index ):
     thumb_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     thumb_color_layout.addWidget( thumb_color_label )
     thumb_color_layout.addStretch( 1 )
-    main_window.thumb_color_rect_slider = ColorRectangle( main_window.current_shape.progress_color.name() )
+    main_window.thumb_color_rect_slider = ColorRectangle( main_window.current_shape.background_color_right.name() )
     main_window.thumb_color_rect_slider.mousePressEvent = lambda e: changeSliderThumbColor( main_window )
     thumb_color_layout.addWidget( main_window.thumb_color_rect_slider )
     thumb_color_widget = QWidget()
@@ -3550,7 +3527,7 @@ def showSliderProperties( main_window, current_index ):
     bg_right_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     bg_right_color_layout.addWidget( bg_right_color_label )
     bg_right_color_layout.addStretch( 1 )
-    main_window.bg_right_color_rect_slider = ColorRectangle( main_window.current_shape.track_color.name() )
+    main_window.bg_right_color_rect_slider = ColorRectangle( main_window.current_shape.background_color_left.name() )
     main_window.bg_right_color_rect_slider.mousePressEvent = lambda e: changeSliderBackgroundRightColor( main_window )
     bg_right_color_layout.addWidget( main_window.bg_right_color_rect_slider ) 
     bg_right_widget = QWidget()
@@ -3567,7 +3544,7 @@ def showSliderProperties( main_window, current_index ):
     main_window.effect_3d_checkbox_slider = QCheckBox()
     main_window.effect_3d_checkbox_slider.setChecked( getattr( main_window.current_shape, 'effect_3d', False ) )
     main_window.effect_3d_checkbox_slider.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
-    main_window.effect_3d_checkbox_slider.stateChanged.connect( lambda state: updateSlider3d( main_window, state ) )
+    main_window.effect_3d_checkbox_slider.stateChanged.connect( lambda state: updateSlider3D( main_window, state ) )
     effect_3d_layout.addWidget( main_window.effect_3d_checkbox_slider )
     effect_3d_widget = QWidget()
     effect_3d_widget.setLayout( effect_3d_layout )
@@ -3579,24 +3556,6 @@ def showSliderProperties( main_window, current_index ):
     main_window.properties_layout.insertWidget( current_index, value_label )
     current_index += 1
 
-    range_layout = QHBoxLayout()
-    range_layout.setContentsMargins( 20, 5, 10, 5 )
-    range_label = QLabel( "Range:" )
-    range_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
-    range_layout.addWidget( range_label )
-    range_layout.addStretch( 1 )
-    main_window.range_spin_slider = QSpinBox()
-    main_window.range_spin_slider.setRange( 1, 1000 )
-    main_window.range_spin_slider.setValue( 100 )
-    main_window.range_spin_slider.setEnabled( False )
-    main_window.range_spin_slider.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
-    main_window.range_spin_slider.setFixedWidth( 70 )
-    range_layout.addWidget( main_window.range_spin_slider )
-    range_widget = QWidget()
-    range_widget.setLayout( range_layout )
-    main_window.properties_layout.insertWidget( current_index, range_widget )
-    current_index += 1
-
     value_val_layout = QHBoxLayout()
     value_val_layout.setContentsMargins( 20, 5, 10, 5 )
     value_val_label = QLabel( "Value:" )
@@ -3605,7 +3564,7 @@ def showSliderProperties( main_window, current_index ):
     value_val_layout.addStretch( 1 )
     main_window.value_spin_slider = QSpinBox()
     main_window.value_spin_slider.setRange( 0, 100 )
-    main_window.value_spin_slider.setValue( main_window.current_shape.getValue() )
+    main_window.value_spin_slider.setValue( main_window.current_shape.value )
     main_window.value_spin_slider.valueChanged.connect( lambda value: updateSliderValue( main_window, value ) )
     main_window.value_spin_slider.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.value_spin_slider.setFixedWidth( 70 )
@@ -3840,7 +3799,7 @@ def showProgressBarProperties( main_window, current_index ):
     main_window.effect_3d_checkbox.setChecked( main_window.current_shape.effect_3d )
     main_window.effect_3d_checkbox.stateChanged.connect( lambda state: updateProgressBar3D( main_window, state ) )
     main_window.effect_3d_checkbox.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
-    effect_3d_layout.addWidget( main_window.progress_3d_checkbox )
+    effect_3d_layout.addWidget( main_window.effect_3d_checkbox )
     effect_3d_widget = QWidget()
     effect_3d_widget.setLayout( effect_3d_layout )
     main_window.properties_layout.insertWidget( current_index, effect_3d_widget )

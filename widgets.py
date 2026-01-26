@@ -3121,9 +3121,9 @@ class ToggleWidget( QWidget ):
 class ScrollBarWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, parent = None ):
+    def __init__( self, parent=None ):
         super().__init__( parent )
-
+        
         self.defaultValues()
         self.setFixedSize( self.scroll_bar_width, self.scroll_bar_height )
         self.setMouseTracking( True )
@@ -3139,11 +3139,12 @@ class ScrollBarWidget( QWidget ):
         self.scroll_bar_width = 200
         self.scroll_bar_height = 15
         self.background_color = QColor( 0, 0, 255 ) 
-        self.thumb_color = QColor( 0, 64, 128 )
+        self.thumb_color = QColor( 255, 0, 0 )
         self.effect_3d = True 
         self.range_value = 100 
         self.current_value = 50
         self.thumb_size = 30
+        self.thumb_min_size = 20
 
         self.selected = False
         self.resizing = False
@@ -3156,15 +3157,25 @@ class ScrollBarWidget( QWidget ):
         self.thumb_dragging = False
         self.thumb_drag_start_pos = QPoint()
         self.thumb_drag_start_value = 0
+        self.thumb_drag_mouse_start_pos = QPoint()
+        self.rotated = False
 
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
+        self.rotated = self.height() > self.width()
         
-        w = self.scroll_bar_width
-        h = self.scroll_bar_height
+        if self.rotated:
+            painter.translate( self.width(), 0 )
+            painter.rotate( 90 )
+            draw_width = self.height()
+            draw_height = self.width()
+
+        else:
+            draw_width = self.width()
+            draw_height = self.height()
         
-        radius = h // 2
+        radius = max( 1, draw_height // 2 )
         
         pen = QPen( self.background_color )
         pen.setWidth( 3 )
@@ -3172,51 +3183,68 @@ class ScrollBarWidget( QWidget ):
         painter.setBrush( self.background_color )
         
         painter.drawPie( 0, 0, 2 * radius, 2 * radius, 90 * 16, 180 * 16 )
-        painter.drawRect( radius, 0, w - 2 * radius, h )
-        painter.drawPie( w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 180 * 16 )
-        
-        thumb_rect = self.getThumbRect()
-        pen = QPen( self.thumb_color )
-        pen.setWidth( 2 )
-        painter.setPen( pen )
-        painter.setBrush( self.thumb_color )
-        
-        thumb_radius = thumb_rect.height() // 2
-        
-        painter.drawPie( thumb_rect.x(), thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 90 * 16, 180 * 16 )
-        painter.drawRect( thumb_rect.x() + thumb_radius, thumb_rect.y(), thumb_rect.width() - 2 * thumb_radius, thumb_rect.height() )
-        painter.drawPie( thumb_rect.x() + thumb_rect.width() - 2 * thumb_radius, thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 90 * 16, -180 * 16 )
+        painter.drawRect( radius, 0, draw_width - 2 * radius, draw_height )
+        painter.drawPie( draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 180 * 16 )
         
         if self.effect_3d:
+            pen = QPen( QColor( 0, 0, 0 ) )
+            pen.setWidth( 1 )
+            painter.setPen( pen )
+            painter.drawLine( radius, 0, draw_width - radius, 0 )
+            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 90 * 16, 135 * 16 )
+            painter.drawArc( draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, 45 * 16 )
+
             pen = QPen( QColor( 255, 255, 255 ) )
             pen.setWidth( 1 )
             painter.setPen( pen )
             
-            painter.drawLine( thumb_rect.x() + thumb_radius, thumb_rect.y(), thumb_rect.x() + thumb_rect.width() - thumb_radius, thumb_rect.y())
-            painter.drawArc( thumb_rect.x(), thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 90 * 16, 135 * 16 )
-            
-            pen.setWidth( 1 )
-            painter.setPen( pen )
-            
-            painter.drawLine( radius, h, w - radius, h )
-            painter.drawArc( w - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, - 135 * 16 )
+            painter.drawLine( radius, draw_height, draw_width - radius, draw_height )
             painter.drawArc( 0, 0, 2 * radius, 2 * radius, 225 * 16, 45 * 16 )
-            
-            pen = QPen( QColor( 0, 0, 0 ) )
-            pen.setWidth( 1 )
+            painter.drawArc( draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, - 135 * 16 )
+        
+        thumb_rect = self.getThumbRectForDrawing()
+        
+        if thumb_rect.width() > 0 and thumb_rect.height() > 0:
+            pen = QPen( self.thumb_color )
+            pen.setWidth( 2 )
             painter.setPen( pen )
+            painter.setBrush( self.thumb_color )
+            
+            thumb_radius = min( thumb_rect.width(), thumb_rect.height() ) // 2
+            thumb_radius = max( 1, thumb_radius )
+            
+            if thumb_radius >= 3:
+                painter.drawPie( thumb_rect.x(), thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 90 * 16, 180 * 16 )
+                painter.drawRect( thumb_rect.x() + thumb_radius, thumb_rect.y(), thumb_rect.width() - 2 * thumb_radius, thumb_rect.height() )
+                painter.drawPie( thumb_rect.x() + thumb_rect.width() - 2 * thumb_radius, thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 90 * 16, - 180 * 16 )
+                
+            else:
+                painter.drawRect (thumb_rect )
+            
+            if self.effect_3d:
+                pen = QPen( QColor( 0, 0, 0 ) )
+                pen.setWidth( 1 )
+                painter.setPen( pen )
+                
+                if thumb_radius >= 3:
+                    painter.drawLine( thumb_rect.x() + thumb_radius, thumb_rect.y(), thumb_rect.x() + thumb_rect.width() - thumb_radius, thumb_rect.y() )
+                    painter.drawArc( thumb_rect.x(), thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 90 * 16, 135 * 16 )
+                else:
+                    painter.drawLine( thumb_rect.x(), thumb_rect.y(), thumb_rect.x() + thumb_rect.width(), thumb_rect.y() )
+                
+                
+                pen.setWidth( 1 )
+                painter.setPen( pen )
+                pen = QPen( QColor( 255, 255, 255 ) )
+                if thumb_radius >= 3:
+                    painter.drawLine( thumb_rect.x() + thumb_radius, thumb_rect.y() + thumb_rect.height(), thumb_rect.x() + thumb_rect.width() - thumb_radius, thumb_rect.y() + thumb_rect.height() )
+                    painter.drawArc( thumb_rect.x() + thumb_rect.width() - 2 * thumb_radius, thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 45 * 16, -135 * 16 )
 
-            painter.drawLine( thumb_rect.x() + thumb_radius, thumb_rect.y() + thumb_rect.height(), thumb_rect.x() + thumb_rect.width() - thumb_radius, thumb_rect.y() + thumb_rect.height() )
-            painter.drawArc( thumb_rect.x() + thumb_rect.width() - 2 * thumb_radius, thumb_rect.y(), 2 * thumb_radius, 2 * thumb_radius, 45 * 16, - 135 * 16 )
-            
-            pen.setWidth( 1 )
-            painter.setPen( pen )
-            
-            painter.drawLine( radius, 0, w - radius, 0 )
-            painter.drawArc( w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 45 * 16 )
-            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 90 * 16, 135 * 16 )
+                else:
+                    painter.drawLine( thumb_rect.x(), thumb_rect.y() + thumb_rect.height(), thumb_rect.x() + thumb_rect.width(), thumb_rect.y() + thumb_rect.height() )
         
         if self.selected:
+            painter.resetTransform()
             self.drawSelectionBorder( painter )
             self.drawSelectionHandles( painter )
 
@@ -3228,18 +3256,21 @@ class ScrollBarWidget( QWidget ):
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        pen = QPen( QColor( 0, 80, 200 ) )
+        pen.setWidth( 1 )
+        painter.setPen( pen )
 
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-
             painter.setBrush( QColor( 255, 255, 255 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
             painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+            pen = QPen(QColor( 0, 80, 200 ) )
+            pen.setWidth( 1 )
+            painter.setPen( pen )
 
     def drawSelectionBorder( self, painter ):
         if not self.selected:
@@ -3253,52 +3284,74 @@ class ScrollBarWidget( QWidget ):
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
-        painter.setPen( selection_pen )
-        painter.setBrush( Qt.BrushStyle.NoBrush )
-        painter.drawRect( border_rect )
+        painter.setPen(selection_pen)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.drawRect(border_rect)
 
     def handleResize( self, global_pos ):
         if not self.resize_corner:
             return
 
         delta = global_pos - self.resize_start_pos
-
         new_width = self.resize_start_size.width()
         new_height = self.resize_start_size.height()
 
         if self.resize_corner == "bottom_right":
-            new_width = max( 100, self.resize_start_size.width() + delta.x() )
-            new_height = max( 10, self.resize_start_size.height() + delta.y() )
+            new_width = self.resize_start_size.width() + delta.x()
+            new_height = self.resize_start_size.height() + delta.y()
 
         elif self.resize_corner == "top_right":
-            new_width = max( 100, self.resize_start_size.width() + delta.x() )
-            new_height = max( 10, self.resize_start_size.height() - delta.y() )
+            new_width = self.resize_start_size.width() + delta.x()
+            new_height = self.resize_start_size.height() - delta.y()
 
         elif self.resize_corner == "bottom_left":
-            new_width = max( 100, self.resize_start_size.width() - delta.x() )
-            new_height = max( 10, self.resize_start_size.height() + delta.y() )
+            new_width = self.resize_start_size.width() - delta.x()
+            new_height = self.resize_start_size.height() + delta.y()
 
         elif self.resize_corner == "top_left":
-            new_width = max( 100, self.resize_start_size.width() - delta.x() )
-            new_height = max( 10, self.resize_start_size.height() - delta.y() )
+            new_width = self.resize_start_size.width() - delta.x()
+            new_height = self.resize_start_size.height() - delta.y()
 
-        self.setSize(new_width, new_height)
+        new_width = max( 10, new_width )
+        new_height = max( 10, new_height )
+        
+        self.scroll_bar_width = new_width
+        self.scroll_bar_height = new_height
+
+        self.setFixedSize( self.scroll_bar_width, self.scroll_bar_height )
+        self.update()
         self.updatePropertiesSize()
         self.updatePropertiesPosition()
 
-    def calculateValueFromPosition( self, x ):
-        track_rect = self.getTrackRect()
-        thumb_rect = self.getThumbRect()
-        
-        relative_x = x - track_rect.x() - thumb_rect.width() / 2
-        track_width = track_rect.width() - thumb_rect.width()
-        
-        if track_width > 0:
-            value = int( ( relative_x / track_width ) * self.range_value )
+    def calculateValueFromPosition( self, pos ):
+        if self.rotated:
+            y = pos.y()
+            track_rect = self.getTrackRectForInteraction()
+            thumb_rect = self.getThumbRectForInteraction()
+            
+            track_length = track_rect.height() - thumb_rect.height()
 
-            return max( 0, min( self.range_value, value ) )
+            if track_length > 0:
+                relative_y = y - track_rect.y() - thumb_rect.height() / 2
+                value = int( ( relative_y / track_length ) * self.range_value )
+
+                return max( 0, min( self.range_value, value ) )
+            
+            return self.current_value
         
-        return self.current_value
+        else:
+            x = pos.x()
+            track_rect = self.getTrackRectForInteraction()
+            thumb_rect = self.getThumbRectForInteraction()
+            track_length = track_rect.width() - thumb_rect.width()
+
+            if track_length > 0:
+                relative_x = x - track_rect.x() - thumb_rect.width() / 2
+                value = int( ( relative_x / track_length ) * self.range_value )
+
+                return max( 0, min( self.range_value, value ) )
+            
+            return self.current_value
 
     def getCornerAt( self, pos ):
         handle_size = 12 
@@ -3319,61 +3372,121 @@ class ScrollBarWidget( QWidget ):
         
         return None
 
-    def getTrackRect( self ):
-        w = self.scroll_bar_width
-        h = self.scroll_bar_height
-        
-        radius = h // 2
-        
-        return QRect( radius, 0, w - 2 * radius, h )
-
-    def getThumbRect( self ):
-        track_rect = self.getTrackRect()
-        
-        thumb_width = int( track_rect.width() * ( self.thumb_size / 100.0 ) )
-        thumb_width = max( 20, min( track_rect.width(), thumb_width ) )
-        
-        max_position = track_rect.width() - thumb_width
-
-        if max_position > 0:
-            thumb_x = track_rect.x() + int( ( self.current_value / self.range_value ) * max_position )
+    def getThumbRectForDrawing( self ):
+        if self.rotated:
+            draw_width = self.height()  
+            draw_height = self.width()   
 
         else:
-            thumb_x = track_rect.x()
+            draw_width = self.width()
+            draw_height = self.height()
         
-        thumb_height = int( h * 0.6 ) if ( h := self.scroll_bar_height ) > 20 else h - 4
-        thumb_y = ( h - thumb_height ) // 2
+        track_height = draw_height
+        track_radius = max( 1, track_height // 2 )
+        track_length = max( 0, draw_width - 2 * track_radius )
+        thumb_length = int( track_length * ( self.thumb_size / 100.0 ) )
+        dynamic_min_size = max( self.thumb_min_size, int(track_height * 1.5 ) )
+        thumb_length = max( dynamic_min_size, min( track_length, thumb_length ) )
+        max_position = max( 0, track_length - thumb_length )
+
+        if max_position > 0:
+            thumb_x = track_radius + int( ( self.current_value / self.range_value ) * max_position )
+
+        else:
+            thumb_x = track_radius
         
-        return QRect( thumb_x, thumb_y, thumb_width, thumb_height )
+        thumb_height = int( track_height * 0.8 ) 
+        thumb_height = max( 6, thumb_height )
+        thumb_y =  ( track_height - thumb_height ) // 2
+        
+        return QRect( thumb_x, thumb_y, thumb_length, thumb_height )
+
+    def getThumbRectForInteraction( self ):
+        if self.rotated:
+            track_height = self.height()
+            track_width = self.width()
+            track_radius = max( 1, track_width // 2 )
+            track_length = max( 0, track_height - 2 * track_radius )
+            
+            thumb_length = int( track_length * ( self.thumb_size / 100.0 ) )
+            dynamic_min_size = max( self.thumb_min_size, int( track_width * 1.5 ) )
+            thumb_length = max( dynamic_min_size, min( track_length, thumb_length ) )
+            
+            max_position = max( 0, track_length - thumb_length )
+
+            if max_position > 0:
+                thumb_y = track_radius + int( ( self.current_value / self.range_value ) * max_position )
+
+            else:
+                thumb_y = track_radius
+            
+            thumb_width = int( track_width * 0.8 )
+            thumb_width = max( 6, thumb_width )
+            thumb_x = ( track_width - thumb_width ) // 2
+            
+            return QRect( thumb_x, thumb_y, thumb_width, thumb_length )
+        
+        else:
+            track_height = self.height()
+            track_width = self.width()
+            track_radius = max( 1, track_height // 2 )
+            track_length = max( 0, track_width - 2 * track_radius )
+            thumb_length = int( track_length * ( self.thumb_size / 100.0 ) )
+            dynamic_min_size = max( self.thumb_min_size, int( track_height * 1.5 ) )
+            thumb_length = max( dynamic_min_size, min( track_length, thumb_length ) )
+            max_position = max( 0, track_length - thumb_length )
+
+            if max_position > 0:
+                thumb_x = track_radius + int( ( self.current_value / self.range_value ) * max_position )
+
+            else:
+                thumb_x = track_radius
+            
+            thumb_height = int( track_height * 0.8 )
+            thumb_height = max( 6, thumb_height )
+            thumb_y = ( track_height - thumb_height ) // 2
+            
+            return QRect( thumb_x, thumb_y, thumb_length, thumb_height )
+
+    def getTrackRectForInteraction( self ):
+        if self.rotated:
+            radius = max( 1, self.width() // 2 )
+
+            return QRect( radius, 0, self.width() - 2 * radius, self.height() )
+        
+        else:
+            radius = max( 1, self.height() // 2 )
+            track_width = max( 0, self.width() - 2 * radius )
+
+            return QRect( radius, 0, track_width, self.height() )
     
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
 
-    def setSize( self, width, height ):
-        self.scroll_bar_width = width
-        self.scroll_bar_height = height
-        self.setFixedSize( width, height )
-        self.update()
-
-
     def updatePropertiesSize( self ):
         main_window = self.findMainWindow()
-
         if not main_window:
             return
         
-        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
-            
-            if hasattr( main_window, 'width_spin_scrollbar' ):
-                main_window.width_spin_scrollbar.blockSignals( True )
-                main_window.width_spin_scrollbar.setValue( self.scroll_bar_width )
-                main_window.width_spin_scrollbar.blockSignals( False )
+        if hasattr( main_window, 'current_shape' ) and main_window.current_shape == self:
+            if hasattr(main_window, 'width_spin_scrollbar'):
+                try:
+                    main_window.width_spin_scrollbar.blockSignals( True )
+                    main_window.width_spin_scrollbar.setValue( self.scroll_bar_width )
+                    main_window.width_spin_scrollbar.blockSignals( False )
+                
+                except:
+                    pass
                 
             if hasattr( main_window, 'height_spin_scrollbar' ):
-                main_window.height_spin_scrollbar.blockSignals( True )
-                main_window.height_spin_scrollbar.setValue( self.scroll_bar_height )
-                main_window.height_spin_scrollbar.blockSignals( False )
+                try:
+                    main_window.height_spin_scrollbar.blockSignals( True )
+                    main_window.height_spin_scrollbar.setValue( self.scroll_bar_height )
+                    main_window.height_spin_scrollbar.blockSignals( False )
+
+                except:
+                    pass
 
     def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
@@ -3381,17 +3494,24 @@ class ScrollBarWidget( QWidget ):
         if not main_window:
             return
         
-        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
-            
+        if hasattr( main_window, 'current_shape' ) and main_window.current_shape == self:
             if hasattr( main_window, 'pos_x_spin_scrollbar' ):
-                main_window.pos_x_spin_scrollbar.blockSignals( True )
-                main_window.pos_x_spin_scrollbar.setValue( self.x() )
-                main_window.pos_x_spin_scrollbar.blockSignals( False )
+                try:
+                    main_window.pos_x_spin_scrollbar.blockSignals( True )
+                    main_window.pos_x_spin_scrollbar.setValue( self.x() )
+                    main_window.pos_x_spin_scrollbar.blockSignals( False )
+
+                except:
+                    pass
                 
             if hasattr( main_window, 'pos_y_spin_scrollbar' ):
-                main_window.pos_y_spin_scrollbar.blockSignals( True )
-                main_window.pos_y_spin_scrollbar.setValue( self.y() )
-                main_window.pos_y_spin_scrollbar.blockSignals( False )
+                try:
+                    main_window.pos_y_spin_scrollbar.blockSignals( True )
+                    main_window.pos_y_spin_scrollbar.setValue( self.y() )
+                    main_window.pos_y_spin_scrollbar.blockSignals( False )
+
+                except:
+                    pass
 
     def updatePropertiesValue( self ):
         main_window = self.findMainWindow()
@@ -3399,34 +3519,37 @@ class ScrollBarWidget( QWidget ):
         if not main_window:
             return
         
-        if (hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
-            
-            if hasattr( main_window, 'current_value_spin_scrollbar' ):
-                main_window.current_value_spin_scrollbar.blockSignals( True )
-                main_window.current_value_spin_scrollbar.setValue( self.current_value )
-                main_window.current_value_spin_scrollbar.blockSignals( False )
+        if hasattr(main_window, 'current_shape') and main_window.current_shape == self:
+            if hasattr(main_window, 'current_value_spin_scrollbar'):
+                try:
+                    main_window.current_value_spin_scrollbar.blockSignals( True )
+                    main_window.current_value_spin_scrollbar.setValue( self.current_value )
+                    main_window.current_value_spin_scrollbar.blockSignals( False )
+
+                except:
+                    pass
                 
-            if hasattr( main_window, 'thumb_size_spin_scrollbar' ):
-                main_window.thumb_size_spin_scrollbar.blockSignals( True )
-                main_window.thumb_size_spin_scrollbar.setValue( self.thumb_size )
-                main_window.thumb_size_spin_scrollbar.blockSignals( False )
+            if hasattr(main_window, 'thumb_size_spin_scrollbar'):
+                try:
+                    main_window.thumb_size_spin_scrollbar.blockSignals( True )
+                    main_window.thumb_size_spin_scrollbar.setValue( self.thumb_size )
+                    main_window.thumb_size_spin_scrollbar.blockSignals( False )
+
+                except:
+                    pass
                 
     def findMainWindow( self ):
         parent = self.parent()
-
         while parent:
-            if isinstance(parent, QMainWindow):
+            if isinstance( parent, QMainWindow ):
                 return parent
-            
             parent = parent.parent()
-
         return None
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
-
-            self.resize_corner = self.getCornerAt( mouse_pos )
+            self.resize_corner = self.getCornerAt(mouse_pos)
 
             if self.resize_corner:
                 self.resizing = True
@@ -3434,25 +3557,27 @@ class ScrollBarWidget( QWidget ):
                 self.resize_start_size = self.size()
 
             else:
-                thumb_rect = self.getThumbRect()
+                thumb_rect = self.getThumbRectForInteraction()
 
                 if thumb_rect.contains( event.pos() ):
                     self.thumb_dragging = True
                     self.dragging = False
                     self.thumb_drag_start_pos = event.pos()
+                    self.thumb_drag_mouse_start_pos = event.pos() 
                     self.thumb_drag_start_value = self.current_value
 
                 else:
                     self.dragging = True
                     self.thumb_dragging = False
                     self.drag_start_pos = mouse_pos
-                    track_rect = self.getTrackRect()
+                    track_rect = self.getTrackRectForInteraction()
 
                     if track_rect.contains( event.pos() ):
-                        new_value = self.calculateValueFromPosition( event.pos().x() )
+                        new_value = self.calculateValueFromPosition( event.pos() )
                         self.current_value = new_value 
                 
                 self.clicked.emit( self )
+                self.updatePropertiesValue()
 
         event.accept()
 
@@ -3462,7 +3587,6 @@ class ScrollBarWidget( QWidget ):
             self.dragging = False
             self.thumb_dragging = False
             self.resize_corner = None
-
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
 
@@ -3470,8 +3594,8 @@ class ScrollBarWidget( QWidget ):
 
     def mouseMoveEvent( self, event ):
         mouse_pos = event.pos()
-        
         corner = self.getCornerAt( mouse_pos )
+
         if corner:
             if corner in [ "top_left", "bottom_right" ]:
                 self.setCursor( Qt.CursorShape.SizeFDiagCursor )
@@ -3486,96 +3610,114 @@ class ScrollBarWidget( QWidget ):
             self.handleResize( event.globalPosition().toPoint() )
 
         elif self.thumb_dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            delta_x = mouse_pos.x() - self.thumb_drag_start_pos.x()
-            track_rect = self.getTrackRect()
-            thumb_rect = self.getThumbRect()
+            if self.rotated:
+                delta_y = mouse_pos.y() - self.thumb_drag_mouse_start_pos.y()
+                track_rect = self.getTrackRectForInteraction()
+                thumb_rect = self.getThumbRectForInteraction()
+                track_length = track_rect.height() - thumb_rect.height()
+
+                if track_length > 0:
+                    pixels_per_value = track_length / self.range_value
+                    delta_value = int( delta_y / pixels_per_value )
+                    new_value = self.thumb_drag_start_value + delta_value
+                    self.current_value = max( 0, min( self.range_value, new_value ) )
+
+            else:
+                delta_x = mouse_pos.x() - self.thumb_drag_mouse_start_pos.x()
+                track_rect = self.getTrackRectForInteraction()
+                thumb_rect = self.getThumbRectForInteraction()
+                track_length = track_rect.width() - thumb_rect.width()
+
+                if track_length > 0:
+                    pixels_per_value = track_length / self.range_value
+                    delta_value = int( delta_x / pixels_per_value )
+                    new_value = self.thumb_drag_start_value + delta_value
+                    self.current_value = max( 0, min( self.range_value, new_value ) )
             
-            track_width = track_rect.width() - thumb_rect.width()
-            
-            if track_width > 0:
-                pixels_per_unit = track_width / self.range_value
-                delta_value = int( delta_x / pixels_per_unit )
-                new_value = self.thumb_drag_start_value + delta_value
-                self.current_value = new_value 
-                
-                self.updatePropertiesValue()
+            self.updatePropertiesValue()
+            self.update()
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-            
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
+            new_x = max( 0, new_x )
+            new_y = max( 0, new_y )
             super().move( new_x, new_y )
-            
             self.updatePropertiesPosition()
         
         event.accept()
 
-
 class SliderWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, width, height, parent = None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
 
-        self._width = width
-        self._height = height
-        self.setFixedSize( width, height )
-        
-        self.track_color = QColor( 0, 32, 64 )
-        self.thumb_color = QColor( 255, 255, 255 )
-        self.progress_color = QColor( 0, 32, 64 )
-        self.border_color = QColor( 0, 0, 0 ) 
-        
+        self.defaultValues()
+        self.setFixedSize( self.slider_width, self.slider_height )
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+
+    def defaultValues( self ):
         self.active = True
         self.visible = True
         self.static = False
-        self.effect_3d = True  
-        self.custom_name = None
+        self.custom_name = ""
         self.stack_order = 1
-
         self.tag = 0
-        
+        self.slider_width = 200
+        self.slider_height = 30
+        self.background_color_left = QColor( 0, 255, 0 )
+        self.thumb_color = QColor( 255, 0, 0 )
+        self.background_color_right = QColor( 0, 0, 255 )
+        self.effect_3d = True  
         self.value = 50
-        
+
+        self.selected = False
         self.resizing = False
         self.dragging = False
+        self.thumb_dragging = False
         self.resize_start_pos = QPoint()
-        self.resize_start_size = QSize()
-        self.resize_corner = None
         self.drag_start_pos = QPoint()
-        
-        self.selected = False
-        
-        self.setMouseTracking( True )
-        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.thumb_drag_start_pos = QPoint()
+        self.thumb_drag_start_value = 0
+        self.resize_corner = None
+        self.resize_start_size = QSize()
+        self.rotated = False 
 
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
-        track_rect = self.getTrackRect()
-        progress_rect = self.getProgressRect()
-        thumb_rect = self.getThumbRect()
-        track_right_rect = self.getTrackRightRect()
+        self.rotated = self.height() > self.width()
+        
+        if self.rotated:
+            painter.translate( self.width(), 0 )
+            painter.rotate( 90 )
+
+        track_rect = self.getTrackRectForDrawing()
+        progress_rect = self.getProgressRectForDrawing()
+        thumb_rect = self.getThumbRectForDrawing()
+        track_right_rect = self.getTrackRightRectForDrawing()
 
         radius = track_rect.height() // 2
 
-        pen = QPen( self.border_color )
+        pen = QPen( QColor( 0, 0, 0 ) )
         pen.setWidth( 3 )
         painter.setPen( pen )
         painter.setBrush( Qt.BrushStyle.NoBrush )
 
         painter.drawArc( track_rect.x() - radius, track_rect.y(), radius * 2, radius * 2, 90 * 16, 180 * 16 )
-        painter.drawArc( track_rect.x() + track_rect.width() - radius, track_rect.y(), radius * 2, radius * 2, 90 * 16, - 180 * 16 )
-        painter.drawLine( track_rect.x(), track_rect.y(), track_rect.x() + track_rect.width(), track_rect.y())
+        painter.drawArc( track_rect.x() + track_rect.width() - radius, track_rect.y(), radius * 2, radius * 2, 90 * 16, -180 * 16 )
+        painter.drawLine( track_rect.x(), track_rect.y(), track_rect.x() + track_rect.width(), track_rect.y() )
         painter.drawLine( track_rect.x(), track_rect.y() + track_rect.height(), track_rect.x() + track_rect.width(), track_rect.y() + track_rect.height() )
 
         if track_right_rect.width() > 0:
-            pen = QPen( self.track_color )
-            pen.setWidth( 3 )
+            pen = QPen( self.background_color_right )
+            pen.setWidth ( 3 )
             painter.setPen( pen )
-            painter.setBrush( self.track_color )
+            painter.setBrush( self.background_color_right )
 
             if track_right_rect.width() > radius:
                 painter.drawPie( track_rect.x() + track_rect.width() - radius, track_rect.y(), radius * 2, radius * 2, 90 * 16, - 180 * 16 )
@@ -3585,10 +3727,10 @@ class SliderWidget( QWidget ):
                 painter.drawRect( track_right_rect.x(), track_rect.y(), track_right_rect.width(), track_rect.height() )
 
         if progress_rect.width() > 0:
-            pen = QPen( self.thumb_color )
+            pen = QPen( self.background_color_left )
             pen.setWidth( 3 )
             painter.setPen( pen )
-            painter.setBrush( self.thumb_color )
+            painter.setBrush( self.background_color_left )
 
             if progress_rect.width() > radius:
                 painter.drawPie( track_rect.x() - radius, track_rect.y(), radius * 2, radius * 2, 90 * 16, 180 * 16 )
@@ -3598,29 +3740,35 @@ class SliderWidget( QWidget ):
                 painter.drawRect( track_rect.x(), track_rect.y(), progress_rect.width(), track_rect.height() )
 
             if track_right_rect.width() > 0:
-                pen = QPen( QColor(0, 0, 0) )
+                pen = QPen( self.background_color_right )
                 pen.setWidth( 2 )
                 painter.setPen( pen )
-
-                painter.drawLine( track_rect.x(), track_rect.y()-1, track_rect.x() + progress_rect.width(), track_rect.y() - 1 )
-                painter.drawLine( track_rect.x(), track_rect.y() + progress_rect.height()+1, track_rect.x() + progress_rect.width(), track_rect.y() + progress_rect.height() + 1 )
+                painter.drawLine( track_rect.x(), track_rect.y() - 1, track_rect.x() + progress_rect.width(), track_rect.y() - 1 )
+                painter.drawLine( track_rect.x(), track_rect.y() + progress_rect.height() + 1, track_rect.x() + progress_rect.width(), track_rect.y() + progress_rect.height() + 1 )
                 painter.drawArc( track_rect.x() - radius - 1, track_rect.y() - 1, radius * 2 + 2, radius * 2 + 2, 90 * 16, 180 * 16 )
 
-        pen = QPen( self.progress_color )
-        pen.setWidth( 3 )
-        painter.setPen( pen )
-        painter.setBrush( self.progress_color )
-        painter.drawEllipse( thumb_rect )
 
         if self.effect_3d:
             if progress_rect.width() > 0:
                 pen = QPen( QColor( 255, 255, 255 ) )
                 pen.setWidth( 1 )
                 painter.setPen( pen )
-                painter.drawLine( track_right_rect.x(), track_rect.y() - 1, track_rect.x() + track_rect.width(), track_rect.y() - 1 )
                 painter.drawLine( track_right_rect.x(), track_rect.y() + progress_rect.height() + 1, track_rect.x() + track_rect.width(), track_rect.y() + progress_rect.height() + 1 )
                 painter.drawArc( track_rect.x() + track_rect.width() - radius - 1, track_rect.y() - 1, radius * 2 + 2, radius * 2 + 2, 90 * 16, - 180 * 16 )
 
+                pen = QPen( QColor( 0, 0, 0 ) )
+                pen.setWidth( 1 )
+                painter.setPen( pen )
+                painter.drawLine( track_rect.x()  , track_rect.y() - 1,  track_rect.width() + radius  , track_rect.y() - 1 )
+                painter.drawArc( track_rect.x() - radius - 1, track_rect.y() - 1, radius * 2 + 2, radius * 2 + 2, 90 * 16, 180 * 16 )
+
+        pen = QPen( self.thumb_color )
+        pen.setWidth( 3 )
+        painter.setPen( pen )
+        painter.setBrush( self.thumb_color )
+        painter.drawEllipse( thumb_rect )
+
+        if self.effect_3d:
             pen = QPen( QColor( 236, 238, 241 ) )
             pen.setWidth( 1 )
             painter.setPen( pen )
@@ -3632,6 +3780,7 @@ class SliderWidget( QWidget ):
             painter.drawArc( thumb_rect, 200 * 16, 180 * 16 )
 
         if self.selected:
+            painter.resetTransform()
             self.drawSelectionBorder( painter )
             self.drawSelectionHandles( painter )
 
@@ -3643,7 +3792,9 @@ class SliderWidget( QWidget ):
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        pen = QPen( QColor(0, 80, 200) )
+        pen.setWidth( 1 )
+        painter.setPen( pen )
 
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
@@ -3653,10 +3804,12 @@ class SliderWidget( QWidget ):
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
             painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+            pen = QPen( ( QColor( 0, 80, 200 ) ) )
+            pen.setWidth( 1 )
+            painter.setPen( pen )
+
 
     def drawSelectionBorder( self, painter ):
-
         if not self.selected:
             return
             
@@ -3672,8 +3825,7 @@ class SliderWidget( QWidget ):
         painter.setBrush( Qt.BrushStyle.NoBrush )
         painter.drawRect( border_rect )
 
-    def handleResize( self, global_pos ): 
-
+    def handleResize( self, global_pos ):
         if not self.resize_corner:
             return
 
@@ -3682,31 +3834,22 @@ class SliderWidget( QWidget ):
         new_height = self.resize_start_size.height()
 
         if self.resize_corner == "bottom_right":
-            new_width = max( 100, self.resize_start_size.width() + delta.x() )
-            new_height = max( 30, self.resize_start_size.height() + delta.y() )
+            new_width = max( 0, self.resize_start_size.width() + delta.x() )
+            new_height = max( 0, self.resize_start_size.height() + delta.y() )
 
         elif self.resize_corner == "top_right":
-            new_width = max( 100, self.resize_start_size.width() + delta.x() )
-            new_height = max( 30, self.resize_start_size.height() - delta.y() )
+            new_width = max( 0, self.resize_start_size.width() + delta.x() )
+            new_height = max( 0, self.resize_start_size.height() - delta.y() )
 
         elif self.resize_corner == "bottom_left":
-            new_width = max( 100, self.resize_start_size.width() - delta.x() )
-            new_height = max( 30, self.resize_start_size.height() + delta.y() )
+            new_width = max( 0, self.resize_start_size.width() - delta.x() )
+            new_height = max( 0, self.resize_start_size.height() + delta.y() )
 
         elif self.resize_corner == "top_left":
-            new_width = max( 100, self.resize_start_size.width() - delta.x() )
-            new_height = max( 30, self.resize_start_size.height() - delta.y() )
+            new_width = max( 0, self.resize_start_size.width() - delta.x() )
+            new_height = max( 0, self.resize_start_size.height() - delta.y() )
 
         self.setSize( new_width, new_height )
-
-    def getValue( self ):
-        return self.value
-
-    def getWidth( self ):
-        return self._width
-
-    def getHeight( self ):
-        return self._height
 
     def getCornerAt( self, pos ):
         handle_size = 12
@@ -3727,9 +3870,62 @@ class SliderWidget( QWidget ):
         
         return None
 
-    def getTrackRect( self ):
-        w = self._width
-        h = self._height
+    def getTrackRectForDrawing( self ):
+        if self.rotated:
+            draw_width = self.height()
+            draw_height = self.width()  
+
+        else:
+            draw_width = self.width()
+            draw_height = self.height()
+        
+        track_height = draw_height // 3
+        track_y = draw_height // 3
+        radius = draw_height // 6 
+        
+        return QRect( radius, track_y, draw_width - 2 * radius, track_height )
+
+    def getProgressRectForDrawing( self ):
+        track_rect = self.getTrackRectForDrawing()
+        progress_width = int( track_rect.width() * self.value / 100 )
+        
+        return QRect( track_rect.x(), track_rect.y(), progress_width, track_rect.height() )
+
+    def getTrackRightRectForDrawing( self ):
+        track_rect = self.getTrackRectForDrawing()
+        thumb_rect = self.getThumbRectForDrawing()
+        
+        start_x = thumb_rect.x() + thumb_rect.width()
+        width = track_rect.x() + track_rect.width() - start_x
+        
+        if width > 0:
+            return QRect( start_x, track_rect.y(), width, track_rect.height() )
+        
+        return QRect()
+
+    def getThumbRectForDrawing( self ):
+        track_rect = self.getTrackRectForDrawing()
+        
+        if self.rotated:
+            draw_height = self.width()
+
+        else:
+            draw_height = self.height()
+            
+        thumb_diameter = min( track_rect.height() * 2, draw_height * 0.8 )
+        thumb_x = track_rect.x() + int( ( track_rect.width() - thumb_diameter ) * ( self.value / 100 ) )
+        thumb_y = (draw_height - thumb_diameter) // 2
+        
+        return QRect( thumb_x, thumb_y, thumb_diameter, thumb_diameter )
+
+    def getTrackRectForInteraction( self ):
+        if self.rotated:
+            w = self.height()
+            h = self.width() 
+
+        else:
+            w = self.width()
+            h = self.height()
         
         track_height = h // 3
         track_y = h // 3
@@ -3737,74 +3933,34 @@ class SliderWidget( QWidget ):
         
         return QRect( radius, track_y, w - 2 * radius, track_height )
 
-    def getProgressRect( self ):
-        track_rect = self.getTrackRect()
-        progress_width = int( track_rect.width() * self.value / 100 )
+    def getThumbRectForInteraction( self ):
+        track_rect = self.getTrackRectForInteraction()
         
-        return QRect( track_rect.x(), track_rect.y(), progress_width, track_rect.height() )
+        if self.rotated:
+            h = self.width()
 
-    def getTrackRightRect( self ):
-        track_rect = self.getTrackRect()
-        thumb_rect = self.getThumbRect()
-        
-        start_x = thumb_rect.x() + thumb_rect.width()
-        width = track_rect.x() + track_rect.width() - start_x
-        
-        if width > 0:
-            return QRect( start_x, track_rect.y(), width, track_rect.height() )
-        return QRect()
-
-    def getThumbRect( self ):
-        track_rect = self.getTrackRect()
-        
-        thumb_diameter = min( track_rect.height() * 2, self._height * 0.8 )
-        
+        else:
+            h = self.height()
+            
+        thumb_diameter = min( track_rect.height() * 2, h * 0.8 )
         thumb_x = track_rect.x() + int( ( track_rect.width() - thumb_diameter ) * ( self.value / 100 ) )
-        thumb_y = ( self._height - thumb_diameter ) // 2
+        thumb_y = ( h - thumb_diameter ) // 2
         
         return QRect( thumb_x, thumb_y, thumb_diameter, thumb_diameter )
+
+    def setValue( self, value ):
+        self.value = max( 0, min( 100, value ) )
+        self.update()
+        self.updatePropertiesValue()
 
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
 
     def setSize( self, width, height ):
-        self._width = width
-        self._height = height
+        self.slider_width = width
+        self.slider_height = height
         self.setFixedSize( width, height )
-        self.update()
-
-    def setTrackColor( self, color ):
-        self.track_color = color
-        self.update()
-
-    def setThumbColor( self, color ):
-        self.thumb_color = color
-        self.update()
-
-    def setProgressColor( self, color ):
-        self.progress_color = color
-        self.update()
-
-    def setBorderColor( self, color ):
-        self.border_color = color
-        self.update()
-
-    def setRange( self, value ):
-        self.range_value = max(1, value)
-        self.update()
-
-    def setValue( self, value ):
-        self.value = max( 0, min( 100, value ) )
-        self.update()
-
-    def setVisibleSlider( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-        self.update()
-
-    def set3d( self, effect_3d ):
-        self.effect_3d = effect_3d
         self.update()
 
     def updatePropertiesSize( self ):
@@ -3814,24 +3970,23 @@ class SliderWidget( QWidget ):
             return
         
         if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
-            
             if hasattr( main_window, 'width_spin_slider' ):
                 main_window.width_spin_slider.blockSignals( True )
-                main_window.width_spin_slider.setValue( self._width )
+                main_window.width_spin_slider.setValue( self.slider_width )
                 main_window.width_spin_slider.blockSignals( False )
                 
             if hasattr( main_window, 'height_spin_slider' ):
                 main_window.height_spin_slider.blockSignals( True )
-                main_window.height_spin_slider.setValue( self._height )
+                main_window.height_spin_slider.setValue( self.slider_height )
                 main_window.height_spin_slider.blockSignals( False )
 
-    def updatePropertiesPosition( self ):
+    def updatePropertiesPosition(self):
         main_window = self.findMainWindow()
 
         if not main_window:
             return
         
-        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+        if ( hasattr( main_window, 'current_shape') and main_window.current_shape == self ):
             if hasattr( main_window, 'pos_x_spin_slider' ):
                 main_window.pos_x_spin_slider.blockSignals( True )
                 main_window.pos_x_spin_slider.setValue( self.x() )
@@ -3842,68 +3997,21 @@ class SliderWidget( QWidget ):
                 main_window.pos_y_spin_slider.setValue( self.y() )
                 main_window.pos_y_spin_slider.blockSignals( False )
 
-    def updateAllProperties( self ):
-        self.updatePropertiesSize()
-        self.updatePropertiesPosition()
+    def updatePropertiesValue( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
             return
         
-        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
-            if hasattr( main_window, 'active_checkbox_slider' ):
-                main_window.active_checkbox_slider.blockSignals( True )
-                main_window.active_checkbox_slider.setChecked( self.active )
-                main_window.active_checkbox_slider.blockSignals( False )
-                
-            if hasattr( main_window, 'visible_checkbox_slider' ):
-                main_window.visible_checkbox_slider.blockSignals( True )
-                main_window.visible_checkbox_slider.setChecked( self.visible )
-                main_window.visible_checkbox_slider.blockSignals( False )
-                
-            if hasattr( main_window, 'static_checkbox_slider' ):
-                main_window.static_checkbox_slider.blockSignals( True )
-                main_window.static_checkbox_slider.setChecked( self.static )
-                main_window.static_checkbox_slider.blockSignals( False )
-                
-            if hasattr( main_window, '_3d_checkbox_slider' ):
-                main_window._3d_checkbox_slider.blockSignals( True )
-                main_window._3d_checkbox_slider.setChecked( self.effect_3d )
-                main_window._3d_checkbox_slider.blockSignals( False )
+        if ( hasattr( main_window, 'current_shape') and main_window.current_shape == self ):
+            if hasattr( main_window, 'value_slider' ):
+                try:
+                    main_window.value_slider.blockSignals( True )
+                    main_window.value_slider.value =  self.value 
+                    main_window.value_slider.blockSignals( False )
 
-            if hasattr( main_window, 'range_spin_slider' ):
-                main_window.value_spin_dial.blockSignals( True )
-                main_window.value_spin_dial.setValue( self.value )
-                main_window.value_spin_dial.blockSignals( False )
-
-            if hasattr( main_window, 'value_spin_slider' ):
-                main_window.value_spin_slider.blockSignals( True )
-                main_window.value_spin_slider.setValue( self.value )
-                main_window.value_spin_slider.blockSignals( False )
-            
-            if hasattr( main_window, 'name_edit_slider' ):
-                main_window.name_edit_slider.blockSignals( True )
-                main_window.name_edit_slider.setText( self.custom_name )
-                main_window.name_edit_slider.blockSignals( False )
-            
-            if hasattr( main_window, 'stack_order_spin_slider' ):
-                main_window.stack_order_spin_slider.blockSignals( True )
-
-                if main_window.current_shape in main_window.all_shapes:
-                    index = main_window.all_shapes.index( main_window.current_shape ) + 1
-                    main_window.stack_order_spin_slider.setValue( index )
-
-                main_window.stack_order_spin_slider.blockSignals( False )
-            
-            if hasattr( main_window, 'bg_left_color_rect_slider' ):
-                main_window.bg_left_color_rect_slider.setStyleSheet( f"background-color: { self.thumb_color.name() }; border: 1px solid #ccc;" )
-                
-            if hasattr( main_window, 'bg_right_color_rect_slider' ):
-                main_window.bg_right_color_rect_slider.setStyleSheet( f"background-color: { self.track_color.name()} ; border: 1px solid #ccc;" )
-                
-            if hasattr(main_window, 'thumb_color_rect_slider'):
-                main_window.thumb_color_rect_slider.setStyleSheet( f"background-color: { self.progress_color.name() }; border: 1px solid #ccc;" )
-
+                except:
+                    pass
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -3919,7 +4027,8 @@ class SliderWidget( QWidget ):
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
-
+            thumb_rect = self.getThumbRectForInteraction()
+            
             self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
@@ -3927,24 +4036,29 @@ class SliderWidget( QWidget ):
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
 
+            elif thumb_rect.contains( mouse_pos ):
+                self.thumb_dragging = True
+                self.thumb_drag_start_pos = mouse_pos
+                self.thumb_drag_start_value = self.value
+
             else:
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                thumb_rect = self.getThumbRect()
+                track_rect = self.getTrackRectForInteraction()
 
-                if thumb_rect.contains(event.pos()):
-                    pass
+                if track_rect.contains(event.pos()):
+                    if self.rotated:
+                        relative_y = event.pos().y() - track_rect.y()
+                        new_value = int( ( relative_y / track_rect.height() ) * 100 )
 
-                else:
-                    track_rect = self.getTrackRect()
-
-                    if track_rect.contains( event.pos() ):
+                    else:
                         relative_x = event.pos().x() - track_rect.x()
                         new_value = int( ( relative_x / track_rect.width() ) * 100 )
-                        self.setValue( new_value )
-                
-                self.clicked.emit( self )
-                self.updateAllProperties()
+                    
+                    self.setValue( new_value )
+            
+            self.clicked.emit( self )
+            self.updatePropertiesValue()
 
         event.accept()
 
@@ -3952,6 +4066,7 @@ class SliderWidget( QWidget ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
+            self.thumb_dragging = False
             self.resize_corner = None
 
             self.updatePropertiesSize()
@@ -3964,49 +4079,60 @@ class SliderWidget( QWidget ):
         corner = self.getCornerAt( mouse_pos )
 
         if corner:
-            if corner in [ "top_left", "bottom_right" ]:
-                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
+            if corner in ["top_left", "bottom_right"]:
+                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
 
-            elif corner in [ "top_right", "bottom_left" ]:
-                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
-
+            elif corner in ["top_right", "bottom_left"]:
+                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
         else:
-            self.setCursor( Qt.CursorShape.ArrowCursor )
+            self.setCursor(Qt.CursorShape.ArrowCursor)
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize( event.globalPosition().toPoint() )
+            self.handleResize(event.globalPosition().toPoint())
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-
             super().move( new_x, new_y )
             self.updatePropertiesPosition()
+
+        elif self.thumb_dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            track_rect = self.getTrackRectForInteraction()
+            delta = mouse_pos - self.thumb_drag_start_pos
+            
+            if self.rotated:
+                value_delta = int( ( delta.y() / track_rect.height() ) * 100 )
+            else:
+                value_delta = int( ( delta.x() / track_rect.width() ) * 100 )
+            
+            new_value = self.thumb_drag_start_value + value_delta
+            self.setValue( new_value )
         
         event.accept()
 
-class ProgressBarWidget( QWidget ):
-    clicked = pyqtSignal( object )
+class ProgressBarWidget(QWidget):
+    clicked = pyqtSignal(object)
     
-    def __init__( self, width, height, parent = None ):
-        super().__init__( parent )
+    def __init__(self, width, height, parent=None):
+        super().__init__(parent)
         self._width = width
         self._height = height
-        self.setFixedSize( width, height )
+        self.setFixedSize(width, height)
         
-        self.bar_color = QColor( 0, 0, 255 ) 
-        self.progress_color = QColor( 255, 255, 255 )
-        self.border_color = QColor( 0, 0, 0 ) 
-        self.white_border_color = QColor( 236, 238, 241 )
+        self.rotated = False  # Nova promenljiva za praćenje rotacije
+        
+        self.bar_color = QColor(0, 0, 255) 
+        self.progress_color = QColor(255, 255, 255)
+        self.border_color = QColor(0, 0, 0) 
+        self.white_border_color = QColor(236, 238, 241)
         
         self.progress_value = 50
         
         self.selected = False
-        self.selection_color = QColor( 255, 0, 0 )
+        self.selection_color = QColor(255, 0, 0)
         
         self.custom_name = ""
         self.stack_order = 1
@@ -4025,97 +4151,121 @@ class ProgressBarWidget( QWidget ):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
         
-        self.setMouseTracking( True )
-        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setMouseTracking(True)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
-    def paintEvent( self, event ):
-        painter = QPainter( self )
-        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
-        w = self._width
-        h = self._height
-
-        pen = QPen( self.bar_color )
-        pen.setWidth( 3 )
-        painter.setPen( pen )
-        painter.setBrush( self.bar_color )
+        # Provera da li treba rotirati (visina > širina)
+        self.rotated = self.height() > self.width()
         
-        radius = h // 2
+        if self.rotated:
+            # Rotiramo koordinatni sistem za 90 stepeni u smeru kazaljke na satu
+            painter.translate(self.width(), 0)
+            painter.rotate(90)
+            # Zamenimo širinu i visinu za crtanje
+            draw_width = self.height()
+            draw_height = self.width()
+        else:
+            draw_width = self.width()
+            draw_height = self.height()
         
-        painter.drawPie( 0, 0, 2 * radius, 2 * radius, 90 * 16, 180 * 16 )
-        painter.drawRect( radius, 0, w - 2 * radius, h )
-        painter.drawPie(w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 180 * 16 )
+        # Crtanje pozadine (bar)
+        pen = QPen(self.bar_color)
+        pen.setWidth(3)
+        painter.setPen(pen)
+        painter.setBrush(self.bar_color)
         
-        pen = QPen( self.progress_color )
-        pen.setWidth( 3 )
-        painter.setPen( pen )
-        painter.setBrush( self.progress_color )
+        radius = draw_height // 2
         
-        progress_width = int( ( w - 2 * radius ) * ( self.progress_value / 100.0 ) )
+        painter.drawPie(0, 0, 2 * radius, 2 * radius, 90 * 16, 180 * 16)
+        painter.drawRect(radius, 0, draw_width - 2 * radius, draw_height)
+        painter.drawPie(draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, -180 * 16)
+        
+        # Crtanje progress dela
+        pen = QPen(self.progress_color)
+        pen.setWidth(3)
+        painter.setPen(pen)
+        painter.setBrush(self.progress_color)
+        
+        progress_width = int((draw_width - 2 * radius) * (self.progress_value / 100.0))
         
         inner_offset = 6 
         inner_radius = radius - inner_offset // 2
         
-        painter.drawPie( inner_offset // 2, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90 * 16, 180 * 16 )
-        painter.drawRect( radius - 3 + inner_offset // 2, inner_offset // 2, progress_width, 2 * inner_radius )
-        painter.drawPie( inner_offset // 2 + progress_width, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90 * 16, - 180 * 16 )
+        # Crtamo progress samo ako je width veći od 0
+        if progress_width > 0:
+            if progress_width >= 2 * inner_radius:
+                painter.drawPie(inner_offset // 2, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90 * 16, 180 * 16)
+                painter.drawRect(radius - 3 + inner_offset // 2, inner_offset // 2, progress_width - 2 * inner_radius, 2 * inner_radius)
+                painter.drawPie(inner_offset // 2 + progress_width - 2 * inner_radius, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90 * 16, -180 * 16)
+            else:
+                # Ako je progress premali za zaobljene krajeve, crtamo pravougaonik
+                painter.drawRect(inner_offset // 2, inner_offset // 2, progress_width, 2 * inner_radius)
 
+        # 3D efekti
         if self.effect_3d:
-            pen = QPen( self.border_color )
-            pen.setWidth( 2 )
-            painter.setPen( pen )
+            # Tamni gornji deo
+            pen = QPen(self.border_color)
+            pen.setWidth(2)
+            painter.setPen(pen)
 
-            painter.drawLine( radius, 0, w - radius, 0 )
-            painter.drawArc( w - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 45 * 16 )
-            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 90 * 16, 135 * 16 )
+            painter.drawLine(radius, 0, draw_width - radius, 0)
+            painter.drawArc(draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, -45 * 16)
+            painter.drawArc(0, 0, 2 * radius, 2 * radius, 90 * 16, 135 * 16)
 
-            pen = QPen( self.white_border_color )
-            pen.setWidth( 1 )
-            painter.setPen( pen )
+            # Svetli donji deo
+            pen = QPen(self.white_border_color)
+            pen.setWidth(1)
+            painter.setPen(pen)
 
-            painter.drawLine( radius, h, w - radius, h )
-            painter.drawArc( w - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, - 135 * 16 )
-            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 225 * 16, 45 * 16 )
+            painter.drawLine(radius, draw_height, draw_width - radius, draw_height)
+            painter.drawArc(draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, -135 * 16)
+            painter.drawArc(0, 0, 2 * radius, 2 * radius, 225 * 16, 45 * 16)
 
+        # Crtanje selekcionih elemenata
         if self.selected:
-            self.drawSelectionBorder( painter )
-            self.drawSelectionHandles( painter )
+            painter.resetTransform()
+            self.drawSelectionBorder(painter)
+            self.drawSelectionHandles(painter)
 
-    def drawSelectionHandles( self, painter ):
+    def drawSelectionHandles(self, painter):
         if not self.selected:
             return
             
         handle_size = 8
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        painter.setBrush(QColor(0, 255, 0))
+        painter.setPen(QPen(QColor(0, 80, 200), 1))
 
-        corners = [ QPoint(4, 4), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
+        corners = [QPoint(4, 4), QPoint(self.width() - 4, 4), QPoint(4, self.height() - 4), QPoint(self.width() - 4, self.height() - 4)]
 
         for corner in corners:
-            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 255, 255 ) )
-            painter.setPen( Qt.PenStyle.NoPen )
-            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, handle_size, handle_size)
+            painter.setBrush(QColor(255, 255, 255))
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
+            painter.setBrush(QColor(0, 255, 0))
+            painter.setPen(QPen(QColor(0, 80, 200), 1))
 
-    def drawSelectionBorder( self, painter ):
+    def drawSelectionBorder(self, painter):
         if not self.selected:
             return
             
         margin = 2
-        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        border_rect = QRect(margin, margin, self.width() - 2 * margin, self.height() - 2 * margin)
 
-        selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
-        selection_pen.setStyle( Qt.PenStyle.DashLine )
-        selection_pen.setDashPattern( [ 4, 2 ] )
+        selection_pen = QPen(QColor(255, 0, 0))
+        selection_pen.setWidth(3)
+        selection_pen.setStyle(Qt.PenStyle.DashLine)
+        selection_pen.setDashPattern([4, 2])
 
-        painter.setPen( selection_pen )
-        painter.setBrush( Qt.BrushStyle.NoBrush )
-        painter.drawRect( border_rect )
+        painter.setPen(selection_pen)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.drawRect(border_rect)
 
     def move(self, x, y):
         super().move(x, y)
@@ -4123,24 +4273,22 @@ class ProgressBarWidget( QWidget ):
         main_window = self.findMainWindow()
         if main_window and main_window.current_shape == self:
             try:
-                if hasattr( main_window, 'progress_pos_x_spin' ):
-                    main_window.progress_pos_x_spin.blockSignals( True )
-                    main_window.progress_pos_x_spin.setValue( x )
-                    main_window.progress_pos_x_spin.blockSignals( False )
-
+                if hasattr(main_window, 'progress_pos_x_spin'):
+                    main_window.progress_pos_x_spin.blockSignals(True)
+                    main_window.progress_pos_x_spin.setValue(x)
+                    main_window.progress_pos_x_spin.blockSignals(False)
             except RuntimeError:
                 pass
             
             try:
-                if hasattr( main_window, 'progress_pos_y_spin' ):
-                    main_window.progress_pos_y_spin.blockSignals( True )
-                    main_window.progress_pos_y_spin.setValue( y )
-                    main_window.progress_pos_y_spin.blockSignals( False )
-
+                if hasattr(main_window, 'progress_pos_y_spin'):
+                    main_window.progress_pos_y_spin.blockSignals(True)
+                    main_window.progress_pos_y_spin.setValue(y)
+                    main_window.progress_pos_y_spin.blockSignals(False)
             except RuntimeError:
                 pass
 
-    def handleResize( self, global_pos ):
+    def handleResize(self, global_pos):
         if not self.resize_corner:
             return
 
@@ -4149,171 +4297,168 @@ class ProgressBarWidget( QWidget ):
         new_height = self.resize_start_size.height()
 
         if self.resize_corner == "bottom_right":
-            new_width = max( 50, self.resize_start_size.width() + delta.x() )
-            new_height = max( 5, self.resize_start_size.height() + delta.y() )
+            new_width = max(10, self.resize_start_size.width() + delta.x())
+            new_height = max(10, self.resize_start_size.height() + delta.y())
 
         elif self.resize_corner == "top_right":
-            new_width = max( 50, self.resize_start_size.width() + delta.x() )
-            new_height = max( 5, self.resize_start_size.height() - delta.y() )
+            new_width = max(10, self.resize_start_size.width() + delta.x())
+            new_height = max(10, self.resize_start_size.height() - delta.y())
 
         elif self.resize_corner == "bottom_left":
-            new_width = max( 50, self.resize_start_size.width() - delta.x() )
-            new_height = max( 5, self.resize_start_size.height() + delta.y() )
+            new_width = max(10, self.resize_start_size.width() - delta.x())
+            new_height = max(10, self.resize_start_size.height() + delta.y())
 
         elif self.resize_corner == "top_left":
-            new_width = max( 50, self.resize_start_size.width() - delta.x() )
-            new_height = max( 5, self.resize_start_size.height() - delta.y() )
+            new_width = max(10, self.resize_start_size.width() - delta.x())
+            new_height = max(10, self.resize_start_size.height() - delta.y())
 
-        self.setSize( new_width, new_height )
+        self.setSize(new_width, new_height)
 
-    def get_progress( self ):
+    def get_progress(self):
         return self.progress_value
 
-    def getWidth( self ):
+    def getWidth(self):
         return self._width
 
-    def getHeight( self ):
+    def getHeight(self):
         return self._height
 
-    def getCornerAt( self, pos ):
+    def getCornerAt(self, pos):
         handle_size = 12
         half_size = handle_size // 2
         
         corners = {
-            "top_left": QPoint( 0, 0 ),
-            "top_right": QPoint( self.width(), 0 ),
-            "bottom_left": QPoint( 0, self.height() ),
-            "bottom_right": QPoint( self.width(), self.height() )
+            "top_left": QPoint(0, 0),
+            "top_right": QPoint(self.width(), 0),
+            "bottom_left": QPoint(0, self.height()),
+            "bottom_right": QPoint(self.width(), self.height())
         }
         
         for corner_name, corner_pos in corners.items():
-            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
+            corner_rect = QRect(corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size)
             
-            if corner_rect.contains( pos ):
+            if corner_rect.contains(pos):
                 return corner_name
         
         return None
 
-    def setSelected( self, selected ):
+    def setSelected(self, selected):
         self.selected = selected
         self.update()
 
-    def setSize( self, width, height ):
+    def setSize(self, width, height):
         self._width = width
         self._height = height
-        self.setFixedSize( width, height )
+        self.setFixedSize(width, height)
         
         main_window = self.findMainWindow()
 
         if main_window and main_window.current_shape == self:
             try:
-                if hasattr( main_window, 'progress_width_spin' ):
-                    main_window.progress_width_spin.blockSignals( True )
-                    main_window.progress_width_spin.setValue( width )
-                    main_window.progress_width_spin.blockSignals( False )
-
+                if hasattr(main_window, 'progress_width_spin'):
+                    main_window.progress_width_spin.blockSignals(True)
+                    main_window.progress_width_spin.setValue(width)
+                    main_window.progress_width_spin.blockSignals(False)
             except RuntimeError:
                 pass
             
             try:
-                if hasattr( main_window, 'progress_height_spin' ):
-                    main_window.progress_height_spin.blockSignals( True )
-                    main_window.progress_height_spin.setValue( height )
-                    main_window.progress_height_spin.blockSignals( False )
-
+                if hasattr(main_window, 'progress_height_spin'):
+                    main_window.progress_height_spin.blockSignals(True)
+                    main_window.progress_height_spin.setValue(height)
+                    main_window.progress_height_spin.blockSignals(False)
             except RuntimeError:
                 pass
         
         self.update()
 
-    def setBarColor( self, color ):
+    def setBarColor(self, color):
         self.bar_color = color
         self.update()
 
-    def setProgressColor( self, color ):
+    def setProgressColor(self, color):
         self.progress_color = color
         self.update()
 
-    def setBorderColor( self, color ):
+    def setBorderColor(self, color):
         self.border_color = color
         self.update()
 
-    def setWhiteBorderColor( self, color ):
+    def setWhiteBorderColor(self, color):
         self.white_border_color = color
         self.update()
 
-    def setProgress( self, value ):
-        self.progress_value = max( 0, min( 100, value ) )
+    def setProgress(self, value):
+        self.progress_value = max(0, min(100, value))
         self.update()
 
-    def setActive( self, active ):
+    def setActive(self, active):
         self.active = active
         self.update()
 
-    def setVisibleProgressBar( self, visible ):
+    def setVisibleProgressBar(self, visible):
         self.visible = visible
-        self.setVisible( visible )
+        self.setVisible(visible)
         self.update()
 
-    def setStatic( self, static ):
+    def setStatic(self, static):
         self.static = static
         self.update()
 
-    def set3d( self, effect_3d ):
+    def set3d(self, effect_3d):
         self.effect_3d = effect_3d
         self.update()
 
-    def setValue( self, value ):
-        self.value = max( self.min_value, min( self.max_value, value ) )
+    def setValue(self, value):
+        self.value = max(self.min_value, min(self.max_value, value))
         progress_range = self.max_value - self.min_value
 
         if progress_range > 0:
-            self.progress_value = int( ( ( self.value - self.min_value) / progress_range ) * 100 )
+            self.progress_value = int(((self.value - self.min_value) / progress_range) * 100)
 
         self.update()
 
-    def setRange( self, min_value, max_value ):
+    def setRange(self, min_value, max_value):
         self.min_value = min_value
         self.max_value = max_value
-        self.value = max( min_value, min( max_value, self.value ) )
+        self.value = max(min_value, min(max_value, self.value))
         progress_range = self.max_value - self.min_value
 
         if progress_range > 0:
-            self.progress_value = int( ( ( self.value - self.min_value ) / progress_range ) * 100 )
+            self.progress_value = int(((self.value - self.min_value) / progress_range) * 100)
 
         self.update()
 
-    def findMainWindow( self ):
+    def findMainWindow(self):
         parent = self.parent()
 
         while parent:
-            if isinstance( parent, QMainWindow ):
+            if isinstance(parent, QMainWindow):
                 return parent
             
             parent = parent.parent()
 
         return None
 
-    def mousePressEvent( self, event ):
+    def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
 
-            self.resize_corner = self.getCornerAt( mouse_pos )
+            self.resize_corner = self.getCornerAt(mouse_pos)
 
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
-
             else:
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
                 
-                self.clicked.emit( self )
+                self.clicked.emit(self)
 
         event.accept()
 
-    def mouseReleaseEvent( self, event ):
+    def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
@@ -4321,29 +4466,24 @@ class ProgressBarWidget( QWidget ):
 
         event.accept()
 
-    def mouseMoveEvent( self, event ):
+    def mouseMoveEvent(self, event):
         mouse_pos = event.pos()
         corner = self.getCornerAt(mouse_pos)
 
         if corner:
-            if corner in [ "top_left", "bottom_right" ]:
-                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
-
-            elif corner in [ "top_right", "bottom_left" ]:
-                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
-
+            if corner in ["top_left", "bottom_right"]:
+                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
+            elif corner in ["top_right", "bottom_left"]:
+                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
         else:
-            self.setCursor( Qt.CursorShape.ArrowCursor )
+            self.setCursor(Qt.CursorShape.ArrowCursor)
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize(event.globalPosition().toPoint())
-
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-            
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-
             self.move(new_x, new_y)
         
         event.accept()

@@ -787,21 +787,16 @@ def updateScrollbarThumbColor( main_window ):
         main_window.current_shape.update()
 
 def updateScrollbarBackgroundColor( main_window ):
-    color = QColorDialog.getColor( main_window.current_shape.track_color )
+    color = QColorDialog.getColor( main_window.current_shape.background_color )
 
     if color.isValid():
         main_window.current_shape.background_color = color 
-        main_window.track_color_rect_scrollbar.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.thumb_color_rect_scrollbar.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
 
 def updateScrollbar3D( main_window, state ):
     state == Qt.CheckState.Checked.value 
-    main_window.current_shape.set3d( state )
-    main_window.current_shape.update()
-
-def updateScrollbarRange( main_window, value ):
-    main_window.current_shape.setRange = value 
-    main_window.current_shape.range_value = value 
+    main_window.current_shape.effect_3d = state 
     main_window.current_shape.update()
 
 def updateScrollbarCurrentValue( main_window, value ):
@@ -814,76 +809,75 @@ def updateScrollbarThumbSize( main_window, value ):
 
 #------------------------------------------------------------SLIDER--------------------------------------------------------------
 
-def updateSliderTag( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        main_window.current_shape.tag = value
-
-def changeSliderBackgroundLeftColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.thumb_color )
-
-        if color.isValid():
-            main_window.current_shape.setThumbColor( color )
-            main_window.bg_left_color_rect_slider.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-
-def changeSliderBackgroundRightColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.track_color )
-
-        if color.isValid():
-            main_window.current_shape.setTrackColor( color )
-            main_window.bg_right_color_rect_slider.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-
 def updateSliderActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        active = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.active = active
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateSliderVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        visible = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setVisibleSlider( visible )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateSliderStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        static = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.static = static
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateSliderName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        main_window.current_shape.custom_name = text
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update()
 
 def updateSliderStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
+
+def updateSliderTag( main_window, value ):
+    main_window.current_shape.tag = value
+    main_window.current_shape.update()
 
 def updateSliderPosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        if hasattr( main_window, 'pos_x_spin_slider' ) and hasattr( main_window, 'pos_y_spin_slider' ):
-            main_window.current_shape.move( main_window.pos_x_spin_slider.value(), main_window.pos_y_spin_slider.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_slider.value(), main_window.pos_y_spin_slider.value() )
+    main_window.current_shape.update()
 
 def updateSliderSize( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        if hasattr( main_window, 'width_spin_slider' ) and hasattr( main_window, 'height_spin_slider' ):
-            main_window.current_shape.setSize( main_window.width_spin_slider.value(), main_window.height_spin_slider.value() )
+    main_window.current_shape.setSize( main_window.width_spin_slider.value(), main_window.height_spin_slider.value() )
+    main_window.current_shape.update()
 
 def changeSliderThumbColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.progress_color )
+    color = QColorDialog.getColor( main_window.current_shape.background_color_left )
 
-        if color.isValid():
-            main_window.current_shape.setProgressColor( color )
-            main_window.thumb_color_rect_slider.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.thumb_color = color
+        main_window.thumb_color_rect_slider.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
-def updateSlider3d( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        effect_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( effect_3d )
+def changeSliderBackgroundLeftColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.thumb_color )
+
+    if color.isValid():
+        main_window.current_shape.background_color_left = color 
+        main_window.bg_left_color_rect_slider.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def changeSliderBackgroundRightColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.background_color_right )
+
+    if color.isValid():
+        main_window.current_shape.background_color_right = color 
+        main_window.bg_right_color_rect_slider.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def updateSlider3D( main_window, state ):
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.effect_3d = state 
+    main_window.current_shape.update()
 
 def updateSliderValue( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, SliderWidget ):
-        main_window.current_shape.setValue( value )
+    main_window.current_shape.value = value 
+    main_window.current_shape.update()
 
 #------------------------------------------------------------PROGRESS BAR--------------------------------------------------------------
 
@@ -905,7 +899,7 @@ def updateProgressBarStatic( main_window, state ):
 def updateProgressBar3D( main_window, state ):
     if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
         effect_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.set3d( effect_3d )
+        main_window.current_shape.effect_3d = effect_3d 
 
 def updateProgressBarName( main_window ):
     if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):

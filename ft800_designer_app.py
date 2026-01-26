@@ -739,7 +739,7 @@ class MainWindow( QMainWindow ):
             shape.tag = generateAutoTag( self, shape )
 
         elif self.selected_shape == "Slider":
-            shape = SliderWidget( 200, 30, widget_container )
+            shape = SliderWidget( widget_container )
             shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Slider" )
