@@ -697,7 +697,7 @@ def generateResources( main_window, out_dir=None ):
     all_images = []
         
     for canvas_id in range( len( main_window.canvases ) ):
-        canvas_widgets = main_window.canvases[ canvas_id ].getWidgetContainer().children()
+        canvas_widgets = main_window.canvases[ canvas_id ].widget_container.children()
             
         for widget in canvas_widgets:
             if isinstance( widget, ImageWidget ):

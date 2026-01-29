@@ -5,60 +5,54 @@ from widgets import*
 
 #------------------------------------------------------------CANVAS--------------------------------------------------------------
 
-def updateCanvasActive( canvas, state ):
-    state == Qt.CheckState.Checked.value 
-    canvas.active = state
-    canvas.update() 
-
-def updateCanvasVisible( canvas, state ):
+def updateCanvasActive( main_window, state ):
     state == Qt.CheckState.Checked.value
-    canvas.setVisible( state )
-    canvas.visible = state
-    canvas.update()
+    main_window.current_canvas.active = state 
+    main_window.current_canvas.update()
 
-def updateCanvasStatic( canvas, state ):
+def updateCanvasVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
-    canvas.static = state 
-    canvas.update()
+    main_window.current_canvas.visible = state
+    main_window.current_canvas.setVisible( main_window.current_canvas.visible )
+    main_window.current_canvas.update()
 
-def updateCanvasName( canvas, text ):
-    canvas.custom_name = text 
-    canvas.update()
+def updateCanvasStatic( main_window, state ):
+    state == Qt.CheckState.Checked.value
+    main_window.current_canvas.static = state
+    main_window.current_canvas.update()
 
-def updateCanvasColor( canvas, canvas_color_rect ):
-    color = QColorDialog.getColor( canvas.canvas_color )
+def updateCanvasName(main_window, text):
+    main_window.current_canvas.custom_name = text
+    main_window.current_canvas.update()
 
+def updateCanvasColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_canvas.canvas_color )
+    
     if color.isValid():
-        canvas.canvas_color = color
-        canvas.canvas_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-        canvas.update()
+        main_window.current_canvas.canvas_color = color
+        main_window.canvas_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_canvas.update()
 
-def updateToggleGrid( canvas, state ):
+def updateToggleGrid( main_window, state ):
     state == Qt.CheckState.Checked.value
-    canvas.canvas_grid_enable = state 
-    canvas.update()
+    main_window.current_canvas.canvas_grid_enable = state
+    main_window.current_canvas.update()
 
-def updateGridColor( canvas, grid_color_rect ):
-    color = QColorDialog.getColor( canvas.grid_color )
-
+def updateGridColor(main_window):
+    color = QColorDialog.getColor( main_window.current_canvas.grid_color )
+    
     if color.isValid():
-        canvas.grid_color = color
-        canvas.grid_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-        canvas.update()
+        main_window.current_canvas.grid_color = color
+        main_window.grid_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_canvas.update()
 
-def changeGridType( canvas, text ):
-    if text == "Lines":
-        grid_type = "lines"  
+def changeGridType ( main_window, text ):
+    main_window.current_canvas.grid_type = text
+    main_window.current_canvas.update()
 
-    elif text == "Dots": 
-       grid_type = "dots"
-
-    canvas.grid_type = grid_type 
-    canvas.update()
-
-def changeGridSize( canvas, value ):
-    canvas.grid_size = value 
-    canvas.update()
+def changeGridSize( main_window, value ):
+    main_window.current_canvas.grid_size = value
+    main_window.current_canvas.update()
 
 #------------------------------------------------------------LINE--------------------------------------------------------------
 

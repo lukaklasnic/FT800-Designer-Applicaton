@@ -262,10 +262,8 @@ class WidgetIcon( QFrame ):
         self.setPalette( palette )
 
 class ColorRectangle( QLabel ):
-    
     def __init__( self, initial_color = "white" ):
         super().__init__()
-
         self._color = initial_color
         self.setFixedSize( 20, 20 )
         self.updateDisplay()
@@ -283,26 +281,38 @@ class ColorRectangle( QLabel ):
         
     def mousePressEvent( self, event ):
         super().mousePressEvent( event )
+
         if event.button() == Qt.MouseButton.LeftButton:
             new_color = QColorDialog.getColor( QColor( self._color ) )
+
             if new_color.isValid():
                 self._color = new_color.name()
                 self.updateDisplay()
+
                 if hasattr( self, 'colorChanged' ):
                     self.colorChanged.emit( self._color )
 
 class Canvas( QWidget ):
     clicked = pyqtSignal( object )
-    properties_changed = pyqtSignal()
     
-    def __init__( self, parent = None, canvas_id=0 ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
 
-        self.canvas_id = canvas_id
-        self.setupProperties()
+        self.defaultValues()
         self.setupUI()
-        self.drawCanvas()
-        
+
+    def defaultValues( self ):
+        self.canvas_id = 0
+        self.active = True
+        self.visible = True
+        self.static = False
+        self.custom_name = ""
+        self.canvas_color = QColor( 168, 168, 168 )
+        self.canvas_grid_enable = False
+        self.grid_color = QColor( 0, 0, 0 )
+        self.grid_type = "Lines"
+        self.grid_size = 20
+
     def setupUI( self ):
         self.setFixedSize( 480, 272 )
         
@@ -318,116 +328,42 @@ class Canvas( QWidget ):
         self.canvas_label.setGeometry( 0, 0, 480, 272 )
         self.canvas_label.setAlignment( Qt.AlignmentFlag.AlignCenter )
         self.canvas_label.lower()
-        
-    def setupProperties( self ):
-        self.canvas_grid_enable = False
-        self.canvas_color = QColor( 255, 255, 255)
-        self.grid_color = QColor( 0, 0, 0 )
-        self.grid_size = 20
-        self.grid_type = "lines"
-        
-        self.custom_name = f"Screen_{ self.canvas_id }"
-        self.active = True
-        self.visible = True
-        self.static = False
-        
-    def mousePressEvent( self, event ):
-        super().mousePressEvent( event )
-        
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.clicked.emit( event )
-              
-    def getWidgetContainer( self ):
-        return self.widget_container
-    
-    def getCanvasContainer( self ):
-        return self.container
-    
-    def drawCanvas( self ):
-        pixmap = QPixmap( 480, 272 )
 
-        if self.canvas_color == "white":
-            pixmap.fill( Qt.GlobalColor.white )
-        else:
-            color = QColor( self.canvas_color )
-            pixmap.fill( color )
+    def paintEvent(self, event ):
+        pixmap = QPixmap( 480, 272 )
+        pixmap.fill(self.canvas_color)
 
         if self.canvas_grid_enable:
             painter = QPainter( pixmap )
             grid_color = QColor( self.grid_color )
             painter.setPen( QPen( grid_color, 1 ) )
             
-            if self.grid_type == "lines":
+            if self.grid_type == "Lines":
                 for x in range( 0, 481, self.grid_size ):
                     painter.drawLine( x, 0, x, 272 )
+
                 for y in range( 0, 273, self.grid_size ):
                     painter.drawLine( 0, y, 480, y )
 
-            elif self.grid_type == "dots":
+            elif self.grid_type == "Dots":
                 dot_size = 2
+
                 for x in range( self.grid_size // 2, 481, self.grid_size ):
+
                     for y in range( self.grid_size // 2, 273, self.grid_size ):
                         painter.drawEllipse( x - dot_size // 2, y - dot_size // 2, dot_size, dot_size )
+
             painter.end()
-        
+
+        super().update()
         self.canvas_label.setPixmap( pixmap )
         self.canvas_label.lower()
+
+    def mousePressEvent( self, event ):
+        super().mousePressEvent( event )
+        
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.clicked.emit( event )
     
-    def setBackgroundColor( self, color ):
-        self.canvas_color = color
-        self.drawCanvas()
-        self.properties_changed.emit()
+
     
-    def setGridEnabled( self, enabled ):
-        self.canvas_grid_enable = enabled
-        self.drawCanvas()
-        self.properties_changed.emit()
-    
-    def setGridColor( self, color ):
-        self.grid_color = color
-        if self.canvas_grid_enable:
-            self.drawCanvas()
-        self.properties_changed.emit()
-    
-    def setGridType( self, grid_type ):
-        self.grid_type = grid_type
-        if self.canvas_grid_enable:
-            self.drawCanvas()
-        self.properties_changed.emit()
-    
-    def setGridSize( self, size ):
-        self.grid_size = size
-        if self.canvas_grid_enable:
-            self.drawCanvas()
-        self.properties_changed.emit()
-    
-    def setName( self, name ):
-        self.custom_name = name
-        self.properties_changed.emit()
-    
-    def setActive( self, active ):
-        self.active = active
-        self.properties_changed.emit()
-    
-    def setVisibleCanvas( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-        self.properties_changed.emit()
-    
-    def setStatic( self, static ):
-        self.static = static
-        self.properties_changed.emit()
-    
-    def getCanvasProperties( self ):
-        return {
-            'id': self.canvas_id,
-            'custom_name': self.custom_name,
-            'active': self.active,
-            'visible': self.visible,
-            'static': self.static,
-            'background_color': self.canvas_color,
-            'grid_enabled': self.canvas_grid_enable,
-            'grid_color': self.grid_color,
-            'grid_type': self.grid_type,
-            'grid_size': self.grid_size,
-        }

@@ -87,33 +87,40 @@ class MainWindow( QMainWindow ):
         
         self.createNewCanvas()
         
-    def createNewCanvas( self ):
-        canvas_id = len( self.canvases )
-        canvas = Canvas( canvas_id = canvas_id )
-        canvas.clicked.connect( self.onCanvasClicked )
-        self.canvases.append( canvas )
-        self.canvas_widgets[ canvas_id ] = []
-        
+    def createNewCanvas(self):
+        canvas_id = len(self.canvases)
+        canvas = Canvas()
+        canvas.clicked.connect(self.onCanvasClicked)
+
+        canvas.custom_name = f"Screen_{canvas_id}"
+
+        self.canvases.append(canvas)
+        self.canvas_widgets[canvas_id] = []
+
         return canvas_id
         
-    def showCanvas( self, canvas_index ):
-        if 0 <= canvas_index < len( self.canvases ):
+    def showCanvas(self, canvas_index):
+        if 0 <= canvas_index < len(self.canvases):
+            self.hideCanvasProperties()
+            self.hideShapeProperties()
+            self.deselectAllShapes()
+            
             self.current_canvas_index = canvas_index
             
             for canvas in self.canvases:
                 canvas.hide()
             
-            current_canvas = self.canvases[ canvas_index ]
+            current_canvas = self.canvases[canvas_index]
             current_canvas.show()
             
-            if hasattr( self, 'prev_btn' ):
-                self.prev_btn.setEnabled( canvas_index > 0 )
-
-            if hasattr( self, 'next_btn' ):
-                self.next_btn.setEnabled( canvas_index < len( self.canvases ) - 1 )
+            if hasattr(self, 'prev_btn'):
+                self.prev_btn.setEnabled(canvas_index > 0)
+    
+            if hasattr(self, 'next_btn'):
+                self.next_btn.setEnabled(canvas_index < len(self.canvases) - 1)
             
-            if hasattr( self, 'canvas_counter_label' ):
-                self.canvas_counter_label.setText( f"Canvas { canvas_index + 1 } / {len( self.canvases ) }" )
+            if hasattr(self, 'canvas_counter_label'):
+                self.canvas_counter_label.setText(f"Canvas {canvas_index + 1} / {len(self.canvases)}")
             
     def addWidgetsToPropertiesBar( self, properties_widget ):
         self.properties_layout = QVBoxLayout( properties_widget )
@@ -322,8 +329,8 @@ class MainWindow( QMainWindow ):
             
         self.updateOutputDirLabel()
 
-    def deleteCurrentCanvas( self ):
-        if len( self.canvases ) <= 1:
+    def deleteCurrentCanvas(self):
+        if len(self.canvases) <= 1:
             return
 
         current_canvas = self.getCurrentCanvas()
@@ -341,12 +348,10 @@ class MainWindow( QMainWindow ):
 
         if reply == QMessageBox.StandardButton.No:
             return
-        
-        if self.canvas_properties_visible:
-            self.hideCanvasProperties()
 
-        self.deselectAllShapes()
+        self.hideCanvasProperties()
         self.hideShapeProperties()
+        self.deselectAllShapes()
 
         if current_canvas_id in self.canvas_widgets:
             widgets = self.canvas_widgets[ current_canvas_id ]
@@ -427,22 +432,55 @@ class MainWindow( QMainWindow ):
 
         widgets_layout.addWidget( icons_container )
         
-    def addNewCanvas( self ):
+    def addNewCanvas(self):
+        self.hideCanvasProperties()
+        self.hideShapeProperties()
+        self.deselectAllShapes()
+
         canvas_id = self.createNewCanvas()
+
+        if hasattr(self, 'canvas_display_container'):
+            self.canvas_display_container.layout().addWidget(self.canvases[-1])
+
+        self.showCanvas(canvas_id)
+
+        current_canvas = self.getCurrentCanvas()
+        if current_canvas:
+            current_canvas.custom_name = f"Screen_{canvas_id}"
+
+            showCanvasProperties(self, current_canvas)
+            self.canvas_properties_visible = True
+            self.shape_properties_visible = False
+
+        self.delete_canvas_btn.setEnabled(len(self.canvases) > 1)
         
-        if hasattr( self, 'canvas_display_container' ):
-            self.canvas_display_container.layout().addWidget( self.canvases[ -1 ] )
-        
-        self.showCanvas( canvas_id )
-        self.delete_canvas_btn.setEnabled( len( self.canvases ) > 1 )
-        
-    def prevCanvas( self ):
+    def prevCanvas(self):
         if self.current_canvas_index > 0:
-            self.showCanvas( self.current_canvas_index - 1 )
+            self.hideCanvasProperties()
+            self.hideShapeProperties()
+            self.deselectAllShapes()
             
-    def nextCanvas( self ):
-        if self.current_canvas_index < len( self.canvases ) - 1:
-            self.showCanvas( self.current_canvas_index + 1 )
+            self.showCanvas(self.current_canvas_index - 1)
+            
+            current_canvas = self.getCurrentCanvas()
+            if current_canvas:
+                showCanvasProperties(self, current_canvas)
+                self.canvas_properties_visible = True
+                self.shape_properties_visible = False
+            
+    def nextCanvas(self):
+        if self.current_canvas_index < len(self.canvases) - 1:
+            self.hideCanvasProperties()
+            self.hideShapeProperties()
+            self.deselectAllShapes()
+            
+            self.showCanvas(self.current_canvas_index + 1)
+            
+            current_canvas = self.getCurrentCanvas()
+            if current_canvas:
+                showCanvasProperties(self, current_canvas)
+                self.canvas_properties_visible = True
+                self.shape_properties_visible = False
             
     def getCurrentCanvas( self ):
         if 0 <= self.current_canvas_index < len( self.canvases ):
@@ -458,13 +496,16 @@ class MainWindow( QMainWindow ):
         
         return []
         
-    def onCanvasClicked( self, event ):
+    def onCanvasClicked(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             if not self.current_shape:
                 current_canvas = self.getCurrentCanvas()
-
+    
                 if current_canvas:
-                    showCanvasProperties( self, current_canvas )
+                    self.hideCanvasProperties()
+                    self.hideShapeProperties()
+                    
+                    showCanvasProperties(self, current_canvas)
                     self.canvas_properties_visible = True
                     self.shape_properties_visible = False
                     
@@ -515,19 +556,19 @@ class MainWindow( QMainWindow ):
 
         QWidget.mousePressEvent( self.main_widget, event )
 
-    def hideCanvasProperties( self ):
-        if not self.canvas_properties_visible:
+    def hideCanvasProperties(self):
+        if hasattr(self, 'canvas_properties_visible') and not self.canvas_properties_visible:
             return
-            
-        for i in reversed( range( self.properties_layout.count() ) ):
-            widget = self.properties_layout.itemAt( i ).widget()
 
+        for i in reversed(range(self.properties_layout.count())):
+            widget = self.properties_layout.itemAt(i).widget()
             if widget:
                 widget.hide()
-                self.properties_layout.removeWidget( widget )
+                self.properties_layout.removeWidget(widget)
                 widget.deleteLater()
-        
-        self.canvas_properties_visible = False
+
+        if hasattr(self, 'canvas_properties_visible'):
+            self.canvas_properties_visible = False
 
     def deselectAllShapes( self ):
         current_widgets = self.getCurrentCanvasWidgets()
@@ -606,19 +647,19 @@ class MainWindow( QMainWindow ):
 
         self.sortWidgetsByStackOrder()
 
-    def hideShapeProperties( self ):
-        if not self.shape_properties_visible:
+    def hideShapeProperties(self):
+        if hasattr(self, 'shape_properties_visible') and not self.shape_properties_visible:
             return
-        
-        for i in reversed( range( self.properties_layout.count() ) ):
-            widget = self.properties_layout.itemAt( i ).widget()
 
+        for i in reversed(range(self.properties_layout.count())):
+            widget = self.properties_layout.itemAt(i).widget()
             if widget:
                 widget.hide()
-                self.properties_layout.removeWidget( widget )
+                self.properties_layout.removeWidget(widget)
                 widget.deleteLater()
 
-        self.shape_properties_visible = False
+        if hasattr(self, 'shape_properties_visible'):
+            self.shape_properties_visible = False
 
     def selectShape( self, shape ):
         self.deselectAllShapes()
@@ -634,12 +675,12 @@ class MainWindow( QMainWindow ):
         if not current_canvas:
             return
             
-        widget_container = current_canvas.getWidgetContainer()
+        widget_container = current_canvas.widget_container
 
         if not widget_container:
             return
         
-        canvas_container = current_canvas.getCanvasContainer()
+        canvas_container = current_canvas.container
 
         if not canvas_container:
             return
