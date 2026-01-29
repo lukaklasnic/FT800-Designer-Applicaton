@@ -1364,7 +1364,7 @@ class ButtonWidget( QWidget ):
 class KeysWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, parent=None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
         
         self.defaultValues()
@@ -2458,7 +2458,7 @@ class GaugeWidget( QWidget ):
 class DialWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, parent=None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
         
         self.defaultValues()
@@ -3121,7 +3121,7 @@ class ToggleWidget( QWidget ):
 class ScrollBarWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, parent=None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
         
         self.defaultValues()
@@ -3487,6 +3487,8 @@ class ScrollBarWidget( QWidget ):
 
                 except:
                     pass
+
+
 
     def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
@@ -4113,182 +4115,147 @@ class SliderWidget( QWidget ):
         
         event.accept()
 
-class ProgressBarWidget(QWidget):
-    clicked = pyqtSignal(object)
+class ProgressBarWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def __init__(self, width, height, parent=None):
-        super().__init__(parent)
-        self._width = width
-        self._height = height
-        self.setFixedSize(width, height)
-        
-        self.rotated = False  # Nova promenljiva za praćenje rotacije
-        
-        self.bar_color = QColor(0, 0, 255) 
-        self.progress_color = QColor(255, 255, 255)
-        self.border_color = QColor(0, 0, 0) 
-        self.white_border_color = QColor(236, 238, 241)
-        
-        self.progress_value = 50
-        
-        self.selected = False
-        self.selection_color = QColor(255, 0, 0)
-        
-        self.custom_name = ""
-        self.stack_order = 1
+    def __init__( self, parent = None ):
+        super().__init__( parent )
+
+        self.defaultValues()
+        self.setFixedSize( self.progress_bar_width, self.progress_bar_height )
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+
+    def defaultValues( self ):
         self.active = True
         self.visible = True
         self.static = False
+        self.custom_name = ""
+        self.stack_order = 1
+        self.progress_bar_width = 200
+        self.progress_bar_height = 15
+        self.progress_color = QColor( 255, 0, 0 )
+        self.background_color = QColor( 0, 0, 255 ) 
         self.effect_3d = True
+        self.range = 100
         self.value = 50
-        self.min_value = 0
-        self.max_value = 100
-        
+
+        self.selected = False
         self.resizing = False
         self.dragging = False
         self.resize_start_pos = QPoint()
-        self.resize_start_size = QSize()
-        self.resize_corner = None
         self.drag_start_pos = QPoint()
-        
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.resize_corner = None
+        self.resize_start_size = QSize()
+        self.rotated = False 
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
-        # Provera da li treba rotirati (visina > širina)
         self.rotated = self.height() > self.width()
         
         if self.rotated:
-            # Rotiramo koordinatni sistem za 90 stepeni u smeru kazaljke na satu
-            painter.translate(self.width(), 0)
-            painter.rotate(90)
-            # Zamenimo širinu i visinu za crtanje
+            painter.translate( self.width(), 0 )
+            painter.rotate( 90 )
             draw_width = self.height()
             draw_height = self.width()
+
         else:
             draw_width = self.width()
             draw_height = self.height()
         
-        # Crtanje pozadine (bar)
-        pen = QPen(self.bar_color)
-        pen.setWidth(3)
-        painter.setPen(pen)
-        painter.setBrush(self.bar_color)
+        pen = QPen( self.background_color )
+        pen.setWidth( 3 )
+        painter.setPen( pen )
+        painter.setBrush( self.background_color )
         
         radius = draw_height // 2
         
-        painter.drawPie(0, 0, 2 * radius, 2 * radius, 90 * 16, 180 * 16)
-        painter.drawRect(radius, 0, draw_width - 2 * radius, draw_height)
-        painter.drawPie(draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, -180 * 16)
+        painter.drawPie( 0, 0, 2 * radius, 2 * radius, 90 * 16, 180 * 16 )
+        painter.drawRect( radius, 0, draw_width - 2 * radius, draw_height )
+        painter.drawPie( draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, - 180 * 16 )
         
-        # Crtanje progress dela
-        pen = QPen(self.progress_color)
-        pen.setWidth(3)
-        painter.setPen(pen)
-        painter.setBrush(self.progress_color)
+        pen = QPen( self.progress_color )
+        pen.setWidth( 3 )
+        painter.setPen( pen )
+        painter.setBrush( self.progress_color )
         
-        progress_width = int((draw_width - 2 * radius) * (self.progress_value / 100.0))
-        
+        progress_width = int( draw_width * ( self.value / self.range ) )
         inner_offset = 6 
         inner_radius = radius - inner_offset // 2
+
+        if progress_width < 2 * inner_radius:
+            progress_width = 2 * inner_radius
         
-        # Crtamo progress samo ako je width veći od 0
         if progress_width > 0:
-            if progress_width >= 2 * inner_radius:
-                painter.drawPie(inner_offset // 2, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90 * 16, 180 * 16)
-                painter.drawRect(radius - 3 + inner_offset // 2, inner_offset // 2, progress_width - 2 * inner_radius, 2 * inner_radius)
-                painter.drawPie(inner_offset // 2 + progress_width - 2 * inner_radius, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90 * 16, -180 * 16)
-            else:
-                # Ako je progress premali za zaobljene krajeve, crtamo pravougaonik
-                painter.drawRect(inner_offset // 2, inner_offset // 2, progress_width, 2 * inner_radius)
+            painter.drawPie( inner_offset // 2, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90 * 16, 180 * 16 )
+            painter.drawRect( radius - 3 + inner_offset // 2, inner_offset // 2, progress_width - 2 * inner_radius - inner_offset, 2 * inner_radius )
+            painter.drawPie( inner_offset // 2 + progress_width - 2 * inner_radius - inner_offset, inner_offset // 2, 2 * inner_radius, 2 * inner_radius, 90 * 16, - 180 * 16 )
 
-        # 3D efekti
+        else:
+            painter.drawEllipse( inner_offset, inner_offset // 2 , inner_radius * 2, inner_radius * 2 )
+
         if self.effect_3d:
-            # Tamni gornji deo
-            pen = QPen(self.border_color)
-            pen.setWidth(2)
-            painter.setPen(pen)
+            
+            pen = QPen( QColor( 0, 0, 0 ) )
+            pen.setWidth( 2 )
+            painter.setPen( pen )
 
-            painter.drawLine(radius, 0, draw_width - radius, 0)
-            painter.drawArc(draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 90 * 16, -45 * 16)
-            painter.drawArc(0, 0, 2 * radius, 2 * radius, 90 * 16, 135 * 16)
+            painter.drawLine( radius, 1, draw_width - radius, 1 )
+            painter.drawArc( draw_width - 2 * radius , 0, 2 * radius, 2 * radius, 90 * 16, - 45 * 16 )
+            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 90 * 16, 135 * 16 )
 
-            # Svetli donji deo
-            pen = QPen(self.white_border_color)
-            pen.setWidth(1)
-            painter.setPen(pen)
+            pen = QPen( QColor( 255, 255, 255 ) )
+            pen.setWidth( 2 )
+            painter.setPen( pen )
 
-            painter.drawLine(radius, draw_height, draw_width - radius, draw_height)
-            painter.drawArc(draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, -135 * 16)
-            painter.drawArc(0, 0, 2 * radius, 2 * radius, 225 * 16, 45 * 16)
+            painter.drawLine( radius , draw_height - 1, draw_width - radius, draw_height - 1 )
+            painter.drawArc( draw_width - 2 * radius, 0, 2 * radius, 2 * radius, 45 * 16, - 135 * 16 )
+            painter.drawArc( 0, 0, 2 * radius, 2 * radius, 225 * 16, 45 * 16 )
 
-        # Crtanje selekcionih elemenata
         if self.selected:
             painter.resetTransform()
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
 
-    def drawSelectionHandles(self, painter):
+    def drawSelectionHandles( self, painter ):
         if not self.selected:
             return
             
         handle_size = 8
         half_size = handle_size // 2
 
-        painter.setBrush(QColor(0, 255, 0))
-        painter.setPen(QPen(QColor(0, 80, 200), 1))
+        painter.setBrush( QColor( 0, 255, 0 ) )
+        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-        corners = [QPoint(4, 4), QPoint(self.width() - 4, 4), QPoint(4, self.height() - 4), QPoint(self.width() - 4, self.height() - 4)]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, handle_size, handle_size)
-            painter.setBrush(QColor(255, 255, 255))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(0, 255, 0))
-            painter.setPen(QPen(QColor(0, 80, 200), 1))
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
 
-    def drawSelectionBorder(self, painter):
+    def drawSelectionBorder( self, painter ):
         if not self.selected:
             return
             
         margin = 2
-        border_rect = QRect(margin, margin, self.width() - 2 * margin, self.height() - 2 * margin)
+        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(border_rect)
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
 
-    def move(self, x, y):
-        super().move(x, y)
-        
-        main_window = self.findMainWindow()
-        if main_window and main_window.current_shape == self:
-            try:
-                if hasattr(main_window, 'progress_pos_x_spin'):
-                    main_window.progress_pos_x_spin.blockSignals(True)
-                    main_window.progress_pos_x_spin.setValue(x)
-                    main_window.progress_pos_x_spin.blockSignals(False)
-            except RuntimeError:
-                pass
-            
-            try:
-                if hasattr(main_window, 'progress_pos_y_spin'):
-                    main_window.progress_pos_y_spin.blockSignals(True)
-                    main_window.progress_pos_y_spin.setValue(y)
-                    main_window.progress_pos_y_spin.blockSignals(False)
-            except RuntimeError:
-                pass
-
-    def handleResize(self, global_pos):
+    def handleResize( self, global_pos ):
         if not self.resize_corner:
             return
 
@@ -4297,260 +4264,215 @@ class ProgressBarWidget(QWidget):
         new_height = self.resize_start_size.height()
 
         if self.resize_corner == "bottom_right":
-            new_width = max(10, self.resize_start_size.width() + delta.x())
-            new_height = max(10, self.resize_start_size.height() + delta.y())
+            new_width = max( 10, self.resize_start_size.width() + delta.x() )
+            new_height = max( 10, self.resize_start_size.height() + delta.y() )
 
         elif self.resize_corner == "top_right":
-            new_width = max(10, self.resize_start_size.width() + delta.x())
-            new_height = max(10, self.resize_start_size.height() - delta.y())
+            new_width = max( 10, self.resize_start_size.width() + delta.x() )
+            new_height = max( 10, self.resize_start_size.height() - delta.y() )
 
         elif self.resize_corner == "bottom_left":
-            new_width = max(10, self.resize_start_size.width() - delta.x())
-            new_height = max(10, self.resize_start_size.height() + delta.y())
+            new_width = max( 10, self.resize_start_size.width() - delta.x() )
+            new_height = max( 10, self.resize_start_size.height() + delta.y() )
 
         elif self.resize_corner == "top_left":
-            new_width = max(10, self.resize_start_size.width() - delta.x())
-            new_height = max(10, self.resize_start_size.height() - delta.y())
+            new_width = max( 10, self.resize_start_size.width() - delta.x() )
+            new_height = max( 10, self.resize_start_size.height() - delta.y() )
 
-        self.setSize(new_width, new_height)
+        self.progress_bar_width = new_width
+        self.progress_bar_height = new_height
+        self.setFixedSize( self.progress_bar_width, self.progress_bar_height )
+        self.updatePropertiesSize()
 
-    def get_progress(self):
-        return self.progress_value
-
-    def getWidth(self):
-        return self._width
-
-    def getHeight(self):
-        return self._height
-
-    def getCornerAt(self, pos):
+    def getCornerAt( self, pos ):
         handle_size = 12
         half_size = handle_size // 2
         
         corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
         }
         
         for corner_name, corner_pos in corners.items():
-            corner_rect = QRect(corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size)
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
             
-            if corner_rect.contains(pos):
+            if corner_rect.contains( pos ):
                 return corner_name
         
         return None
 
-    def setSelected(self, selected):
+    def setSelected( self, selected ):
         self.selected = selected
         self.update()
 
-    def setSize(self, width, height):
-        self._width = width
-        self._height = height
-        self.setFixedSize(width, height)
-        
+    def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
 
         if main_window and main_window.current_shape == self:
             try:
-                if hasattr(main_window, 'progress_width_spin'):
-                    main_window.progress_width_spin.blockSignals(True)
-                    main_window.progress_width_spin.setValue(width)
-                    main_window.progress_width_spin.blockSignals(False)
+                if hasattr( main_window, 'pos_x_spin_progress_bar' ):
+                    main_window.pos_x_spin_progress_bar.blockSignals( True )
+                    main_window.pos_x_spin_progress_bar.setValue( self.x() )
+                    main_window.pos_x_spin_progress_bar.blockSignals( False )
+                    
             except RuntimeError:
                 pass
             
             try:
-                if hasattr(main_window, 'progress_height_spin'):
-                    main_window.progress_height_spin.blockSignals(True)
-                    main_window.progress_height_spin.setValue(height)
-                    main_window.progress_height_spin.blockSignals(False)
+                if hasattr( main_window, 'pos_y_spin_progress_bar' ):
+                    main_window.pos_y_spin_progress_bar.blockSignals( True )
+                    main_window.pos_y_spin_progress_bar.setValue( self.y() )
+                    main_window.pos_y_spin_progress_bar.blockSignals( False )
+
+            except RuntimeError:
+                pass
+
+    def updatePropertiesSize( self ):
+        main_window = self.findMainWindow()
+
+        if main_window and main_window.current_shape == self:
+            try:
+                if hasattr( main_window, 'width_spin_progress_bar' ):
+                    main_window.width_spin_progress_bar.blockSignals( True )
+                    main_window.width_spin_progress_bar.setValue( self.progress_bar_width )
+                    main_window.width_spin_progress_bar.blockSignals( False )
+            except RuntimeError:
+                pass
+            
+            try:
+                if hasattr( main_window, 'height_spin_progress_bar' ):
+                    main_window.height_spin_progress_bar.blockSignals( True )
+                    main_window.height_spin_progress_bar.setValue( self.progress_bar_height )
+                    main_window.height_spin_progress_bar.blockSignals( False )
             except RuntimeError:
                 pass
         
         self.update()
 
-    def setBarColor(self, color):
-        self.bar_color = color
-        self.update()
-
-    def setProgressColor(self, color):
-        self.progress_color = color
-        self.update()
-
-    def setBorderColor(self, color):
-        self.border_color = color
-        self.update()
-
-    def setWhiteBorderColor(self, color):
-        self.white_border_color = color
-        self.update()
-
-    def setProgress(self, value):
-        self.progress_value = max(0, min(100, value))
-        self.update()
-
-    def setActive(self, active):
-        self.active = active
-        self.update()
-
-    def setVisibleProgressBar(self, visible):
-        self.visible = visible
-        self.setVisible(visible)
-        self.update()
-
-    def setStatic(self, static):
-        self.static = static
-        self.update()
-
-    def set3d(self, effect_3d):
-        self.effect_3d = effect_3d
-        self.update()
-
-    def setValue(self, value):
-        self.value = max(self.min_value, min(self.max_value, value))
-        progress_range = self.max_value - self.min_value
-
-        if progress_range > 0:
-            self.progress_value = int(((self.value - self.min_value) / progress_range) * 100)
-
-        self.update()
-
-    def setRange(self, min_value, max_value):
-        self.min_value = min_value
-        self.max_value = max_value
-        self.value = max(min_value, min(max_value, self.value))
-        progress_range = self.max_value - self.min_value
-
-        if progress_range > 0:
-            self.progress_value = int(((self.value - self.min_value) / progress_range) * 100)
-
-        self.update()
-
-    def findMainWindow(self):
+    def findMainWindow( self ):
         parent = self.parent()
 
         while parent:
-            if isinstance(parent, QMainWindow):
+            if isinstance( parent, QMainWindow ):
                 return parent
             
             parent = parent.parent()
 
         return None
 
-    def mousePressEvent(self, event):
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
 
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+
             else:
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                
-                self.clicked.emit(self)
+                self.clicked.emit( self )
 
         event.accept()
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
+            self.updatePropertiesPosition()
+            self.updatePropertiesSize()
 
         event.accept()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent( self, event ):
         mouse_pos = event.pos()
-        corner = self.getCornerAt(mouse_pos)
+        corner = self.getCornerAt( mouse_pos )
 
         if corner:
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
+
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
+
         else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
+            self.setCursor( Qt.CursorShape.ArrowCursor )
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
+            self.handleResize( event.globalPosition().toPoint() )
+            self.updatePropertiesPosition()
+            self.updatePropertiesSize()
+
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-            self.move(new_x, new_y)
-        
+            new_x = max( 0, new_x )
+            new_y = max( 0, new_y )
+            self.move( new_x, new_y )
+            self.updatePropertiesPosition()
+            
         event.accept()
 
 class ImageWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, width = 100, height = 100, parent = None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
-        self._width = width
-        self._height = height
-        
-        self.active = True
-        self.visible = True
-        self.static = False
-        self.custom_name = None
-        self.stack_order = 1
-        
-        self._x = 0
-        self._y = 0
-        
-        self.frame_enabled = False
-        self.frame_color = QColor( 0, 0, 0 )
-        self.frame_width = 5
-        
-        self.background_color = QColor( 240, 240, 240 )
-        
-        self.image_path = ""
-        self.original_pixmap = QPixmap()
-        self.pixmap = QPixmap()
-        
-        self.selected = False
-        self.dragging = False
-        self.resizing = False
-        self.resize_corner = None
-        self.drag_start_pos = QPoint()
-        self.resize_start_pos = QPoint()
-        self.resize_start_size = QSize()
-        
-        self.setFixedSize( self._width, self._height )
+
+        self.defaultValues()
+        self.setFixedSize( self.image_width, self.image_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
+    def defaultValues( self ):
+        self.active = True
+        self.visible = True
+        self.static = False
+        self.custom_name = ""
+        self.stack_order = 1
+        self.image_width = 100
+        self.image_height = 100
+        self.image_path = ""
+        self.frame_enabled = False
+        self.frame_color = QColor( 0, 0, 0 )
+        self.frame_width = 5
+
+        self.selected = False
+        self.resizing = False
+        self.dragging = False
+        self.resize_start_pos = QPoint()
+        self.drag_start_pos = QPoint()
+        self.resize_corner = None
+        self.resize_start_size = QSize()
+        self.pixmap = QPixmap()
+        self.original_pixmap = QPixmap()
+
+    def paintEvent( self, event ):
+        painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
-        
-        painter.setBrush( self.background_color )
+        painter.setBrush( QColor( 240, 240, 240 ) )
         painter.setPen( Qt.PenStyle.NoPen )
-        painter.drawRect( 0, 0, self._width, self._height )
+
+        if self.frame_enabled:
+            painter.drawRect( 0, 0, self.image_width , self.image_height  )
+
+        else:
+            painter.drawRect( 0, 0, self.image_width , self.image_height )
         
         if not self.pixmap.isNull():
-            if self.frame_enabled:
-                margin = self.frame_width  
-
-            else:
-                margin = 0
+            painter.drawPixmap(0, 0, self.pixmap)
         
-            x = margin
-            y = margin
-            
-            painter.drawPixmap(x, y, self.pixmap)
-        
-        if self.frame_enabled and self.frame_width > 0:
+        if self.frame_enabled:
             painter.setPen( QPen( self.frame_color, self.frame_width ) )
             painter.setBrush( Qt.BrushStyle.NoBrush )
-            painter.drawRect( 0, 0, self._width, self._height )
+            painter.drawRect( 0, 0, self.image_width, self.image_height )
         
         if self.selected:
             self.drawSelectionBorder( painter )
@@ -4597,7 +4519,6 @@ class ImageWidget( QWidget ):
             return
 
         delta = global_pos - self.resize_start_pos
-
         new_width = self.resize_start_size.width()
         new_height = self.resize_start_size.height()
 
@@ -4617,8 +4538,8 @@ class ImageWidget( QWidget ):
             new_width = max( 20, self.resize_start_size.width() - delta.x() )
             new_height = max( 20, self.resize_start_size.height() - delta.y() )
 
-        self._width = new_width
-        self._height = new_height
+        self.image_width = new_width
+        self.image_height = new_height
         
         self.setFixedSize( new_width, new_height )
         
@@ -4631,20 +4552,11 @@ class ImageWidget( QWidget ):
         if self.original_pixmap.isNull():
             return
         
-        if self.frame_enabled:
-            margin = self.frame_width  
-
-        else:
-            margin = 0
-
-        content_width = max( 1, self._width - 2 * margin )
-        content_height = max( 1, self._height - 2 * margin )
+        content_width = max( 0, self.image_width )
+        content_height = max( 0, self.image_height  )
         
         self.pixmap = self.original_pixmap.scaled( content_width, content_height, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation )
-
-    def getImagePath( self ):
-        return self.image_path
-
+        
     def getCornerAt( self, pos ):
         handle_size = 12
         half_size = handle_size // 2
@@ -4664,43 +4576,6 @@ class ImageWidget( QWidget ):
         
         return None
 
-    def getScaleToFit( self ):
-        return self.scale_to_fit
-
-    def getWidth( self ):
-        return self._width
-    
-    def getHeight( self ):
-        return self._height
-
-    def setSize( self, width, height ):
-        self._width = max( 20, width )
-        self._height = max( 20, height )
-        self.setFixedSize( self._width, self._height )
-        
-        if not self.original_pixmap.isNull():
-            self.resizePixmap()
-        
-        self.update()
-    
-    def setFrameEnabled( self, enabled ):
-        self.frame_enabled = enabled
-        self.resizePixmap()
-        self.update()
-    
-    def setFrameColor( self, color ):
-        self.frame_color = color
-        self.update()
-    
-    def setFrameWidth( self, width ):
-        self.frame_width = max( 0, min( 20, width ) )
-        self.resizePixmap()
-        self.update()
-    
-    def setBackgroundColor( self, color ):
-        self.background_color = color
-        self.update()
-    
     def setImagePath( self, path ):
         supported_formats = ['.bmp', '.png', '.jpg', '.jpeg', '.jpe']
         
@@ -4724,6 +4599,7 @@ class ImageWidget( QWidget ):
                     self.custom_name = f"Image_{ os.path.splitext( filename )[ 0 ] }"
                 
                 self.update()
+
                 return True
 
             else:
@@ -4731,36 +4607,30 @@ class ImageWidget( QWidget ):
         
         return False
     
-    def setScaleToFit( self, scale ):
-        self.scale_to_fit = scale
-        self.update()
-    
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
     
-    def setVisibleImage( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-        self.update()
-
     def updatePropertiesSize( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
             return
         
-        if (hasattr( main_window, 'current_shape') and main_window.current_shape == self ):
-            
-            if hasattr( main_window, 'width_spin' ):
-                main_window.width_spin.blockSignals( True )
-                main_window.width_spin.setValue( self._width )
-                main_window.width_spin.blockSignals( False )
+        if ( hasattr( main_window, 'current_shape') and main_window.current_shape == self ):
+            try:
+                if hasattr( main_window, 'width_spin_image' ):
+                    main_window.width_spin_image.blockSignals( True )
+                    main_window.width_spin_image.setValue( self.image_width )
+                    main_window.width_spin_image.blockSignals( False )
                 
-            if hasattr(main_window, 'height_spin'):
-                main_window.height_spin.blockSignals( True )
-                main_window.height_spin.setValue( self._height )
-                main_window.height_spin.blockSignals( False )
+                if hasattr(main_window, 'height_spin_image'):
+                    main_window.height_spin_image.blockSignals( True )
+                    main_window.height_spin_image.setValue( self.image_height )
+                    main_window.height_spin_image.blockSignals( False )
+
+            except:
+                pass
     
     def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
@@ -4769,61 +4639,19 @@ class ImageWidget( QWidget ):
             return
         
         if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
-            if hasattr( main_window, 'pos_x_spin' ):
-                main_window.pos_x_spin.blockSignals( True )
-                main_window.pos_x_spin.setValue( self.x() )
-                main_window.pos_x_spin.blockSignals( False )
-                
-            if hasattr( main_window, 'pos_y_spin' ):
-                main_window.pos_y_spin.blockSignals( True )
-                main_window.pos_y_spin.setValue( self.y() )
-                main_window.pos_y_spin.blockSignals( False )
-    
-    def updateProperties( self ):
-        main_window = self.findMainWindow()
+            try:    
+                if hasattr( main_window, 'pos_x_spin_image' ):
+                    main_window.pos_x_spin_image.blockSignals( True )
+                    main_window.pos_x_spin_image.setValue( self.x() )
+                    main_window.pos_x_spin_image.blockSignals( False )
 
-        if not main_window:
-            return
+                if hasattr( main_window, 'pos_y_spin_image' ):
+                    main_window.pos_y_spin_image.blockSignals( True )
+                    main_window.pos_y_spin_image.setValue( self.y() )
+                    main_window.pos_y_spin_image.blockSignals( False )
+            except:
+                pass
     
-        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
-            if hasattr( main_window, 'active_checkbox' ):
-                main_window.active_checkbox.blockSignals( True )
-                main_window.active_checkbox.setChecked( self.active )
-                main_window.active_checkbox.blockSignals( False )
-                
-            if hasattr( main_window, 'visible_checkbox' ):
-                main_window.visible_checkbox.blockSignals( True )
-                main_window.visible_checkbox.setChecked( self.visible )
-                main_window.visible_checkbox.blockSignals( False )
-                
-            if hasattr( main_window, 'static_checkbox' ):
-                main_window.static_checkbox.blockSignals( True )
-                main_window.static_checkbox.setChecked( self.static )
-                main_window.static_checkbox.blockSignals( False )
-            
-            if hasattr( main_window, 'name_edit' ):
-                main_window.name_edit.blockSignals( True )
-                main_window.name_edit.setText( self.custom_name )
-                main_window.name_edit.blockSignals( False )
-            
-            if hasattr( main_window, 'stack_order_spin' ):
-                main_window.stack_order_spin.blockSignals( True )
-                main_window.stack_order_spin.setValue( self.stack_order )
-                main_window.stack_order_spin.blockSignals( False )
-            
-            if hasattr( main_window, 'frame_checkbox' ):
-                main_window.frame_checkbox.blockSignals( True )
-                main_window.frame_checkbox.setChecked( self.frame_enabled )
-                main_window.frame_checkbox.blockSignals( False )
-            
-            if hasattr( main_window, 'frame_width_spin' ):
-                main_window.frame_width_spin.blockSignals( True )
-                main_window.frame_width_spin.setValue( self.frame_width )
-                main_window.frame_width_spin.blockSignals( False ) 
-            
-            if hasattr(main_window, 'frame_color_rect'):
-                main_window.frame_color_rect.setStyleSheet( f"background-color: { self.frame_color.name() }; border: 1px solid #ccc;" )
-
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -4849,7 +4677,6 @@ class ImageWidget( QWidget ):
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
                 self.clicked.emit(self)
-                self.updateProperties()
 
         event.accept()
     
@@ -4874,12 +4701,11 @@ class ImageWidget( QWidget ):
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-
+            new_x = max( 0, new_x )
+            new_y = max( 0, new_y )
             super().move( new_x, new_y )
-            
             self.updatePropertiesPosition()
         
         event.accept()
@@ -4898,44 +4724,39 @@ class ImageWidget( QWidget ):
 class LabelWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, width, height, parent = None ):
+    def __init__( self, parent = None ):
         super().__init__( parent )
 
-        self._width = width
-        self._height = height
-        self.setFixedSize( width, height )
-        
-        self.text_color = QColor( 0, 0, 0 )            
-        self.text = "Text"                    
-        
-        self.active = True
-        self.visible = True
-        self.static = False
-        
-        self.text_size = 20
-        self.text_font = "Arial"
-        self.text_alignment = "Left"
-        
-        self.selected = False
-        self.selection_color = QColor( 255, 0, 0 )
-        
-        self.dragging = False
-        self.drag_start_pos = QPoint()
-        
+        self.defaultValues()
+        self.setFixedSize( self.label_width, self.label_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         
-        self.custom_name = None
+    def defaultValues( self ):
+        self.active = True
+        self.visible = True
+        self.static = False
+        self.custom_name = ""
         self.stack_order = 1
+        self.label_width = 100
+        self.label_height = 40
+        self.text_color = QColor( 0, 0, 0 ) 
+        self.text = "Text"  
+        self.text_size = 20 
+        self.text_alignment = "Left"
+
+        self.selected = False
+        self.dragging = False
+        self.drag_start_pos = QPoint()
 
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
         painter.setPen( self.text_color )
-        font = QFont( self.text_font, self.text_size )
+        font = QFont( "Arial", self.text_size )
         painter.setFont( font )
-        text_rect = QRect( 0, 0, self._width, self._height )
+        text_rect = QRect( 0, 0, self.label_width, self.label_height )
         alignment_flags = Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft
         
         if self.text_alignment == "Left":
@@ -4960,6 +4781,72 @@ class LabelWidget( QWidget ):
         
         if self.selected:
             self.drawSelectionBorder( painter )
+
+    #def paintEvent(self, event):
+    #    painter = QPainter(self)
+    #    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    #    
+    #    # Prvo dobijamo metrike fonta
+    #    font = QFont("Arial", self.text_size)
+    #    painter.setFont(font)
+    #    font_metrics = QFontMetrics(font)
+    #    
+    #    # Izračunaj dimenzije teksta
+    #    text_width = font_metrics.horizontalAdvance(self.text)
+    #    text_height = font_metrics.height()
+    #    
+    #    # Postavi boju
+    #    painter.setPen(self.text_color)
+    #    
+    #    # Pozicija za crtanje teksta
+    #    text_x = 0
+    #    text_y = 0
+    #    
+    #    if self.text_alignment == "Left":
+    #        # Standardno - tekst počinje na (0, 0)
+    #        # QPainter.drawText(x, y) crta tekst tako da je y pozicija baseline
+    #        text_x = 0
+    #        text_y = text_height  # Da bi tekst bio vidljiv (y je baseline)
+    #        painter.drawText(text_x, text_y, self.text)
+    #    
+    #    elif self.text_alignment == "Right":
+    #        # Tekst se završava na desnoj ivici widgeta
+    #        text_x = self.label_width - text_width
+    #        text_y = text_height
+    #        painter.drawText(text_x, text_y, self.text)
+    #    
+    #    elif self.text_alignment == "Center":
+    #        # Sredina teksta je na sredini widgeta po x
+    #        text_x = (self.label_width - text_width) // 2
+    #        text_y = text_height
+    #        painter.drawText(text_x, text_y, self.text)
+    #    
+    #    elif self.text_alignment == "Horisontaly":  # PAZI: "Horisontaly" sa "y"
+    #        # Sredina teksta po x, donja strana widgeta po y
+    #        text_x = (self.label_width - text_width) // 2
+    #        # Za donju poziciju, koristimo donju ivicu widgeta
+    #        text_y = self.label_height - font_metrics.descent()
+    #        painter.drawText(text_x, text_y, self.text)
+    #    
+    #    elif self.text_alignment == "Verticaly":  # PAZI: "Verticaly" sa "y"
+    #        # Početak teksta po x, sredina widgeta po y
+    #        text_x = 0
+    #        # Za vertikalno centriranje, treba nam sredina widgeta
+    #        text_y = (self.label_height // 2) + (text_height // 2) - font_metrics.descent()
+    #        painter.drawText(text_x, text_y, self.text)
+    #    
+    #    else:  # Fallback na Left
+    #        text_x = 0
+    #        text_y = text_height
+    #        painter.drawText(text_x, text_y, self.text)
+    #    
+    #    # Opcionalno: crtanje referentne tačke na (0,0)
+    #    painter.setBrush(QColor(255, 0, 0, 100))  # Polu-transparentna crvena
+    #    painter.setPen(Qt.PenStyle.NoPen)
+    #    painter.drawEllipse(0, 0, 6, 6)
+    #    
+    #    if self.selected:
+    #        self.drawSelectionBorder(painter)
 
     def drawSelectionBorder( self, painter ):
         if not self.selected:
@@ -5001,66 +4888,23 @@ class LabelWidget( QWidget ):
             except RuntimeError:
                 pass
 
-    def getWidth( self ):
-        return self._width
-
-    def getHeight( self ):
-        return self._height
-
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
 
     def setSizeBasedOnText( self ):
         painter = QPainter( self )
-        font = QFont( self.text_font, self.text_size )
+        font = QFont( "Arial", self.text_size )
         font_metrics = QFontMetrics( font )
         
         text_width = font_metrics.horizontalAdvance( self.text ) + 20
         text_height = font_metrics.height() + 10
         
-        self._width = max( 50, text_width )
-        self._height = max( 30, text_height )
-        self.setFixedSize( self._width, self._height )
+        self.label_width = max( 50, text_width )
+        self.label_height = max( 30, text_height )
+        self.setFixedSize( self.label_width, self.label_height )
         
         painter.end()
-        self.update()
-
-    def setTextColor( self, color ):
-        self.text_color = color
-        self.update()
-
-    def setTextFont( self, text ):
-        self.text = text
-        self.setSizeBasedOnText()
-        self.update()
-
-    def setTextSize( self, size ):
-        self.text_size = size
-        self.setSizeBasedOnText()
-        self.update()
-
-    def setTextFont( self, font ):
-        self.text_font = font
-        self.setSizeBasedOnText()
-        self.update()
-
-    def setTextAlignment( self, alignment ):
-        self.text_alignment = alignment
-        self.update()
-
-    def setActive( self, active ):
-        self.active = active
-        self.setEnabled( active )
-        self.update()
-
-    def setVisibleLabel( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-        self.update()
-
-    def setStatic( self, static ):
-        self.static = static
         self.update()
 
     def findMainWindow( self ):

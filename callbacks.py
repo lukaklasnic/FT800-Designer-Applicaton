@@ -890,216 +890,180 @@ def updateSliderValue( main_window, value ):
 #------------------------------------------------------------PROGRESS BAR--------------------------------------------------------------
 
 def updateProgressBarActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        active = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setActive( active )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateProgressBarVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        visible = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setVisibleProgressBar( visible )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateProgressBarStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        static = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setStatic( static )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
-def updateProgressBar3D( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        effect_3d = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.effect_3d = effect_3d 
-
-def updateProgressBarName( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        main_window.current_shape.custom_name = main_window.progress_name_edit.text()
+def updateProgressBarName( main_window, text ):
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update()
 
 def updateProgressBarStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
 
 def updateProgressBarPosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        if hasattr( main_window, 'progress_pos_x_spin' ) and hasattr( main_window, 'progress_pos_y_spin' ):
-            x = main_window.progress_pos_x_spin.value()
-            y = main_window.progress_pos_y_spin.value()
-            main_window.current_shape.move( x, y )
+    main_window.current_shape.move( main_window.pos_x_spin_progress_bar.value(), main_window.pos_y_spin_progress_bar.value() )
+    main_window.current_shape.update()
 
 def updateProgressBarSize( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        if hasattr( main_window, 'progress_width_spin' ) and hasattr( main_window, 'progress_height_spin' ):
-            width = main_window.progress_width_spin.value()
-            height = main_window.progress_height_spin.value()
-            main_window.current_shape.setSize(width, height)
+    main_window.current_shape.progress_bar_width = main_window.width_spin_progress_bar.value()
+    main_window.current_shape.progress_bar_height = main_window.height_spin_progress_bar.value() 
+    main_window.current_shape.setFixedSize( main_window.current_shape.progress_bar_width, main_window.current_shape.progress_bar_height )
+    main_window.current_shape.update()
 
-def changeProgressBarProgressColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.progress_color )
+def updateProgressBarProgressColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.progress_color )
 
-        if color.isValid():
-            main_window.current_shape.setProgressColor( color )
-            main_window.progress_progress_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.progress_color = color 
+        main_window.progress_progress_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
 
-def changeProgressBarBackgroundColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.bar_color )
+def updateProgressBarBackgroundColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.background_color )
 
-        if color.isValid():
-            main_window.current_shape.setBarColor( color )
-            main_window.progress_background_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+    if color.isValid():
+        main_window.current_shape.background_color = color 
+        main_window.progress_background_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+
+def updateProgressBar3D( main_window, state ):
+    state == Qt.CheckState.Checked.value 
+    main_window.current_shape.effect_3d = state 
+    main_window.current_shape.update()
 
 def updateProgressBarRange( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        max_val = main_window.progress_max_spin.value()
-
-        if 0 < max_val:
-            main_window.current_shape.setRange( 0, max_val )
-            main_window.progress_value_spin.setRange( 0, max_val )
+    main_window.current_shape.range = main_window.progress_bar_range_spin.value()
+    main_window.current_shape.update()
 
 def updateProgressBarValue( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ProgressBarWidget ):
-        main_window.current_shape.setValue( main_window.progress_value_spin.value() )
+    main_window.current_shape.value = main_window.progress_bar_value_spin.value()
+    main_window.current_shape.update()
 
 #------------------------------------------------------------IMAGE--------------------------------------------------------------
 
 def updateImageActive( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        is_active = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.active = is_active
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
 def updateImageVisible( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        is_visible = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setVisibleImage( is_visible )
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
 def updateImageStatic( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        is_static = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.static = is_static
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
 def updateImageName( main_window, text ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        main_window.current_shape.custom_name = text
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update()
 
 def updateImageStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
-
-def selectImageFile( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        file_dialog = QFileDialog()
-        file_path, _ = file_dialog.getOpenFileName( main_window, "Select Image File", "", "Image Files (*.bmp *.png *.jpg *.jpeg *.jpe);;" "BMP Files (*.bmp);;" "PNG Files (*.png);;" "JPEG Files (*.jpg *.jpeg *.jpe);;" "All Files (*.*)" )
-
-        if file_path:
-            success = main_window.current_shape.setImagePath( file_path )
-
-def updateImageFrameEnabled( main_window, state ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        is_enabled = ( state == Qt.CheckState.Checked.value )
-        main_window.current_shape.setFrameEnabled( is_enabled )
-
-def updateImageFrameWidth( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        main_window.current_shape.setFrameWidth( value )
-
-def changeImageFrameColor( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        color = QColorDialog.getColor( main_window.current_shape.frame_color )
-
-        if color.isValid():
-            main_window.current_shape.setFrameColor( color )
-            main_window.frame_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-
-def updateImageSize( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        width = main_window.width_spin_image.value()
-        height = main_window.height_spin_image.value()
-        main_window.current_shape.setSize( width, height )
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
 
 def updateImagePosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, ImageWidget ):
-        if hasattr( main_window, 'pos_x_spin_image' ) and hasattr( main_window, 'pos_y_spin_image' ):
-            main_window.current_shape.move( main_window.pos_x_spin_image.value(), main_window.pos_y_spin_image.value() )
+    main_window.current_shape.move( main_window.pos_x_spin_image.value(), main_window.pos_y_spin_image.value() )
+    main_window.current_shape.update()
 
+def updateImageSize( main_window ):
+    main_window.current_shape.image_width = main_window.width_spin_image.value()
+    main_window.current_shape.image_height = main_window.height_spin_image.value()
+    main_window.current_shape.setFixedSize( main_window.current_shape.image_width, main_window.current_shape.image_height )
+    main_window.current_shape.resizePixmap()
+    main_window.current_shape.update()
+
+def selectImageFile( main_window ):
+    file_path, _ = QFileDialog.getOpenFileName( main_window, "Select Image File", "", "Image Files (*.bmp *.png *.jpg *.jpeg *.jpe);;" "BMP Files (*.bmp);;" "PNG Files (*.png);;" "JPEG Files (*.jpg *.jpeg *.jpe);;" "All Files (*.*)" )
+
+    if file_path:
+        main_window.current_shape.setImagePath( file_path )
+
+def updateImageFrameEnabled( main_window, state ):
+        state == Qt.CheckState.Checked.value 
+        main_window.current_shape.frame_enabled = state
+        main_window.current_shape.update()
+
+def changeImageFrameColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.frame_color )
+
+    if color.isValid():
+        main_window.current_shape.frame_color = color 
+        main_window.frame_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+
+def updateImageFrameWidth( main_window, value ):
+    main_window.current_shape.frame_width = value 
+    main_window.current_shape.update()
 
 #------------------------------------------------------------LABEL--------------------------------------------------------------
 
-def updateLabelActive( self, state ):
-    if self.current_shape and isinstance( self.current_shape, LabelWidget ):
-        is_active = ( state == Qt.CheckState.Checked.value )
-        self.current_shape.setActive( is_active )
+def updateLabelActive( main_window, state ):
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.active = state
+    main_window.current_shape.update()
 
-def updateLabelVisible( self, state ):
-    if self.current_shape and isinstance( self.current_shape, LabelWidget ):
-        is_visible = ( state == Qt.CheckState.Checked.value )
-        self.current_shape.setVisibleLabel( is_visible )
+def updateLabelVisible( main_window, state ):
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.visible = state
+    main_window.current_shape.setVisible( state )
+    main_window.current_shape.update()
 
-def updateLabelStatic( self, state ):
-    if self.current_shape and isinstance( self.current_shape, LabelWidget ):
-        is_static = ( state == Qt.CheckState.Checked.value )
-        self.current_shape.setStatic( is_static )
+def updateLabelStatic( main_window, state ):
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.static = state
+    main_window.current_shape.update()
 
-def updateLabelName( self, text ):
-    if self.current_shape and isinstance( self.current_shape, LabelWidget ):
-        self.current_shape.custom_name = text
+def updateLabelName( main_window, text ):
+    main_window.current_shape.custom_name = text
+    main_window.current_shape.update()
 
 def updateLabelStackOrder( main_window, value ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LabelWidget ):
-        main_window.current_shape.stack_order = value
-        main_window.sortWidgetsByStackOrder()
-
-def changeLabelTextColor( self ):
-    if self.current_shape and isinstance( self.current_shape, LabelWidget ):
-        color = QColorDialog.getColor( self.current_shape.text_color )
-
-        if color.isValid():
-            self.current_shape.setTextColor( color )
-            self.text_color_rect_label.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-
-def updateLabelText( self, text ):
-    if self.current_shape and isinstance( self.current_shape, LabelWidget ):
-        self.current_shape.setTextFont( text )
-
-        if hasattr( self, 'width_spin_label' ):
-            self.width_spin_label.setValue( self.current_shape.keys_width )
-
-        if hasattr (self, 'height_spin_label' ):
-            self.height_spin_label.setValue( self.current_shape.keys_height )
-
-def updateLabelTextSize( self, value ):
-    if self.current_shape and isinstance( self.current_shape, LabelWidget ):
-        self.current_shape.setTextSize( value )
-
-        if hasattr( self, 'width_spin_label' ):
-            self.width_spin_label.setValue( self.current_shape.keys_width )
-
-        if hasattr( self, 'height_spin_label' ):
-            self.height_spin_label.setValue( self.current_shape.keys_height )
-
-def updateLabelAlignment( self, text ):
-    if self.current_shape and isinstance( self.current_shape, LabelWidget ):
-        self.current_shape.setTextAlignment( text )
-
-def updateLabelSize( self ):
-    if self.current_shape:
-        updatePositionSpins( self )
+    main_window.current_shape.stack_order = value
+    main_window.sortWidgetsByStackOrder()
+    main_window.current_shape.update()
 
 def updateLabelPosition( main_window ):
-    if main_window.current_shape and isinstance( main_window.current_shape, LabelWidget ):
-        if hasattr( main_window, 'pos_x_spin_label' ) and hasattr( main_window, 'pos_y_spin_label' ):
-            x = main_window.pos_x_spin_label.value()
-            y = main_window.pos_y_spin_label.value()
-            main_window.current_shape.move(x, y)
+    main_window.current_shape.move( main_window.pos_x_spin_label.value(), main_window.pos_y_spin_label.value() )
+    main_window.current_shape.update()
 
-def updatePositionSpins( main_window ):
-    if main_window.current_shape and hasattr( main_window, 'pos_x_spin' ) and hasattr( main_window, 'pos_y_spin' ):
-        main_window.pos_x_spin.blockSignals( True )
-        main_window.pos_y_spin.blockSignals( True )
-        main_window.pos_x_spin.setValue( main_window.current_shape.x() )
-        main_window.pos_y_spin.setValue( main_window.current_shape.y() )
-        main_window.pos_x_spin.blockSignals( False )
-        main_window.pos_y_spin.blockSignals( False )
+def updateLabelTextColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.text_color )
+
+    if color.isValid():
+        main_window.current_shape.text_color = color 
+        main_window.text_color_rect_label.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.update()
+
+def updateLabelText( main_window, text ):
+    main_window.current_shape.text = text 
+    main_window.current_shape.setSizeBasedOnText()
+    main_window.current_shape.update()
+
+def updateLabelTextSize( main_window, value ):
+    main_window.current_shape.text_size = value 
+    main_window.current_shape.setSizeBasedOnText()
+    main_window.current_shape.update()
+
+def updateLabelAlignment( main_window, text ):
+    main_window.current_shape.text_alignment = text 
+    main_window.current_shape.update()
 
 #------------------------------------------------------------NUMERIC--------------------------------------------------------------
 

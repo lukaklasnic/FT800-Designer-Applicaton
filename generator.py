@@ -652,8 +652,8 @@ def generateResourcesC( self, all_images ):
                 continue
             
             image = img_widget.pixmap.toImage()
-            width = img_widget.getWidth()
-            height = img_widget.getHeight()
+            width = img_widget.image_width
+            height = img_widget.image_height
             scaled_image = image.scaled( width, height, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation )
             rgb888_image = scaled_image.convertToFormat( QImage.Format.Format_RGB888 )
             rgb565 = bytearray()

@@ -788,21 +788,21 @@ class MainWindow( QMainWindow ):
             shape.tag = generateAutoTag( self, shape )
 
         elif self.selected_shape == "Progress bar":
-            shape = ProgressBarWidget( 200, 15, widget_container )
+            shape = ProgressBarWidget( widget_container )
             shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "ProgressBar" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
-
+            
         elif self.selected_shape == "Image":
-            shape = ImageWidget( 100, 100, widget_container )
+            shape = ImageWidget( widget_container )
             shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName(self, "Image")
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
         elif self.selected_shape == "Label":
-            shape = LabelWidget( 100, 40, widget_container )
+            shape = LabelWidget( widget_container )
             shape.move( container_pos.x(), container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Label" )
