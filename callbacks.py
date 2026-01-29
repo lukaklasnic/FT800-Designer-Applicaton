@@ -303,7 +303,7 @@ def changeEllipseStartColor( main_window ):
     color = QColorDialog.getColor( main_window.current_shape.gradient_start_color )
 
     if color.isValid():
-        main_window.current_shape.gradient_start_color = main_window.current_shape.gradient_end_color 
+        main_window.current_shape.gradient_start_color = main_window.current_shape.gradient_start_color 
         main_window.start_color_rect_ellipse.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
 
@@ -311,7 +311,7 @@ def changeEllipseEndColor( main_window ):
     color = QColorDialog.getColor( main_window.current_shape.gradient_end_color )
 
     if color.isValid():
-        main_window.current_shape.gradient_end_color = main_window.current_shape.gradient_start_color
+        main_window.current_shape.gradient_end_color = main_window.current_shape.gradient_end_color
         main_window.end_color_rect_ellipse.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
 
@@ -351,7 +351,7 @@ def updateButtonPosition( main_window ):
     main_window.current_shape.update()
 
 def updateButtonSize( main_window ):
-    main_window.current_shape.setFixedSize( main_window.width_spin.value(), main_window.height_spin.value() )
+    main_window.current_shape.setFixedSize( main_window.width_spin_button.value(), main_window.height_spin_button.value() )
     main_window.current_shape.update()
 
 def updateButtonStartColor( main_window ):

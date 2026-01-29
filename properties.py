@@ -2321,7 +2321,7 @@ def showGaugeProperties( main_window, current_index ):
     main_window.pos_y_spin_gauge = QSpinBox()
     main_window.pos_y_spin_gauge.setRange( 0, 272 )
     main_window.pos_y_spin_gauge.setValue( main_window.current_shape.y() + main_window.current_shape.diameter // 2 )
-    main_window.pos_y_spin_gauge.valueChanged.connect( updateGaugePosition )
+    main_window.pos_y_spin_gauge.valueChanged.connect( lambda value: updateGaugePosition( main_window ) )
     main_window.pos_y_spin_gauge.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.pos_y_spin_gauge.setFixedWidth( 70 )
     pos_y_layout.addWidget( main_window.pos_y_spin_gauge )
