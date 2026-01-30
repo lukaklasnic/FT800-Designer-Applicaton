@@ -17,6 +17,7 @@ class MainWindow( QMainWindow ):
         self.setTitleBar()
         self.setScrollArea()
         self.setMainLayouts()
+        self.all_canvas_data = {}
 
     def setTitleBar( self ):
         self.setWindowTitle( "FT800 Designer application" )
@@ -92,7 +93,12 @@ class MainWindow( QMainWindow ):
         canvas = Canvas()
         canvas.clicked.connect(self.onCanvasClicked)
 
+        canvas.canvas_id = canvas_id  # POSTAVI ID PRVO
         canvas.custom_name = f"Screen_{canvas_id}"
+
+        # OSVEŽI data_dict sa pravim ID-jem
+        canvas.data_dict['id'] = canvas_id
+        canvas.data_dict['name'] = canvas.custom_name
 
         self.canvases.append(canvas)
         self.canvas_widgets[canvas_id] = []
@@ -155,7 +161,7 @@ class MainWindow( QMainWindow ):
                 border: 2px solid #cc5500;
             }
         """ )
-        #generate_button.clicked.connect( self.printAllCanvasAndWidgetData )
+        generate_button.clicked.connect( self.printAllCanvasAndWidgetData )
 
         top_layout.addWidget( generate_button )
         top_layout.addStretch( 1 )
@@ -586,25 +592,39 @@ class MainWindow( QMainWindow ):
         else:
             super().keyPressEvent( event )
     
-    def deleteSelectedShape( self ):
+    def deleteSelectedShape(self):
         if self.current_shape:
             current_canvas = self.getCurrentCanvas()
-
+            
             if not current_canvas:
                 return
                 
             current_canvas_id = current_canvas.canvas_id
-            current_widgets = self.canvas_widgets.get( current_canvas_id, [] )
-
+            current_widgets = self.canvas_widgets.get(current_canvas_id, [])
+            
             if self.current_shape in current_widgets:
-                current_widgets.remove( self.current_shape )
-
+                current_widgets.remove(self.current_shape)
+                
+                # Ukloni widget rečnik iz canvas rečnika
+                if hasattr(current_canvas, 'removeWidgetData') and hasattr(self.current_shape, 'data_dict'):
+                    widget_id = self.current_shape.data_dict.get('id')
+                    if widget_id:
+                        current_canvas.removeWidgetData(widget_id)
+            
             self.current_shape.deleteLater()
             self.current_shape = None
             self.hideShapeProperties()
             self.deselectAllShapes()
             self.renumberStackOrders()
             self.renumberAllWidgets()
+
+    def getAllCanvasData(self):
+        """Vraća sve podatke svih canvas-a i widget-a"""
+        all_data = {}
+        for canvas in self.canvases:
+            if hasattr(canvas, 'getDataDict'):
+                all_data[canvas.canvas_id] = canvas.getDataDict()
+        return all_data
 
     def renumberAllWidgets( main_window ):
         if hasattr( main_window, 'canvas_widgets' ):
@@ -809,7 +829,7 @@ class MainWindow( QMainWindow ):
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
         elif self.selected_shape == "Numeric":
-            shape = NumericWidget( 100, 40, widget_container )
+            shape = NumericWidget( widget_container )
             shape.move( container_pos.x() , container_pos.y() )
             shape.clicked.connect( self.selectShape )
             shape.custom_name = generateWidgetName( self, "Numeric" )
@@ -825,15 +845,24 @@ class MainWindow( QMainWindow ):
             return
 
         if shape:
-            current_widgets_count = len( self.getCurrentCanvasWidgets() )
+            current_widgets_count = len(self.getCurrentCanvasWidgets())
             shape.stack_order = current_widgets_count + 1
-
+            
+            # Postavi jedinstveni ID za widget
+            widget_id = f"{current_canvas.canvas_id}_widget_{len(self.getCurrentCanvasWidgets())}"
+            shape.setDataId(widget_id)
+            
             shape.show()
             shape.raise_()
             
-            self.canvas_widgets[ current_canvas.canvas_id ].append( shape )
+            self.canvas_widgets[current_canvas.canvas_id].append(shape)
+            
+            # Dodaj widget rečnik u canvas rečnik
+            if hasattr(current_canvas, 'addWidgetData'):
+                current_canvas.addWidgetData(shape.getDataDict())
+            
             self.sortWidgetsByStackOrder()
-            self.selectShape( shape )
+            self.selectShape(shape)
             
             QApplication.restoreOverrideCursor()
             self.object_attached = False
@@ -978,127 +1007,287 @@ class MainWindow( QMainWindow ):
         #generateResources( self, self.output_dir )
         #generateComponents( self, self.output_dir )
 
-#    def printAllCanvasAndWidgetData(self):
-#        """Ispisuje sve vrednosti iz recnika za sve aktivne canvase i widgete"""
-#        print("\n" + "="*80)
-#        print("DEBUG: SVE VREDNOSTI IZ RECNIKA ZA CANVASE I WIDGETE")
-#        print("="*80)
-#
-#        # Proveri da li all_canvas_dicts postoji
-#        if not hasattr(self, 'all_canvas_dicts'):
-#            print("ERROR: all_canvas_dicts ne postoji!")
-#            return
-#
-#        print(f"\nBroj canvasa u all_canvas_dicts: {len(self.all_canvas_dicts)}")
-#
-#        # Prikazi svaki canvas
-#        for canvas_id, canvas_props in self.all_canvas_dicts.items():
-#            print(f"\n{'='*60}")
-#            print(f"CANVAS {canvas_id}:")
-#            print(f"{'='*60}")
-#
-#            # Prikazi osnovne informacije o canvasu
-#            print(f"  ID: {canvas_id}")
-#            print(f"  Naziv: {canvas_props.get('name', 'N/A')}")
-#            print(f"  Aktivan: {canvas_props.get('active', True)}")
-#            print(f"  Vidljiv: {canvas_props.get('visible', True)}")
-#            print(f"  Static: {canvas_props.get('static', False)}")
-#            print(f"  Stack order: {canvas_props.get('stack_order', 1)}")
-#            print(f"  Background color: {canvas_props.get('background_color', 'N/A')}")
-#            print(f"  Grid enable: {canvas_props.get('grid_enable', False)}")
-#            print(f"  Grid color: {canvas_props.get('grid_color', 'N/A')}")
-#            print(f"  Grid type: {canvas_props.get('grid_type', 'N/A')}")
-#            print(f"  Grid size: {canvas_props.get('grid_size', 20)}")
-#
-#            # Prikazi widgete na ovom canvasu
-#            widgets = canvas_props.get('widgets', [])
-#            print(f"\n  Broj widgeta: {len(widgets)}")
-#
-#            if widgets:
-#                for i, widget in enumerate(widgets):
-#                    print(f"\n  --- WIDGET {i+1} ---")
-#                    print(f"    Tip: {widget.get('type', 'Nepoznato')}")
-#                    print(f"    Naziv: {widget.get('name', 'N/A')}")
-#                    print(f"    Aktivan: {widget.get('active', True)}")
-#                    print(f"    Vidljiv: {widget.get('visible', True)}")
-#                    print(f"    Static: {widget.get('static', False)}")
-#                    print(f"    Stack order: {widget.get('stack_order', 1)}")
-#
-#                    # Prikazi specificna polja za svaki tip widgeta
-#                    widget_type = widget.get('type', '')
-#
-#                    if widget_type == 'Rectangle':
-#                        print(f"    X: {widget.get('x', 'N/A')}")
-#                        print(f"    Y: {widget.get('y', 'N/A')}")
-#                        print(f"    Width: {widget.get('width', 'N/A')}")
-#                        print(f"    Height: {widget.get('height', 'N/A')}")
-#                        print(f"    Edges color: {widget.get('edges_color', 'N/A')}")
-#                        print(f"    Thickness: {widget.get('thickness', 'N/A')}")
-#                        print(f"    Filled: {widget.get('filled', 'N/A')}")
-#                        print(f"    Fill color: {widget.get('fill_color', 'N/A')}")
-#                        print(f"    Tag: {widget.get('tag', 'N/A')}")
-#
-#                    elif widget_type == 'Button':
-#                        print(f"    X: {widget.get('x', 'N/A')}")
-#                        print(f"    Y: {widget.get('y', 'N/A')}")
-#                        print(f"    Width: {widget.get('width', 'N/A')}")
-#                        print(f"    Height: {widget.get('height', 'N/A')}")
-#                        print(f"    Text: {widget.get('text', 'N/A')}")
-#                        print(f"    Tag: {widget.get('tag', 'N/A')}")
-#
-#                    elif widget_type == 'Line':
-#                        print(f"    X1: {widget.get('x1', 'N/A')}")
-#                        print(f"    Y1: {widget.get('y1', 'N/A')}")
-#                        print(f"    X2: {widget.get('x2', 'N/A')}")
-#                        print(f"    Y2: {widget.get('y2', 'N/A')}")
-#                        print(f"    Tag: {widget.get('tag', 'N/A')}")
-#
-#                    elif widget_type == 'Circle':
-#                        print(f"    Center X: {widget.get('center_x', 'N/A')}")
-#                        print(f"    Center Y: {widget.get('center_y', 'N/A')}")
-#                        print(f"    Diameter: {widget.get('diameter', 'N/A')}")
-#                        print(f"    Tag: {widget.get('tag', 'N/A')}")
-#
-#                    elif widget_type == 'Label':
-#                        print(f"    X: {widget.get('x', 'N/A')}")
-#                        print(f"    Y: {widget.get('y', 'N/A')}")
-#                        print(f"    Text: {widget.get('text', 'N/A')}")
-#                        print(f"    Text size: {widget.get('text_size', 'N/A')}")
-#
-#                    elif widget_type == 'Image':
-#                        print(f"    X: {widget.get('x', 'N/A')}")
-#                        print(f"    Y: {widget.get('y', 'N/A')}")
-#                        print(f"    Width: {widget.get('width', 'N/A')}")
-#                        print(f"    Height: {widget.get('height', 'N/A')}")
-#
-#                    # Prikazi sva polja za debug
-#                    print(f"\n    Sva polja u widget dict-u:")
-#                    for key, value in widget.items():
-#                        print(f"      {key}: {value}")
-#            else:
-#                print("  Nema widgeta na ovom canvasu.")
-#
-#        print(f"\n{'='*80}")
-#
-#        # Takodje prikazi canvas_widgets strukturu
-#        print(f"\nDEBUG: canvas_widgets struktura:")
-#        print(f"{'='*80}")
-#
-#        if hasattr(self, 'canvas_widgets'):
-#            for canvas_id, widget_list in self.canvas_widgets.items():
-#                print(f"\nCanvas {canvas_id} ima {len(widget_list)} widget objekata:")
-#                for i, widget in enumerate(widget_list):
-#                    print(f"  Widget {i+1}: {type(widget).__name__}")
-#                    print(f"    Pozicija: ({widget.x()}, {widget.y()})")
-#                    print(f"    Velicina: {widget.width()} x {widget.height()}")
-#                    if hasattr(widget, 'custom_name'):
-#                        print(f"    Ime: {widget.custom_name}")
-#        else:
-#            print("canvas_widgets ne postoji!")
-#
-#        print(f"\n{'='*80}")
-#        print("KRAJ DEBUG ISPISA")
-#        print("="*80)    
+    def printAllCanvasAndWidgetData(self):
+        """Ispisuje sve vrednosti iz rečnika za sve aktivne canvase i widgete"""
+        print("\n" + "="*80)
+        print("DEBUG: SVE VREDNOSTI IZ REČNIKA ZA CANVASE I WIDGETE")
+        print("="*80)
+
+        all_data = self.getAllCanvasData()
+        print(f"\nBroj canvasa: {len(all_data)}")
+
+        for canvas_id, canvas_data in all_data.items():
+            print(f"\n{'='*60}")
+            print(f"CANVAS {canvas_id}:")
+            print(f"{'='*60}")
+
+            # ISPIS PODATAKA ZA CANVAS
+            print(f"  Naziv: {canvas_data.get('name', 'N/A')}")
+            print(f"  Aktivan: {canvas_data.get('active', 'N/A')}")
+            print(f"  Vidljiv: {canvas_data.get('visible', 'N/A')}")
+            print(f"  Static: {canvas_data.get('static', 'N/A')}")
+            print(f"  Background color: {canvas_data.get('background_color', 'N/A')}")
+            print(f"  Grid enable: {canvas_data.get('grid_enable', 'N/A')}")
+            print(f"  Grid color: {canvas_data.get('grid_color', 'N/A')}")
+            print(f"  Grid type: {canvas_data.get('grid_type', 'N/A')}")
+            print(f"  Grid size: {canvas_data.get('grid_size', 'N/A')}")
+
+            # Broj widgeta na canvas-u
+            widgets_list = canvas_data.get('widgets', [])
+            print(f"\n  Broj widgeta: {len(widgets_list)}")
+
+            # ISPIS PODATAKA ZA SVAKI WIDGET
+            for i, widget_data in enumerate(widgets_list):
+                print(f"\n  --- WIDGET {i+1} ---")
+                # SPECIFIČNI PODACI ZA SVAKI TIP WIDGET-A
+                widget_type = widget_data.get('type', '')
+
+                if widget_type == 'Circle':
+                    print(f"    Centar X: {widget_data.get('center_x', 'N/A')}")
+                    print(f"    Centar Y: {widget_data.get('center_y', 'N/A')}")
+                    print(f"    Prečnik: {widget_data.get('diameter', 'N/A')}")
+                    print(f"    Boja ivice: {widget_data.get('edges_color', 'N/A')}")
+                    print(f"    Debljina ivice: {widget_data.get('edges_width', 'N/A')}")
+                    print(f"    Popuna: {widget_data.get('filled', 'N/A')}")
+                    print(f"    Boja popune: {widget_data.get('fill_color', 'N/A')}")
+                    print(f"    Tag: {widget_data.get('tag', 'N/A')}")
+
+                elif widget_type == 'Ellipse':
+                    print(f"    Širina elipse: {widget_data.get('ellipse_width', 'N/A')}")
+                    print(f"    Visina elipse: {widget_data.get('ellipse_height', 'N/A')}")
+                    print(f"    Centar X: {widget_data.get('center_x', 'N/A')}")
+                    print(f"    Centar Y: {widget_data.get('center_y', 'N/A')}")
+                    print(f"    Boja ivica: {widget_data.get('edges_color', 'N/A')}")
+                    print(f"    Debljina ivica: {widget_data.get('edges_width', 'N/A')}")
+                    print(f"    Popuna: {widget_data.get('filled', 'N/A')}")
+                    print(f"    Smer gradijenta: {widget_data.get('gradient_direction', 'N/A')}")
+                    print(f"    Početna boja gradijenta: {widget_data.get('gradient_start_color', 'N/A')}")
+                    print(f"    Krajnja boja gradijenta: {widget_data.get('gradient_end_color', 'N/A')}")
+                    print(f"    Tag: {widget_data.get('tag', 'N/A')}")
+
+                elif widget_type == 'Rectangle':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Tag: {widget_data.get('tag', 'N/A')}")
+                    print(f"    Position X: {widget_data.get('position_x', 'N/A')}")
+                    print(f"    Position Y: {widget_data.get('position_y', 'N/A')}")
+                    print(f"    Width: {widget_data.get('rectangle_width', 'N/A')}")
+                    print(f"    Height: {widget_data.get('rectangle_height', 'N/A')}")
+                    print(f"    Edges color: {widget_data.get('edges_color', 'N/A')}")
+                    print(f"    Edges width: {widget_data.get('edges_width', 'N/A')}")
+                    print(f"    Filled: {widget_data.get('filled', 'N/A')}")
+                    print(f"    Gradient type: {widget_data.get('gradient_direction', 'N/A')}")
+                    print(f"    Start color: {widget_data.get('gradient_start_color', 'N/A')}")
+                    print(f"    End color: {widget_data.get('gradient_end_color', 'N/A')}")
+
+                elif widget_type == 'Line':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Tag: {widget_data.get('tag', 'N/A')}")
+                    print(f"    Start X: {widget_data.get('start_x', 'N/A')}")
+                    print(f"    Start Y: {widget_data.get('start_y', 'N/A')}")
+                    print(f"    End X: {widget_data.get('end_x', 'N/A')}")
+                    print(f"    End Y: {widget_data.get('end_y', 'N/A')}")
+                    print(f"    Line color: {widget_data.get('line_color', 'N/A')}")
+                    print(f"    Line width: {widget_data.get('line_width', 'N/A')}")
+
+                elif widget_type == 'Button':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Tag: {widget_data.get('tag', 'N/A')}")
+                    print(f"    Position X: {widget_data.get('position_x', 'N/A')}")
+                    print(f"    Position Y: {widget_data.get('position_y', 'N/A')}")
+                    print(f"    Button width: {widget_data.get('button_width', 'N/A')}")
+                    print(f"    Button height: {widget_data.get('button_height', 'N/A')}")
+                    print(f"    Gradient start color: {widget_data.get('gradient_start_color', 'N/A')}")
+                    print(f"    Gradient end color: {widget_data.get('gradient_end_color', 'N/A')}")
+                    print(f"    3D: {widget_data.get('effect_3d', 'N/A')}")
+                    print(f"    Text: {widget_data.get('text', 'N/A')}")
+                    print(f"    Text size: {widget_data.get('text_size', 'N/A')}")
+                    print(f"    Text color: {widget_data.get('text_color', 'N/A')}")
+
+                elif widget_type == 'Keys':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Position X: {widget_data.get('position_x', 'N/A')}")
+                    print(f"    Position Y: {widget_data.get('position_y', 'N/A')}")
+                    print(f"    Keys width: {widget_data.get('keys_width', 'N/A')}")
+                    print(f"    Keys height: {widget_data.get('keys_height', 'N/A')}")
+                    print(f"    Gradient start color: {widget_data.get('gradient_start_color', 'N/A')}")
+                    print(f"    Gradient end color: {widget_data.get('gradient_end_color', 'N/A')}")
+                    print(f"    3D: {widget_data.get('effect_3d', 'N/A')}")
+                    print(f"    Keys type: {widget_data.get('keys_type', 'N/A')}")
+                    print(f"    Text size: {widget_data.get('font_size', 'N/A')}")
+                    print(f"    Text color: {widget_data.get('font_color', 'N/A')}")
+
+                elif widget_type == 'Clock':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Center X: {widget_data.get('center_x', 'N/A')}")
+                    print(f"    Center Y: {widget_data.get('center_y', 'N/A')}")
+                    print(f"    Diameter: {widget_data.get('diameter', 'N/A')}")
+                    print(f"    Background color: {widget_data.get('background_color', 'N/A')}")
+                    print(f"    Face color: {widget_data.get('face_color', 'N/A')}")
+                    print(f"    3D: {widget_data.get('effect_3d', 'N/A')}")
+                    print(f"    Hours: {widget_data.get('hours', 'N/A')}")
+                    print(f"    Minutes: {widget_data.get('minutes', 'N/A')}")
+                    print(f"    Seconds: {widget_data.get('seconds', 'N/A')}")
+
+                elif widget_type == 'Gauge':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Center X: {widget_data.get('center_x', 'N/A')}")
+                    print(f"    Center Y: {widget_data.get('center_y', 'N/A')}")
+                    print(f"    Diameter: {widget_data.get('diameter', 'N/A')}")
+                    print(f"    Background color: {widget_data.get('background_color', 'N/A')}")
+                    print(f"    Face color: {widget_data.get('face_color', 'N/A')}")
+                    print(f"    3D: {widget_data.get('effect_3d', 'N/A')}")
+                    print(f"    Major subdivision: {widget_data.get('major_subdivision', 'N/A')}")
+                    print(f"    Minor subdivision: {widget_data.get('minor_subdivision', 'N/A')}")
+                    print(f"    Range: {widget_data.get('range', 'N/A')}")
+                    print(f"    Value: {widget_data.get('value', 'N/A')}")
+
+                elif widget_type == 'Dial':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Center X: {widget_data.get('center_x', 'N/A')}")
+                    print(f"    Center Y: {widget_data.get('center_y', 'N/A')}")
+                    print(f"    Diameter: {widget_data.get('diameter', 'N/A')}")
+                    print(f"    Background color: {widget_data.get('background_color', 'N/A')}")
+                    print(f"    Pointer color: {widget_data.get('pointer_color', 'N/A')}")
+                    print(f"    3D: {widget_data.get('effect_3d', 'N/A')}")
+                    print(f"    Value: {widget_data.get('value', 'N/A')}")
+
+                elif widget_type == 'Toggle':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Tag: {widget_data.get('tag', 'N/A')}")
+                    print(f"    Position X: {widget_data.get('position_x', 'N/A')}")
+                    print(f"    Position Y: {widget_data.get('position_y', 'N/A')}")
+                    print(f"    Toggle width: {widget_data.get('toggle_width', 'N/A')}")
+                    print(f"    Thumb color: {widget_data.get('thumb_color', 'N/A')}")
+                    print(f"    Background color: {widget_data.get('background_color', 'N/A')}")
+                    print(f"    Text color: {widget_data.get('text_color', 'N/A')}")
+                    print(f"    3D: {widget_data.get('effect_3d', 'N/A')}")
+                    print(f"    State: {widget_data.get('state', 'N/A')}")
+
+                elif widget_type == 'Scroll_bar':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Tag: {widget_data.get('tag', 'N/A')}")
+                    print(f"    Position X: {widget_data.get('position_x', 'N/A')}")
+                    print(f"    Position Y: {widget_data.get('position_y', 'N/A')}")
+                    print(f"    Scroll bar width: {widget_data.get('scroll_bar_width', 'N/A')}")
+                    print(f"    Scroll bar height: {widget_data.get('scroll_bar_height', 'N/A')}")
+                    print(f"    Thumb color: {widget_data.get('thumb_color', 'N/A')}")
+                    print(f"    Background color: {widget_data.get('background_color', 'N/A')}")
+                    print(f"    3D: {widget_data.get('effect_3d', 'N/A')}")
+                    print(f"    Value: {widget_data.get('current_value', 'N/A')}")
+                    print(f"    Thumb size: {widget_data.get('thumb_size', 'N/A')}")
+
+                elif widget_type == 'Slider':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Tag: {widget_data.get('tag', 'N/A')}")
+                    print(f"    Position X: {widget_data.get('position_x', 'N/A')}")
+                    print(f"    Position Y: {widget_data.get('position_y', 'N/A')}")
+                    print(f"    Slider width: {widget_data.get('slider_width', 'N/A')}")
+                    print(f"    Slider height: {widget_data.get('slider_height', 'N/A')}")
+                    print(f"    Thumb color: {widget_data.get('thumb_color', 'N/A')}")
+                    print(f"    Left color: {widget_data.get('left_background_color', 'N/A')}")
+                    print(f"    Right color: {widget_data.get('right_background_color', 'N/A')}")
+                    print(f"    3D: {widget_data.get('effect_3d', 'N/A')}")
+                    print(f"    Value: {widget_data.get('current_value', 'N/A')}")
+
+                elif widget_type == 'Progress_bar':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Position X: {widget_data.get('position_x', 'N/A')}")
+                    print(f"    Position Y: {widget_data.get('position_y', 'N/A')}")
+                    print(f"    Progress bar width: {widget_data.get('progress_bar_width', 'N/A')}")
+                    print(f"    Progress bar height: {widget_data.get('progress_bar_height', 'N/A')}")
+                    print(f"    Progress color: {widget_data.get('progress_color', 'N/A')}")
+                    print(f"    Background color: {widget_data.get('background_color', 'N/A')}")
+                    print(f"    3D: {widget_data.get('effect_3d', 'N/A')}")
+                    print(f"    Range: {widget_data.get('range', 'N/A')}")
+                    print(f"    Value: {widget_data.get('current_value', 'N/A')}")
+
+                elif widget_type == 'Image':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Position X: {widget_data.get('position_x', 'N/A')}")
+                    print(f"    Position Y: {widget_data.get('position_y', 'N/A')}")
+                    print(f"    Image width: {widget_data.get('image_width', 'N/A')}")
+                    print(f"    Image height: {widget_data.get('image_height', 'N/A')}")
+                    print(f"    Frame: {widget_data.get('frame', 'N/A')}")
+                    print(f"    Frame color: {widget_data.get('frame_color', 'N/A')}")
+                    print(f"    Frame width: {widget_data.get('frame_width', 'N/A')}")
+
+                elif widget_type == 'Label':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Position X: {widget_data.get('position_x', 'N/A')}")
+                    print(f"    Position Y: {widget_data.get('position_y', 'N/A')}")
+                    print(f"    Text color: {widget_data.get('text_color', 'N/A')}")
+                    print(f"    Text: {widget_data.get('text', 'N/A')}")
+                    print(f"    Text size: {widget_data.get('text_size', 'N/A')}")
+                    print(f"    Text alignment: {widget_data.get('text_alignment', 'N/A')}")
+
+                elif widget_type == 'Numeric':
+                    print(f"    Active: {widget_data.get('active', 'N/A')}")
+                    print(f"    Visible: {widget_data.get('visible', 'N/A')}")
+                    print(f"    Static: {widget_data.get('static', 'N/A')}")
+                    print(f"    Name: {widget_data.get('name', 'N/A')}")
+                    print(f"    Stack order: {widget_data.get('stack_order', 'N/A')}")
+                    print(f"    Position X: {widget_data.get('position_x', 'N/A')}")
+                    print(f"    Position Y: {widget_data.get('position_y', 'N/A')}")
+                    print(f"    Number color: {widget_data.get('text_color', 'N/A')}")
+                    print(f"    Number: {widget_data.get('number', 'N/A')}")
+                    print(f"    Number size: {widget_data.get('number_size', 'N/A')}")
+                    print(f"    Number alignment: {widget_data.get('number_alignment', 'N/A')}")
+
+                # Dodajte ostale tipove widget-a po potrebi
+
+        print(f"\n{'='*80}")
 
 
 if __name__ == "__main__":

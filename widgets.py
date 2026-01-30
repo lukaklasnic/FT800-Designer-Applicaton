@@ -13,6 +13,7 @@ class LineWidget( QWidget ):
         self.defaultValues()
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
 
     def defaultValues( self ):
         self.active = True
@@ -225,6 +226,48 @@ class LineWidget( QWidget ):
             except:
                 pass
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'start_x': self.start_x,
+            'start_y': self.start_y,
+            'end_x': self.end_x,
+            'end_y': self.end_y,
+            'line_color': color_to_hex( self.line_color ),
+            'line_width': self.line_width,
+
+            'type': 'Line',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'start_x': self.start_x,
+            'start_y': self.start_y,
+            'end_x': self.end_x,
+            'end_y': self.end_y,
+            'line_color': color_to_hex( self.line_color ),
+            'line_width': self.line_width,
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -308,6 +351,7 @@ class RectangleWidget( QWidget ):
         self.setFixedSize( self.rectangle_width, self.rectangle_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
         
         
     def defaultValues( self ):
@@ -487,6 +531,56 @@ class RectangleWidget( QWidget ):
         except:
             pass
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'rectangle_width': self.rectangle_width,
+            'rectangle_height': self.rectangle_height,
+            'edges_color': color_to_hex( self.edges_color ),
+            'edges_width': self.edges_width,
+            'filled': self.filled,
+            'gradient_direction': self.gradient_direction,
+            'gradient_start_color': color_to_hex( self.start_color ),
+            'gradient_end_color': color_to_hex( self.end_color ),
+        
+            'type': 'Rectangle',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'rectangle_width': self.rectangle_width,
+            'rectangle_height': self.rectangle_height,
+            'edges_color': color_to_hex( self.edges_color ),
+            'edges_width': self.edges_width,
+            'filled': self.filled,
+            'gradient_direction': self.gradient_direction,
+            'gradient_start_color': color_to_hex( self.start_color ),
+            'gradient_end_color': color_to_hex( self.end_color )
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -562,6 +656,7 @@ class CircleWidget( QWidget ):
         self.setFixedSize( self.diameter, self.diameter )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
         
     def defaultValues( self ):
         self.active = True
@@ -723,6 +818,49 @@ class CircleWidget( QWidget ):
         except:
             pass
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'center_x': self.center_x,
+            'center_y': self.center_y,
+            'diameter': self.diameter,
+            'edges_color': color_to_hex( self.edges_color ),
+            'edges_width': self.edges_width,
+            'filled': self.filled,
+            'fill_color': color_to_hex( self.fill_color ),
+            'type': 'Circle',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'center_x': self.center_x,
+            'center_y': self.center_y,
+            'diameter': self.diameter,
+            'edges_color': color_to_hex( self.edges_color ),
+            'edges_width': self.edges_width,
+            'filled': self.filled,
+            'fill_color': color_to_hex( self.fill_color )
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId(self, data_id):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -757,6 +895,7 @@ class CircleWidget( QWidget ):
             self.dragging = False
             self.resize_corner = None
             self.resize_start_diameter = 0
+            self.updateDataDict()
 
         event.accept()
 
@@ -784,6 +923,7 @@ class CircleWidget( QWidget ):
             new_y = max( 0, self.y() + delta.y() )
             self.move( new_x, new_y )
             self.updateCircleCenterPositionProperties()
+            self.updateDataDict()
 
         event.accept()
 
@@ -797,6 +937,7 @@ class EllipseWidget( QWidget ):
         self.setFixedSize( self.ellipse_width, self.ellipse_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
 
     def defaultValues( self ):
         self.active = True
@@ -1025,6 +1166,56 @@ class EllipseWidget( QWidget ):
         if hasattr( self, 'end_color_rect_ellipse' ):
             self.end_color_rect_ellipse.setEnabled( state )
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'center_x': self.center_x,
+            'center_y': self.center_y,
+            'ellipse_width': self.ellipse_width,
+            'ellipse_height': self.ellipse_height,
+            'edges_color': color_to_hex( self.edges_color ),
+            'edges_width': self.edges_width,
+            'filled': self.filled,
+            'gradient_direction': self.gradient_direction,
+            'gradient_start_color': color_to_hex( self.gradient_start_color ),
+            'gradient_end_color': color_to_hex( self.gradient_end_color ),
+        
+            'type': 'Ellipse',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'center_x': self.center_x,
+            'center_y': self.center_y,
+            'ellipse_width': self.ellipse_width,
+            'ellipse_height': self.ellipse_height,
+            'edges_color': color_to_hex( self.edges_color ),
+            'edges_width': self.edges_width,
+            'filled': self.filled,
+            'gradient_direction': self.gradient_direction,
+            'gradient_start_color': color_to_hex( self.gradient_start_color ),
+            'gradient_end_color': color_to_hex( self.gradient_end_color )
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -1058,6 +1249,7 @@ class EllipseWidget( QWidget ):
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
+            self.updateDataDict()
 
         event.accept()
 
@@ -1082,6 +1274,7 @@ class EllipseWidget( QWidget ):
             new_y = max( 0, self.y() + delta.y() )
             self.move( new_x, new_y )
             self.updateEllipsePropertiesCenterPosition()
+            self.updateDataDict()
         
         event.accept()
     
@@ -1095,6 +1288,7 @@ class ButtonWidget( QWidget ):
         self.setFixedSize( self.button_width, self.button_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
         
     def defaultValues( self ):
         self.active = True
@@ -1288,6 +1482,56 @@ class ButtonWidget( QWidget ):
         except:
             pass
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'button_width': self.width(),
+            'button_height': self.height(),
+            'gradient_start_color': color_to_hex( self.gradient_start_color ),
+            'gradient_end_color': color_to_hex( self.gradient_end_color ),
+            'effect_3d': self.effect_3d,
+            'text': self.button_text,
+            'text_size': self.text_size,
+            'text_color': color_to_hex( self.text_color ),
+
+            'type': 'Button',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.x(),
+            'button_width': self.width(),
+            'button_height': self.height(),
+            'gradient_start_color': color_to_hex( self.gradient_start_color ),
+            'gradient_end_color': color_to_hex( self.gradient_end_color ),
+            'effect_3d': self.effect_3d,
+            'text': self.button_text,
+            'text_size': self.text_size,
+            'text_color': color_to_hex( self.text_color )
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -1370,6 +1614,7 @@ class KeysWidget( QWidget ):
         self.defaultValues()
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
 
     def defaultValues( self ):
         self.active = True
@@ -1798,7 +2043,54 @@ class KeysWidget( QWidget ):
 
         except:
             pass
+
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'keys_width': self.keys_width,
+            'keys_height': self.keys_height,
+            'gradient_start_color': color_to_hex( self.gradient_start_color ),
+            'gradient_end_color': color_to_hex( self.gradient_end_color ),
+            'effect_3d': self.effect_3d,
+            'font_size': self.font_size,
+            'font_color': color_to_hex( self.text_color ),
+
+            'type': 'Keys',
+            'id': None
+        }
     
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'keys_width': self.keys_width,
+            'keys_height': self.keys_height,
+            'gradient_start_color': color_to_hex( self.gradient_start_color ),
+            'gradient_end_color': color_to_hex( self.gradient_end_color ),
+            'effect_3d': self.effect_3d,
+            'keys_type': self.key_type,
+            'font_size': self.font_size,
+            'font_color': color_to_hex( self.text_color ),
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -1882,6 +2174,7 @@ class ClockWidget( QWidget ):
         self.setFixedSize( self.diameter, self.diameter )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
         
     def defaultValues( self ):
         self.active = True
@@ -2100,6 +2393,53 @@ class ClockWidget( QWidget ):
         except:
             pass
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'center_x': self.center_x,
+            'center_y': self.center_y,
+            'diameter': self.diameter,
+            'background_color': color_to_hex( self.background_color ),
+            'face_color': color_to_hex( self.face_color ),
+            'effect_3d': self.effect_3d,
+            'hours': self.hours,
+            'minutes': self.minutes,
+            'seconds': self.seconds,
+
+            'type': 'Clock',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'center_x': self.center_x,
+            'center_y': self.center_y,
+            'diameter': self.diameter,
+            'background_color': color_to_hex( self.background_color ),
+            'face_color': color_to_hex( self.face_color ),
+            'effect_3d': self.effect_3d,
+            'hours': self.hours,
+            'minutes': self.minutes,
+            'seconds': self.seconds,
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -2174,6 +2514,7 @@ class GaugeWidget( QWidget ):
         self.setFixedSize( self.diameter, self.diameter )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
         
     def defaultValues( self ):
         self.active = True
@@ -2391,6 +2732,54 @@ class GaugeWidget( QWidget ):
         except:
             pass
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'center_x': self.center_x,
+            'center_y': self.center_y,
+            'diameter': self.diameter,
+            'background_color': color_to_hex( self.background_color ),
+            'face_color': color_to_hex( self.face_color ),
+            'effect_3d': self.effect_3d,
+            'major_subdivision': self.major_subdivision,
+            'minor_subdivision': self.minor_subdivision,
+            'range': self.range_value,
+            'value': self.value,
+
+            'type': 'Gauge',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'center_x': self.center_x,
+            'center_y': self.center_y,
+            'diameter': self.diameter,
+            'background_color': color_to_hex( self.background_color ),
+            'face_color': color_to_hex( self.face_color ),
+            'effect_3d': self.effect_3d,
+            'major_subdivision': self.major_subdivision,
+            'minor_subdivision': self.minor_subdivision,
+            'range': self.range_value,
+            'value': self.value,
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -2465,6 +2854,7 @@ class DialWidget( QWidget ):
         self.setFixedSize( self.diameter, self.diameter )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
         
     def defaultValues(self):
         self.active = True
@@ -2711,6 +3101,48 @@ class DialWidget( QWidget ):
         except:
             pass
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'center_x': self.center_x,
+            'center_y': self.center_y,
+            'diameter': self.diameter,
+            'background_color': color_to_hex( self.background_color ),
+            'pointer_color': color_to_hex( self.pointer_color ),
+            'effect_3d': self.effect_3d,
+            'value': self.value,
+
+            'type': 'Dial',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'center_x': self.center_x,
+            'center_y': self.center_y,
+            'diameter': self.diameter,
+            'background_color': color_to_hex( self.background_color ),
+            'pointer_color': color_to_hex( self.pointer_color ),
+            'effect_3d': self.effect_3d,
+            'value': self.value
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -2806,6 +3238,7 @@ class ToggleWidget( QWidget ):
         self.setFixedSize( self.toggle_width, self.toggle_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
         
     def defaultValues( self ):
         self.active = True
@@ -3048,6 +3481,52 @@ class ToggleWidget( QWidget ):
             except RuntimeError:
                 pass
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'toggle_width': self.toggle_width,
+            'thumb_color': color_to_hex( self.thumb_color ),
+            'background_color': color_to_hex( self.background_color ),
+            'text_color': color_to_hex( self.text_color ),
+            'effect_3d': self.effect_3d,
+            'state': self.state,
+
+            'type': 'Toggle',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'toggle_width': self.toggle_width,
+            'thumb_color': color_to_hex( self.thumb_color ),
+            'background_color': color_to_hex( self.background_color ),
+            'text_color': color_to_hex( self.text_color ),
+            'effect_3d': self.effect_3d,
+            'state': self.state,
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -3128,6 +3607,7 @@ class ScrollBarWidget( QWidget ):
         self.setFixedSize( self.scroll_bar_width, self.scroll_bar_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
 
     def defaultValues( self ):
         self.active = True
@@ -3539,7 +4019,55 @@ class ScrollBarWidget( QWidget ):
 
                 except:
                     pass
-                
+
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'scroll_bar_width': self.scroll_bar_width,
+            'scroll_bar_height': self.scroll_bar_height,
+            'thumb_color': color_to_hex( self.thumb_color ),
+            'background_color': color_to_hex( self.background_color ),
+            'effect_3d': self.effect_3d,
+            'current_value': self.current_value,
+            'thumb_size': self.thumb_size,
+
+            'type': 'Scroll_bar',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'scroll_bar_width': self.scroll_bar_width,
+            'scroll_bar_height': self.scroll_bar_height,
+            'thumb_color': color_to_hex( self.thumb_color ),
+            'background_color': color_to_hex( self.background_color ),
+            'effect_3d': self.effect_3d,
+            'current_value': self.current_value,
+            'thumb_size': self.thumb_size,
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
         while parent:
@@ -3660,6 +4188,7 @@ class SliderWidget( QWidget ):
         self.setFixedSize( self.slider_width, self.slider_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
 
     def defaultValues( self ):
         self.active = True
@@ -4007,6 +4536,54 @@ class SliderWidget( QWidget ):
                 except:
                     pass
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'slider_width': self.slider_width,
+            'slider_height': self.slider_height,
+            'thumb_color': color_to_hex( self.thumb_color ),
+            'left_background_color': color_to_hex( self.background_color_left ),
+            'right_background_color': color_to_hex( self.background_color_right ),
+            'effect_3d': self.effect_3d,
+            'current_value': self.value,
+
+            'type': 'Slider',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'tag': self.tag,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'slider_width': self.slider_width,
+            'slider_height': self.slider_height,
+            'thumb_color': color_to_hex( self.thumb_color ),
+            'left_background_color': color_to_hex( self.background_color_left ),
+            'right_background_color': color_to_hex( self.background_color_right ),
+            'effect_3d': self.effect_3d,
+            'current_value': self.value,
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -4125,6 +4702,7 @@ class ProgressBarWidget( QWidget ):
         self.setFixedSize( self.progress_bar_width, self.progress_bar_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
 
     def defaultValues( self ):
         self.active = True
@@ -4351,6 +4929,52 @@ class ProgressBarWidget( QWidget ):
         
         self.update()
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'progress_bar_width': self.progress_bar_width,
+            'progress_bar_height': self.progress_bar_height,
+            'progress_color': color_to_hex( self.progress_color ),
+            'background_color': color_to_hex( self.background_color ),
+            'effect_3d': self.effect_3d,
+            'range': self.range,
+            'current_value': self.value,
+
+            'type': 'Progress_bar',
+            'id': None
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'progress_bar_width': self.progress_bar_width,
+            'progress_bar_height': self.progress_bar_height,
+            'progress_color': color_to_hex( self.progress_color ),
+            'background_color': color_to_hex( self.background_color ),
+            'effect_3d': self.effect_3d,
+            'range': self.range,
+            'current_value': self.value,
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -4430,6 +5054,7 @@ class ImageWidget( QWidget ):
         self.setFixedSize( self.image_width, self.image_height )
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
 
     def defaultValues( self ):
         self.active = True
@@ -4651,7 +5276,50 @@ class ImageWidget( QWidget ):
                     main_window.pos_y_spin_image.blockSignals( False )
             except:
                 pass
+
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'image_width': self.image_width,
+            'image_height': self.image_height,
+            'frame': self.frame_enabled,
+            'frame_color': color_to_hex( self.frame_color ),
+            'frame_width': self.frame_width,
+
+            'type': 'Image',
+            'id': None
+        }
     
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'image_width': self.image_width,
+            'image_height': self.image_height,
+            'frame': self.frame_enabled,
+            'frame_color': color_to_hex( self.frame_color ),
+            'frame_width': self.frame_width,
+
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
+
     def findMainWindow( self ):
         parent = self.parent()
 
@@ -4728,9 +5396,10 @@ class LabelWidget( QWidget ):
         super().__init__( parent )
 
         self.defaultValues()
-        self.setFixedSize( self.label_width, self.label_height )
+        self.calculateAndSetSize() 
         self.setMouseTracking( True )
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
         
     def defaultValues( self ):
         self.active = True
@@ -4738,142 +5407,177 @@ class LabelWidget( QWidget ):
         self.static = False
         self.custom_name = ""
         self.stack_order = 1
-        self.label_width = 100
-        self.label_height = 40
+        self.original_x = 0
+        self.original_y = 0
         self.text_color = QColor( 0, 0, 0 ) 
         self.text = "Text"  
-        self.text_size = 20 
+        self.text_size = 29 
         self.text_alignment = "Left"
 
         self.selected = False
         self.dragging = False
         self.drag_start_pos = QPoint()
-
+        
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
-        
-        painter.setPen( self.text_color )
-        font = QFont( "Arial", self.text_size )
+
+        painter.setPen( QPen( self.text_color ) )
+        font = QFont()
+        font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5 ) )
         painter.setFont( font )
+        
         text_rect = QRect( 0, 0, self.label_width, self.label_height )
-        alignment_flags = Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft
         
         if self.text_alignment == "Left":
             alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
-
-        elif self.text_alignment == "Center":
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter 
-
+        
         elif self.text_alignment == "Right":
             alignment_flags = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
-
-        elif self.text_alignment == "Top":
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
-
-        elif self.text_alignment == "Bottom":
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom
-            
-        else:
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
-
+        
+        elif self.text_alignment == "Center":
+            alignment_flags = Qt.AlignmentFlag.AlignCenter
+        
+        elif self.text_alignment == "Horisontaly":
+            alignment_flags = Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop
+        
+        elif self.text_alignment == "Verticaly":
+            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        
         painter.drawText( text_rect, alignment_flags, self.text )
         
         if self.selected:
             self.drawSelectionBorder( painter )
 
-    #def paintEvent(self, event):
-    #    painter = QPainter(self)
-    #    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    #    
-    #    # Prvo dobijamo metrike fonta
-    #    font = QFont("Arial", self.text_size)
-    #    painter.setFont(font)
-    #    font_metrics = QFontMetrics(font)
-    #    
-    #    # Izračunaj dimenzije teksta
-    #    text_width = font_metrics.horizontalAdvance(self.text)
-    #    text_height = font_metrics.height()
-    #    
-    #    # Postavi boju
-    #    painter.setPen(self.text_color)
-    #    
-    #    # Pozicija za crtanje teksta
-    #    text_x = 0
-    #    text_y = 0
-    #    
-    #    if self.text_alignment == "Left":
-    #        # Standardno - tekst počinje na (0, 0)
-    #        # QPainter.drawText(x, y) crta tekst tako da je y pozicija baseline
-    #        text_x = 0
-    #        text_y = text_height  # Da bi tekst bio vidljiv (y je baseline)
-    #        painter.drawText(text_x, text_y, self.text)
-    #    
-    #    elif self.text_alignment == "Right":
-    #        # Tekst se završava na desnoj ivici widgeta
-    #        text_x = self.label_width - text_width
-    #        text_y = text_height
-    #        painter.drawText(text_x, text_y, self.text)
-    #    
-    #    elif self.text_alignment == "Center":
-    #        # Sredina teksta je na sredini widgeta po x
-    #        text_x = (self.label_width - text_width) // 2
-    #        text_y = text_height
-    #        painter.drawText(text_x, text_y, self.text)
-    #    
-    #    elif self.text_alignment == "Horisontaly":  # PAZI: "Horisontaly" sa "y"
-    #        # Sredina teksta po x, donja strana widgeta po y
-    #        text_x = (self.label_width - text_width) // 2
-    #        # Za donju poziciju, koristimo donju ivicu widgeta
-    #        text_y = self.label_height - font_metrics.descent()
-    #        painter.drawText(text_x, text_y, self.text)
-    #    
-    #    elif self.text_alignment == "Verticaly":  # PAZI: "Verticaly" sa "y"
-    #        # Početak teksta po x, sredina widgeta po y
-    #        text_x = 0
-    #        # Za vertikalno centriranje, treba nam sredina widgeta
-    #        text_y = (self.label_height // 2) + (text_height // 2) - font_metrics.descent()
-    #        painter.drawText(text_x, text_y, self.text)
-    #    
-    #    else:  # Fallback na Left
-    #        text_x = 0
-    #        text_y = text_height
-    #        painter.drawText(text_x, text_y, self.text)
-    #    
-    #    # Opcionalno: crtanje referentne tačke na (0,0)
-    #    painter.setBrush(QColor(255, 0, 0, 100))  # Polu-transparentna crvena
-    #    painter.setPen(Qt.PenStyle.NoPen)
-    #    painter.drawEllipse(0, 0, 6, 6)
-    #    
-    #    if self.selected:
-    #        self.drawSelectionBorder(painter)
-
     def drawSelectionBorder( self, painter ):
         if not self.selected:
             return
+        
+        font = QFont()
+        font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5 ) )
+        font_metrics = QFontMetrics( font )
+        
+        text_width = font_metrics.horizontalAdvance( self.text )
+        text_height = font_metrics.height()
+        ascent = font_metrics.ascent()
+        
+        if self.text_alignment == "Left":
+            text_x = 0
+            text_y = ascent
             
-        margin = 2
-        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
-
+        elif self.text_alignment == "Right":
+            text_x = self.width() - text_width
+            text_y = ascent
+            
+        elif self.text_alignment == "Center":
+            text_x = ( self.width() - text_width ) // 2
+            text_y = ( self.height() - text_height ) // 2 + ascent
+            
+        elif self.text_alignment == "Horisontaly":
+            text_x = ( self.width() - text_width ) // 2
+            text_y = ascent
+            
+        elif self.text_alignment == "Verticaly":
+            text_x = 0
+            text_y = ( self.height() - text_height ) // 2 + ascent
+            
+        bbox_x = text_x
+        bbox_y = text_y - ascent 
+        margin = 0
+        
+        border_rect = QRect(
+            bbox_x - margin,
+            bbox_y - margin,
+            text_width + 2 * margin,
+            text_height + 2 * margin
+        )
+    
         selection_pen = QPen( QColor( 255, 0, 0 ) )
         selection_pen.setWidth( 3 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
-
+    
         painter.setPen( selection_pen )
         painter.setBrush( Qt.BrushStyle.NoBrush )
         painter.drawRect( border_rect )
 
-    def move( self, x, y ):
-        super().move( x, y )
+    def calculateAndSetSize( self ):
+        font = QFont()
+        font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5) )
+        font_metrics = QFontMetrics( font )
         
+        self.text_width = font_metrics.horizontalAdvance( self.text )
+        self.text_height = font_metrics.height()
+        self.ascent = font_metrics.ascent()
+        
+        margin = 10
+        self.label_width = max( 50, self.text_width + 2 * margin )
+        self.label_height = max( 30, self.text_height + 2 * margin )
+        
+        self.setFixedSize( self.label_width, self.label_height )
+
+    def applyAlignmentOffset( self ):
+        if not hasattr( self, 'text_width' ):
+            return
+            
+        if self.text_alignment == "Left":
+            offset_x = 0
+            offset_y = 0
+            
+        elif self.text_alignment == "Right":
+            offset_x = - self.text_width
+            offset_y = 0
+            
+        elif self.text_alignment == "Center":
+            offset_x = - self.text_width // 2
+            offset_y = - self.text_height // 2
+            
+        elif self.text_alignment == "Horisontaly":
+            offset_x = - self.text_width // 2
+            offset_y = 0
+            
+        elif self.text_alignment == "Verticaly":
+            offset_x = 0
+            offset_y = - self.ascent // 2
+            
+        actual_x = self.original_x + offset_x
+        actual_y = self.original_y + offset_y
+        actual_x = max( 0, actual_x )
+        actual_y = max( 0, actual_y )
+        super().move( int( actual_x ), int( actual_y ) )
+
+    def move( self, x, y ):
+        self.original_x = x
+        self.original_y = y
+        
+        self.applyAlignmentOffset()
+        self.updatePropertiesPosition()
+
+    def setSelected( self, selected ):
+        self.selected = selected
+        self.update()
+
+    def setSizeBasedOnText( self ):
+        current_original_x = getattr( self, 'original_x', self.x() )
+        current_original_y = getattr( self, 'original_y', self.y() )
+        
+        self.calculateAndSetSize()
+        
+        self.original_x = current_original_x
+        self.original_y = current_original_y
+        self.original_x = max( 0, self.original_x )
+        self.original_y = max( 0, self.original_y )        
+        self.applyAlignmentOffset()
+        self.update()
+
+    def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
 
-        if main_window and hasattr( main_window, 'current_shape' ) and main_window.current_shape == self:
+        if main_window and hasattr(main_window, 'current_shape') and main_window.current_shape == self:
             try:
                 if hasattr( main_window, 'pos_x_spin_label' ):
                     main_window.pos_x_spin_label.blockSignals( True )
-                    main_window.pos_x_spin_label.setValue( x )
+                    main_window.pos_x_spin_label.setValue( self.original_x )
                     main_window.pos_x_spin_label.blockSignals( False )
 
             except RuntimeError:
@@ -4882,30 +5586,53 @@ class LabelWidget( QWidget ):
             try:
                 if hasattr( main_window, 'pos_y_spin_label' ):
                     main_window.pos_y_spin_label.blockSignals( True )
-                    main_window.pos_y_spin_label.setValue( y )
+                    main_window.pos_y_spin_label.setValue( self.original_y )
                     main_window.pos_y_spin_label.blockSignals( False )
 
             except RuntimeError:
                 pass
 
-    def setSelected( self, selected ):
-        self.selected = selected
-        self.update()
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'text_color': color_to_hex( self.text_color ),
+            'text': self.text,
+            'text_size': self.text_size,
+            'text_alignment': self.text_alignment,
 
-    def setSizeBasedOnText( self ):
-        painter = QPainter( self )
-        font = QFont( "Arial", self.text_size )
-        font_metrics = QFontMetrics( font )
-        
-        text_width = font_metrics.horizontalAdvance( self.text ) + 20
-        text_height = font_metrics.height() + 10
-        
-        self.label_width = max( 50, text_width )
-        self.label_height = max( 30, text_height )
-        self.setFixedSize( self.label_width, self.label_height )
-        
-        painter.end()
-        self.update()
+            'type': 'Label',
+            'id': None
+
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'text_color': color_to_hex( self.text_color ),
+            'text': self.text,
+            'text_size': self.text_size,
+            'text_alignment': self.text_alignment,
+
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -4922,10 +5649,15 @@ class LabelWidget( QWidget ):
         if self.dragging and ( event.buttons() & Qt.MouseButton.LeftButton ):
             delta = event.pos() - self.drag_start_pos
             
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
+            self.original_x += delta.x()
+            self.original_y += delta.y()
+            self.original_x = max( 0, self.original_x )
+            self.original_y = max( 0, self.original_y )
             
-            self.move( new_x, new_y )
+            self.applyAlignmentOffset()
+            self.updatePropertiesPosition()
+            
+            self.drag_start_pos = event.pos()
         
         event.accept()
 
@@ -4946,167 +5678,251 @@ class LabelWidget( QWidget ):
 class NumericWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, width, height, parent = None ):
-        super().__init__( parent)
+    def __init__( self, parent = None ):
+        super().__init__( parent )
 
-        self._width = width
-        self._height = height
-        self.setFixedSize( width, height )
+        self.defaultValues()
+        self.calculateAndSetSize() 
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setupDataDict()
         
+    def defaultValues( self ):
         self.active = True
         self.visible = True
         self.static = False
-        
-        self.number = 123
+        self.custom_name = ""
+        self.stack_order = 1
+        self.original_x = 0
+        self.original_y = 0
         self.number_color = QColor( 0, 0, 0 )
-        self.number_size = 20
-        self.number_alignment = "Left" 
-        self.number_font = "Arial"
-        
+        self.number = 123
+        self.number_size = 29
+        self.number_alignment = "Left"
+
         self.selected = False
-        
         self.dragging = False
         self.drag_start_pos = QPoint()
         
-        self.custom_name = None
-        self.stack_order = 1
-        
-        self.setMouseTracking( True )
-        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
-
-        self.updateDisplayText()
-        self.updateDisplaySize()
-
     def paintEvent( self, event ):
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
-        
-        painter.setPen( self.number_color )
-        font = QFont( self.number_font, self.number_size )
+
+        painter.setPen( QPen( self.number_color ) )
+        font = QFont()
+        font.setPointSize( int( ( 23 / 5 ) * self.number_size - 548 / 5 ) )
         painter.setFont( font )
         
-        text_rect = QRect( 0, 0, self._width, self._height )
+        text_rect = QRect( 0, 0, self.numeric_width, self.numeric_height )
         
         if self.number_alignment == "Left":
             alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
-        elif self.number_alignment == "Center":
-            alignment_flags = Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+
         elif self.number_alignment == "Right":
             alignment_flags = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
-        elif self.number_alignment == "Top":
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
-        elif self.number_alignment == "Bottom":
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom
-        else:
-            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
 
-        painter.drawText( text_rect, alignment_flags, self.display_text )
+        elif self.number_alignment == "Center":
+            alignment_flags = Qt.AlignmentFlag.AlignCenter
+
+        elif self.number_alignment == "Horisontaly":
+            alignment_flags = Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop
+
+        elif self.number_alignment == "Verticaly":
+            alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+
+        painter.drawText( text_rect, alignment_flags, str( self.number ) )
         
         if self.selected:
-            self.drawSelectionBorder(painter)
+            self.drawSelectionBorder( painter )
 
     def drawSelectionBorder( self, painter ):
         if not self.selected:
             return
-            
-        margin = 2
-        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        
+        font = QFont()
+        font.setPointSize( int( ( 23 / 5 ) * self.number_size - 548 / 5 ) )
+        font_metrics = QFontMetrics( font )
+        
+        text_width = font_metrics.horizontalAdvance( str( self.number ) )
+        text_height = font_metrics.height()
+        ascent = font_metrics.ascent()
+        
+        if self.number_alignment == "Left":
+            text_x = 0
+            text_y = ascent
 
+        elif self.number_alignment == "Right":
+            text_x = self.width() - text_width
+            text_y = ascent
+
+        elif self.number_alignment == "Center":
+            text_x = ( self.width() - text_width ) // 2
+            text_y = ( self.height() - text_height ) // 2 + ascent
+
+        elif self.number_alignment == "Horisontaly":
+            text_x = ( self.width() - text_width ) // 2
+            text_y = ascent
+
+        elif self.number_alignment == "Verticaly":
+            text_x = 0
+            text_y = ( self.height() - text_height ) // 2 + ascent
+        
+        bbox_x = text_x
+        bbox_y = text_y - ascent 
+        margin = 0
+        
+        border_rect = QRect(
+            bbox_x - margin,
+            bbox_y - margin,
+            text_width + 2 * margin,
+            text_height + 2 * margin
+        )
+    
         selection_pen = QPen( QColor( 255, 0, 0 ) )
         selection_pen.setWidth( 3 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
-
+    
         painter.setPen( selection_pen )
         painter.setBrush( Qt.BrushStyle.NoBrush )
         painter.drawRect( border_rect )
+
+    def calculateAndSetSize( self ):
+        font = QFont()
+        font.setPointSize( int( ( 23 / 5 ) * self.number_size - 548 / 5 ) )
+        font_metrics = QFontMetrics( font )
+        
+        self.text_width = font_metrics.horizontalAdvance( str( self.number ) )
+        self.text_height = font_metrics.height()
+        self.ascent = font_metrics.ascent()
+        
+        margin = 10
+        self.numeric_width = max( 50, self.text_width + 2 * margin )
+        self.numeric_height = max( 30, self.text_height + 2 * margin )
+        
+        self.setFixedSize( self.numeric_width, self.numeric_height )
+
+    def applyAlignmentOffset( self ):
+        if not hasattr( self, 'text_width' ):
+            return
+            
+        if self.number_alignment == "Left":
+            offset_x = 0
+            offset_y = 0
+
+        elif self.number_alignment == "Right":
+            offset_x = - self.text_width
+            offset_y = 0
+
+        elif self.number_alignment == "Center":
+            offset_x = - self.text_width // 2
+            offset_y = - self.text_height // 2
+
+        elif self.number_alignment == "Horisontaly":
+            offset_x = - self.text_width // 2
+            offset_y = 0
+
+        elif self.number_alignment == "Verticaly":
+            offset_x = 0
+            offset_y = - self.ascent // 2
+
+        else:
+            offset_x = 0
+            offset_y = 0
+        
+        actual_x = self.original_x + offset_x
+        actual_y = self.original_y + offset_y
+        actual_x = max( 0, actual_x )
+        actual_y = max( 0, actual_y )
+        super().move( int( actual_x ), int( actual_y ) )
+
+    def move( self, x, y ):
+        self.original_x = x
+        self.original_y = y
+        
+        self.applyAlignmentOffset()
+        self.updatePropertiesPosition()
 
     def setSelected( self, selected ):
         self.selected = selected
         self.update()
 
-    def setNumber( self, number ):
-        self.number = number
-        self.updateDisplayText()
-        self.updateDisplaySize()
-        self.update()
-
-    def setNumberColor( self, color ):
-        self.number_color = color
-        self.update()
-
-    def setNumberSize( self, size ):
-        self.number_size = size
-        self.updateDisplaySize()
-        self.update()
-
-    def setNumberAlignment( self, alignment ):
-        self.number_alignment = alignment
-        self.update()
-
-    def setActive( self, active ):
-        self.active = active
-        self.setEnabled( active )
-        self.update()
-
-    def setVisibleNumeric( self, visible ):
-        self.visible = visible
-        self.setVisible( visible )
-        self.update()
-
-    def setStatic( self, static ):
-        self.static = static
-        self.update()
-
-    def getWidth( self ):
-        return self._width
-
-    def getHeight( self ):
-        return self._height
-
-    def updateDisplayText( self ):
-        self.display_text = str(self.number)
-
-    def updateDisplaySize( self ):
-        painter = QPainter(self)
-        font = QFont(self.number_font, self.number_size)
-        font_metrics = QFontMetrics( font )
+    def setSizeBasedOnNumber( self ):
+        current_original_x = getattr( self, 'original_x', self.x() )
+        current_original_y = getattr( self, 'original_y', self.y() )
         
-        text_width = font_metrics.horizontalAdvance( self.display_text ) + 20 
-        text_height = font_metrics.height() + 10
+        self.calculateAndSetSize()
         
-        self._width = max( 50, text_width )
-        self._height = max( 30, text_height )
-        self.setFixedSize( self._width, self._height )
-        
-        painter.end()
+        self.original_x = current_original_x
+        self.original_y = current_original_y
+        self.original_x = max( 0, self.original_x )
+        self.original_y = max( 0, self.original_y )        
+        self.applyAlignmentOffset()
+        self.update()
 
     def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
 
-        if not main_window:
-            return
-        
-        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
-            if hasattr( main_window, 'pos_x_spin_numeric' ):
-                main_window.pos_x_spin_numeric.blockSignals( True )
-                main_window.pos_x_spin_numeric.setValue( self.x() )
-                main_window.pos_x_spin_numeric.blockSignals( False )
+        if main_window and hasattr( main_window, 'current_shape' ) and main_window.current_shape == self:
+            try:
+                if hasattr( main_window, 'pos_x_spin_numeric' ):
+                    main_window.pos_x_spin_numeric.blockSignals( True )
+                    main_window.pos_x_spin_numeric.setValue( self.original_x )
+                    main_window.pos_x_spin_numeric.blockSignals( False )
 
-            elif hasattr( main_window, 'pos_x_spin' ):
-                main_window.pos_x_spin.blockSignals( True )
-                main_window.pos_x_spin.setValue( self.x() )
-                main_window.pos_x_spin.blockSignals( False )
-                
-            if hasattr( main_window, 'pos_y_spin_numeric' ):
-                main_window.pos_y_spin_numeric.blockSignals( True )
-                main_window.pos_y_spin_numeric.setValue( self.y() )
-                main_window.pos_y_spin_numeric.blockSignals( False )
+            except RuntimeError:
+                pass
+            
+            try:
+                if hasattr( main_window, 'pos_y_spin_numeric' ):
+                    main_window.pos_y_spin_numeric.blockSignals( True )
+                    main_window.pos_y_spin_numeric.setValue( self.original_y )
+                    main_window.pos_y_spin_numeric.blockSignals( False )
+            except RuntimeError:
+                pass
 
-            elif hasattr( main_window, 'pos_y_spin' ):
-                main_window.pos_y_spin.blockSignals( True )
-                main_window.pos_y_spin.setValue( self.y() )
-                main_window.pos_y_spin.blockSignals( False )
+
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'number_color': color_to_hex( self.number_color ),
+            'number': self.number,
+            'number_size': self.number_size,
+            'number_alignment': self.number_alignment,
+
+            'type': 'Numeric',
+            'id': None
+
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'stack_order': self.stack_order,
+            'position_x': self.x(),
+            'position_y': self.y(),
+            'number_color': color_to_hex( self.number_color ),
+            'number': self.number,
+            'number_size': self.number_size,
+            'number_alignment': self.number_alignment
+
+        } )
+        return self.data_dict
+    
+    def getDataDict( self ):
+        return self.updateDataDict()
+    
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
 
     def findMainWindow( self ):
         parent = self.parent()
@@ -5114,10 +5930,25 @@ class NumericWidget( QWidget ):
         while parent:
             if isinstance( parent, QMainWindow ):
                 return parent
-
             parent = parent.parent()
 
         return None
+    
+    def mouseMoveEvent( self, event ):
+        if self.dragging and ( event.buttons() & Qt.MouseButton.LeftButton ):
+            delta = event.pos() - self.drag_start_pos
+            
+            self.original_x += delta.x()
+            self.original_y += delta.y()
+            self.original_x = max( 0, self.original_x )
+            self.original_y = max( 0, self.original_y )
+            
+            self.applyAlignmentOffset()
+            self.updatePropertiesPosition()
+            
+            self.drag_start_pos = event.pos()
+        
+        event.accept()
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -5130,18 +5961,18 @@ class NumericWidget( QWidget ):
     def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = False
-            self.updatePropertiesPosition()
 
         event.accept()
 
-    def mouseMoveEvent( self, event ):
-        if self.dragging and ( event.buttons() & Qt.MouseButton.LeftButton ):
-            delta = event.pos() - self.drag_start_pos
-            
-            new_x = self.x() + delta.x()
-            new_y = self.y() + delta.y()
-            super().move( new_x, new_y )
-            
-            self.updatePropertiesPosition()
-        
-        event.accept()
+def color_to_hex(color):
+    """Konvertuje QColor u hex format (0xRRGGBB)"""
+    if isinstance(color, QColor):
+        return f"0x{color.red():02X}{color.green():02X}{color.blue():02X}"
+    elif isinstance(color, str):
+        try:
+            qcolor = QColor(color)
+            return f"0x{qcolor.red():02X}{qcolor.green():02X}{qcolor.blue():02X}"
+        except:
+            return color
+    else:
+        return color

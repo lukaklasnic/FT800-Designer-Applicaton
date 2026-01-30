@@ -300,6 +300,7 @@ class Canvas( QWidget ):
 
         self.defaultValues()
         self.setupUI()
+        self.setupDataDict()
 
     def defaultValues( self ):
         self.canvas_id = 0
@@ -359,6 +360,44 @@ class Canvas( QWidget ):
         self.canvas_label.setPixmap( pixmap )
         self.canvas_label.lower()
 
+    def setupDataDict( self ):
+        self.data_dict = {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'background_color': color_to_hex( self.canvas_color ),
+            'grid_enable': self.canvas_grid_enable,
+            'grid_color': color_to_hex( self.grid_color ),
+            'grid_type': self.grid_type,
+            'grid_size': self.grid_size,
+            'id': self.canvas_id,
+            'widgets': []
+        }
+    
+    def updateDataDict( self ):
+        self.data_dict.update( {
+            'active': self.active,
+            'visible': self.visible,
+            'static': self.static,
+            'name': self.custom_name,
+            'background_color': color_to_hex( self.canvas_color ),
+            'grid_enable': self.canvas_grid_enable,
+            'grid_color': color_to_hex( self.grid_color ),
+            'grid_type': self.grid_type,
+            'grid_size': self.grid_size
+        } )
+        return self.data_dict
+    
+    def addWidgetData( self, widget_dict ):
+        self.data_dict[ 'widgets' ].append( widget_dict )
+    
+    def removeWidgetData( self, widget_id ):
+        self.data_dict['widgets'] = [ w for w in self.data_dict[ 'widgets' ] if w.get( 'id' ) != widget_id ]
+    
+    def getDataDict( self ):
+        return self.data_dict
+
     def mousePressEvent( self, event ):
         super().mousePressEvent( event )
         
@@ -366,4 +405,17 @@ class Canvas( QWidget ):
             self.clicked.emit( event )
     
 
-    
+def color_to_hex(color):
+    """Konvertuje QColor u hex format (0xRRGGBB)"""
+    if isinstance(color, QColor):
+        # Format: 0xRRGGBB
+        return f"0x{color.red():02X}{color.green():02X}{color.blue():02X}"
+    elif isinstance(color, str):
+        # Ako je već string, pokušaj da konvertuješ
+        try:
+            qcolor = QColor(color)
+            return f"0x{qcolor.red():02X}{qcolor.green():02X}{qcolor.blue():02X}"
+        except:
+            return color
+    else:
+        return color
