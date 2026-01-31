@@ -60,11 +60,11 @@ class LineWidget( QWidget ):
         handle_size = 10
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
         painter.drawEllipse( start_x - half_size, start_y - half_size, handle_size, handle_size )
         painter.drawEllipse( end_x - half_size, end_y - half_size, handle_size, handle_size )
-        painter.setBrush( QColor( 255, 255, 255 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
         painter.setPen( Qt.PenStyle.NoPen )
         painter.drawEllipse( start_x - 1, start_y - 1, 2, 2 )
         painter.drawEllipse( end_x - 1, end_y - 1, 2, 2 )
@@ -417,17 +417,17 @@ class RectangleWidget( QWidget ):
         handle_size = 10
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder(  self, painter ):
         margin = 2
@@ -711,18 +711,18 @@ class CircleWidget( QWidget ):
         handle_size = 10
         half_handle = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 255, 0 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         points = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( self.width() - 4, self.height() - 4 ), QPoint( 4, self.height() - 4 ), ]
 
         for point in points:
             painter.drawEllipse(point.x() - half_handle, point.y() - half_handle, handle_size, handle_size )
-            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( point.x() - 1, point.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 255, 0 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder(  self, painter ):
         margin = 2
@@ -1007,18 +1007,18 @@ class EllipseWidget( QWidget ):
         handle_size = 10
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
     
     def drawSelectionBorder( self, painter ):
         margin = 2
@@ -1356,18 +1356,18 @@ class ButtonWidget( QWidget ):
         handle_size = 8
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
             
     def drawSelectionBorder(self, painter):
         margin = 2
@@ -1859,18 +1859,18 @@ class KeysWidget( QWidget ):
         handle_size = 8
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         corners = [ QPoint( 4, 4 ), QPoint( self.keys_width - 4, 4 ), QPoint( 4, self.keys_height - 4 ), QPoint( self.keys_width - 4, self.keys_height - 4 ) ]
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
     
     def drawSelectionBorder( self, painter ):
         if not self.selected:
@@ -2286,18 +2286,18 @@ class ClockWidget( QWidget ):
         handle_size = 10
         half_handle = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 255, 0 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         points = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( self.width() - 4, self.height() - 4 ), QPoint( 4, self.height() - 4 ) ]
 
         for point in points:
             painter.drawEllipse(point.x() - half_handle, point.y() - half_handle, handle_size, handle_size )
-            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( point.x() - 1, point.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 255, 0 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder(  self, painter ):
         margin = 2
@@ -2626,18 +2626,18 @@ class GaugeWidget( QWidget ):
         handle_size = 10
         half_handle = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 255, 0 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         points = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( self.width() - 4, self.height() - 4 ), QPoint( 4, self.height() - 4 ) ]
 
         for point in points:
             painter.drawEllipse(point.x() - half_handle, point.y() - half_handle, handle_size, handle_size )
-            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( point.x() - 1, point.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 255, 0 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder(  self, painter ):
         margin = 2
@@ -2948,18 +2948,18 @@ class DialWidget( QWidget ):
         handle_size = 10
         half_handle = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 255, 0 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         points = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( self.width() - 4, self.height() - 4 ), QPoint( 4, self.height() - 4 ) ]
 
         for point in points:
             painter.drawEllipse( point.x() - half_handle, point.y() - half_handle, handle_size, handle_size )
-            painter.setBrush( QColor( 0, 255, 0 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( point.x() - 1, point.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 255, 0 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder(self, painter):
         margin = 2
@@ -3344,18 +3344,18 @@ class ToggleWidget( QWidget ):
         handle_size = 8
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         corners = [ QPoint(4, 4), QPoint(self.width()-4, 4), ]
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 255, 255 ) ) 
+            painter.setBrush( QColor( 255, 142, 62 ) ) 
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder( self, painter ):
         if not self.selected:
@@ -3735,8 +3735,8 @@ class ScrollBarWidget( QWidget ):
         handle_size = 8
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        pen = QPen( QColor( 0, 80, 200 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        pen = QPen( QColor( 56, 56, 56 ) )
         pen.setWidth( 1 )
         painter.setPen( pen )
 
@@ -3744,11 +3744,11 @@ class ScrollBarWidget( QWidget ):
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            pen = QPen(QColor( 0, 80, 200 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            pen = QPen( QColor( 56, 56, 56 ) )
             pen.setWidth( 1 )
             painter.setPen( pen )
 
@@ -4322,8 +4322,8 @@ class SliderWidget( QWidget ):
         handle_size = 8
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        pen = QPen( QColor(0, 80, 200) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        pen = QPen( QColor( 56, 56, 56 ) )
         pen.setWidth( 1 )
         painter.setPen( pen )
 
@@ -4331,11 +4331,11 @@ class SliderWidget( QWidget ):
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            pen = QPen( ( QColor( 0, 80, 200 ) ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            pen = QPen( ( QColor( 56, 56, 56 ) ) )
             pen.setWidth( 1 )
             painter.setPen( pen )
 
@@ -4804,18 +4804,18 @@ class ProgressBarWidget( QWidget ):
         handle_size = 8
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder( self, painter ):
         if not self.selected:
@@ -5110,18 +5110,18 @@ class ImageWidget( QWidget ):
         handle_size = 8
         half_size = handle_size // 2
 
-        painter.setBrush( QColor( 0, 255, 0 ) )
-        painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 255, 255 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 0, 255, 0 ) )
-            painter.setPen( QPen( QColor( 0, 80, 200 ), 1 ) )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
     
     def drawSelectionBorder( self, painter ):
         if not self.selected:

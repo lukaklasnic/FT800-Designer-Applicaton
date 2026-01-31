@@ -1587,7 +1587,7 @@ def showButtonProperties( main_window, current_index ):
     
     text_size_layout = QHBoxLayout()
     text_size_layout.setContentsMargins( 20, 5, 10, 5 )
-    text_size_label = QLabel( "Text size:" )
+    text_size_label = QLabel( "Font size:" )
     text_size_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     text_size_layout.addWidget( text_size_label )
     text_size_layout.addStretch( 1 )
@@ -1605,7 +1605,7 @@ def showButtonProperties( main_window, current_index ):
     
     text_color_layout = QHBoxLayout()
     text_color_layout.setContentsMargins( 20, 5, 10, 5 )
-    text_color_label = QLabel( "Text color:" )
+    text_color_label = QLabel( "Font color:" )
     text_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     text_color_layout.addWidget( text_color_label )
     text_color_layout.addStretch( 1 )
@@ -2962,7 +2962,7 @@ def showToggleProperties( main_window, current_index ):
 
     text_color_layout = QHBoxLayout()
     text_color_layout.setContentsMargins( 20, 5, 10, 5 )
-    text_color_label = QLabel( "Text color:" )
+    text_color_label = QLabel( "Label color:" )
     text_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     text_color_layout.addWidget( text_color_label )
     text_color_layout.addStretch( 1 )
@@ -4263,7 +4263,7 @@ def showLabelProperties( main_window, current_index ):
 
     text_color_layout = QHBoxLayout()
     text_color_layout.setContentsMargins( 20, 5, 10, 5 )
-    text_color_label = QLabel( "Text color:" )
+    text_color_label = QLabel( "Font color:" )
     text_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     text_color_layout.addWidget( text_color_label )
     text_color_layout.addStretch( 1 )
@@ -4299,7 +4299,7 @@ def showLabelProperties( main_window, current_index ):
 
     text_size_layout = QHBoxLayout()
     text_size_layout.setContentsMargins( 20, 5, 10, 5 )
-    text_size_label = QLabel( "Text size:" )
+    text_size_label = QLabel( "Font size:" )
     text_size_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     text_size_layout.addWidget( text_size_label )
     text_size_layout.addStretch( 1 )
@@ -4483,7 +4483,7 @@ def showNumericProperties( main_window, current_index ):
 
     number_color_layout = QHBoxLayout()
     number_color_layout.setContentsMargins( 20, 5, 10, 5 )
-    number_color_label = QLabel( "Number color:" )
+    number_color_label = QLabel( "Font color:" )
     number_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     number_color_layout.addWidget( number_color_label )
     number_color_layout.addStretch( 1 )
@@ -4520,7 +4520,7 @@ def showNumericProperties( main_window, current_index ):
 
     number_size_layout = QHBoxLayout()
     number_size_layout.setContentsMargins( 20, 5, 10, 5 )
-    number_size_label = QLabel( "Number size:" )
+    number_size_label = QLabel( "Font size:" )
     number_size_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     number_size_layout.addWidget( number_size_label )
     number_size_layout.addStretch( 1 )
