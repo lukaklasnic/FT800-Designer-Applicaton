@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import ( QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QFrame, QPushButton, QSplashScreen, QFileDialog, QMessageBox )
-#from generator import ( generateResources, generateComponents )
+from generator import ( generateResources, generateComponents )
 from PyQt6.QtGui import ( QPixmap, QIcon, QGuiApplication )
 from PyQt6.QtCore import ( Qt, QTimer )
 from ui_components import *
@@ -161,7 +161,7 @@ class MainWindow( QMainWindow ):
                 border: 2px solid #cc5500;
             }
         """ )
-        generate_button.clicked.connect( self.printAllCanvasAndWidgetData )
+        generate_button.clicked.connect( self.generateAllFiles )
 
         top_layout.addWidget( generate_button )
         top_layout.addStretch( 1 )
@@ -1004,8 +1004,8 @@ class MainWindow( QMainWindow ):
             return
 
         self.updateOutputDirLabel()
-        #generateResources( self, self.output_dir )
-        #generateComponents( self, self.output_dir )
+        generateResources( self, self.output_dir )
+        generateComponents( self, self.output_dir )
 
     def printAllCanvasAndWidgetData(self):
         """Ispisuje sve vrednosti iz rečnika za sve aktivne canvase i widgete"""

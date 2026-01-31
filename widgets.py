@@ -238,7 +238,7 @@ class LineWidget( QWidget ):
             'start_y': self.start_y,
             'end_x': self.end_x,
             'end_y': self.end_y,
-            'line_color': color_to_hex( self.line_color ),
+            'line_color': self.line_color,
             'line_width': self.line_width,
 
             'type': 'Line',
@@ -257,7 +257,7 @@ class LineWidget( QWidget ):
             'start_y': self.start_y,
             'end_x': self.end_x,
             'end_y': self.end_y,
-            'line_color': color_to_hex( self.line_color ),
+            'line_color':  self.line_color,
             'line_width': self.line_width,
         } )
         return self.data_dict
@@ -543,12 +543,12 @@ class RectangleWidget( QWidget ):
             'position_y': self.y(),
             'rectangle_width': self.rectangle_width,
             'rectangle_height': self.rectangle_height,
-            'edges_color': color_to_hex( self.edges_color ),
+            'edges_color': self.edges_color,
             'edges_width': self.edges_width,
             'filled': self.filled,
             'gradient_direction': self.gradient_direction,
-            'gradient_start_color': color_to_hex( self.start_color ),
-            'gradient_end_color': color_to_hex( self.end_color ),
+            'gradient_start_color':  self.start_color ,
+            'gradient_end_color': self.end_color,
         
             'type': 'Rectangle',
             'id': None
@@ -566,12 +566,12 @@ class RectangleWidget( QWidget ):
             'position_y': self.y(),
             'rectangle_width': self.rectangle_width,
             'rectangle_height': self.rectangle_height,
-            'edges_color': color_to_hex( self.edges_color ),
+            'edges_color': self.edges_color ,
             'edges_width': self.edges_width,
             'filled': self.filled,
             'gradient_direction': self.gradient_direction,
-            'gradient_start_color': color_to_hex( self.start_color ),
-            'gradient_end_color': color_to_hex( self.end_color )
+            'gradient_start_color': self.start_color ,
+            'gradient_end_color': self.end_color
         } )
         return self.data_dict
     
@@ -829,10 +829,10 @@ class CircleWidget( QWidget ):
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
-            'edges_color': color_to_hex( self.edges_color ),
+            'edges_color': self.edges_color ,
             'edges_width': self.edges_width,
             'filled': self.filled,
-            'fill_color': color_to_hex( self.fill_color ),
+            'fill_color': self.fill_color,
             'type': 'Circle',
             'id': None
         }
@@ -848,10 +848,10 @@ class CircleWidget( QWidget ):
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
-            'edges_color': color_to_hex( self.edges_color ),
+            'edges_color': self.edges_color,
             'edges_width': self.edges_width,
             'filled': self.filled,
-            'fill_color': color_to_hex( self.fill_color )
+            'fill_color': self.fill_color
         } )
         return self.data_dict
     
@@ -1178,12 +1178,12 @@ class EllipseWidget( QWidget ):
             'center_y': self.center_y,
             'ellipse_width': self.ellipse_width,
             'ellipse_height': self.ellipse_height,
-            'edges_color': color_to_hex( self.edges_color ),
+            'edges_color': self.edges_color,
             'edges_width': self.edges_width,
             'filled': self.filled,
             'gradient_direction': self.gradient_direction,
-            'gradient_start_color': color_to_hex( self.gradient_start_color ),
-            'gradient_end_color': color_to_hex( self.gradient_end_color ),
+            'gradient_start_color': self.gradient_start_color,
+            'gradient_end_color': self.gradient_end_color,
         
             'type': 'Ellipse',
             'id': None
@@ -1201,12 +1201,12 @@ class EllipseWidget( QWidget ):
             'center_y': self.center_y,
             'ellipse_width': self.ellipse_width,
             'ellipse_height': self.ellipse_height,
-            'edges_color': color_to_hex( self.edges_color ),
+            'edges_color': self.edges_color,
             'edges_width': self.edges_width,
             'filled': self.filled,
             'gradient_direction': self.gradient_direction,
-            'gradient_start_color': color_to_hex( self.gradient_start_color ),
-            'gradient_end_color': color_to_hex( self.gradient_end_color )
+            'gradient_start_color': self.gradient_start_color,
+            'gradient_end_color': self.gradient_end_color
         } )
         return self.data_dict
     
@@ -1494,12 +1494,12 @@ class ButtonWidget( QWidget ):
             'position_y': self.y(),
             'button_width': self.width(),
             'button_height': self.height(),
-            'gradient_start_color': color_to_hex( self.gradient_start_color ),
-            'gradient_end_color': color_to_hex( self.gradient_end_color ),
+            'gradient_start_color': self.gradient_start_color,
+            'gradient_end_color': self.gradient_end_color,
             'effect_3d': self.effect_3d,
             'text': self.button_text,
             'text_size': self.text_size,
-            'text_color': color_to_hex( self.text_color ),
+            'text_color': self.text_color,
 
             'type': 'Button',
             'id': None
@@ -1517,12 +1517,12 @@ class ButtonWidget( QWidget ):
             'position_y': self.x(),
             'button_width': self.width(),
             'button_height': self.height(),
-            'gradient_start_color': color_to_hex( self.gradient_start_color ),
-            'gradient_end_color': color_to_hex( self.gradient_end_color ),
+            'gradient_start_color': self.gradient_start_color,
+            'gradient_end_color': self.gradient_end_color,
             'effect_3d': self.effect_3d,
             'text': self.button_text,
             'text_size': self.text_size,
-            'text_color': color_to_hex( self.text_color )
+            'text_color': self.text_color
         } )
         return self.data_dict
     
@@ -2055,11 +2055,11 @@ class KeysWidget( QWidget ):
             'position_y': self.y(),
             'keys_width': self.keys_width,
             'keys_height': self.keys_height,
-            'gradient_start_color': color_to_hex( self.gradient_start_color ),
-            'gradient_end_color': color_to_hex( self.gradient_end_color ),
+            'gradient_start_color': self.gradient_start_color,
+            'gradient_end_color': self.gradient_end_color,
             'effect_3d': self.effect_3d,
             'font_size': self.font_size,
-            'font_color': color_to_hex( self.text_color ),
+            'font_color': self.text_color,
 
             'type': 'Keys',
             'id': None
@@ -2076,12 +2076,12 @@ class KeysWidget( QWidget ):
             'position_y': self.y(),
             'keys_width': self.keys_width,
             'keys_height': self.keys_height,
-            'gradient_start_color': color_to_hex( self.gradient_start_color ),
-            'gradient_end_color': color_to_hex( self.gradient_end_color ),
+            'gradient_start_color': self.gradient_start_color,
+            'gradient_end_color': self.gradient_end_color,
             'effect_3d': self.effect_3d,
             'keys_type': self.key_type,
             'font_size': self.font_size,
-            'font_color': color_to_hex( self.text_color ),
+            'font_color': self.text_color
         } )
         return self.data_dict
     
@@ -2403,8 +2403,8 @@ class ClockWidget( QWidget ):
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
-            'background_color': color_to_hex( self.background_color ),
-            'face_color': color_to_hex( self.face_color ),
+            'background_color': self.background_color,
+            'face_color': self.face_color,
             'effect_3d': self.effect_3d,
             'hours': self.hours,
             'minutes': self.minutes,
@@ -2424,8 +2424,8 @@ class ClockWidget( QWidget ):
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
-            'background_color': color_to_hex( self.background_color ),
-            'face_color': color_to_hex( self.face_color ),
+            'background_color': self.background_color,
+            'face_color': self.face_color,
             'effect_3d': self.effect_3d,
             'hours': self.hours,
             'minutes': self.minutes,
@@ -2742,8 +2742,8 @@ class GaugeWidget( QWidget ):
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
-            'background_color': color_to_hex( self.background_color ),
-            'face_color': color_to_hex( self.face_color ),
+            'background_color': self.background_color,
+            'face_color': self.face_color,
             'effect_3d': self.effect_3d,
             'major_subdivision': self.major_subdivision,
             'minor_subdivision': self.minor_subdivision,
@@ -2764,8 +2764,8 @@ class GaugeWidget( QWidget ):
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
-            'background_color': color_to_hex( self.background_color ),
-            'face_color': color_to_hex( self.face_color ),
+            'background_color': self.background_color,
+            'face_color': self.face_color,
             'effect_3d': self.effect_3d,
             'major_subdivision': self.major_subdivision,
             'minor_subdivision': self.minor_subdivision,
@@ -3111,8 +3111,8 @@ class DialWidget( QWidget ):
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
-            'background_color': color_to_hex( self.background_color ),
-            'pointer_color': color_to_hex( self.pointer_color ),
+            'background_color': self.background_color,
+            'pointer_color': self.pointer_color,
             'effect_3d': self.effect_3d,
             'value': self.value,
 
@@ -3130,8 +3130,8 @@ class DialWidget( QWidget ):
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
-            'background_color': color_to_hex( self.background_color ),
-            'pointer_color': color_to_hex( self.pointer_color ),
+            'background_color': self.background_color,
+            'pointer_color': self.pointer_color,
             'effect_3d': self.effect_3d,
             'value': self.value
         } )
@@ -3492,9 +3492,9 @@ class ToggleWidget( QWidget ):
             'position_x': self.x(),
             'position_y': self.y(),
             'toggle_width': self.toggle_width,
-            'thumb_color': color_to_hex( self.thumb_color ),
-            'background_color': color_to_hex( self.background_color ),
-            'text_color': color_to_hex( self.text_color ),
+            'thumb_color': self.thumb_color,
+            'background_color': self.background_color,
+            'text_color': self.text_color,
             'effect_3d': self.effect_3d,
             'state': self.state,
 
@@ -3513,11 +3513,11 @@ class ToggleWidget( QWidget ):
             'position_x': self.x(),
             'position_y': self.y(),
             'toggle_width': self.toggle_width,
-            'thumb_color': color_to_hex( self.thumb_color ),
-            'background_color': color_to_hex( self.background_color ),
-            'text_color': color_to_hex( self.text_color ),
+            'thumb_color': self.thumb_color,
+            'background_color': self.background_color,
+            'text_color': self.text_color,
             'effect_3d': self.effect_3d,
-            'state': self.state,
+            'state': self.state
         } )
         return self.data_dict
     
@@ -4032,8 +4032,8 @@ class ScrollBarWidget( QWidget ):
             'position_y': self.y(),
             'scroll_bar_width': self.scroll_bar_width,
             'scroll_bar_height': self.scroll_bar_height,
-            'thumb_color': color_to_hex( self.thumb_color ),
-            'background_color': color_to_hex( self.background_color ),
+            'thumb_color': self.thumb_color,
+            'background_color': self.background_color,
             'effect_3d': self.effect_3d,
             'current_value': self.current_value,
             'thumb_size': self.thumb_size,
@@ -4054,11 +4054,11 @@ class ScrollBarWidget( QWidget ):
             'position_y': self.y(),
             'scroll_bar_width': self.scroll_bar_width,
             'scroll_bar_height': self.scroll_bar_height,
-            'thumb_color': color_to_hex( self.thumb_color ),
-            'background_color': color_to_hex( self.background_color ),
+            'thumb_color': self.thumb_color,
+            'background_color': self.background_color,
             'effect_3d': self.effect_3d,
             'current_value': self.current_value,
-            'thumb_size': self.thumb_size,
+            'thumb_size': self.thumb_size
         } )
         return self.data_dict
     
@@ -4548,9 +4548,9 @@ class SliderWidget( QWidget ):
             'position_y': self.y(),
             'slider_width': self.slider_width,
             'slider_height': self.slider_height,
-            'thumb_color': color_to_hex( self.thumb_color ),
-            'left_background_color': color_to_hex( self.background_color_left ),
-            'right_background_color': color_to_hex( self.background_color_right ),
+            'thumb_color': self.thumb_color,
+            'left_background_color': self.background_color_left,
+            'right_background_color': self.background_color_right,
             'effect_3d': self.effect_3d,
             'current_value': self.value,
 
@@ -4570,11 +4570,11 @@ class SliderWidget( QWidget ):
             'position_y': self.y(),
             'slider_width': self.slider_width,
             'slider_height': self.slider_height,
-            'thumb_color': color_to_hex( self.thumb_color ),
-            'left_background_color': color_to_hex( self.background_color_left ),
-            'right_background_color': color_to_hex( self.background_color_right ),
+            'thumb_color': self.thumb_color,
+            'left_background_color': self.background_color_left,
+            'right_background_color': self.background_color_right,
             'effect_3d': self.effect_3d,
-            'current_value': self.value,
+            'current_value': self.value
         } )
         return self.data_dict
     
@@ -4940,8 +4940,8 @@ class ProgressBarWidget( QWidget ):
             'position_y': self.y(),
             'progress_bar_width': self.progress_bar_width,
             'progress_bar_height': self.progress_bar_height,
-            'progress_color': color_to_hex( self.progress_color ),
-            'background_color': color_to_hex( self.background_color ),
+            'progress_color': self.progress_color,
+            'background_color': self.background_color,
             'effect_3d': self.effect_3d,
             'range': self.range,
             'current_value': self.value,
@@ -4961,11 +4961,11 @@ class ProgressBarWidget( QWidget ):
             'position_y': self.y(),
             'progress_bar_width': self.progress_bar_width,
             'progress_bar_height': self.progress_bar_height,
-            'progress_color': color_to_hex( self.progress_color ),
-            'background_color': color_to_hex( self.background_color ),
+            'progress_color': self.progress_color,
+            'background_color': self.background_color,
             'effect_3d': self.effect_3d,
             'range': self.range,
-            'current_value': self.value,
+            'current_value': self.value
         } )
         return self.data_dict
     
@@ -5289,7 +5289,7 @@ class ImageWidget( QWidget ):
             'image_width': self.image_width,
             'image_height': self.image_height,
             'frame': self.frame_enabled,
-            'frame_color': color_to_hex( self.frame_color ),
+            'frame_color': self.frame_color,
             'frame_width': self.frame_width,
 
             'type': 'Image',
@@ -5308,9 +5308,8 @@ class ImageWidget( QWidget ):
             'image_width': self.image_width,
             'image_height': self.image_height,
             'frame': self.frame_enabled,
-            'frame_color': color_to_hex( self.frame_color ),
-            'frame_width': self.frame_width,
-
+            'frame_color': self.frame_color,
+            'frame_width': self.frame_width
         } )
         return self.data_dict
     
@@ -5601,7 +5600,7 @@ class LabelWidget( QWidget ):
             'stack_order': self.stack_order,
             'position_x': self.x(),
             'position_y': self.y(),
-            'text_color': color_to_hex( self.text_color ),
+            'text_color': self.text_color,
             'text': self.text,
             'text_size': self.text_size,
             'text_alignment': self.text_alignment,
@@ -5620,11 +5619,10 @@ class LabelWidget( QWidget ):
             'stack_order': self.stack_order,
             'position_x': self.x(),
             'position_y': self.y(),
-            'text_color': color_to_hex( self.text_color ),
+            'text_color': self.text_color,
             'text': self.text,
             'text_size': self.text_size,
-            'text_alignment': self.text_alignment,
-
+            'text_alignment': self.text_alignment
         } )
         return self.data_dict
     
@@ -5891,7 +5889,7 @@ class NumericWidget( QWidget ):
             'stack_order': self.stack_order,
             'position_x': self.x(),
             'position_y': self.y(),
-            'number_color': color_to_hex( self.number_color ),
+            'number_color': self.number_color,
             'number': self.number,
             'number_size': self.number_size,
             'number_alignment': self.number_alignment,
@@ -5910,11 +5908,10 @@ class NumericWidget( QWidget ):
             'stack_order': self.stack_order,
             'position_x': self.x(),
             'position_y': self.y(),
-            'number_color': color_to_hex( self.number_color ),
+            'number_color': self.number_color,
             'number': self.number,
             'number_size': self.number_size,
             'number_alignment': self.number_alignment
-
         } )
         return self.data_dict
     
@@ -5963,16 +5960,3 @@ class NumericWidget( QWidget ):
             self.dragging = False
 
         event.accept()
-
-def color_to_hex(color):
-    """Konvertuje QColor u hex format (0xRRGGBB)"""
-    if isinstance(color, QColor):
-        return f"0x{color.red():02X}{color.green():02X}{color.blue():02X}"
-    elif isinstance(color, str):
-        try:
-            qcolor = QColor(color)
-            return f"0x{qcolor.red():02X}{qcolor.green():02X}{qcolor.blue():02X}"
-        except:
-            return color
-    else:
-        return color
