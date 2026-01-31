@@ -366,9 +366,9 @@ class Canvas( QWidget ):
             'visible': self.visible,
             'static': self.static,
             'name': self.custom_name,
-            'background_color': color_to_hex( self.canvas_color ),
+            'background_color': self.canvas_color,
             'grid_enable': self.canvas_grid_enable,
-            'grid_color': color_to_hex( self.grid_color ),
+            'grid_color': self.grid_color ,
             'grid_type': self.grid_type,
             'grid_size': self.grid_size,
             'id': self.canvas_id,
@@ -381,9 +381,9 @@ class Canvas( QWidget ):
             'visible': self.visible,
             'static': self.static,
             'name': self.custom_name,
-            'background_color': color_to_hex( self.canvas_color ),
+            'background_color': self.canvas_color,
             'grid_enable': self.canvas_grid_enable,
-            'grid_color': color_to_hex( self.grid_color ),
+            'grid_color': self.grid_color,
             'grid_type': self.grid_type,
             'grid_size': self.grid_size
         } )
@@ -404,18 +404,3 @@ class Canvas( QWidget ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.clicked.emit( event )
     
-
-def color_to_hex(color):
-    """Konvertuje QColor u hex format (0xRRGGBB)"""
-    if isinstance(color, QColor):
-        # Format: 0xRRGGBB
-        return f"0x{color.red():02X}{color.green():02X}{color.blue():02X}"
-    elif isinstance(color, str):
-        # Ako je već string, pokušaj da konvertuješ
-        try:
-            qcolor = QColor(color)
-            return f"0x{qcolor.red():02X}{qcolor.green():02X}{qcolor.blue():02X}"
-        except:
-            return color
-    else:
-        return color
