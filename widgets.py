@@ -5470,6 +5470,9 @@ class ImageWidget( QWidget ):
                 pass
 
     def setupDataDict( self ):
+        # Osiguraj da position_x i position_y postoje
+        self.position_x = self.x()
+        self.position_y = self.y()
         self.data_dict = {
             'active': self.active,
             'visible': self.visible,
