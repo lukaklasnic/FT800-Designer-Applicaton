@@ -4,67 +4,64 @@ from PyQt6.QtCore import Qt
 from widgets import*  
 
 #------------------------------------------------------------CANVAS--------------------------------------------------------------
-def updateCanvasActive(main_window, state):
-    state = state == Qt.CheckState.Checked.value  # ISPRAVLJENO: dodela vrednosti
+
+def updateCanvasActive( main_window, state ):
+    state = state == Qt.CheckState.Checked.value 
     main_window.current_canvas.active = state 
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()  # OVO JE KLJUČNO
+    main_window.current_canvas.updateDataDict()
 
-def updateCanvasVisible(main_window, state):
-    state = state == Qt.CheckState.Checked.value  # ISPRAVLJENO: dodela vrednosti
+def updateCanvasVisible( main_window, state ):
+    state = state == Qt.CheckState.Checked.value 
     main_window.current_canvas.visible = state
-    main_window.current_canvas.setVisible(main_window.current_canvas.visible)
+    main_window.current_canvas.setVisible( main_window.current_canvas.visible )
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()  # OVO JE KLJUČNO
+    main_window.current_canvas.updateDataDict()
 
-def updateCanvasStatic(main_window, state):
-    state = state == Qt.CheckState.Checked.value  # ISPRAVLJENO: dodela vrednosti
+def updateCanvasStatic( main_window, state ):
+    state = state == Qt.CheckState.Checked.value 
     main_window.current_canvas.static = state
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()  # OVO JE KLJUČNO
+    main_window.current_canvas.updateDataDict()
 
-def updateCanvasName(main_window, text):
+def updateCanvasName( main_window, text ):
     main_window.current_canvas.custom_name = text
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()  # OVO JE KLJUČNO
+    main_window.current_canvas.updateDataDict()
 
 def updateCanvasColor(main_window):
-    color = QColorDialog.getColor(main_window.current_canvas.canvas_color)
+    color = QColorDialog.getColor( main_window.current_canvas.canvas_color )
     
     if color.isValid():
         main_window.current_canvas.canvas_color = color
-        main_window.canvas_color_rect.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.canvas_color_rect.setStyleSheet( f"background-color: {color.name()}; border: 1px solid #ccc;" )
         main_window.current_canvas.update()
-        main_window.current_canvas.updateDataDict()  # DODATO: ažuriraj data dict
+        main_window.current_canvas.updateDataDict() 
 
-def updateToggleGrid(main_window, state):
-    state = state == Qt.CheckState.Checked.value  # ISPRAVLJENO: dodela vrednosti
+def updateToggleGrid( main_window, state ):
+    state = state == Qt.CheckState.Checked.value 
     main_window.current_canvas.canvas_grid_enable = state
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()  # DODATO: ažuriraj data dict
+    main_window.current_canvas.updateDataDict()  
 
-def updateGridColor(main_window):
-    color = QColorDialog.getColor(main_window.current_canvas.grid_color)
+def updateGridColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_canvas.grid_color )
     
     if color.isValid():
         main_window.current_canvas.grid_color = color
-        main_window.grid_color_rect.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.grid_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_canvas.update()
-        main_window.current_canvas.updateDataDict()  # Već postoji, ali je dobro
+        main_window.current_canvas.updateDataDict() 
 
-def changeGridType(main_window, text):
+def changeGridType( main_window, text ):
     main_window.current_canvas.grid_type = text
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()  # Već postoji, ali je dobro
+    main_window.current_canvas.updateDataDict() 
 
-def changeGridSize(main_window, value):
+def changeGridSize( main_window, value ):
     main_window.current_canvas.grid_size = value
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()  # Već postoji, ali je dobro
+    main_window.current_canvas.updateDataDict() 
 
 #------------------------------------------------------------LINE--------------------------------------------------------------
 
@@ -217,31 +214,31 @@ def updateRectangleGradientEndColor( main_window ):
         
 #------------------------------------------------------------CIRCLE--------------------------------------------------------------
 
-def updateCircleActive(main_window, state):
+def updateCircleActive( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleVisible(main_window, state):
+def updateCircleVisible( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
     main_window.current_shape.setVisible(state)
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleStatic(main_window, state):
+def updateCircleStatic( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.static = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleName(main_window, text):
+def updateCircleName( main_window, text ):
     main_window.current_shape.custom_name = text
     main_window.current_shape.update() 
     main_window.current_shape.updateDataDict()
 
-def updateCircleStackOrder(main_window, value):
+def updateCircleStackOrder( main_window, value ):
     main_window.current_shape.stack_order = value
     main_window.sortWidgetsByStackOrder()
     main_window.current_shape.update()
@@ -252,193 +249,162 @@ def updateCircleTag(main_window, value):
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCirclePosition(main_window):
-    """Ažuriraj poziciju kruga na osnovu centra"""
-    # Izračunaj gornji levi ugao na osnovu centra
+def updateCirclePosition( main_window ):
     x = main_window.pos_x_spin_circle.value() - main_window.current_shape.diameter // 2
     y = main_window.pos_y_spin_circle.value() - main_window.current_shape.diameter // 2
     
-    main_window.current_shape.move(x, y)
-    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.move( x, y )
+    main_window.current_shape.updateCenterPosition() 
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleSize(main_window):
-    """Ažuriraj veličinu kruga"""
+def updateCircleSize( main_window ):
     new_diameter = main_window.diameter_spin_circle.value()
-    
-    # Sačuvaj trenutni centar
     current_center_x = main_window.current_shape.center_x
     current_center_y = main_window.current_shape.center_y
-    
-    # Izračunaj novu poziciju gornjeg levog ugla da centar ostane isti
     new_x = current_center_x - new_diameter // 2
     new_y = current_center_y - new_diameter // 2
     
     main_window.current_shape.diameter = new_diameter
-    main_window.current_shape.setFixedSize(new_diameter, new_diameter)
-    main_window.current_shape.move(new_x, new_y)
-    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.setFixedSize( new_diameter, new_diameter )
+    main_window.current_shape.move( new_x, new_y )
+    main_window.current_shape.updateCenterPosition()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleLineColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.edges_color)
+def updateCircleLineColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.edges_color )
 
     if color.isValid():
         main_window.current_shape.edges_color = color
-        main_window.edges_color_rect_circle.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.edges_color_rect_circle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update() 
         main_window.current_shape.updateDataDict()
 
-def updateCircleEdgeWidth(main_window, value):
+def updateCircleEdgeWidth( main_window, value ):
     main_window.current_shape.edges_width = value 
     main_window.current_shape.update() 
     main_window.current_shape.updateDataDict()
 
-def updateCircleFilled(main_window, state):
+def updateCircleFilled( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.filled = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleFillColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.fill_color)
+def updateCircleFillColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.fill_color )
 
     if color.isValid():
         main_window.current_shape.fill_color = color
-        main_window.fill_color_rect_circle.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.fill_color_rect_circle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
+
 #------------------------------------------------------------ELLIPSE--------------------------------------------------------------
 
-def updateEllipseActive(main_window, state):
+def updateEllipseActive( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateEllipseVisible(main_window, state):
+def updateEllipseVisible( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
     main_window.current_shape.setVisible(state)
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateEllipseStatic(main_window, state):
+def updateEllipseStatic( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.static = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateEllipseName(main_window, text):
+def updateEllipseName( main_window, text ):
     main_window.current_shape.custom_name = text
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateEllipseStackOrder(main_window, value):
+def updateEllipseStackOrder( main_window, value ):
     main_window.current_shape.stack_order = value
     main_window.sortWidgetsByStackOrder()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateEllipseTag(main_window, value):
+def updateEllipseTag( main_window, value ):
     main_window.current_shape.tag = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateEllipsePosition(main_window):
-    """Ažuriraj poziciju elipse na osnovu centra"""
-    # Izračunaj gornji levi ugao na osnovu centra
+def updateEllipsePosition( main_window ):
     x = main_window.pos_x_spin_ellipse.value() - main_window.current_shape.ellipse_width // 2
     y = main_window.pos_y_spin_ellipse.value() - main_window.current_shape.ellipse_height // 2
-    
+
     main_window.current_shape.move(x, y)
-    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.updateCenterPosition() 
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateEllipseSize(main_window):
-    """Ažuriraj veličinu elipse"""
+def updateEllipseSize( main_window ):
     new_width = main_window.width_spin_ellipse.value()
     new_height = main_window.height_spin_ellipse.value()
-    
-    # Sačuvaj trenutni centar
     current_center_x = main_window.current_shape.center_x
     current_center_y = main_window.current_shape.center_y
-    
-    # Izračunaj novu poziciju gornjeg levog ugla da centar ostane isti
     new_x = current_center_x - new_width // 2
     new_y = current_center_y - new_height // 2
     
     main_window.current_shape.ellipse_width = new_width
     main_window.current_shape.ellipse_height = new_height
-    main_window.current_shape.setFixedSize(new_width, new_height)
-    main_window.current_shape.move(new_x, new_y)
-    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.setFixedSize( new_width, new_height )
+    main_window.current_shape.move( new_x, new_y )
+    main_window.current_shape.updateCenterPosition()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def changeEllipseEdgesColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.edges_color)
+def changeEllipseEdgesColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.edges_color )
 
     if color.isValid():
         main_window.current_shape.edges_color = color
-        main_window.edges_color_rect_ellipse.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.edges_color_rect_ellipse.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def updateEllipseEdgeWidth(main_window, value):
+def updateEllipseEdgeWidth( main_window, value ):
     main_window.current_shape.edges_width = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateEllipseFilled(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def updateEllipseFilled( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.filled = state
-    main_window.current_shape.showFilledWarning(state)
-    
-    # Omogući/onemogući kontrole za gradient
-    if hasattr(main_window, 'gradient_combo_ellipse'):
-        main_window.gradient_combo_ellipse.setEnabled(state)
-    if hasattr(main_window, 'start_color_rect_ellipse'):
-        main_window.start_color_rect_ellipse.setEnabled(state)
-    if hasattr(main_window, 'end_color_rect_ellipse'):
-        main_window.end_color_rect_ellipse.setEnabled(state)
+    main_window.current_shape.showFilledWarning( state )
     
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateEllipseGradientDirection(main_window, text):
+def updateEllipseGradientDirection( main_window, text ):
     main_window.current_shape.gradient_direction = text
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def changeEllipseStartColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.gradient_start_color)
+def changeEllipseStartColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.gradient_start_color )
 
     if color.isValid():
-        main_window.current_shape.gradient_start_color = color  # Ispravljeno: dodela boje
-        main_window.start_color_rect_ellipse.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.current_shape.gradient_start_color = color 
+        main_window.start_color_rect_ellipse.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def changeEllipseEndColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.gradient_end_color)
+def changeEllipseEndColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.gradient_end_color )
 
     if color.isValid():
-        main_window.current_shape.gradient_end_color = color  # Ispravljeno: dodela boje
-        main_window.end_color_rect_ellipse.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.current_shape.gradient_end_color = color  
+        main_window.end_color_rect_ellipse.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
@@ -622,248 +588,219 @@ def updateKeysFontColor( main_window ):
 
 #------------------------------------------------------------CLOCK--------------------------------------------------------------
 
-def updateClockActive(main_window, state):
+def updateClockActive( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockVisible(main_window, state):
+def updateClockVisible( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible(state)
+    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockStatic(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def updateClockStatic( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.static = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockName(main_window, text):
+def updateClockName( main_window, text ):
     main_window.current_shape.custom_name = text
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockStackOrder(main_window, value):
+def updateClockStackOrder( main_window, value ):
     main_window.current_shape.stack_order = value
     main_window.sortWidgetsByStackOrder()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockTag(main_window, value):
-    """Nova funkcija za ažuriranje tag-a (ako je potrebno)"""
-    main_window.current_shape.tag = value
-    main_window.current_shape.update()
-    main_window.current_shape.updateDataDict()
-
-def updateClockPosition(main_window):
-    """Ažuriraj poziciju sata na osnovu centra"""
-    # Izračunaj gornji levi ugao na osnovu centra
+def updateClockPosition( main_window ):
     x = main_window.pos_x_spin_clock.value() - main_window.current_shape.diameter // 2
     y = main_window.pos_y_spin_clock.value() - main_window.current_shape.diameter // 2
     
-    main_window.current_shape.move(x, y)
-    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.move( x, y )
+    main_window.current_shape.updateCenterPosition() 
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockSize(main_window, value):
-    """Ažuriraj veličinu sata"""
+def updateClockSize( main_window ):
     new_diameter = main_window.diameter_spin_clock.value()
-    
-    # Sačuvaj trenutni centar
     current_center_x = main_window.current_shape.center_x
     current_center_y = main_window.current_shape.center_y
-    
-    # Izračunaj novu poziciju gornjeg levog ugla da centar ostane isti
     new_x = current_center_x - new_diameter // 2
     new_y = current_center_y - new_diameter // 2
     
     main_window.current_shape.diameter = new_diameter
-    main_window.current_shape.setFixedSize(new_diameter, new_diameter)
-    main_window.current_shape.move(new_x, new_y)
-    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.setFixedSize( new_diameter, new_diameter )
+    main_window.current_shape.move( new_x, new_y )
+    main_window.current_shape.updateCenterPosition()  
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockBackgroundColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.background_color)
+def updateClockBackgroundColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.background_color )
 
     if color.isValid():
         main_window.current_shape.background_color = color
-        main_window.bg_color_rect_clock.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.bg_color_rect_clock.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def updateClockFaceColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.face_color)
+def updateClockFaceColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.face_color )
 
     if color.isValid():
         main_window.current_shape.face_color = color
-        main_window.face_color_rect_clock.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.face_color_rect_clock.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def update3DClock(main_window, state):
+def update3DClock( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.effect_3d = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockHours(main_window, value):
-    main_window.current_shape.hours = value % 24  # Korigovano na 24 sata
+def updateClockHours( main_window, value ):
+    main_window.current_shape.hours = value % 24
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockMinutes(main_window, value):
+def updateClockMinutes( main_window, value ):
     main_window.current_shape.minutes = value % 60
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockSeconds(main_window, value):
+def updateClockSeconds( main_window, value ):
     main_window.current_shape.seconds = value % 60
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
 #------------------------------------------------------------GAUGE--------------------------------------------------------------
 
-def updateGaugeActive(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def updateGaugeActive( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeVisible(main_window, state):
+def updateGaugeVisible( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible(state)
+    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeStatic(main_window, state):
+def updateGaugeStatic( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.static = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeName(main_window, text):
+def updateGaugeName( main_window, text ):
     main_window.current_shape.custom_name = text
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeStackOrder(main_window, value):
+def updateGaugeStackOrder( main_window, value ):
     main_window.current_shape.stack_order = value
     main_window.sortWidgetsByStackOrder()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeTag(main_window, value):
-    """Nova funkcija za ažuriranje tag-a (ako je potrebno)"""
+def updateGaugeTag( main_window, value ):
     main_window.current_shape.tag = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugePosition(main_window):
-    """Ažuriraj poziciju merača na osnovu centra"""
-    # Izračunaj gornji levi ugao na osnovu centra
+def updateGaugePosition( main_window ):
     x = main_window.pos_x_spin_gauge.value() - main_window.current_shape.diameter // 2
     y = main_window.pos_y_spin_gauge.value() - main_window.current_shape.diameter // 2
     
     main_window.current_shape.move(x, y)
-    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.updateCenterPosition() 
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeSize(main_window, value):
-    """Ažuriraj veličinu merača"""
+def updateGaugeSize( main_window ):
     new_diameter = main_window.diameter_spin_gauge.value()
-    
-    # Sačuvaj trenutni centar
     current_center_x = main_window.current_shape.center_x
     current_center_y = main_window.current_shape.center_y
-    
-    # Izračunaj novu poziciju gornjeg levog ugla da centar ostane isti
     new_x = current_center_x - new_diameter // 2
     new_y = current_center_y - new_diameter // 2
     
     main_window.current_shape.diameter = new_diameter
-    main_window.current_shape.setFixedSize(new_diameter, new_diameter)
-    main_window.current_shape.move(new_x, new_y)
-    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.setFixedSize( new_diameter, new_diameter )
+    main_window.current_shape.move( new_x, new_y )
+    main_window.current_shape.updateCenterPosition() 
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeBackgroundColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.background_color)
+def updateGaugeBackgroundColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.background_color )
 
     if color.isValid():
         main_window.current_shape.background_color = color
-        main_window.bg_color_rect_gauge.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.bg_color_rect_gauge.setStyleSheet( f"background-color: {color.name()}; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def updateGaugeFaceColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.face_color)
+def updateGaugeFaceColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.face_color )
 
     if color.isValid():
         main_window.current_shape.face_color = color
-        main_window.face_color_rect_gauge.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.face_color_rect_gauge.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def update3DGauge(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def update3DGauge( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.effect_3d = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeMajorSubdivision(main_window, value):
+def updateGaugeMajorSubdivision( main_window, value ):
     main_window.current_shape.major_subdivision = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeMinorSubdivision(main_window, value):
+def updateGaugeMinorSubdivision( main_window, value ):
     main_window.current_shape.minor_subdivision = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeRangeValue(main_window, value):
+def updateGaugeRangeValue( main_window, value ):
     main_window.current_shape.range_value = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateGaugeValue(main_window, value):
+def updateGaugeValue( main_window, value ):
     main_window.current_shape.value = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
 #------------------------------------------------------------DIAL--------------------------------------------------------------
 
-def updateDialActive(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def updateDialActive( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialVisible(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def updateDialVisible( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible(state)
+    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialStatic(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def updateDialStatic( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.static = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
@@ -884,68 +821,58 @@ def updateDialTag(main_window, value):
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialPosition(main_window):
-    """Ažuriraj poziciju dajala na osnovu centra"""
-    # Izračunaj gornji levi ugao na osnovu centra
+def updateDialPosition( main_window ):
     x = main_window.pos_x_spin_dial.value() - main_window.current_shape.diameter // 2
     y = main_window.pos_y_spin_dial.value() - main_window.current_shape.diameter // 2
     
-    main_window.current_shape.move(x, y)
-    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.move( x, y )
+    main_window.current_shape.updateCenterPosition()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialSize(main_window, value):
-    """Ažuriraj veličinu dajala"""
+def updateDialSize( main_window ):
     new_diameter = main_window.diameter_spin_dial.value()
-    
-    # Sačuvaj trenutni centar
     current_center_x = main_window.current_shape.center_x
     current_center_y = main_window.current_shape.center_y
-    
-    # Izračunaj novu poziciju gornjeg levog ugla da centar ostane isti
     new_x = current_center_x - new_diameter // 2
     new_y = current_center_y - new_diameter // 2
     
     main_window.current_shape.diameter = new_diameter
-    main_window.current_shape.setFixedSize(new_diameter, new_diameter)
-    main_window.current_shape.move(new_x, new_y)
-    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.setFixedSize( new_diameter, new_diameter )
+    main_window.current_shape.move( new_x, new_y )
+    main_window.current_shape.updateCenterPosition()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialBackgroundColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.background_color)
+def updateDialBackgroundColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.background_color )
 
     if color.isValid():
         main_window.current_shape.background_color = color
-        main_window.bg_color_rect_dial.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.bg_color_rect_dial.setStyleSheet( f"background-color: {color.name()}; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def updateDialPointerColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.pointer_color)
+def updateDialPointerColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.pointer_color )
 
     if color.isValid():
         main_window.current_shape.pointer_color = color
-        main_window.face_color_rect_dial.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.face_color_rect_dial.setStyleSheet( f"background-color: {color.name()}; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def updateDial3D(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def updateDial3D( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.effect_3d = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialValue(main_window, value):
+def updateDialValue( main_window, value ):
     main_window.current_shape.value = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
+    
 #------------------------------------------------------------TOGGLE--------------------------------------------------------------
 
 def updateToggleActive( main_window, state ):
