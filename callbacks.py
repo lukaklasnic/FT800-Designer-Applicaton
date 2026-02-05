@@ -581,81 +581,111 @@ def updateKeysFontColor( main_window ):
 
 #------------------------------------------------------------CLOCK--------------------------------------------------------------
 
-def updateClockActive( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateClockActive(main_window, state):
+    state = state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockVisible( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateClockVisible(main_window, state):
+    state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
+    main_window.current_shape.setVisible(state)
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockStatic( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateClockStatic(main_window, state):
+    state = state == Qt.CheckState.Checked.value
     main_window.current_shape.static = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockName( main_window, text ):
+def updateClockName(main_window, text):
     main_window.current_shape.custom_name = text
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockStackOrder( main_window, value ):
+def updateClockStackOrder(main_window, value):
     main_window.current_shape.stack_order = value
     main_window.sortWidgetsByStackOrder()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockPosition( main_window ):
-    main_window.current_shape.move( main_window.pos_x_spin_clock.value() - main_window.current_shape.diameter // 2, main_window.pos_y_spin_clock.value() - main_window.current_shape.diameter // 2 )
+def updateClockTag(main_window, value):
+    """Nova funkcija za ažuriranje tag-a (ako je potrebno)"""
+    main_window.current_shape.tag = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockSize( main_window, value ):
-    main_window.current_shape.diameter = value 
-    main_window.current_shape.setFixedSize( value, value )
+def updateClockPosition(main_window):
+    """Ažuriraj poziciju sata na osnovu centra"""
+    # Izračunaj gornji levi ugao na osnovu centra
+    x = main_window.pos_x_spin_clock.value() - main_window.current_shape.diameter // 2
+    y = main_window.pos_y_spin_clock.value() - main_window.current_shape.diameter // 2
+    
+    main_window.current_shape.move(x, y)
+    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockBackgroundColor( main_window ):
-    color = QColorDialog.getColor( main_window.current_shape.background_color )
+def updateClockSize(main_window, value):
+    """Ažuriraj veličinu sata"""
+    new_diameter = main_window.diameter_spin_clock.value()
+    
+    # Sačuvaj trenutni centar
+    current_center_x = main_window.current_shape.center_x
+    current_center_y = main_window.current_shape.center_y
+    
+    # Izračunaj novu poziciju gornjeg levog ugla da centar ostane isti
+    new_x = current_center_x - new_diameter // 2
+    new_y = current_center_y - new_diameter // 2
+    
+    main_window.current_shape.diameter = new_diameter
+    main_window.current_shape.setFixedSize(new_diameter, new_diameter)
+    main_window.current_shape.move(new_x, new_y)
+    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
+    main_window.current_shape.update()
+    main_window.current_shape.updateDataDict()
+
+def updateClockBackgroundColor(main_window):
+    color = QColorDialog.getColor(main_window.current_shape.background_color)
 
     if color.isValid():
-        main_window.current_shape.background_color = color 
-        main_window.bg_color_rect_clock.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
-        main_window.current_shape.updateDataDict()
-
-def updateClockFaceColor( main_window ):
-    color = QColorDialog.getColor( main_window.current_shape.face_color )
-
-    if color.isValid():
-        main_window.current_shape.face_color = color
-        main_window.face_color_rect_clock.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.background_color = color
+        main_window.bg_color_rect_clock.setStyleSheet(
+            f"background-color: {color.name()}; border: 1px solid #ccc;"
+        )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def update3DClock( main_window, state ):
-    state == Qt.CheckState.Checked.value 
-    main_window.current_shape.effect_3d = state 
+def updateClockFaceColor(main_window):
+    color = QColorDialog.getColor(main_window.current_shape.face_color)
+
+    if color.isValid():
+        main_window.current_shape.face_color = color
+        main_window.face_color_rect_clock.setStyleSheet(
+            f"background-color: {color.name()}; border: 1px solid #ccc;"
+        )
+        main_window.current_shape.update()
+        main_window.current_shape.updateDataDict()
+
+def update3DClock(main_window, state):
+    state = state == Qt.CheckState.Checked.value
+    main_window.current_shape.effect_3d = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockHours( main_window, value ):
-    main_window.current_shape.hours = value % 60
+def updateClockHours(main_window, value):
+    main_window.current_shape.hours = value % 24  # Korigovano na 24 sata
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockMinutes( main_window, value ):
+def updateClockMinutes(main_window, value):
     main_window.current_shape.minutes = value % 60
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateClockSeconds( main_window, value ):
+def updateClockSeconds(main_window, value):
     main_window.current_shape.seconds = value % 60
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
