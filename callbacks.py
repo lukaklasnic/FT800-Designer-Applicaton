@@ -4,62 +4,67 @@ from PyQt6.QtCore import Qt
 from widgets import*  
 
 #------------------------------------------------------------CANVAS--------------------------------------------------------------
-
-def updateCanvasActive( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateCanvasActive(main_window, state):
+    state = state == Qt.CheckState.Checked.value  # ISPRAVLJENO: dodela vrednosti
     main_window.current_canvas.active = state 
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()
+    main_window.current_canvas.updateDataDict()  # OVO JE KLJUČNO
 
-def updateCanvasVisible( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateCanvasVisible(main_window, state):
+    state = state == Qt.CheckState.Checked.value  # ISPRAVLJENO: dodela vrednosti
     main_window.current_canvas.visible = state
-    main_window.current_canvas.setVisible( main_window.current_canvas.visible )
+    main_window.current_canvas.setVisible(main_window.current_canvas.visible)
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()
+    main_window.current_canvas.updateDataDict()  # OVO JE KLJUČNO
 
-def updateCanvasStatic( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateCanvasStatic(main_window, state):
+    state = state == Qt.CheckState.Checked.value  # ISPRAVLJENO: dodela vrednosti
     main_window.current_canvas.static = state
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()
+    main_window.current_canvas.updateDataDict()  # OVO JE KLJUČNO
 
 def updateCanvasName(main_window, text):
     main_window.current_canvas.custom_name = text
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()
+    main_window.current_canvas.updateDataDict()  # OVO JE KLJUČNO
 
-def updateCanvasColor( main_window ):
-    color = QColorDialog.getColor( main_window.current_canvas.canvas_color )
+def updateCanvasColor(main_window):
+    color = QColorDialog.getColor(main_window.current_canvas.canvas_color)
     
     if color.isValid():
         main_window.current_canvas.canvas_color = color
-        main_window.canvas_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.canvas_color_rect.setStyleSheet(
+            f"background-color: {color.name()}; border: 1px solid #ccc;"
+        )
         main_window.current_canvas.update()
+        main_window.current_canvas.updateDataDict()  # DODATO: ažuriraj data dict
 
-def updateToggleGrid( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateToggleGrid(main_window, state):
+    state = state == Qt.CheckState.Checked.value  # ISPRAVLJENO: dodela vrednosti
     main_window.current_canvas.canvas_grid_enable = state
     main_window.current_canvas.update()
+    main_window.current_canvas.updateDataDict()  # DODATO: ažuriraj data dict
 
 def updateGridColor(main_window):
-    color = QColorDialog.getColor( main_window.current_canvas.grid_color )
+    color = QColorDialog.getColor(main_window.current_canvas.grid_color)
     
     if color.isValid():
         main_window.current_canvas.grid_color = color
-        main_window.grid_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.grid_color_rect.setStyleSheet(
+            f"background-color: {color.name()}; border: 1px solid #ccc;"
+        )
         main_window.current_canvas.update()
-        main_window.current_canvas.updateDataDict()
+        main_window.current_canvas.updateDataDict()  # Već postoji, ali je dobro
 
-def changeGridType ( main_window, text ):
+def changeGridType(main_window, text):
     main_window.current_canvas.grid_type = text
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()
+    main_window.current_canvas.updateDataDict()  # Već postoji, ali je dobro
 
-def changeGridSize( main_window, value ):
+def changeGridSize(main_window, value):
     main_window.current_canvas.grid_size = value
     main_window.current_canvas.update()
-    main_window.current_canvas.updateDataDict()
+    main_window.current_canvas.updateDataDict()  # Već postoji, ali je dobro
 
 #------------------------------------------------------------LINE--------------------------------------------------------------
 
