@@ -808,81 +808,103 @@ def updateGaugeValue(main_window, value):
 
 #------------------------------------------------------------DIAL--------------------------------------------------------------
 
-def updateDialActive( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateDialActive(main_window, state):
+    state = state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialVisible( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateDialVisible(main_window, state):
+    state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
+    main_window.current_shape.setVisible(state)
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialStatic( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateDialStatic(main_window, state):
+    state = state == Qt.CheckState.Checked.value
     main_window.current_shape.static = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialName( main_window, text ):
-    main_window.current_shape.custom_name = text 
+def updateDialName(main_window, text):
+    main_window.current_shape.custom_name = text
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialStackOrder( main_window, value ):
+def updateDialStackOrder(main_window, value):
     main_window.current_shape.stack_order = value
     main_window.sortWidgetsByStackOrder()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialTag( main_window, value ):
+def updateDialTag(main_window, value):
     main_window.current_shape.tag = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialPosition( main_window ):
-    main_window.current_shape.move( main_window.pos_x_spin_dial.value() - main_window.current_shape.diameter // 2, main_window.pos_y_spin_dial.value() - main_window.current_shape.diameter // 2 )
+def updateDialPosition(main_window):
+    """Ažuriraj poziciju dajala na osnovu centra"""
+    # Izračunaj gornji levi ugao na osnovu centra
+    x = main_window.pos_x_spin_dial.value() - main_window.current_shape.diameter // 2
+    y = main_window.pos_y_spin_dial.value() - main_window.current_shape.diameter // 2
+    
+    main_window.current_shape.move(x, y)
+    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialSize( main_window, value ):
-    main_window.current_shape.diameter = value 
-    main_window.current_shape.setFixedSize( value, value )
+def updateDialSize(main_window, value):
+    """Ažuriraj veličinu dajala"""
+    new_diameter = main_window.diameter_spin_dial.value()
+    
+    # Sačuvaj trenutni centar
+    current_center_x = main_window.current_shape.center_x
+    current_center_y = main_window.current_shape.center_y
+    
+    # Izračunaj novu poziciju gornjeg levog ugla da centar ostane isti
+    new_x = current_center_x - new_diameter // 2
+    new_y = current_center_y - new_diameter // 2
+    
+    main_window.current_shape.diameter = new_diameter
+    main_window.current_shape.setFixedSize(new_diameter, new_diameter)
+    main_window.current_shape.move(new_x, new_y)
+    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialBackgroundColor( main_window ):
-    color = QColorDialog.getColor( main_window.current_shape.background_color )
+def updateDialBackgroundColor(main_window):
+    color = QColorDialog.getColor(main_window.current_shape.background_color)
 
     if color.isValid():
-        main_window.current_shape.background_color = color 
-        main_window.bg_color_rect_dial.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.current_shape.background_color = color
+        main_window.bg_color_rect_dial.setStyleSheet(
+            f"background-color: {color.name()}; border: 1px solid #ccc;"
+        )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def updateDialPointerColor( main_window ):
-    color = QColorDialog.getColor( main_window.current_shape.pointer_color )
+def updateDialPointerColor(main_window):
+    color = QColorDialog.getColor(main_window.current_shape.pointer_color)
 
     if color.isValid():
         main_window.current_shape.pointer_color = color
-        main_window.face_color_rect_dial.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.face_color_rect_dial.setStyleSheet(
+            f"background-color: {color.name()}; border: 1px solid #ccc;"
+        )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def updateDial3D( main_window, state ):
-    state == Qt.CheckState.Checked.value 
-    main_window.current_shape.effect_3d = state 
+def updateDial3D(main_window, state):
+    state = state == Qt.CheckState.Checked.value
+    main_window.current_shape.effect_3d = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateDialValue( main_window, value ):
-    main_window.current_shape.value = value 
+def updateDialValue(main_window, value):
+    main_window.current_shape.value = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
-
 #------------------------------------------------------------TOGGLE--------------------------------------------------------------
 
 def updateToggleActive( main_window, state ):
