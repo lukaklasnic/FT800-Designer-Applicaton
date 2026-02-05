@@ -304,6 +304,7 @@ class LineWidget( QWidget ):
             self.resize_corner = None
             self.resize_start_size = None
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -618,6 +619,7 @@ class RectangleWidget( QWidget ):
             self.updateRectanglePropertiesSize()
             self.updateRectanglePropertiesPosition()
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -897,6 +899,7 @@ class CircleWidget( QWidget ):
             self.resize_start_diameter = 0
             self.updateDataDict()
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -1251,6 +1254,7 @@ class EllipseWidget( QWidget ):
             self.resize_corner = None
             self.updateDataDict()
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -1514,7 +1518,7 @@ class ButtonWidget( QWidget ):
             'stack_order': self.stack_order,
             'tag': self.tag,
             'position_x': self.x(),
-            'position_y': self.x(),
+            'position_y': self.y(),
             'button_width': self.width(),
             'button_height': self.height(),
             'gradient_start_color': self.gradient_start_color,
@@ -1577,6 +1581,7 @@ class ButtonWidget( QWidget ):
             self.updateButtonPropertiesSize()
             self.updateButtonPropertiesPosition()
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -2128,6 +2133,7 @@ class KeysWidget( QWidget ):
             self.updateKeysPropertiesSize()
             self.updateKeysPropertiesPosition()
 
+        self.updateDataDict()
         event.accept()
     
     def mouseMoveEvent( self, event ):
@@ -2475,6 +2481,7 @@ class ClockWidget( QWidget ):
             self.resize_corner = None
             self.resize_start_diameter = 0
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -2815,6 +2822,7 @@ class GaugeWidget( QWidget ):
             self.resize_corner = None
             self.resize_start_diameter = 0
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -3108,6 +3116,7 @@ class DialWidget( QWidget ):
             'static': self.static,
             'name': self.custom_name,
             'stack_order': self.stack_order,
+            'tag': self.tag,
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
@@ -3127,6 +3136,7 @@ class DialWidget( QWidget ):
             'static': self.static,
             'name': self.custom_name,
             'stack_order': self.stack_order,
+            'tag': self.tag,
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
@@ -3192,6 +3202,7 @@ class DialWidget( QWidget ):
             self.resize_corner = None
             self.resize_start_diameter = 0
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -3569,6 +3580,7 @@ class ToggleWidget( QWidget ):
             self.resize_corner = None
             self.updateTogglePropertiesPosition()
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -4120,6 +4132,7 @@ class ScrollBarWidget( QWidget ):
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -4646,6 +4659,7 @@ class SliderWidget( QWidget ):
             self.updatePropertiesPosition()
             self.updatePropertiesValue()
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -5012,6 +5026,7 @@ class ProgressBarWidget( QWidget ):
             self.updatePropertiesPosition()
             self.updatePropertiesSize()
 
+        self.updateDataDict()
         event.accept()
 
     def mouseMoveEvent( self, event ):
@@ -5386,6 +5401,7 @@ class ImageWidget( QWidget ):
             self.updatePropertiesSize()
             self.updatePropertiesPosition()
 
+        self.updateDataDict()
         event.accept()
 
 class LabelWidget( QWidget ):
@@ -5671,6 +5687,7 @@ class LabelWidget( QWidget ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = False
 
+        self.updateDataDict()
         event.accept()
 
 class NumericWidget( QWidget ):
@@ -5959,4 +5976,5 @@ class NumericWidget( QWidget ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = False
 
+        self.updateDataDict()
         event.accept()

@@ -98,7 +98,7 @@ def generateWidgetStructure( widget_type, name, widget_data ):
         content += f"    { name }.gradient.end_color = { convertColorToHex( widget_data.get( 'gradient_end_color', '0x000000' ) ) };\n"
         content += f"    { name }.text.text_color = { convertColorToHex( widget_data.get( 'font_color', '0xFFFFFF' ) ) };\n"
         content += f"    { name }._3d = { convert3dEnabled( widget_data.get( 'effect_3d', True ) ) };\n"
-        content += f"    { name }.type = { convertKeyboardType( widget_data.get( 'key_type', 'QUERTZ' ) ) };\n"
+        content += f"    { name }.type = { convertKeyboardType( widget_data.get( 'keys_type', 'QUERTZ' ) ) };\n"
         content += f"    { name }.text.text_size = { widget_data.get( 'font_size', 28 ) };\n"
         content += "\n"
     
@@ -401,8 +401,8 @@ def generateComponentsC( canvas_data ):
             content += "{\n"
             content += f"    if( { name }.visible )\n"
             content +=  "    {\n"
-            content += f"       ft800_start_display_list( &ctx );\n"
-            content += f"       ft800_designer_screen_settings( &ctx, &{ name } );\n"
+            content += f"        ft800_start_display_list( &ctx );\n"
+            content += f"        ft800_designer_screen_settings( &ctx, &{ name } );\n"
             
             if 'widgets' in canvas:
                 sorted_widgets = sorted( canvas[ 'widgets' ], key = lambda x: x.get( 'stack_order', 0 ) )
@@ -417,7 +417,7 @@ def generateComponentsC( canvas_data ):
                         if widget_type in draw_functions:
                             content += f"        { draw_functions[ widget_type ] }( &ctx, &{ widget_name } );\n"
             
-            content += f"       ft800_end_display_list( &ctx );\n"
+            content += f"        ft800_end_display_list( &ctx );\n"
             content += "    }\n"
             content += "}\n\n"
     

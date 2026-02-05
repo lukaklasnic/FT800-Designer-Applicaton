@@ -84,7 +84,7 @@ def convertAlignment( alignment ):
         'Right': 'FT800_ALIGN_RIGHT',
         'Center': 'FT800_ALIGN_CENTER',
         'Horisontaly': 'FT800_ALIGN_HORISONTALY',
-        'Vericaly': 'FT800_ALIGN_VERTICALY',
+        'Verticaly': 'FT800_ALIGN_VERTICALY',
     }
 
     return mapping.get( alignment, 'FT800_ALIGN_LEFT' )
@@ -108,9 +108,8 @@ def convertKeyboardType( key_type ):
     return mapping.get( key_type, 'FT800_KEYBOARD_NUM' )
 
 def convertToggleState( state ):
-    if isinstance( state, str ):
-        if state:
-            return 'FT800_ON'  
+    if state:
+        return 'FT800_ON'  
         
-        else: 
-            return 'FT800_OFF'
+    else: 
+        return 'FT800_OFF'
