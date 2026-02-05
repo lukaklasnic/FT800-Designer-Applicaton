@@ -648,19 +648,19 @@ class RectangleWidget( QWidget ):
         
         event.accept()
 
-class CircleWidget( QWidget ):
-    clicked = pyqtSignal( object )
+class CircleWidget(QWidget):
+    clicked = pyqtSignal(object)
     
-    def __init__( self, parent = None ):
-        super().__init__( parent )
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
         self.defaultValues()
-        self.setFixedSize( self.diameter, self.diameter )
-        self.setMouseTracking( True )
-        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
+        self.setFixedSize(self.diameter, self.diameter)
+        self.setMouseTracking(True)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setupDataDict()
         
-    def defaultValues( self ):
+    def defaultValues(self):
         self.active = True
         self.visible = True
         self.static = False
@@ -670,10 +670,10 @@ class CircleWidget( QWidget ):
         self.center_x = 0
         self.center_y = 0
         self.diameter = 100
-        self.edges_color = QColor( 0, 0, 0 )
+        self.edges_color = QColor(0, 0, 0)
         self.edges_width = 5
         self.filled = False 
-        self.fill_color = QColor( 255, 0, 0 ) 
+        self.fill_color = QColor(255, 0, 0)
 
         self.selected = False
         self.resizing = False
@@ -681,146 +681,178 @@ class CircleWidget( QWidget ):
         self.resize_start_pos = QPoint()
         self.drag_start_pos = QPoint()
         self.resize_corner = None
-        self.resize_start_diameter = QPoint()
+        self.resize_start_diameter = 0
 
-    def paintEvent( self, event ):
-        painter = QPainter( self )
-        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
-        rect_size = min( self.width(), self.height() ) - 2 * self.edges_width
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        rect_size = min(self.width(), self.height()) - 2 * self.edges_width
 
-        x_offset = ( self.width() - rect_size ) // 2
-        y_offset = ( self.height() - rect_size ) // 2
+        x_offset = (self.width() - rect_size) // 2
+        y_offset = (self.height() - rect_size) // 2
 
-        circle_rect = QRectF( x_offset, y_offset, rect_size, rect_size )
+        circle_rect = QRectF(x_offset, y_offset, rect_size, rect_size)
 
         if self.filled:
-            painter.setBrush( self.fill_color )
-            painter.setPen( Qt.PenStyle.NoPen )
-            painter.drawEllipse( circle_rect )
+            painter.setBrush(self.fill_color)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawEllipse(circle_rect)
 
-        pen = QPen( self.edges_color, 2 * self.edges_width )
-        pen.setJoinStyle( Qt.PenJoinStyle.RoundJoin )
-        pen.setCapStyle( Qt.PenCapStyle.RoundCap )
-        painter.setPen( pen )
-        painter.setBrush( Qt.BrushStyle.NoBrush )
-        painter.drawEllipse( circle_rect )
+        pen = QPen(self.edges_color, 2 * self.edges_width)
+        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        painter.setPen(pen)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.drawEllipse(circle_rect)
 
         if self.selected:
-            self.drawSelectionBorder( painter )
-            self.drawSelectionHandles( painter )
+            self.drawSelectionBorder(painter)
+            self.drawSelectionHandles(painter)
             
-    def drawSelectionHandles( self, painter ):
+    def drawSelectionHandles(self, painter):
         handle_size = 10
         half_handle = handle_size // 2
 
-        painter.setBrush( QColor( 255, 142, 62 ) )
-        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
+        painter.setBrush(QColor(255, 142, 62))
+        painter.setPen(QPen(QColor(56, 56, 56), 1))
 
-        points = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( self.width() - 4, self.height() - 4 ), QPoint( 4, self.height() - 4 ), ]
+        points = [QPoint(4, 4), QPoint(self.width() - 4, 4), 
+                  QPoint(self.width() - 4, self.height() - 4), QPoint(4, self.height() - 4)]
 
         for point in points:
-            painter.drawEllipse(point.x() - half_handle, point.y() - half_handle, handle_size, handle_size )
-            painter.setBrush( QColor( 255, 142, 62 ) )
-            painter.setPen( Qt.PenStyle.NoPen )
-            painter.drawEllipse( point.x() - 1, point.y() - 1, 2, 2 )
-            painter.setBrush( QColor( 255, 142, 62 ) )
-            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
+            painter.drawEllipse(point.x() - half_handle, point.y() - half_handle, handle_size, handle_size)
+            painter.setBrush(QColor(255, 142, 62))
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawEllipse(point.x() - 1, point.y() - 1, 2, 2)
+            painter.setBrush(QColor(255, 142, 62))
+            painter.setPen(QPen(QColor(56, 56, 56), 1))
 
-    def drawSelectionBorder(  self, painter ):
+    def drawSelectionBorder(self, painter):
         margin = 2
+        selection_rect = QRectF(margin, margin, self.width() - 2 * margin, self.height() - 2 * margin)
+        
+        selection_pen = QPen(QColor(255, 0, 0))
+        selection_pen.setWidth(3)
+        selection_pen.setStyle(Qt.PenStyle.DashLine)
+        selection_pen.setDashPattern([4, 2])
+        
+        painter.setPen(selection_pen)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.drawRect(selection_rect)
 
-        selection_rect = QRectF( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
-        painter.setPen( QPen( QColor( 255, 0, 0 ), 3, Qt.PenStyle.DashLine ) )
-        painter.setBrush( Qt.BrushStyle.NoBrush )
-        painter.drawRect( selection_rect )
-
-    def handleResize( self, global_pos ):
+    def handleResize(self, global_pos):
         if not self.resize_corner:
             return
 
         delta = global_pos - self.resize_start_pos
 
         if "right" in self.resize_corner:
-            new_diameter = max( 20, self.resize_start_diameter + delta.x() )
-
+            new_diameter = max(20, self.resize_start_diameter + delta.x())
         elif "left" in self.resize_corner:
-            new_diameter = max( 20, self.resize_start_diameter - delta.x() )
-
+            new_diameter = max(20, self.resize_start_diameter - delta.x())
         else:
             new_diameter = self.diameter
 
+        # Sačuvaj trenutnu poziciju centra pre promene
+        old_center_x = self.center_x
+        old_center_y = self.center_y
+        
         self.diameter = new_diameter
-        self.setFixedSize( new_diameter, new_diameter )
-        self.update()
-
-
+        self.setFixedSize(new_diameter, new_diameter)
+        
+        # Podesi poziciju widget-a da centar ostane na istom mestu
         if "left" in self.resize_corner:
             delta_x = self.resize_start_diameter - new_diameter
-            self.move( self.x() + delta_x, self.y() )
-
+            self.move(self.x() + delta_x, self.y())
+        
         if "top" in self.resize_corner:
             delta_y = self.resize_start_diameter - new_diameter
-            self.move( self.x(), self.y() + delta_y )
-
+            self.move(self.x(), self.y() + delta_y)
+        
+        # Ažuriraj centar
+        self.updateCenterPosition()
         self.updateCirclePropertiesSize()
         self.updateCircleCenterPositionProperties()
+        self.update()
 
-    def getCornerAt( self, pos ):
-        handle_size = 12 
+    def getCornerAt(self, pos):
+        handle_size = 16  # Povećano za konzistentnost
         half_size = handle_size // 2
         
         corners = {
-            "top_left": QPoint( 0, 0 ),
-            "top_right": QPoint( self.width(), 0 ),
-            "bottom_left": QPoint( 0, self.height() ),
-            "bottom_right": QPoint( self.width(), self.height() )
+            "top_left": QPoint(0, 0),
+            "top_right": QPoint(self.width(), 0),
+            "bottom_left": QPoint(0, self.height()),
+            "bottom_right": QPoint(self.width(), self.height())
         }
         
         for corner_name, corner_pos in corners.items():
-            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
+            corner_rect = QRect(corner_pos.x() - half_size, corner_pos.y() - half_size, 
+                               handle_size, handle_size)
             
-            if corner_rect.contains( pos ):
+            if corner_rect.contains(pos):
                 return corner_name
         
         return None
 
-    def setSelected( self, selected ):
+    def setSelected(self, selected):
         self.selected = selected
         self.update()
     
-    def updateCirclePropertiesSize( self ):
-        main_window = self.findMainWindow()
-
-        try:
-            if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr(main_window, 'diameter_spin_circle' ) ):
-                main_window.diameter_spin_circle.blockSignals( True )
-                main_window.diameter_spin_circle.setValue( self.diameter )
-                main_window.diameter_spin_circle.blockSignals( False )
-
-        except:
-            pass
-
-    def updateCircleCenterPositionProperties( self ):
-        main_window = self.findMainWindow()
-
+    def updateCenterPosition(self):
+        """Ažuriraj poziciju centra na osnovu pozicije widget-a i prečnika"""
         self.center_x = self.x() + self.diameter // 2
         self.center_y = self.y() + self.diameter // 2
 
-        try:
-            if hasattr( main_window, 'pos_x_spin_circle' ) and main_window.pos_x_spin_circle:
-                main_window.pos_x_spin_circle.blockSignals( True )
-                main_window.pos_x_spin_circle.setValue( self.center_x )
-                main_window.pos_x_spin_circle.blockSignals( False )
+    def updateCirclePropertiesSize(self):
+        main_window = self.findMainWindow()
 
-            if hasattr( main_window, 'pos_y_spin_circle' ) and main_window.pos_y_spin_circle:
-                main_window.pos_y_spin_circle.blockSignals( True )
-                main_window.pos_y_spin_circle.setValue( self.center_y )
-                main_window.pos_y_spin_circle.blockSignals( False )
+        if not main_window:
+            return
+
+        try:
+            if (hasattr(main_window, 'current_shape') and 
+                main_window.current_shape == self and 
+                hasattr(main_window, 'diameter_spin_circle')):
+                
+                main_window.diameter_spin_circle.blockSignals(True)
+                main_window.diameter_spin_circle.setValue(self.diameter)
+                main_window.diameter_spin_circle.blockSignals(False)
 
         except:
             pass
 
-    def setupDataDict( self ):
+    def updateCircleCenterPositionProperties(self):
+        """Ažuriraj UI sa trenutnom pozicijom centra"""
+        main_window = self.findMainWindow()
+
+        if not main_window:
+            return
+
+        # Uvek ažuriraj centar pre nego što ga prikažeš u UI
+        self.updateCenterPosition()
+
+        try:
+            if (hasattr(main_window, 'current_shape') and 
+                main_window.current_shape == self):
+                
+                if hasattr(main_window, 'pos_x_spin_circle'):
+                    main_window.pos_x_spin_circle.blockSignals(True)
+                    main_window.pos_x_spin_circle.setValue(self.center_x)
+                    main_window.pos_x_spin_circle.blockSignals(False)
+
+                if hasattr(main_window, 'pos_y_spin_circle'):
+                    main_window.pos_y_spin_circle.blockSignals(True)
+                    main_window.pos_y_spin_circle.setValue(self.center_y)
+                    main_window.pos_y_spin_circle.blockSignals(False)
+
+        except:
+            pass
+
+    def setupDataDict(self):
+        """Inicijalizuj data dict - VAŽNO: pozovi updateCenterPosition() prvo!"""
+        self.updateCenterPosition()  # OVO JE KLJUČNO!
+        
         self.data_dict = {
             'active': self.active,
             'visible': self.visible,
@@ -831,7 +863,7 @@ class CircleWidget( QWidget ):
             'center_x': self.center_x,
             'center_y': self.center_y,
             'diameter': self.diameter,
-            'edges_color': self.edges_color ,
+            'edges_color': self.edges_color,
             'edges_width': self.edges_width,
             'filled': self.filled,
             'fill_color': self.fill_color,
@@ -839,8 +871,11 @@ class CircleWidget( QWidget ):
             'id': None
         }
     
-    def updateDataDict( self ):
-        self.data_dict.update( {
+    def updateDataDict(self):
+        """Ažuriraj data dict - VAŽNO: ažuriraj centar prvo!"""
+        self.updateCenterPosition()  # OVO JE KLJUČNO!
+        
+        self.data_dict.update({
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -854,77 +889,83 @@ class CircleWidget( QWidget ):
             'edges_width': self.edges_width,
             'filled': self.filled,
             'fill_color': self.fill_color
-        } )
+        })
         return self.data_dict
     
-    def getDataDict( self ):
+    def getDataDict(self):
         return self.updateDataDict()
     
     def setDataId(self, data_id):
-        self.data_dict[ 'id' ] = data_id
+        self.data_dict['id'] = data_id
 
-    def findMainWindow( self ):
+    def move(self, x, y):
+        """Override move metode da bi se ažurirao centar"""
+        super().move(x, y)
+        self.updateCenterPosition()
+
+    def setGeometry(self, x, y, width, height):
+        """Override setGeometry metode"""
+        super().setGeometry(x, y, width, height)
+        self.updateCenterPosition()
+
+    def findMainWindow(self):
         parent = self.parent()
 
         while parent:
-            if isinstance( parent, QMainWindow ):
+            if isinstance(parent, QMainWindow):
                 return parent
             parent = parent.parent()
 
         return None
 
-    def mousePressEvent( self, event ):
+    def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
-            self.resize_corner = self.getCornerAt( mouse_pos )
+            self.resize_corner = self.getCornerAt(mouse_pos)
             
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_diameter = self.diameter
-
             else:
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                self.clicked.emit( self )
+                self.clicked.emit(self)
                 
             self.updateCircleCenterPositionProperties()
             event.accept()
 
-    def mouseReleaseEvent( self, event ):
+    def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
             self.resize_corner = None
-            self.resize_start_diameter = 0
+            
+            self.updateCirclePropertiesSize()
+            self.updateCircleCenterPositionProperties()
             self.updateDataDict()
 
-        self.updateDataDict()
         event.accept()
 
-    def mouseMoveEvent( self, event ):
+    def mouseMoveEvent(self, event):
         mouse_pos = event.pos()
-
-        corner = self.getCornerAt( mouse_pos )
+        corner = self.getCornerAt(mouse_pos)
 
         if corner:
-            if corner in [ "top_left", "bottom_right" ]:
-                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
-
-            elif corner in [ "top_right", "bottom_left" ]:
-                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
-
+            if corner in ["top_left", "bottom_right"]:
+                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
+            elif corner in ["top_right", "bottom_left"]:
+                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
         else:
-            self.setCursor( Qt.CursorShape.ArrowCursor )
+            self.setCursor(Qt.CursorShape.ArrowCursor)
 
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize( event.globalPosition().toPoint())
-
+            self.handleResize(event.globalPosition().toPoint())
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-            new_x = max( 0, self.x() + delta.x() )
-            new_y = max( 0, self.y() + delta.y() )
-            self.move( new_x, new_y )
+            new_x = max(0, self.x() + delta.x())
+            new_y = max(0, self.y() + delta.y())
+            self.move(new_x, new_y)
             self.updateCircleCenterPositionProperties()
             self.updateDataDict()
 

@@ -212,80 +212,103 @@ def updateRectangleGradientEndColor( main_window ):
         
 #------------------------------------------------------------CIRCLE--------------------------------------------------------------
 
-def updateCircleActive( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateCircleActive(main_window, state):
+    state = state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleVisible( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateCircleVisible(main_window, state):
+    state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
+    main_window.current_shape.setVisible(state)
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleStatic( main_window, state ):
-    state == Qt.CheckState.Checked.value
+def updateCircleStatic(main_window, state):
+    state = state == Qt.CheckState.Checked.value
     main_window.current_shape.static = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleName( main_window, text ):
+def updateCircleName(main_window, text):
     main_window.current_shape.custom_name = text
     main_window.current_shape.update() 
     main_window.current_shape.updateDataDict()
 
-def updateCircleStackOrder( main_window, value ):
+def updateCircleStackOrder(main_window, value):
     main_window.current_shape.stack_order = value
     main_window.sortWidgetsByStackOrder()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleTag( main_window, value ):
+def updateCircleTag(main_window, value):
     main_window.current_shape.tag = value
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCirclePosition( main_window ):
-    main_window.current_shape.move( main_window.pos_x_spin_circle.value() - main_window.current_shape.diameter // 2, main_window.pos_y_spin_circle.value() - main_window.current_shape.diameter // 2 )
+def updateCirclePosition(main_window):
+    """Ažuriraj poziciju kruga na osnovu centra"""
+    # Izračunaj gornji levi ugao na osnovu centra
+    x = main_window.pos_x_spin_circle.value() - main_window.current_shape.diameter // 2
+    y = main_window.pos_y_spin_circle.value() - main_window.current_shape.diameter // 2
+    
+    main_window.current_shape.move(x, y)
+    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleSize( main_window, value ):
-    main_window.current_shape.setFixedSize( value, value )
+def updateCircleSize(main_window):
+    """Ažuriraj veličinu kruga"""
+    new_diameter = main_window.diameter_spin_circle.value()
+    
+    # Sačuvaj trenutni centar
+    current_center_x = main_window.current_shape.center_x
+    current_center_y = main_window.current_shape.center_y
+    
+    # Izračunaj novu poziciju gornjeg levog ugla da centar ostane isti
+    new_x = current_center_x - new_diameter // 2
+    new_y = current_center_y - new_diameter // 2
+    
+    main_window.current_shape.diameter = new_diameter
+    main_window.current_shape.setFixedSize(new_diameter, new_diameter)
+    main_window.current_shape.move(new_x, new_y)
+    main_window.current_shape.updateCenterPosition()  # Ažuriraj centar
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleLineColor( main_window ):
-    color = QColorDialog.getColor( main_window.current_shape.edges_color )
+def updateCircleLineColor(main_window):
+    color = QColorDialog.getColor(main_window.current_shape.edges_color)
 
     if color.isValid():
         main_window.current_shape.edges_color = color
-        main_window.edges_color_rect_circle.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.edges_color_rect_circle.setStyleSheet(
+            f"background-color: {color.name()}; border: 1px solid #ccc;"
+        )
         main_window.current_shape.update() 
         main_window.current_shape.updateDataDict()
 
-def updateCircleEdgeWidth( main_window, value ):
+def updateCircleEdgeWidth(main_window, value):
     main_window.current_shape.edges_width = value 
     main_window.current_shape.update() 
     main_window.current_shape.updateDataDict()
 
-def updateCircleFilled( main_window, state ):
-    state == Qt.CheckState.Checked.value 
+def updateCircleFilled(main_window, state):
+    state = state == Qt.CheckState.Checked.value
     main_window.current_shape.filled = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateCircleFillColor( main_window ):
-    color = QColorDialog.getColor( main_window.current_shape.fill_color )
+def updateCircleFillColor(main_window):
+    color = QColorDialog.getColor(main_window.current_shape.fill_color)
 
     if color.isValid():
         main_window.current_shape.fill_color = color
-        main_window.fill_color_rect_circle.setStyleSheet( f"background-color: { color.name() }; "f"border: 1px solid #ccc;" )
+        main_window.fill_color_rect_circle.setStyleSheet(
+            f"background-color: {color.name()}; border: 1px solid #ccc;"
+        )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
-
 #------------------------------------------------------------ELLIPSE--------------------------------------------------------------
 
 def updateEllipseActive( main_window, state ):
