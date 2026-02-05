@@ -5470,9 +5470,6 @@ class ImageWidget( QWidget ):
                 pass
 
     def setupDataDict( self ):
-        # Osiguraj da position_x i position_y postoje
-        self.position_x = self.x()
-        self.position_y = self.y()
         self.data_dict = {
             'active': self.active,
             'visible': self.visible,
@@ -5584,245 +5581,291 @@ class ImageWidget( QWidget ):
         self.updateDataDict()
         event.accept()
 
-class LabelWidget(QWidget):
-    clicked = pyqtSignal(object)
+class LabelWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__( self, parent = None ):
+        super().__init__( parent )
 
         self.defaultValues()
         self.calculateAndSetSize() 
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         self.setupDataDict()
         
-    def defaultValues(self):
+    def defaultValues( self ):
         self.active = True
         self.visible = True
         self.static = False
         self.custom_name = ""
         self.stack_order = 1
-        self.tag = 0  # Dodat tag za konzistentnost
-        self.position_x = 0  # Gornji levi ugao
-        self.position_y = 0  # Gornji levi ugao
-        self.text_color = QColor(0, 0, 0)
-        self.text = "Text"
-        self.text_size = 29
+        self.original_x = 0
+        self.original_y = 0
+        self.text_color = QColor( 0, 0, 0 ) 
+        self.text = "Text"  
+        self.text_size = 29 
         self.text_alignment = "Left"
 
         self.selected = False
         self.dragging = False
         self.drag_start_pos = QPoint()
         
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    def paintEvent( self, event ):
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
-        painter.setPen(QPen(self.text_color))
+        painter.setPen( QPen( self.text_color ) )
         font = QFont()
-        font.setPointSize(int((23 / 5) * self.text_size - 548 / 5))
-        painter.setFont(font)
+        font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5 ) )
+        painter.setFont( font )
         
-        text_rect = QRect(0, 0, self.label_width, self.label_height)
+        text_rect = QRect( 0, 0, self.label_width, self.label_height )
         
         if self.text_alignment == "Left":
             alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
+        
         elif self.text_alignment == "Right":
             alignment_flags = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
+        
         elif self.text_alignment == "Center":
             alignment_flags = Qt.AlignmentFlag.AlignCenter
+        
         elif self.text_alignment == "Horisontaly":
             alignment_flags = Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop
+        
         elif self.text_alignment == "Verticaly":
             alignment_flags = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
         
-        painter.drawText(text_rect, alignment_flags, self.text)
+        painter.drawText( text_rect, alignment_flags, self.text )
         
         if self.selected:
-            self.drawSelectionBorder(painter)
+            self.drawSelectionBorder( painter )
 
-    def drawSelectionBorder(self, painter):
+    def drawSelectionBorder( self, painter ):
         if not self.selected:
             return
         
-        margin = 2
-        selection_rect = QRect(margin, margin, 
-                              self.width() - 2 * margin, 
-                              self.height() - 2 * margin)
-
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
-
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(selection_rect)
-
-    def calculateAndSetSize(self):
         font = QFont()
-        font.setPointSize(int((23 / 5) * self.text_size - 548 / 5))
-        font_metrics = QFontMetrics(font)
+        font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5 ) )
+        font_metrics = QFontMetrics( font )
         
-        self.text_width = font_metrics.horizontalAdvance(self.text)
+        text_width = font_metrics.horizontalAdvance( self.text )
+        text_height = font_metrics.height()
+        ascent = font_metrics.ascent()
+        
+        if self.text_alignment == "Left":
+            text_x = 0
+            text_y = ascent
+            
+        elif self.text_alignment == "Right":
+            text_x = self.width() - text_width
+            text_y = ascent
+            
+        elif self.text_alignment == "Center":
+            text_x = ( self.width() - text_width ) // 2
+            text_y = ( self.height() - text_height ) // 2 + ascent
+            
+        elif self.text_alignment == "Horisontaly":
+            text_x = ( self.width() - text_width ) // 2
+            text_y = ascent
+            
+        elif self.text_alignment == "Verticaly":
+            text_x = 0
+            text_y = ( self.height() - text_height ) // 2 + ascent
+            
+        bbox_x = text_x
+        bbox_y = text_y - ascent 
+        margin = 0
+        
+        border_rect = QRect(
+            bbox_x - margin,
+            bbox_y - margin,
+            text_width + 2 * margin,
+            text_height + 2 * margin
+        )
+    
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 3 )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
+    
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( border_rect )
+
+    def calculateAndSetSize( self ):
+        font = QFont()
+        font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5) )
+        font_metrics = QFontMetrics( font )
+        
+        self.text_width = font_metrics.horizontalAdvance( self.text )
         self.text_height = font_metrics.height()
+        self.ascent = font_metrics.ascent()
         
         margin = 10
-        self.label_width = max(50, self.text_width + 2 * margin)
-        self.label_height = max(30, self.text_height + 2 * margin)
+        self.label_width = max( 50, self.text_width + 2 * margin )
+        self.label_height = max( 30, self.text_height + 2 * margin )
         
-        self.setFixedSize(self.label_width, self.label_height)
-        self.update()
+        self.setFixedSize( self.label_width, self.label_height )
 
-    def setSelected(self, selected):
+    def applyAlignmentOffset( self ):
+        if not hasattr( self, 'text_width' ):
+            return
+            
+        if self.text_alignment == "Left":
+            offset_x = 0
+            offset_y = 0
+            
+        elif self.text_alignment == "Right":
+            offset_x = - self.text_width
+            offset_y = 0
+            
+        elif self.text_alignment == "Center":
+            offset_x = - self.text_width // 2
+            offset_y = - self.text_height // 2
+            
+        elif self.text_alignment == "Horisontaly":
+            offset_x = - self.text_width // 2
+            offset_y = 0
+            
+        elif self.text_alignment == "Verticaly":
+            offset_x = 0
+            offset_y = - self.ascent // 2
+            
+        actual_x = self.original_x + offset_x
+        actual_y = self.original_y + offset_y
+        actual_x = max( 0, actual_x )
+        actual_y = max( 0, actual_y )
+        super().move( int( actual_x ), int( actual_y ) )
+
+    def move( self, x, y ):
+        self.original_x = x
+        self.original_y = y
+        
+        self.applyAlignmentOffset()
+        self.updatePropertiesPosition()
+
+    def setSelected( self, selected ):
         self.selected = selected
         self.update()
 
-    def move(self, x, y):
-        """Move widget to position (gornji levi ugao)"""
-        self.position_x = x
-        self.position_y = y
-        super().move(x, y)
-        self.updateLabelPropertiesPosition()
+    def setSizeBasedOnText( self ):
+        current_original_x = getattr( self, 'original_x', self.x() )
+        current_original_y = getattr( self, 'original_y', self.y() )
+        
+        self.calculateAndSetSize()
+        
+        self.original_x = current_original_x
+        self.original_y = current_original_y
+        self.original_x = max( 0, self.original_x )
+        self.original_y = max( 0, self.original_y )        
+        self.applyAlignmentOffset()
+        self.update()
 
-    def updateLabelPropertiesPosition(self):
-        """Ažuriraj UI sa trenutnom pozicijom (gornji levi ugao)"""
+    def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
 
-        if not main_window:
-            return
+        if main_window and hasattr(main_window, 'current_shape') and main_window.current_shape == self:
+            try:
+                if hasattr( main_window, 'pos_x_spin_label' ):
+                    main_window.pos_x_spin_label.blockSignals( True )
+                    main_window.pos_x_spin_label.setValue( self.original_x )
+                    main_window.pos_x_spin_label.blockSignals( False )
 
-        try:
-            if (hasattr(main_window, 'current_shape') and 
-                main_window.current_shape == self):
-                
-                if hasattr(main_window, 'pos_x_spin_label'):
-                    main_window.pos_x_spin_label.blockSignals(True)
-                    main_window.pos_x_spin_label.setValue(self.position_x)
-                    main_window.pos_x_spin_label.blockSignals(False)
+            except RuntimeError:
+                pass
+            
+            try:
+                if hasattr( main_window, 'pos_y_spin_label' ):
+                    main_window.pos_y_spin_label.blockSignals( True )
+                    main_window.pos_y_spin_label.setValue( self.original_y )
+                    main_window.pos_y_spin_label.blockSignals( False )
 
-                if hasattr(main_window, 'pos_y_spin_label'):
-                    main_window.pos_y_spin_label.blockSignals(True)
-                    main_window.pos_y_spin_label.setValue(self.position_y)
-                    main_window.pos_y_spin_label.blockSignals(False)
+            except RuntimeError:
+                pass
 
-        except:
-            pass
-
-    def setupDataDict(self):
+    def setupDataDict( self ):
         self.data_dict = {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
             'name': self.custom_name,
             'stack_order': self.stack_order,
-            'tag': self.tag,  # Dodat tag
-            'position_x': self.position_x,
-            'position_y': self.position_y,
+            'position_x': self.x(),
+            'position_y': self.y(),
             'text_color': self.text_color,
             'text': self.text,
             'text_size': self.text_size,
             'text_alignment': self.text_alignment,
+
             'type': 'Label',
             'id': None
+
         }
     
-    def updateDataDict(self):
-        # Ažuriraj trenutnu poziciju iz widget-a
-        self.position_x = self.x()
-        self.position_y = self.y()
-        
-        self.data_dict.update({
+    def updateDataDict( self ):
+        self.data_dict.update( {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
             'name': self.custom_name,
             'stack_order': self.stack_order,
-            'tag': self.tag,  # Dodat tag
-            'position_x': self.position_x,
-            'position_y': self.position_y,
+            'position_x': self.x(),
+            'position_y': self.y(),
             'text_color': self.text_color,
             'text': self.text,
             'text_size': self.text_size,
             'text_alignment': self.text_alignment
-        })
+        } )
         return self.data_dict
     
-    def getDataDict(self):
+    def getDataDict( self ):
         return self.updateDataDict()
     
-    def setDataId(self, data_id):
-        self.data_dict['id'] = data_id
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
 
-    def findMainWindow(self):
+    def findMainWindow( self ):
         parent = self.parent()
 
         while parent:
-            if isinstance(parent, QMainWindow):
+            if isinstance( parent, QMainWindow ):
                 return parent
             
             parent = parent.parent()
 
         return None
     
-    def mousePressEvent(self, event):
+    def mouseMoveEvent( self, event ):
+        if self.dragging and ( event.buttons() & Qt.MouseButton.LeftButton ):
+            delta = event.pos() - self.drag_start_pos
+            
+            self.original_x += delta.x()
+            self.original_y += delta.y()
+            self.original_x = max( 0, self.original_x )
+            self.original_y = max( 0, self.original_y )
+            
+            self.applyAlignmentOffset()
+            self.updatePropertiesPosition()
+            
+            self.drag_start_pos = event.pos()
+        
+        event.accept()
+
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = True
             self.drag_start_pos = event.pos()
-            self.clicked.emit(self)
-            event.accept()
+            self.clicked.emit( self )
 
-    def mouseReleaseEvent(self, event):
+        event.accept()
+
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = False
-            self.updateLabelPropertiesPosition()
-            self.updateDataDict()
-        event.accept()
 
-    def mouseMoveEvent(self, event):
-        if self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            delta = event.pos() - self.drag_start_pos
-            new_x = max(0, self.x() + delta.x())
-            new_y = max(0, self.y() + delta.y())
-            
-            # Ažuriraj poziciju widget-a
-            super().move(new_x, new_y)
-            
-            # Ažuriraj naše interne promenljive
-            self.position_x = new_x
-            self.position_y = new_y
-            
-            # Resetuj drag_start_pos za glatko pomeranje
-            self.drag_start_pos = event.pos()
-            
-            # Ažuriraj UI
-            self.updateLabelPropertiesPosition()
-        
+        self.updateDataDict()
         event.accept()
-
-    def setTextProperties(self, text=None, text_size=None, alignment=None):
-        """Pomoćna metoda za postavljanje više svojstava odjednom"""
-        if text is not None:
-            self.text = text
-        if text_size is not None:
-            self.text_size = text_size
-        if alignment is not None:
-            self.text_alignment = alignment
-        
-        # Sačuvaj trenutnu poziciju
-        current_x = self.x()
-        current_y = self.y()
-        
-        # Preračunaj veličinu
-        self.calculateAndSetSize()
-        
-        # Vrati na istu poziciju (gornji levi ugao ostaje isti)
-        super().move(current_x, current_y)
-        self.position_x = current_x
-        self.position_y = current_y
-        
-        self.update()
-        self.updateLabelPropertiesPosition()
 
 class NumericWidget( QWidget ):
     clicked = pyqtSignal( object )

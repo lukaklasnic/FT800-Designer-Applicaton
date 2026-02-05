@@ -1350,101 +1350,65 @@ def updateImageFrameWidth( main_window, value ):
 
 #------------------------------------------------------------LABEL--------------------------------------------------------------
 
-def updateLabelActive(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def updateLabelActive( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateLabelVisible(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def updateLabelVisible( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible(state)
+    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateLabelStatic(main_window, state):
-    state = state == Qt.CheckState.Checked.value
+def updateLabelStatic( main_window, state ):
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.static = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateLabelName(main_window, text):
+def updateLabelName( main_window, text ):
     main_window.current_shape.custom_name = text
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateLabelStackOrder(main_window, value):
+def updateLabelStackOrder( main_window, value ):
     main_window.current_shape.stack_order = value
     main_window.sortWidgetsByStackOrder()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateLabelTag(main_window, value):
-    """Nova funkcija za ažuriranje tag-a"""
-    main_window.current_shape.tag = value
+def updateLabelPosition( main_window ):
+    main_window.current_shape.move( main_window.pos_x_spin_label.value(), main_window.pos_y_spin_label.value() )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateLabelPosition(main_window):
-    """Ažuriraj poziciju labele (gornji levi ugao)"""
-    main_window.current_shape.move(
-        main_window.pos_x_spin_label.value(), 
-        main_window.pos_y_spin_label.value()
-    )
-    main_window.current_shape.update()
-    main_window.current_shape.updateDataDict()
-
-def updateLabelTextColor(main_window):
-    color = QColorDialog.getColor(main_window.current_shape.text_color)
+def updateLabelTextColor( main_window ):
+    color = QColorDialog.getColor( main_window.current_shape.text_color )
 
     if color.isValid():
-        main_window.current_shape.text_color = color
-        main_window.text_color_rect_label.setStyleSheet(
-            f"background-color: {color.name()}; border: 1px solid #ccc;"
-        )
+        main_window.current_shape.text_color = color 
+        main_window.text_color_rect_label.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
-def updateLabelText(main_window, text):
-    """Ažuriraj tekst labele"""
-    # Sačuvaj trenutnu poziciju pre promene
-    current_x = main_window.current_shape.x()
-    current_y = main_window.current_shape.y()
-    
-    main_window.current_shape.text = text
-    main_window.current_shape.calculateAndSetSize()
-    
-    # Vrati na istu poziciju (gornji levi ugao ostaje isti)
-    main_window.current_shape.move(current_x, current_y)
+def updateLabelText( main_window, text ):
+    main_window.current_shape.text = text 
+    main_window.current_shape.setSizeBasedOnText()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateLabelTextSize(main_window, value):
-    """Ažuriraj veličinu teksta labele"""
-    # Sačuvaj trenutnu poziciju pre promene
-    current_x = main_window.current_shape.x()
-    current_y = main_window.current_shape.y()
-    
-    main_window.current_shape.text_size = value
-    main_window.current_shape.calculateAndSetSize()
-    
-    # Vrati na istu poziciju (gornji levi ugao ostaje isti)
-    main_window.current_shape.move(current_x, current_y)
+def updateLabelTextSize( main_window, value ):
+    main_window.current_shape.text_size = value 
+    main_window.current_shape.setSizeBasedOnText()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
-def updateLabelAlignment(main_window, text):
-    """Ažuriraj poravnanje teksta labele"""
-    # Sačuvaj trenutnu poziciju pre promene
-    current_x = main_window.current_shape.x()
-    current_y = main_window.current_shape.y()
-    
-    main_window.current_shape.text_alignment = text
-    main_window.current_shape.calculateAndSetSize()
-    
-    # Vrati na istu poziciju (gornji levi ugao ostaje isti)
-    main_window.current_shape.move(current_x, current_y)
+def updateLabelAlignment( main_window, text ):
+    main_window.current_shape.text_alignment = text 
+    main_window.current_shape.setSizeBasedOnText()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
