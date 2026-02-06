@@ -269,7 +269,7 @@ class LineWidget( QWidget ):
         }
     
     def updateDataDict( self ):
-        self.data_dict.update({
+        self.data_dict.update( {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -282,7 +282,7 @@ class LineWidget( QWidget ):
             'end_y': self.end_y,
             'line_color':  self.line_color,
             'line_width': self.line_width,
-        })
+        } )
         return self.data_dict
     
     def getDataDict( self ):
@@ -380,7 +380,7 @@ class RectangleWidget(QWidget):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setupDataDict()
         
-    def defaultValues(self):
+    def defaultValues( self ):
         self.active = True
         self.visible = True
         self.static = False
@@ -470,7 +470,7 @@ class RectangleWidget(QWidget):
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawRect(selection_rect)
 
-    def handleResize(self, global_pos):
+    def handleResize( self, global_pos ):
         if not self.resize_corner:
             return
 
@@ -481,118 +481,102 @@ class RectangleWidget(QWidget):
         new_x = self.resize_start_position.x()
         new_y = self.resize_start_position.y()
 
-        # Desni uglovi - originalna logika (desna strana se pomera)
         if self.resize_corner == "bottom_right":
-            new_width = max(20, self.resize_start_size.width() + delta.x())
-            new_height = max(20, self.resize_start_size.height() + delta.y())
+            new_width = max( 20, self.resize_start_size.width() + delta.x() )
+            new_height = max( 20, self.resize_start_size.height() + delta.y() )
 
         elif self.resize_corner == "top_right":
-            new_width = max(20, self.resize_start_size.width() + delta.x())
-            new_height = max(20, self.resize_start_size.height() - delta.y())
+            new_width = max( 20, self.resize_start_size.width() + delta.x() )
+            new_height = max( 20, self.resize_start_size.height() - delta.y() )
             new_y = self.resize_start_position.y() + delta.y()
 
-        # Levi uglovi - NOVA LOGIKA: leva strana se pomera, desna ostaje fiksna
         elif self.resize_corner == "bottom_left":
-            # Nova širina = stara širina - delta.x() (smanjuje se sa pomeranjem u desno)
-            new_width = max(20, self.resize_start_size.width() - delta.x())
-            # Nova pozicija X = stara pozicija + delta.x() (pomera se u desno)
+            new_width = max( 20, self.resize_start_size.width() - delta.x() )
             new_x = self.resize_start_position.x() + delta.x()
-            # Visina se produžava/smanjuje kao obično
-            new_height = max(20, self.resize_start_size.height() + delta.y())
+            new_height = max( 20, self.resize_start_size.height() + delta.y() )
 
         elif self.resize_corner == "top_left":
-            # Nova širina = stara širina - delta.x() (smanjuje se sa pomeranjem u desno)
-            new_width = max(20, self.resize_start_size.width() - delta.x())
-            # Nova pozicija X = stara pozicija + delta.x() (pomera se u desno)
+            new_width = max( 20, self.resize_start_size.width() - delta.x() )
             new_x = self.resize_start_position.x() + delta.x()
-            # Nova visina = stara visina - delta.y() (smanjuje se sa pomeranjem na dole)
-            new_height = max(20, self.resize_start_size.height() - delta.y())
-            # Nova pozicija Y = stara pozicija + delta.y() (pomera se na dole)
+            new_height = max( 20, self.resize_start_size.height() - delta.y() )
             new_y = self.resize_start_position.y() + delta.y()
 
-        # Ažuriraj dimenzije widget-a
         self.rectangle_width = new_width
         self.rectangle_height = new_height
-        self.setFixedSize(new_width, new_height)
+        self.setFixedSize( new_width, new_height )
         
-        # Ako se pomera leva strana, pomeri ceo widget
-        if self.resize_corner in ["top_left", "bottom_left"]:
-            self.move(new_x, new_y)
-        # Ako se pomera gornji desni ugao, pomeri widget vertikalno
+        if self.resize_corner in [ "top_left", "bottom_left" ]:
+            self.move( new_x, new_y )
+
         elif self.resize_corner == "top_right":
-            self.move(self.x(), new_y)
+            self.move( self.x(), new_y )
 
         self.updateRectanglePropertiesSize()
-        # VAŽNO: Ažuriraj i poziciju tokom resize-a
         self.updateRectanglePropertiesPosition()
 
-    def getCornerAt(self, pos):
+    def getCornerAt( self, pos ):
         handle_size = 16
         half_size = handle_size // 2
         
         corners = {
-            "top_left": QPoint(0, 0),
-            "top_right": QPoint(self.width(), 0),
-            "bottom_left": QPoint(0, self.height()),
-            "bottom_right": QPoint(self.width(), self.height())
+            "top_left": QPoint( 0, 0 ),
+            "top_right": QPoint( self.width(), 0 ),
+            "bottom_left": QPoint( 0, self.height() ),
+            "bottom_right": QPoint( self.width(), self.height() )
         }
         
         for corner_name, corner_pos in corners.items():
-            corner_rect = QRect(corner_pos.x() - half_size, corner_pos.y() - half_size, 
-                              handle_size, handle_size)
-            
-            if corner_rect.contains(pos):
+            corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
+    
+            if corner_rect.contains( pos ):
                 return corner_name
         
         return None
 
-    def setSelected(self, selected):
+    def setSelected( self, selected ):
         self.selected = selected
         self.update()
 
-    def updateRectanglePropertiesSize(self):
+    def updateRectanglePropertiesSize( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
             return
 
         try:        
-            if (hasattr(main_window, 'current_shape') and main_window.current_shape == self and 
-                hasattr(main_window, 'width_spin_rect') and hasattr(main_window, 'height_spin_rect')):
-                main_window.width_spin_rect.blockSignals(True)
-                main_window.width_spin_rect.setValue(self.rectangle_width)
-                main_window.width_spin_rect.blockSignals(False)
+            if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'width_spin_rect' ) and hasattr( main_window, 'height_spin_rect' ) ):
+                main_window.width_spin_rect.blockSignals( True )
+                main_window.width_spin_rect.setValue( self.rectangle_width )
+                main_window.width_spin_rect.blockSignals( False )
 
-            if (hasattr(main_window, 'current_shape') and main_window.current_shape == self and 
-                hasattr(main_window, 'height_spin_rect')):
-                main_window.height_spin_rect.blockSignals(True)
-                main_window.height_spin_rect.setValue(self.rectangle_height)
-                main_window.height_spin_rect.blockSignals(False)
+            if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'height_spin_rect' ) ):
+                main_window.height_spin_rect.blockSignals( True )
+                main_window.height_spin_rect.setValue( self.rectangle_height )
+                main_window.height_spin_rect.blockSignals( False )
 
         except:
             pass
 
-    def updateRectanglePropertiesPosition(self):
+    def updateRectanglePropertiesPosition( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
             return
         
         try:
-            if (hasattr(main_window, 'current_shape') and main_window.current_shape == self and 
-                hasattr(main_window, 'pos_x_spin_rect') and hasattr(main_window, 'pos_y_spin_rect')):
-                main_window.pos_x_spin_rect.blockSignals(True)
-                main_window.pos_x_spin_rect.setValue(self.x())
-                main_window.pos_x_spin_rect.blockSignals(False)
+            if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'pos_x_spin_rect' ) and hasattr( main_window, 'pos_y_spin_rect' ) ):
+                main_window.pos_x_spin_rect.blockSignals( True )
+                main_window.pos_x_spin_rect.setValue( self.x() )
+                main_window.pos_x_spin_rect.blockSignals( False )
                 
-                main_window.pos_y_spin_rect.blockSignals(True)
-                main_window.pos_y_spin_rect.setValue(self.y())
-                main_window.pos_y_spin_rect.blockSignals(False)
+                main_window.pos_y_spin_rect.blockSignals( True )
+                main_window.pos_y_spin_rect.setValue( self.y() )
+                main_window.pos_y_spin_rect.blockSignals( False )
 
         except:
             pass
 
-    def setupDataDict(self):
+    def setupDataDict( self ):
         self.data_dict = {
             'active': self.active,
             'visible': self.visible,
@@ -615,8 +599,8 @@ class RectangleWidget(QWidget):
             'id': None
         }
     
-    def updateDataDict(self):
-        self.data_dict.update({
+    def updateDataDict( self ):
+        self.data_dict.update( {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -633,45 +617,45 @@ class RectangleWidget(QWidget):
             'gradient_direction': self.gradient_direction,
             'gradient_start_color': self.start_color,
             'gradient_end_color': self.end_color
-        })
+        } )
         return self.data_dict
     
-    def getDataDict(self):
+    def getDataDict( self ):
         return self.updateDataDict()
     
-    def setDataId(self, data_id):
-        self.data_dict['id'] = data_id
+    def setDataId( self, data_id ):
+        self.data_dict[ 'id' ] = data_id
 
-    def findMainWindow(self):
+    def findMainWindow( self ):
         parent = self.parent()
 
         while parent:
-            if isinstance(parent, QMainWindow):
+            if isinstance( parent, QMainWindow ):
                 return parent
             
             parent = parent.parent()
 
         return None
 
-    def mousePressEvent(self, event):
+    def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
-                self.resize_start_position = self.pos()  # Sačuvaj početnu poziciju
+                self.resize_start_position = self.pos()
 
             else:
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                self.clicked.emit(self)
+                self.clicked.emit( self )
 
         event.accept()
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.resizing = False
             self.dragging = False
@@ -683,27 +667,28 @@ class RectangleWidget(QWidget):
         self.updateDataDict()
         event.accept()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent( self, event ):
         mouse_pos = event.pos()
         corner = self.getCornerAt(mouse_pos)
 
         if corner:
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
+
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
         else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
+            self.setCursor( Qt.CursorShape.ArrowCursor )
         
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
+            self.handleResize( event.globalPosition().toPoint() )
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-            new_x = max(0, self.x() + delta.x())
-            new_y = max(0, self.y() + delta.y())
+            new_x = max( 0, self.x() + delta.x() )
+            new_y = max( 0, self.y() + delta.y() )
 
-            self.move(new_x, new_y)
+            self.move( new_x, new_y )
             self.updateRectanglePropertiesPosition()
         
         event.accept()
@@ -924,7 +909,7 @@ class CircleWidget( QWidget ):
     def updateDataDict( self ):
         self.updateCenterPosition()
         
-        self.data_dict.update({
+        self.data_dict.update( {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -938,7 +923,7 @@ class CircleWidget( QWidget ):
             'edges_width': self.edges_width,
             'filled': self.filled,
             'fill_color': self.fill_color
-        })
+        } )
         return self.data_dict
     
     def getDataDict( self ):
@@ -1307,7 +1292,7 @@ class EllipseWidget( QWidget ):
     def updateDataDict( self ):
         self.updateCenterPosition()  
         
-        self.data_dict.update({
+        self.data_dict.update( {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -1324,7 +1309,7 @@ class EllipseWidget( QWidget ):
             'gradient_direction': self.gradient_direction,
             'gradient_start_color': self.gradient_start_color,
             'gradient_end_color': self.gradient_end_color
-        })
+        } )
         return self.data_dict
     
     def getDataDict( self ):
@@ -1447,6 +1432,7 @@ class ButtonWidget( QWidget ):
         self.drag_start_pos = QPoint()
         self.resize_corner = None
         self.resize_start_size = QSize()
+        self.resize_start_position = QPoint() 
 
     def paintEvent( self, event ):
         painter = QPainter( self )
@@ -1515,32 +1501,46 @@ class ButtonWidget( QWidget ):
         painter.drawRect( border_rect )
 
     def handleResize( self, global_pos ):
-            if not self.resize_corner:
-                return
+        if not self.resize_corner:
+            return
 
-            delta = global_pos - self.resize_start_pos
-            new_width = self.resize_start_size.width()
-            new_height = self.resize_start_size.height()
+        delta = global_pos - self.resize_start_pos
+        new_width = self.resize_start_size.width()
+        new_height = self.resize_start_size.height()
+        new_x = self.resize_start_position.x()
+        new_y = self.resize_start_position.y()
 
-            if self.resize_corner == "bottom_right":
-                new_width = max( 50, self.resize_start_size.width() + delta.x() )
-                new_height = max( 30, self.resize_start_size.height() + delta.y() )
+        if self.resize_corner == "bottom_right":
+            new_width = max( 50, self.resize_start_size.width() + delta.x() )
+            new_height = max( 30, self.resize_start_size.height() + delta.y() )
 
-            elif self.resize_corner == "top_right":
-                new_width = max( 50, self.resize_start_size.width() + delta.x() )
-                new_height = max( 30, self.resize_start_size.height() - delta.y() )
+        elif self.resize_corner == "top_right":
+            new_width = max( 50, self.resize_start_size.width() + delta.x() )
+            new_height = max( 30, self.resize_start_size.height() - delta.y() )
+            new_y = self.resize_start_position.y() + delta.y() 
 
-            elif self.resize_corner == "bottom_left":
-                new_width = max( 50, self.resize_start_size.width() - delta.x() )
-                new_height = max( 30, self.resize_start_size.height() + delta.y() )
+        elif self.resize_corner == "bottom_left":
+            new_width = max( 50, self.resize_start_size.width() - delta.x() )
+            new_height = max( 30, self.resize_start_size.height() + delta.y() )
+            new_x = self.resize_start_position.x() + delta.x()
 
-            elif self.resize_corner == "top_left":
-                new_width = max( 50, self.resize_start_size.width() - delta.x() )
-                new_height = max( 30, self.resize_start_size.height() - delta.y() )
+        elif self.resize_corner == "top_left":
+            new_width = max( 50, self.resize_start_size.width() - delta.x() )
+            new_height = max( 30, self.resize_start_size.height() - delta.y() )
+            new_x = self.resize_start_position.x() + delta.x() 
+            new_y = self.resize_start_position.y() + delta.y()
 
-            self.setFixedSize( new_width, new_height )
-            self.update()
-            self.updateButtonPropertiesSize()
+        self.setFixedSize( new_width, new_height )
+
+        if self.resize_corner in [ "top_left", "bottom_left" ]:
+            self.move(new_x, new_y)
+
+        elif self.resize_corner == "top_right":
+            self.move( self.x(), new_y ) 
+
+        self.update()
+        self.updateButtonPropertiesSize()
+        self.updateButtonPropertiesPosition()
 
     def getCornerAt( self, pos ):
         handle_size = 12 
@@ -1599,7 +1599,7 @@ class ButtonWidget( QWidget ):
 
         if not main_window:
             return
-        
+
         try:
             if hasattr( main_window, 'pos_x_spin_button' ):
                 main_window.pos_x_spin_button.blockSignals( True )
@@ -1676,7 +1676,6 @@ class ButtonWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
-        
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
 
@@ -1684,11 +1683,13 @@ class ButtonWidget( QWidget ):
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+                self.resize_start_position = self.pos()
 
             else:
                 self.dragging = True
                 self.drag_start_pos = mouse_pos 
                 self.clicked.emit( self )
+
                 if self.effect_3d:
                     self.effect_3d_press = False
                     self.updateButtonProperties3D()
@@ -1769,6 +1770,7 @@ class KeysWidget( QWidget ):
         self.drag_start_pos = QPoint()
         self.resize_corner = None
         self.resize_start_size = QSize()
+        self.resize_start_position = QPoint()
         self.calculateOptimalSize()
     
     def paintEvent( self, event ):
@@ -2028,7 +2030,8 @@ class KeysWidget( QWidget ):
         delta = global_pos - self.resize_start_pos
         new_width = self.resize_start_size.width()
         new_height = self.resize_start_size.height()
-
+        new_x = self.resize_start_position.x()
+        new_y = self.resize_start_position.y() 
 
         if self.resize_corner == "bottom_right":
             new_width = max( 185, self.resize_start_size.width() + delta.x() )
@@ -2037,18 +2040,31 @@ class KeysWidget( QWidget ):
         elif self.resize_corner == "top_right":
             new_width = max( 185, self.resize_start_size.width() + delta.x() )
             new_height = max( 80, self.resize_start_size.height() - delta.y() )
+            new_y = self.resize_start_position.y() + delta.y()
 
         elif self.resize_corner == "bottom_left":
             new_width = max( 185, self.resize_start_size.width() - delta.x() )
-            new_height = max( 80, self.resize_start_size.height() + delta.y() )
+            new_height = max( 80, self.resize_start_size.height() + delta.y() ) 
+            new_x = self.resize_start_position.x() + delta.x() 
 
         elif self.resize_corner == "top_left":
             new_width = max( 185, self.resize_start_size.width() - delta.x() )
             new_height = max( 80, self.resize_start_size.height() - delta.y() )
-        
-        self.adjustKeySizeFromWidgetSize()
+            new_x = self.resize_start_position.x() + delta.x() 
+            new_y = self.resize_start_position.y() + delta.y() 
+
         self.setFixedSize( new_width, new_height )
+
+        if self.resize_corner in [ "top_left", "bottom_left" ]:
+            self.move( new_x, new_y )
+
+        elif self.resize_corner == "top_right":
+            self.move( self.x(), new_y )
+
+        self.adjustKeySizeFromWidgetSize()
         self.update()
+        self.updateKeysPropertiesSize()
+        self.updateKeysPropertiesPosition()
 
     def getCornerAt( self, pos ):
         handle_size = 12
@@ -2161,7 +2177,7 @@ class KeysWidget( QWidget ):
         main_window = self.findMainWindow()
         if not main_window:
             return
-        
+
         try:
             if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
                 if hasattr( main_window, 'pos_x_spin_keys' ):
@@ -2244,6 +2260,7 @@ class KeysWidget( QWidget ):
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+                self.resize_start_position = self.pos() 
 
             else:
                 self.dragging = True
@@ -2266,8 +2283,9 @@ class KeysWidget( QWidget ):
     
     def mouseMoveEvent( self, event ):
         mouse_pos = event.pos()
-        
+
         corner = self.getCornerAt( mouse_pos )
+
         if corner:
             if corner in [ "top_left", "bottom_right" ]:
                 self.setCursor( Qt.CursorShape.SizeFDiagCursor )
@@ -2277,15 +2295,13 @@ class KeysWidget( QWidget ):
 
         else:
             self.setCursor( Qt.CursorShape.ArrowCursor )
-        
+
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize( event.globalPosition().toPoint() )
-            self.updateKeysPropertiesSize()
-            self.updateKeysPropertiesPosition()
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
-            
+
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
 
@@ -2293,9 +2309,9 @@ class KeysWidget( QWidget ):
             new_y = max( 0, new_y )
 
             super().move( new_x, new_y )
-            
+
             self.updateKeysPropertiesPosition()
-        
+
         event.accept()
 
 class ClockWidget( QWidget ):
@@ -2310,7 +2326,7 @@ class ClockWidget( QWidget ):
         self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         self.setupDataDict()
         
-    def defaultValues(self):
+    def defaultValues( self ):
         self.active = True
         self.visible = True
         self.static = False
@@ -2569,7 +2585,7 @@ class ClockWidget( QWidget ):
     def updateDataDict( self ):
         self.updateCenterPosition()
         
-        self.data_dict.update({
+        self.data_dict.update( {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -2584,7 +2600,7 @@ class ClockWidget( QWidget ):
             'hours': self.hours,
             'minutes': self.minutes,
             'seconds': self.seconds
-        })
+        } )
         return self.data_dict
     
     def getDataDict( self ):
@@ -2939,7 +2955,7 @@ class GaugeWidget( QWidget ):
     def updateDataDict( self ):
         self.updateCenterPosition() 
         
-        self.data_dict.update({
+        self.data_dict.update( {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -2955,7 +2971,7 @@ class GaugeWidget( QWidget ):
             'minor_subdivision': self.minor_subdivision,
             'range': self.range_value,
             'value': self.value
-        })
+        } )
         return self.data_dict
     
     def getDataDict( self ):
@@ -3339,7 +3355,7 @@ class DialWidget( QWidget ):
     def updateDataDict( self ):
         self.updateCenterPosition() 
         
-        self.data_dict.update({
+        self.data_dict.update( {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -3353,7 +3369,7 @@ class DialWidget( QWidget ):
             'pointer_color': self.pointer_color,
             'effect_3d': self.effect_3d,
             'value': self.value
-        })
+        } )
         return self.data_dict
     
     def getDataDict( self ):
@@ -3494,7 +3510,8 @@ class ToggleWidget( QWidget ):
         self.resize_start_pos = QPoint()
         self.drag_start_pos = QPoint()
         self.resize_corner = None
-        self.resize_start_diameter = QPoint()
+        self.resize_start_size = QSize()
+        self.resize_start_position = QPoint()
 
     def paintEvent( self, event ):
         painter = QPainter( self )
@@ -3612,19 +3629,23 @@ class ToggleWidget( QWidget ):
 
         delta = global_pos - self.resize_start_pos
         new_width = self.resize_start_size.width()
+        new_x = self.resize_start_position.x() 
 
         if self.resize_corner == "right":
             new_width = max( 80, self.resize_start_size.width() + delta.x() )
 
         elif self.resize_corner == "left":
             new_width = max( 80, self.resize_start_size.width() - delta.x() )
-            width_delta = self.toggle_width - new_width
-            self.move( self.x() + width_delta, self.y() )
+            new_x = self.resize_start_position.x() + delta.x() 
 
         self.toggle_width = new_width
+        self.setFixedSize( self.toggle_width, self.toggle_height )
 
-        self.setFixedSize( self.toggle_width , self.toggle_height )
+        if self.resize_corner == "left":
+            self.move( new_x, self.y() )
+
         self.updateTogglePropertiesSize()
+        self.updateTogglePropertiesPosition() 
 
     def getCornerAt( self, pos ):
         handle_size = 12 
@@ -3661,7 +3682,7 @@ class ToggleWidget( QWidget ):
         self.selected = selected
         self.update()
 
-    def updateTogglePropertiesPosition( self):
+    def updateTogglePropertiesPosition( self ):
         main_window = self.findMainWindow()
 
         if main_window and main_window.current_shape == self:
@@ -3675,7 +3696,7 @@ class ToggleWidget( QWidget ):
                 pass
             
             try:
-                if hasattr( main_window, 'pos_y_spin_toggle' ):
+                if hasattr(main_window, 'pos_y_spin_toggle'):
                     main_window.pos_y_spin_toggle.blockSignals( True )
                     main_window.pos_y_spin_toggle.setValue( self.y() )
                     main_window.pos_y_spin_toggle.blockSignals( False )
@@ -3781,6 +3802,7 @@ class ToggleWidget( QWidget ):
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+                self.resize_start_position = self.pos() 
 
             else:
                 self.dragging = True
@@ -3867,7 +3889,8 @@ class ScrollBarWidget( QWidget ):
         self.drag_start_pos = QPoint()
         self.resize_corner = None
         self.resize_start_size = QSize()
-        
+        self.resize_start_position = QPoint() 
+
         self.thumb_dragging = False
         self.thumb_drag_start_pos = QPoint()
         self.thumb_drag_start_value = 0
@@ -4009,6 +4032,8 @@ class ScrollBarWidget( QWidget ):
         delta = global_pos - self.resize_start_pos
         new_width = self.resize_start_size.width()
         new_height = self.resize_start_size.height()
+        new_x = self.resize_start_position.x()
+        new_y = self.resize_start_position.y()
 
         if self.resize_corner == "bottom_right":
             new_width = self.resize_start_size.width() + delta.x()
@@ -4017,22 +4042,33 @@ class ScrollBarWidget( QWidget ):
         elif self.resize_corner == "top_right":
             new_width = self.resize_start_size.width() + delta.x()
             new_height = self.resize_start_size.height() - delta.y()
+            new_y = self.resize_start_position.y() + delta.y() 
 
         elif self.resize_corner == "bottom_left":
             new_width = self.resize_start_size.width() - delta.x()
             new_height = self.resize_start_size.height() + delta.y()
+            new_x = self.resize_start_position.x() + delta.x()
 
         elif self.resize_corner == "top_left":
             new_width = self.resize_start_size.width() - delta.x()
             new_height = self.resize_start_size.height() - delta.y()
+            new_x = self.resize_start_position.x() + delta.x()
+            new_y = self.resize_start_position.y() + delta.y()
 
         new_width = max( 10, new_width )
         new_height = max( 10, new_height )
-        
+
         self.scroll_bar_width = new_width
         self.scroll_bar_height = new_height
 
         self.setFixedSize( self.scroll_bar_width, self.scroll_bar_height )
+
+        if self.resize_corner in [ "top_left", "bottom_left" ]:
+            self.move( new_x, new_y )
+
+        elif self.resize_corner == "top_right":
+            self.move( self.x(), new_y ) 
+
         self.update()
         self.updatePropertiesSize()
         self.updatePropertiesPosition()
@@ -4202,14 +4238,12 @@ class ScrollBarWidget( QWidget ):
                 except:
                     pass
 
-
-
     def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
             return
-        
+
         if hasattr( main_window, 'current_shape' ) and main_window.current_shape == self:
             if hasattr( main_window, 'pos_x_spin_scrollbar' ):
                 try:
@@ -4219,7 +4253,7 @@ class ScrollBarWidget( QWidget ):
 
                 except:
                     pass
-                
+
             if hasattr( main_window, 'pos_y_spin_scrollbar' ):
                 try:
                     main_window.pos_y_spin_scrollbar.blockSignals( True )
@@ -4313,12 +4347,13 @@ class ScrollBarWidget( QWidget ):
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
-            self.resize_corner = self.getCornerAt(mouse_pos)
+            self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+                self.resize_start_position = self.pos()
 
             else:
                 thumb_rect = self.getThumbRectForInteraction()
@@ -4339,7 +4374,7 @@ class ScrollBarWidget( QWidget ):
                     if track_rect.contains( event.pos() ):
                         new_value = self.calculateValueFromPosition( event.pos() )
                         self.current_value = new_value 
-                
+
                 self.clicked.emit( self )
                 self.updatePropertiesValue()
 
@@ -4450,7 +4485,8 @@ class SliderWidget( QWidget ):
         self.thumb_drag_start_value = 0
         self.resize_corner = None
         self.resize_start_size = QSize()
-        self.rotated = False 
+        self.resize_start_position = QPoint()
+        self.rotated = False
 
     def paintEvent( self, event ):
         painter = QPainter( self )
@@ -4598,6 +4634,8 @@ class SliderWidget( QWidget ):
         delta = global_pos - self.resize_start_pos
         new_width = self.resize_start_size.width()
         new_height = self.resize_start_size.height()
+        new_x = self.resize_start_position.x() 
+        new_y = self.resize_start_position.y()
 
         if self.resize_corner == "bottom_right":
             new_width = max( 0, self.resize_start_size.width() + delta.x() )
@@ -4606,19 +4644,32 @@ class SliderWidget( QWidget ):
         elif self.resize_corner == "top_right":
             new_width = max( 0, self.resize_start_size.width() + delta.x() )
             new_height = max( 0, self.resize_start_size.height() - delta.y() )
+            new_y = self.resize_start_position.y() + delta.y()
 
         elif self.resize_corner == "bottom_left":
             new_width = max( 0, self.resize_start_size.width() - delta.x() )
             new_height = max( 0, self.resize_start_size.height() + delta.y() )
+            new_x = self.resize_start_position.x() + delta.x() 
 
         elif self.resize_corner == "top_left":
             new_width = max( 0, self.resize_start_size.width() - delta.x() )
             new_height = max( 0, self.resize_start_size.height() - delta.y() )
+            new_x = self.resize_start_position.x() + delta.x() 
+            new_y = self.resize_start_position.y() + delta.y() 
 
         self.slider_width = new_width
         self.slider_height = new_height
         self.setFixedSize( self.slider_width, self.slider_height )
+
+        if self.resize_corner in [ "top_left", "bottom_left" ]:
+            self.move( new_x, new_y )
+
+        elif self.resize_corner == "top_right":
+            self.move( self.x(), new_y ) 
+
         self.update()
+        self.updatePropertiesSize()
+        self.updatePropertiesPosition() 
 
     def getCornerAt( self, pos ):
         handle_size = 12
@@ -4738,19 +4789,19 @@ class SliderWidget( QWidget ):
                 main_window.height_spin_slider.setValue( self.slider_height )
                 main_window.height_spin_slider.blockSignals( False )
 
-    def updatePropertiesPosition(self):
+    def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
 
         if not main_window:
             return
-        
-        if ( hasattr( main_window, 'current_shape') and main_window.current_shape == self ):
-            if hasattr( main_window, 'pos_x_spin_slider' ):
+
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+            if hasattr( main_window, 'pos_x_spin_slider'):
                 main_window.pos_x_spin_slider.blockSignals( True )
                 main_window.pos_x_spin_slider.setValue( self.x() )
                 main_window.pos_x_spin_slider.blockSignals( False )
-                
-            if hasattr( main_window, 'pos_y_spin_slider' ):
+
+            if hasattr(main_window, 'pos_y_spin_slider'):
                 main_window.pos_y_spin_slider.blockSignals( True )
                 main_window.pos_y_spin_slider.setValue( self.y() )
                 main_window.pos_y_spin_slider.blockSignals( False )
@@ -4834,13 +4885,13 @@ class SliderWidget( QWidget ):
         if event.button() == Qt.MouseButton.LeftButton:
             mouse_pos = event.pos()
             thumb_rect = self.getThumbRectForInteraction()
-            
             self.resize_corner = self.getCornerAt( mouse_pos )
 
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+                self.resize_start_position = self.pos() 
 
             elif thumb_rect.contains( mouse_pos ):
                 self.thumb_dragging = True
@@ -4852,7 +4903,7 @@ class SliderWidget( QWidget ):
                 self.drag_start_pos = mouse_pos
                 track_rect = self.getTrackRectForInteraction()
 
-                if track_rect.contains(event.pos()):
+                if track_rect.contains( event.pos() ):
                     if self.rotated:
                         relative_y = event.pos().y() - track_rect.y()
                         new_value = int( ( relative_y / track_rect.height() ) * 100 )
@@ -4860,11 +4911,11 @@ class SliderWidget( QWidget ):
                     else:
                         relative_x = event.pos().x() - track_rect.x()
                         new_value = int( ( relative_x / track_rect.width() ) * 100 )
-                    
-                    self.value =  max( 0, min( 100, new_value ) )
+
+                    self.value = max( 0, min( 100, new_value ) )
                     self.update()
                     self.updatePropertiesValue()
-            
+
             self.clicked.emit( self )
             self.updatePropertiesValue()
 
@@ -4889,18 +4940,16 @@ class SliderWidget( QWidget ):
         corner = self.getCornerAt( mouse_pos )
 
         if corner:
-            if corner in ["top_left", "bottom_right"]:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
+            if corner in [ "top_left", "bottom_right" ]:
+                self.setCursor( Qt.CursorShape.SizeFDiagCursor )
 
-            elif corner in ["top_right", "bottom_left"]:
-                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+            elif corner in [ "top_right", "bottom_left" ]:
+                self.setCursor( Qt.CursorShape.SizeBDiagCursor )
         else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
-        
+            self.setCursor( Qt.CursorShape.ArrowCursor )
+
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize(event.globalPosition().toPoint())
-            self.updatePropertiesSize()
-            self.updatePropertiesPosition()
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
@@ -4908,24 +4957,25 @@ class SliderWidget( QWidget ):
             new_y = self.y() + delta.y()
             new_x = max( 0, new_x )
             new_y = max( 0, new_y )
-        
+
             super().move( new_x, new_y )
             self.updatePropertiesPosition()
 
         elif self.thumb_dragging and event.buttons() & Qt.MouseButton.LeftButton:
             track_rect = self.getTrackRectForInteraction()
             delta = mouse_pos - self.thumb_drag_start_pos
-            
+
             if self.rotated:
                 value_delta = int( ( delta.y() / track_rect.height() ) * 100 )
+
             else:
                 value_delta = int( ( delta.x() / track_rect.width() ) * 100 )
-            
+
             new_value = self.thumb_drag_start_value + value_delta
-            self.value =  max( 0, min( 100, new_value ) )
+            self.value = max( 0, min( 100, new_value ) )
             self.update()
             self.updatePropertiesValue()
-        
+
         event.accept()
 
 class ProgressBarWidget( QWidget ):
@@ -4948,8 +4998,8 @@ class ProgressBarWidget( QWidget ):
         self.stack_order = 1
         self.progress_bar_width = 200
         self.progress_bar_height = 15
-        self.progress_color = QColor( 255, 0, 0 )
-        self.background_color = QColor( 0, 0, 255 ) 
+        self.progress_color = QColor(255, 0, 0)
+        self.background_color = QColor(0, 0, 255) 
         self.effect_3d = True
         self.range = 100
         self.value = 50
@@ -4961,7 +5011,8 @@ class ProgressBarWidget( QWidget ):
         self.drag_start_pos = QPoint()
         self.resize_corner = None
         self.resize_start_size = QSize()
-        self.rotated = False 
+        self.resize_start_position = QPoint()
+        self.rotated = False
 
     def paintEvent( self, event ):
         painter = QPainter( self )
@@ -5076,6 +5127,8 @@ class ProgressBarWidget( QWidget ):
         delta = global_pos - self.resize_start_pos
         new_width = self.resize_start_size.width()
         new_height = self.resize_start_size.height()
+        new_x = self.resize_start_position.x() 
+        new_y = self.resize_start_position.y()
 
         if self.resize_corner == "bottom_right":
             new_width = max( 10, self.resize_start_size.width() + delta.x() )
@@ -5084,19 +5137,31 @@ class ProgressBarWidget( QWidget ):
         elif self.resize_corner == "top_right":
             new_width = max( 10, self.resize_start_size.width() + delta.x() )
             new_height = max( 10, self.resize_start_size.height() - delta.y() )
+            new_y = self.resize_start_position.y() + delta.y()
 
         elif self.resize_corner == "bottom_left":
             new_width = max( 10, self.resize_start_size.width() - delta.x() )
             new_height = max( 10, self.resize_start_size.height() + delta.y() )
+            new_x = self.resize_start_position.x() + delta.x()
 
         elif self.resize_corner == "top_left":
             new_width = max( 10, self.resize_start_size.width() - delta.x() )
             new_height = max( 10, self.resize_start_size.height() - delta.y() )
+            new_x = self.resize_start_position.x() + delta.x() 
+            new_y = self.resize_start_position.y() + delta.y()  
 
         self.progress_bar_width = new_width
         self.progress_bar_height = new_height
         self.setFixedSize( self.progress_bar_width, self.progress_bar_height )
+
+        if self.resize_corner in [ "top_left", "bottom_left" ]:
+            self.move( new_x, new_y )
+
+        elif self.resize_corner == "top_right":
+            self.move( self.x(), new_y ) 
+
         self.updatePropertiesSize()
+        self.updatePropertiesPosition()
 
     def getCornerAt( self, pos ):
         handle_size = 12
@@ -5130,7 +5195,7 @@ class ProgressBarWidget( QWidget ):
                     main_window.pos_x_spin_progress_bar.blockSignals( True )
                     main_window.pos_x_spin_progress_bar.setValue( self.x() )
                     main_window.pos_x_spin_progress_bar.blockSignals( False )
-                    
+
             except RuntimeError:
                 pass
             
@@ -5232,6 +5297,7 @@ class ProgressBarWidget( QWidget ):
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+                self.resize_start_position = self.pos()
 
             else:
                 self.dragging = True
@@ -5264,11 +5330,9 @@ class ProgressBarWidget( QWidget ):
 
         else:
             self.setCursor( Qt.CursorShape.ArrowCursor )
-        
+
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize( event.globalPosition().toPoint() )
-            self.updatePropertiesPosition()
-            self.updatePropertiesSize()
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
@@ -5278,7 +5342,7 @@ class ProgressBarWidget( QWidget ):
             new_y = max( 0, new_y )
             self.move( new_x, new_y )
             self.updatePropertiesPosition()
-            
+
         event.accept()
 
 class ImageWidget( QWidget ):
@@ -5313,6 +5377,7 @@ class ImageWidget( QWidget ):
         self.drag_start_pos = QPoint()
         self.resize_corner = None
         self.resize_start_size = QSize()
+        self.resize_start_position = QPoint()
         self.pixmap = QPixmap()
         self.original_pixmap = QPixmap()
 
@@ -5383,6 +5448,8 @@ class ImageWidget( QWidget ):
         delta = global_pos - self.resize_start_pos
         new_width = self.resize_start_size.width()
         new_height = self.resize_start_size.height()
+        new_x = self.resize_start_position.x()
+        new_y = self.resize_start_position.y()
 
         if self.resize_corner == "bottom_right":
             new_width = max( 20, self.resize_start_size.width() + delta.x() )
@@ -5391,24 +5458,35 @@ class ImageWidget( QWidget ):
         elif self.resize_corner == "top_right":
             new_width = max( 20, self.resize_start_size.width() + delta.x() )
             new_height = max( 20, self.resize_start_size.height() - delta.y() )
+            new_y = self.resize_start_position.y() + delta.y() 
 
         elif self.resize_corner == "bottom_left":
-            new_width = max( 20, self.resize_start_size.width() - delta.x() )
-            new_height = max( 20, self.resize_start_size.height() + delta.y() )
+            new_width = max(20, self.resize_start_size.width() - delta.x())
+            new_height = max(20, self.resize_start_size.height() + delta.y())
+            new_x = self.resize_start_position.x() + delta.x()
 
         elif self.resize_corner == "top_left":
             new_width = max( 20, self.resize_start_size.width() - delta.x() )
             new_height = max( 20, self.resize_start_size.height() - delta.y() )
+            new_x = self.resize_start_position.x() + delta.x()
+            new_y = self.resize_start_position.y() + delta.y()
 
         self.image_width = new_width
         self.image_height = new_height
-        
+
         self.setFixedSize( new_width, new_height )
-        
+
+        if self.resize_corner in [ "top_left", "bottom_left" ]:
+            self.move( new_x, new_y )
+
+        elif self.resize_corner == "top_right":
+            self.move( self.x(), new_y )
+
         if not self.original_pixmap.isNull():
             self.resizePixmap()
-        
+
         self.updatePropertiesSize()
+        self.updatePropertiesPosition() 
 
     def resizePixmap( self ):
         if self.original_pixmap.isNull():
@@ -5499,7 +5577,7 @@ class ImageWidget( QWidget ):
 
         if not main_window:
             return
-        
+
         if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
             try:    
                 if hasattr( main_window, 'pos_x_spin_image' ):
@@ -5576,11 +5654,12 @@ class ImageWidget( QWidget ):
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
                 self.resize_start_size = self.size()
+                self.resize_start_position = self.pos()
 
             else:
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
-                self.clicked.emit(self)
+                self.clicked.emit( self )
 
         event.accept()
     
@@ -5597,11 +5676,9 @@ class ImageWidget( QWidget ):
 
         else:
             self.setCursor( Qt.CursorShape.ArrowCursor )
-        
+
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
             self.handleResize( event.globalPosition().toPoint() )
-            self.updatePropertiesSize()
-            self.updatePropertiesPosition()
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
@@ -5611,7 +5688,7 @@ class ImageWidget( QWidget ):
             new_y = max( 0, new_y )
             super().move( new_x, new_y )
             self.updatePropertiesPosition()
-        
+
         event.accept()
     
     def mouseReleaseEvent( self, event ):
@@ -5844,8 +5921,8 @@ class LabelWidget( QWidget ):
 
         }
     
-    def updateDataDict(self):
-        self.data_dict.update({
+    def updateDataDict( self ):
+        self.data_dict.update( {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -5857,7 +5934,7 @@ class LabelWidget( QWidget ):
             'text': self.text,
             'text_size': self.text_size,
             'text_alignment': self.text_alignment
-        })
+        } )
         return self.data_dict
     
     def getDataDict( self ):
@@ -6135,7 +6212,7 @@ class NumericWidget( QWidget ):
         }
     
     def updateDataDict( self ):
-        self.data_dict.update({
+        self.data_dict.update( {
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -6147,7 +6224,7 @@ class NumericWidget( QWidget ):
             'number': self.number,
             'number_size': self.number_size,
             'number_alignment': self.number_alignment
-        })
+        } )
         return self.data_dict
     
     def getDataDict( self ):
