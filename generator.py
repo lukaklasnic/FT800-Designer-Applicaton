@@ -433,10 +433,11 @@ def generateResourcesH(self, all_images):
     h_content += f"#include \"stdint.h\"\n"
     h_content += "\n"
     
-    # Koristimo set da pratimo već generisane nazive
-    generated_names = set()
+    # Koristimo dictionary da pratimo već generisane slike
+    # Ključ je hash ili naziv, vrijednost je var_name
+    generated = {}
     
-    for img_widget in all_images:
+    for idx, img_widget in enumerate(all_images):
         try:
             if not hasattr(img_widget, 'pixmap') or img_widget.pixmap.isNull():
                 continue
@@ -446,15 +447,31 @@ def generateResourcesH(self, all_images):
                 clean_name = img_widget.custom_name.replace(' ', '_').replace('-', '_')
                 var_name = f"{clean_name}_hex"
             else:
-                # Ako slika nema custom_name, generišemo baziran na indeksu
-                var_name = f"image_{len(generated_names)}_hex"
+                # Koristimo ID widgeta ako postoji, inače indeks
+                widget_id = getattr(img_widget, 'widget_id', f"image_{idx}")
+                var_name = f"{widget_id}_hex"
             
             # Provjeri da li smo već generisali ovu sliku
-            if var_name in generated_names:
+            # Napravi ključ od originalne slike
+            image_hash = None
+            if hasattr(img_widget, 'pixmap'):
+                # Pokušaj da dobiješ hash od slike
+                try:
+                    # Kreiraj jedinstveni identifikator od dimenzija i custom_name
+                    width = getattr(img_widget, 'image_width', 0)
+                    height = getattr(img_widget, 'image_height', 0)
+                    custom_name = getattr(img_widget, 'custom_name', '')
+                    image_hash = f"{custom_name}_{width}x{height}"
+                except:
+                    image_hash = str(id(img_widget))
+            
+            if image_hash and image_hash in generated:
+                # Ova slika je već generisana, preskoči
                 continue
-                
+            
             h_content += f"extern const code uint8_t {var_name}[];\n"
-            generated_names.add(var_name)
+            if image_hash:
+                generated[image_hash] = var_name
             
         except Exception as e:
             continue
@@ -473,13 +490,21 @@ def generateResourcesC(self, all_images):
     c_content += f"#include \"resource.h\"\n"
     c_content += "\n"
 
-    # Koristimo dictionary da pratimo već generisane slike
-    # Ključ je hash slike ili naziv, vrijednost je tuple (var_name, image_data)
+    # Dictionary za praćenje već generisanih slika
+    # Ključ: image_hash, Vrijednost: (var_name, rgb565_data)
     generated_images = {}
     
-    for img_widget in all_images:
+    for idx, img_widget in enumerate(all_images):
         try:
             if not hasattr(img_widget, 'pixmap') or img_widget.pixmap.isNull():
+                continue
+            
+            # Dobij dimenzije
+            width = getattr(img_widget, 'image_width', 100)
+            height = getattr(img_widget, 'image_height', 100)
+            
+            # Provjeri dimenzije
+            if width <= 0 or height <= 0:
                 continue
             
             # Generiši jedinstveni naziv za sliku
@@ -487,42 +512,66 @@ def generateResourcesC(self, all_images):
                 clean_name = img_widget.custom_name.replace(' ', '_').replace('-', '_')
                 var_name = f"{clean_name}_hex"
             else:
-                # Koristimo indeks baziran na broju već generisanih slika
-                var_name = f"image_{len(generated_images)}_hex"
+                # Koristimo ID widgeta ako postoji, inače indeks
+                widget_id = getattr(img_widget, 'widget_id', f"image_{idx}")
+                var_name = f"{widget_id}_hex"
+            
+            # Kreiraj jedinstveni hash za ovu sliku
+            custom_name = getattr(img_widget, 'custom_name', '')
+            image_hash = f"{custom_name}_{width}x{height}_{id(img_widget.pixmap) if hasattr(img_widget, 'pixmap') else id(img_widget)}"
             
             # Provjeri da li smo već generisali ovu sliku
-            if var_name in generated_images:
+            if image_hash in generated_images:
                 continue
             
             # Procesuiraj sliku
             image = img_widget.pixmap.toImage()
-            width = img_widget.image_width
-            height = img_widget.image_height
             
-            # Provjeri dimenzije
-            if width <= 0 or height <= 0:
+            # Provjeri da li je slika validna
+            if image.isNull():
                 continue
-                
+            
+            # Skaliraj sliku na željene dimenzije
             scaled_image = image.scaled(width, height, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            
+            # Konvertuj u RGB888 format
             rgb888_image = scaled_image.convertToFormat(QImage.Format.Format_RGB888)
+            
+            # Provjeri da li je konverzija uspjela
+            if rgb888_image.isNull():
+                continue
+            
             rgb565 = bytearray()
-
+            
+            # Procesuiraj svaki piksel
             for y in range(height):
                 for x in range(width):
-                    c = rgb888_image.pixelColor(x, y)
-                    r = min(max(c.red(), 0), 255) >> 3
-                    g = min(max(c.green(), 0), 255) >> 2
-                    b = min(max(c.blue(), 0), 255) >> 3
+                    # Dobij boju piksela
+                    color = rgb888_image.pixelColor(x, y)
+                    if not color.isValid():
+                        # Ako boja nije validna, koristi crnu
+                        r, g, b = 0, 0, 0
+                    else:
+                        r = color.red()
+                        g = color.green()
+                        b = color.blue()
+                    
+                    # Konvertuj u RGB565
+                    r = max(0, min(255, r)) >> 3
+                    g = max(0, min(255, g)) >> 2
+                    b = max(0, min(255, b)) >> 3
+                    
                     value = (r << 11) | (g << 5) | b
                     rgb565.append(value & 0xFF)
                     rgb565.append((value >> 8) & 0xFF)
-
+            
             size = len(rgb565)
             
             # Dodaj u dictionary
-            generated_images[var_name] = (var_name, rgb565, size)
+            generated_images[image_hash] = (var_name, rgb565, size)
             
         except Exception as e:
+            print(f"Error processing image {idx}: {e}")
             continue
     
     # Generiši C kod za sve jedinstvene slike
@@ -548,9 +597,15 @@ def generateResources(main_window, out_dir=None):
                 if widget.get('type') == 'Image' and widget.get('active', True):
                     if canvas_id in main_window.canvas_widgets:
                         for widget_obj in main_window.canvas_widgets[canvas_id]:
-                            if isinstance(widget_obj, ImageWidget) and widget_obj not in all_images:
-                                # Dodaj samo ako već nije u listi
-                                all_images.append(widget_obj)
+                            if isinstance(widget_obj, ImageWidget):
+                                # Provjeri da li widget ima jedinstveni ID
+                                if not hasattr(widget_obj, 'widget_id'):
+                                    # Dodaj jedinstveni ID ako ne postoji
+                                    widget_obj.widget_id = f"image_{len(all_images)}"
+                                
+                                # Dodaj widget samo ako već nije dodan
+                                if widget_obj not in all_images:
+                                    all_images.append(widget_obj)
     
     if not all_images:
         return
