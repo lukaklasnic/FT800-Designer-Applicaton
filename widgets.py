@@ -1,6 +1,6 @@
+from PyQt6.QtWidgets import ( QWidget, QMainWindow, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QCheckBox )
 from PyQt6.QtGui import ( QPainter, QPen, QColor, QLinearGradient, QFont, QBrush, QPixmap, QFontMetrics )
 from PyQt6.QtCore import ( Qt, QPoint, QRect, QPointF, pyqtSignal, QSize, QRectF )
-from PyQt6.QtWidgets import ( QWidget, QMainWindow, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QCheckBox )
 import math
 import os
         
@@ -35,7 +35,8 @@ class LineWidget( QWidget ):
         self.resize_start_pos = QPoint()
         self.resize_start_size = QPoint()
         self.resize_corner = None
-        self.drag_start_pos = QPoint()
+        self.drag_start_global_pos = QPoint()
+        self.drag_start_line_pos = None
 
     def paintEvent( self, event ):
         painter = QPainter( self )
@@ -69,7 +70,7 @@ class LineWidget( QWidget ):
         painter.drawEllipse( start_x - 1, start_y - 1, 2, 2 )
         painter.drawEllipse( end_x - 1, end_y - 1, 2, 2 )
     
-    def drawSelectionBorder(self, painter):
+    def drawSelectionBorder( self, painter ):
         margin = 2
     
         local_start_x = self.start_x - self.x()
@@ -109,21 +110,31 @@ class LineWidget( QWidget ):
             self.end_x = end_x_start + delta.x()
             self.end_y = end_y_start + delta.y()
         
-        self.updateLineSize()
+        self.updateWidgetPosition()
         self.update()
 
     def isPointOnLine( self, pos ):
-        global_x = pos.x() + self.x()
-        global_y = pos.y() + self.y()
+        if self.parent():
+            global_pos = self.parent().mapToGlobal( self.mapToParent( pos ) )
+
+        else:
+            global_pos = self.mapToGlobal( pos )
+        
+        if self.parent():
+            parent_global = self.parent().mapFromGlobal( global_pos )
+
+        else:
+            parent_global = self.mapFromGlobal( global_pos )
         
         x1, y1, x2, y2 = self.start_x, self.start_y, self.end_x, self.end_y
         
         if x1 == x2 and y1 == y2:
-            distance = math.sqrt( ( global_x - x1 ) ** 2 + ( global_y - y1 ) ** 2 )
+            distance = math.sqrt( ( parent_global.x() - x1 ) ** 2 + ( parent_global.y() - y1 ) ** 2 )
+
             return distance <= self.line_width / 2 + 5
         
-        A = global_x - x1
-        B = global_y - y1
+        A = parent_global.x() - x1
+        B = parent_global.y() - y1
         C = x2 - x1
         D = y2 - y1
         
@@ -139,28 +150,38 @@ class LineWidget( QWidget ):
 
         elif param > 1:
             xx, yy = x2, y2
-            
+
         else:
             xx = x1 + param * C
             yy = y1 + param * D
         
-        distance = math.sqrt( ( global_x - xx ) ** 2 + ( global_y - yy ) ** 2 )
+        distance = math.sqrt( ( parent_global.x() - xx ) ** 2 + ( parent_global.y() - yy ) ** 2 )
         
         return distance <= self.line_width / 2 + 5
 
     def getCornerAt( self, pos ):
         handle_size = 16
         
-        global_pos = QPoint( pos.x() + self.x(), pos.y() + self.y() )
+        if self.parent():
+            global_pos = self.parent().mapToGlobal( self.mapToParent( pos ) )
+
+        else:
+            global_pos = self.mapToGlobal( pos )
+        
+        if self.parent():
+            parent_global = self.parent().mapFromGlobal( global_pos )
+
+        else:
+            parent_global = self.mapFromGlobal( global_pos )
         
         start_rect = QRect( self.start_x - handle_size // 2, self.start_y - handle_size // 2, handle_size, handle_size )
 
-        if start_rect.contains( global_pos ):
+        if start_rect.contains( parent_global ):
             return "start"
         
         end_rect = QRect( self.end_x - handle_size // 2, self.end_y - handle_size // 2, handle_size, handle_size ) 
 
-        if end_rect.contains( global_pos ):
+        if end_rect.contains( parent_global ):
             return "end"
         
         return None
@@ -169,31 +190,33 @@ class LineWidget( QWidget ):
         self.selected = selected
         self.update()
 
-
-
     def setLinePosition( self, start_x, start_y, end_x, end_y ):
         self.start_x = start_x
         self.start_y = start_y
         self.end_x = end_x
         self.end_y = end_y
-        self.updateLineSize()
+
+        self.updateWidgetPosition()
         self.update()
 
-    def updateLineSize( self ):
+    def updateWidgetPosition( self ):
         margin = 20 
-        
-        min_x = min( self.start_x, self.end_x ) - self.x()
-        min_y = min( self.start_y, self.end_y ) - self.y()
-        max_x = max( self.start_x, self.end_x ) - self.x()
-        max_y = max( self.start_y, self.end_y ) - self.y()
-        
+        min_x = min(self.start_x, self.end_x)
+        min_y = min(self.start_y, self.end_y)
+        max_x = max(self.start_x, self.end_x)
+        max_y = max(self.start_y, self.end_y)
         width = max( 20, max_x - min_x ) + 2 * margin
         height = max( 20, max_y - min_y ) + 2 * margin
         
-        self.setFixedSize( width, height )
+        self.setFixedSize(width, height)
+        
         center_x = ( self.start_x + self.end_x ) // 2
         center_y = ( self.start_y + self.end_y ) // 2
-        self.move( center_x - self.width() // 2, center_y - self.height() // 2 )
+        new_x = center_x - self.width() // 2
+        new_y = center_y - self.height() // 2
+        
+        if self.x() != new_x or self.y() != new_y:
+            self.move(new_x, new_y)
 
     def updateLinePositionPropertiesPosition( self ):
         main_window = self.findMainWindow()
@@ -201,7 +224,7 @@ class LineWidget( QWidget ):
         if not main_window:
             return
         
-        if (hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
+        if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self ):
             try:
                 if hasattr( main_window, 'start_x_spin_line' ):
                     main_window.start_x_spin_line.blockSignals( True )
@@ -213,12 +236,12 @@ class LineWidget( QWidget ):
                     main_window.start_y_spin_line.setValue( self.start_y )
                     main_window.start_y_spin_line.blockSignals( False )
 
-                if hasattr( main_window, 'end_x_spin_line' ):
+                if hasattr(main_window, 'end_x_spin_line'):
                     main_window.end_x_spin_line.blockSignals( True )
                     main_window.end_x_spin_line.setValue( self.end_x )
                     main_window.end_x_spin_line.blockSignals( False )
 
-                if hasattr( main_window, 'end_y_spin_line' ):
+                if hasattr(main_window, 'end_y_spin_line'):
                     main_window.end_y_spin_line.blockSignals( True )
                     main_window.end_y_spin_line.setValue( self.end_y )
                     main_window.end_y_spin_line.blockSignals( False )
@@ -246,7 +269,7 @@ class LineWidget( QWidget ):
         }
     
     def updateDataDict( self ):
-        self.data_dict.update( {
+        self.data_dict.update({
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
@@ -259,13 +282,13 @@ class LineWidget( QWidget ):
             'end_y': self.end_y,
             'line_color':  self.line_color,
             'line_width': self.line_width,
-        } )
+        })
         return self.data_dict
     
     def getDataDict( self ):
         return self.updateDataDict()
     
-    def setDataId( self, data_id ):
+    def setDataId(self, data_id):
         self.data_dict[ 'id' ] = data_id
 
     def findMainWindow( self ):
@@ -273,7 +296,9 @@ class LineWidget( QWidget ):
 
         while parent:
             if isinstance( parent, QMainWindow ):
+
                 return parent
+            
             parent = parent.parent()
 
         return None
@@ -291,7 +316,8 @@ class LineWidget( QWidget ):
             else:
                 if self.isPointOnLine( mouse_pos ):
                     self.dragging = True
-                    self.drag_start_pos = mouse_pos
+                    self.drag_start_global_pos = event.globalPosition().toPoint()
+                    self.drag_start_line_pos = ( self.start_x, self.start_y, self.end_x, self.end_y )
                 
                 self.clicked.emit( self )
 
@@ -303,6 +329,7 @@ class LineWidget( QWidget ):
             self.dragging = False
             self.resize_corner = None
             self.resize_start_size = None
+            self.drag_start_line_pos = None
 
         self.updateDataDict()
         event.accept()
@@ -325,20 +352,19 @@ class LineWidget( QWidget ):
             self.updateLinePositionPropertiesPosition()
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            delta = mouse_pos - self.drag_start_pos
-            self.start_x += delta.x()
-            self.start_y += delta.y()
-            self.end_x += delta.x()
-            self.end_y += delta.y()
-
-            self.drag_start_pos = mouse_pos
-                    
-            center_x = ( self.start_x + self.end_x ) // 2
-            center_y = ( self.start_y + self.end_y ) // 2
-            self.move( center_x - self.width() // 2, center_y - self.height() // 2 )
-
-            self.update()
-            self.updateLinePositionPropertiesPosition()
+            current_global_pos = event.globalPosition().toPoint()
+            delta = current_global_pos - self.drag_start_global_pos
+            
+            if self.drag_start_line_pos:
+                start_x_start, start_y_start, end_x_start, end_y_start = self.drag_start_line_pos
+                self.start_x = start_x_start + delta.x()
+                self.start_y = start_y_start + delta.y()
+                self.end_x = end_x_start + delta.x()
+                self.end_y = end_y_start + delta.y()
+                
+                self.updateWidgetPosition()
+                self.update()
+                self.updateLinePositionPropertiesPosition()
         
         event.accept()
 
@@ -5563,7 +5589,8 @@ class LabelWidget( QWidget ):
 
         self.selected = False
         self.dragging = False
-        self.drag_start_pos = QPoint()
+        self.drag_start_global_pos = QPoint()
+        self.drag_start_original_pos = None
         
     def paintEvent( self, event ):
         painter = QPainter( self )
@@ -5602,7 +5629,7 @@ class LabelWidget( QWidget ):
         
         font = QFont()
         font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5 ) )
-        font_metrics = QFontMetrics( font )
+        font_metrics = QFontMetrics(font)
         
         text_width = font_metrics.horizontalAdvance( self.text )
         text_height = font_metrics.height()
@@ -5632,12 +5659,7 @@ class LabelWidget( QWidget ):
         bbox_y = text_y - ascent 
         margin = 0
         
-        border_rect = QRect(
-            bbox_x - margin,
-            bbox_y - margin,
-            text_width + 2 * margin,
-            text_height + 2 * margin
-        )
+        border_rect = QRect( bbox_x - margin, bbox_y - margin, text_width + 2 * margin, text_height + 2 * margin )
     
         selection_pen = QPen( QColor( 255, 0, 0 ) )
         selection_pen.setWidth( 3 )
@@ -5650,7 +5672,7 @@ class LabelWidget( QWidget ):
 
     def calculateAndSetSize( self ):
         font = QFont()
-        font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5) )
+        font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5 ) )
         font_metrics = QFontMetrics( font )
         
         self.text_width = font_metrics.horizontalAdvance( self.text )
@@ -5689,22 +5711,22 @@ class LabelWidget( QWidget ):
             
         actual_x = self.original_x + offset_x
         actual_y = self.original_y + offset_y
-        actual_x = max( 0, actual_x )
-        actual_y = max( 0, actual_y )
-        super().move( int( actual_x ), int( actual_y ) )
+        actual_x = max(0, actual_x)
+        actual_y = max(0, actual_y)
+        super().move(int(actual_x), int(actual_y))
 
-    def move( self, x, y ):
+    def move(self, x, y):
         self.original_x = x
         self.original_y = y
         
         self.applyAlignmentOffset()
         self.updatePropertiesPosition()
 
-    def setSelected( self, selected ):
+    def setSelected(self, selected):
         self.selected = selected
         self.update()
 
-    def setSizeBasedOnText( self ):
+    def setSizeBasedOnText(self):
         current_original_x = getattr( self, 'original_x', self.x() )
         current_original_y = getattr( self, 'original_y', self.y() )
         
@@ -5720,7 +5742,7 @@ class LabelWidget( QWidget ):
     def updatePropertiesPosition( self ):
         main_window = self.findMainWindow()
 
-        if main_window and hasattr(main_window, 'current_shape') and main_window.current_shape == self:
+        if main_window and hasattr( main_window, 'current_shape' ) and main_window.current_shape == self:
             try:
                 if hasattr( main_window, 'pos_x_spin_label' ):
                     main_window.pos_x_spin_label.blockSignals( True )
@@ -5746,8 +5768,8 @@ class LabelWidget( QWidget ):
             'static': self.static,
             'name': self.custom_name,
             'stack_order': self.stack_order,
-            'position_x': self.x(),
-            'position_y': self.y(),
+            'position_x': self.original_x, 
+            'position_y': self.original_y,  
             'text_color': self.text_color,
             'text': self.text,
             'text_size': self.text_size,
@@ -5758,29 +5780,29 @@ class LabelWidget( QWidget ):
 
         }
     
-    def updateDataDict( self ):
-        self.data_dict.update( {
+    def updateDataDict(self):
+        self.data_dict.update({
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
             'name': self.custom_name,
             'stack_order': self.stack_order,
-            'position_x': self.x(),
-            'position_y': self.y(),
+            'position_x': self.original_x,  
+            'position_y': self.original_y,  
             'text_color': self.text_color,
             'text': self.text,
             'text_size': self.text_size,
             'text_alignment': self.text_alignment
-        } )
+        })
         return self.data_dict
     
     def getDataDict( self ):
         return self.updateDataDict()
     
-    def setDataId( self, data_id ):
+    def setDataId(self, data_id):
         self.data_dict[ 'id' ] = data_id
 
-    def findMainWindow( self ):
+    def findMainWindow(self):
         parent = self.parent()
 
         while parent:
@@ -5793,24 +5815,26 @@ class LabelWidget( QWidget ):
     
     def mouseMoveEvent( self, event ):
         if self.dragging and ( event.buttons() & Qt.MouseButton.LeftButton ):
-            delta = event.pos() - self.drag_start_pos
-            
-            self.original_x += delta.x()
-            self.original_y += delta.y()
-            self.original_x = max( 0, self.original_x )
-            self.original_y = max( 0, self.original_y )
-            
-            self.applyAlignmentOffset()
-            self.updatePropertiesPosition()
-            
-            self.drag_start_pos = event.pos()
+            if self.drag_start_original_pos is not None:
+                current_global_pos = event.globalPosition().toPoint()
+                delta = current_global_pos - self.drag_start_global_pos
+                
+                self.original_x = self.drag_start_original_pos[ 0 ] + delta.x()
+                self.original_y = self.drag_start_original_pos[ 1 ] + delta.y()
+                self.original_x = max( 0, self.original_x )
+                self.original_y = max( 0, self.original_y )
+                
+                self.applyAlignmentOffset()
+                self.updatePropertiesPosition()
+                self.update()
         
         event.accept()
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = True
-            self.drag_start_pos = event.pos()
+            self.drag_start_global_pos = event.globalPosition().toPoint()
+            self.drag_start_original_pos = ( self.original_x, self.original_y )
             self.clicked.emit( self )
 
         event.accept()
@@ -5818,6 +5842,7 @@ class LabelWidget( QWidget ):
     def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = False
+            self.drag_start_original_pos = None
 
         self.updateDataDict()
         event.accept()
@@ -5825,7 +5850,7 @@ class LabelWidget( QWidget ):
 class NumericWidget( QWidget ):
     clicked = pyqtSignal( object )
     
-    def __init__( self, parent = None ):
+    def __init__(self, parent = None ):
         super().__init__( parent )
 
         self.defaultValues()
@@ -5849,7 +5874,8 @@ class NumericWidget( QWidget ):
 
         self.selected = False
         self.dragging = False
-        self.drag_start_pos = QPoint()
+        self.drag_start_global_pos = QPoint()
+        self.drag_start_original_pos = None
         
     def paintEvent( self, event ):
         painter = QPainter( self )
@@ -5858,7 +5884,7 @@ class NumericWidget( QWidget ):
         painter.setPen( QPen( self.number_color ) )
         font = QFont()
         font.setPointSize( int( ( 23 / 5 ) * self.number_size - 548 / 5 ) )
-        painter.setFont( font )
+        painter.setFont(font)
         
         text_rect = QRect( 0, 0, self.numeric_width, self.numeric_height )
         
@@ -5918,12 +5944,7 @@ class NumericWidget( QWidget ):
         bbox_y = text_y - ascent 
         margin = 0
         
-        border_rect = QRect(
-            bbox_x - margin,
-            bbox_y - margin,
-            text_width + 2 * margin,
-            text_height + 2 * margin
-        )
+        border_rect = QRect( bbox_x - margin, bbox_y - margin, text_width + 2 * margin, text_height + 2 * margin )
     
         selection_pen = QPen( QColor( 255, 0, 0 ) )
         selection_pen.setWidth( 3 )
@@ -5994,7 +6015,7 @@ class NumericWidget( QWidget ):
         self.selected = selected
         self.update()
 
-    def setSizeBasedOnNumber( self ):
+    def setSizeBasedOnNumber(self):
         current_original_x = getattr( self, 'original_x', self.x() )
         current_original_y = getattr( self, 'original_y', self.y() )
         
@@ -6025,6 +6046,7 @@ class NumericWidget( QWidget ):
                     main_window.pos_y_spin_numeric.blockSignals( True )
                     main_window.pos_y_spin_numeric.setValue( self.original_y )
                     main_window.pos_y_spin_numeric.blockSignals( False )
+
             except RuntimeError:
                 pass
 
@@ -6036,8 +6058,8 @@ class NumericWidget( QWidget ):
             'static': self.static,
             'name': self.custom_name,
             'stack_order': self.stack_order,
-            'position_x': self.x(),
-            'position_y': self.y(),
+            'position_x': self.original_x, 
+            'position_y': self.original_y, 
             'number_color': self.number_color,
             'number': self.number,
             'number_size': self.number_size,
@@ -6049,19 +6071,19 @@ class NumericWidget( QWidget ):
         }
     
     def updateDataDict( self ):
-        self.data_dict.update( {
+        self.data_dict.update({
             'active': self.active,
             'visible': self.visible,
             'static': self.static,
             'name': self.custom_name,
             'stack_order': self.stack_order,
-            'position_x': self.x(),
-            'position_y': self.y(),
+            'position_x': self.original_x, 
+            'position_y': self.original_y,
             'number_color': self.number_color,
             'number': self.number,
             'number_size': self.number_size,
             'number_alignment': self.number_alignment
-        } )
+        })
         return self.data_dict
     
     def getDataDict( self ):
@@ -6074,32 +6096,36 @@ class NumericWidget( QWidget ):
         parent = self.parent()
 
         while parent:
+
             if isinstance( parent, QMainWindow ):
                 return parent
+            
             parent = parent.parent()
 
         return None
     
     def mouseMoveEvent( self, event ):
         if self.dragging and ( event.buttons() & Qt.MouseButton.LeftButton ):
-            delta = event.pos() - self.drag_start_pos
-            
-            self.original_x += delta.x()
-            self.original_y += delta.y()
-            self.original_x = max( 0, self.original_x )
-            self.original_y = max( 0, self.original_y )
-            
-            self.applyAlignmentOffset()
-            self.updatePropertiesPosition()
-            
-            self.drag_start_pos = event.pos()
+            if self.drag_start_original_pos is not None:
+                current_global_pos = event.globalPosition().toPoint()
+                delta = current_global_pos - self.drag_start_global_pos
+                
+                self.original_x = self.drag_start_original_pos[ 0 ] + delta.x()
+                self.original_y = self.drag_start_original_pos[ 1 ] + delta.y()
+                self.original_x = max( 0, self.original_x )
+                self.original_y = max( 0, self.original_y )
+                
+                self.applyAlignmentOffset()
+                self.updatePropertiesPosition()
+                self.update()
         
         event.accept()
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = True
-            self.drag_start_pos = event.pos()
+            self.drag_start_global_pos = event.globalPosition().toPoint()
+            self.drag_start_original_pos = ( self.original_x, self.original_y )
             self.clicked.emit( self )
 
         event.accept()
@@ -6107,6 +6133,7 @@ class NumericWidget( QWidget ):
     def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = False
+            self.drag_start_original_pos = None
 
         self.updateDataDict()
         event.accept()
