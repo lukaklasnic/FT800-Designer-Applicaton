@@ -161,7 +161,7 @@ def generateWidgetStructure( widget_type, name, widget_data ):
         content += f"    { name }.width = { widget_data.get( 'scroll_bar_width', 100 ) };\n"
         content += f"    { name }.height = { widget_data.get( 'scroll_bar_height', 10 ) };\n"
         content += f"    { name }.thumb_color = { convertColorToHex( widget_data.get( 'thumb_color', '0x000000' ) ) };\n"
-        content += f"    { name }.background_color = { convertColorToHex( widget_data.get( 'track_color', '0xFFFFFF' ) ) };\n"
+        content += f"    { name }.background_color = { convertColorToHex( widget_data.get( 'background_color', '0xFFFFFF' ) ) };\n"
         content += f"    { name }._3d = { convert3dEnabled( widget_data.get( 'effect_3d', True ) ) };\n"
         content += f"    { name }.val = { widget_data.get( 'current_value', 32767 ) };\n"
         content += f"    { name }.size = { widget_data.get( 'thumb_size', 1000 ) };\n"
@@ -423,7 +423,7 @@ def generateComponentsC( canvas_data ):
     
     return content
 
-def generateResourcesH( self, all_images ):
+def generateResourcesH(self, all_images):
     if not all_images:
         return None
     
@@ -433,21 +433,29 @@ def generateResourcesH( self, all_images ):
     h_content += f"#include \"stdint.h\"\n"
     h_content += "\n"
     
+    # Koristimo set za praćenje već generisanih slika
+    generated_names = set()
     generated_count = 0
     
     for img_widget in all_images:
         try:
-            if not hasattr( img_widget, 'pixmap' ) or img_widget.pixmap.isNull():
+            if not hasattr(img_widget, 'pixmap') or img_widget.pixmap.isNull():
                 continue
             
-            if hasattr( img_widget, 'custom_name' ) and img_widget.custom_name:
-                clean_name = img_widget.custom_name.replace( ' ', '_' ).replace( '-', '_' )
-                var_name = f"{ clean_name }_hex"
-
+            # Odredi ime za promenljivu
+            if hasattr(img_widget, 'custom_name') and img_widget.custom_name:
+                clean_name = img_widget.custom_name.replace(' ', '_').replace('-', '_')
+                var_name = f"{clean_name}_hex"
             else:
-                var_name = f"image_{ generated_count }_hex"
+                var_name = f"image_{generated_count}_hex"
             
-            h_content += f"extern const code uint8_t { var_name }[];\n"
+            # Proveri da li smo već generisali ovu promenljivu
+            if var_name in generated_names:
+                continue
+            
+            # Dodaj u set i generiši
+            generated_names.add(var_name)
+            h_content += f"extern const code uint8_t {var_name}[];\n"
             generated_count += 1
             
         except Exception as e:
@@ -458,7 +466,7 @@ def generateResourcesH( self, all_images ):
     
     return h_content
 
-def generateResourcesC( self, all_images ):
+def generateResourcesC(self, all_images):
     if not all_images:
         return None
 
@@ -467,44 +475,53 @@ def generateResourcesC( self, all_images ):
     c_content += f"#include \"resource.h\"\n"
     c_content += "\n"
 
+    generated_names = set()
     generated_count = 0
 
     for img_widget in all_images:
         try:
-            if not hasattr( img_widget, 'pixmap' ) or img_widget.pixmap.isNull():
+            if not hasattr(img_widget, 'pixmap') or img_widget.pixmap.isNull():
                 continue
             
+            # Odredi ime za promenljivu
+            if hasattr(img_widget, 'custom_name') and img_widget.custom_name:
+                clean_name = img_widget.custom_name.replace(' ', '_').replace('-', '_')
+                var_name = f"{clean_name}_hex"
+            else:
+                var_name = f"image_{generated_count}_hex"
+            
+            # Proveri da li smo već generisali ovu promenljivu
+            if var_name in generated_names:
+                continue
+            
+            # Oznaci kao generisanu
+            generated_names.add(var_name)
+            
+            # Generiši hex podatke
             image = img_widget.pixmap.toImage()
             width = img_widget.image_width
             height = img_widget.image_height
-            scaled_image = image.scaled( width, height, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation )
-            rgb888_image = scaled_image.convertToFormat( QImage.Format.Format_RGB888 )
+            scaled_image = image.scaled(width, height, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            rgb888_image = scaled_image.convertToFormat(QImage.Format.Format_RGB888)
             rgb565 = bytearray()
 
-            for y in range( height ):
-                for x in range( width ):
-                    c = rgb888_image.pixelColor( x, y )
-                    r = min( max( c.red(), 0 ), 255 ) >> 3
-                    g = min( max( c.green(), 0 ), 255 ) >> 2
-                    b = min( max( c.blue(), 0 ), 255 ) >> 3
-                    value = ( r << 11 ) | ( g << 5 ) | b
-                    rgb565.append( value & 0xFF )
-                    rgb565.append( ( value >> 8 ) & 0xFF )
+            for y in range(height):
+                for x in range(width):
+                    c = rgb888_image.pixelColor(x, y)
+                    r = min(max(c.red(), 0), 255) >> 3
+                    g = min(max(c.green(), 0), 255) >> 2
+                    b = min(max(c.blue(), 0), 255) >> 3
+                    value = (r << 11) | (g << 5) | b
+                    rgb565.append(value & 0xFF)
+                    rgb565.append((value >> 8) & 0xFF)
 
-            size = len( rgb565 )
+            size = len(rgb565)
+            
+            c_content += f"const code uint8_t {var_name}[{size}] = {{\n"
 
-            if hasattr( img_widget, 'custom_name' ) and img_widget.custom_name:
-                clean_name = img_widget.custom_name.replace( ' ', '_' ).replace( '-', '_' )
-                var_name = f" {clean_name }_hex"
-
-            else:
-                var_name = f"image_{ generated_count }_hex"
-
-            c_content += f"const code uint8_t { var_name }[ { size } ] = {{\n"
-
-            for i in range( 0, size, 16 ):
-                line = ", ".join( f"0x{b:02X}" for b in rgb565[ i:i+16 ] )
-                c_content += f"    { line },\n"
+            for i in range(0, size, 16):
+                line = ", ".join(f"0x{b:02X}" for b in rgb565[i:i+16])
+                c_content += f"    {line},\n"
 
             c_content += "};\n\n"
             generated_count += 1
@@ -513,7 +530,6 @@ def generateResourcesC( self, all_images ):
             continue
         
     return c_content
-
 def generateResources( main_window, out_dir = None ):
     all_images = []
     canvas_data_dict = main_window.getAllCanvasData()
