@@ -770,25 +770,30 @@ class CircleWidget( QWidget ):
             return
 
         delta = global_pos - self.resize_start_pos
+        new_diameter = self.resize_start_diameter
 
         if "right" in self.resize_corner:
-            new_diameter = max( 20, self.resize_start_diameter + delta.x() )
+            new_diameter = max( 20, self.resize_start_diameter + 2 * delta.x() )
+
         elif "left" in self.resize_corner:
-            new_diameter = max( 20, self.resize_start_diameter - delta.x() )
-        else:
-            new_diameter = self.diameter
-        
+            new_diameter = max( 20, self.resize_start_diameter - 2 * delta.x() )
+
+        elif "top" in self.resize_corner:
+            new_diameter = max( 20, self.resize_start_diameter - 2 * delta.y() )
+
+        elif "bottom" in self.resize_corner:
+            new_diameter = max( 20, self.resize_start_diameter + 2 * delta.y() )
+
+        old_center_x = self.x() + self.diameter // 2
+        old_center_y = self.y() + self.diameter // 2
+
         self.diameter = new_diameter
         self.setFixedSize( new_diameter, new_diameter )
-        
-        if "left" in self.resize_corner:
-            delta_x = self.resize_start_diameter - new_diameter
-            self.move( self.x() + delta_x, self.y() )
-        
-        if "top" in self.resize_corner:
-            delta_y = self.resize_start_diameter - new_diameter
-            self.move( self.x(), self.y() + delta_y )
-        
+
+        new_x = old_center_x - new_diameter // 2
+        new_y = old_center_y - new_diameter // 2
+        self.move( new_x, new_y )
+
         self.updateCenterPosition()
         self.updateCirclePropertiesSize()
         self.updateCircleCenterPositionProperties()
@@ -1094,6 +1099,9 @@ class EllipseWidget( QWidget ):
         new_width = self.resize_start_size.width()
         new_height = self.resize_start_size.height()
 
+        old_center_x = self.x() + self.ellipse_width // 2
+        old_center_y = self.y() + self.ellipse_height // 2
+
         if self.resize_corner == "bottom_right":
             new_width = max( 20, self.resize_start_size.width() + delta.x() )
             new_height = max( 20, self.resize_start_size.height() + delta.y() )
@@ -1101,17 +1109,30 @@ class EllipseWidget( QWidget ):
         elif self.resize_corner == "top_right":
             new_width = max( 20, self.resize_start_size.width() + delta.x() )
             new_height = max( 20, self.resize_start_size.height() - delta.y() )
+            delta_height = new_height - self.resize_start_size.height()
+            self.move( self.x(), self.y() - delta_height )
 
         elif self.resize_corner == "bottom_left":
             new_width = max( 20, self.resize_start_size.width() - delta.x() )
             new_height = max( 20, self.resize_start_size.height() + delta.y() )
+            delta_width = new_width - self.resize_start_size.width()
+            self.move(self.x() - delta_width, self.y())
 
         elif self.resize_corner == "top_left":
             new_width = max( 20, self.resize_start_size.width() - delta.x() )
             new_height = max( 20, self.resize_start_size.height() - delta.y() )
+            delta_width = new_width - self.resize_start_size.width()
+            delta_height = new_height - self.resize_start_size.height()
+            self.move( self.x() - delta_width, self.y() - delta_height )
 
         self.ellipse_width = max( 20, new_width )
         self.ellipse_height = max( 20, new_height )
+
+        new_center_x = self.x() + self.ellipse_width // 2
+        new_center_y = self.y() + self.ellipse_height // 2
+
+        if new_center_x != old_center_x or new_center_y != old_center_y:
+            self.move( old_center_x - self.ellipse_width // 2, old_center_y - self.ellipse_height // 2 )
 
         self.setFixedSize( self.ellipse_width, self.ellipse_height )
         self.updateCenterPosition()
@@ -2393,28 +2414,31 @@ class ClockWidget( QWidget ):
             return
 
         delta = global_pos - self.resize_start_pos
+        new_diameter = self.resize_start_diameter
 
         if "right" in self.resize_corner:
-            new_diameter = max( 20, self.resize_start_diameter + delta.x() )
+            new_diameter = max( 20, self.resize_start_diameter + 2 * delta.x() )
 
         elif "left" in self.resize_corner:
-            new_diameter = max( 20, self.resize_start_diameter - delta.x() )
+            new_diameter = max( 20, self.resize_start_diameter - 2 * delta.x() )
 
-        else:
-            new_diameter = self.diameter
+        elif "top" in self.resize_corner:
+            new_diameter = max( 20, self.resize_start_diameter - 2 * delta.y() )
+
+        elif "bottom" in self.resize_corner:
+            new_diameter = max( 20, self.resize_start_diameter + 2 * delta.y() )
+
+        old_center_x = self.x() + self.diameter // 2
+        old_center_y = self.y() + self.diameter // 2
 
         self.diameter = new_diameter
         self.setFixedSize( new_diameter, new_diameter )
-        
-        if "left" in self.resize_corner:
-            delta_x = self.resize_start_diameter - new_diameter
-            self.move( self.x() + delta_x, self.y() )
 
-        if "top" in self.resize_corner:
-            delta_y = self.resize_start_diameter - new_diameter
-            self.move( self.x(), self.y() + delta_y )
+        new_x = old_center_x - new_diameter // 2
+        new_y = old_center_y - new_diameter // 2
+        self.move( new_x, new_y )
 
-        self.updateCenterPosition() 
+        self.updateCenterPosition()
         self.updateClockPropertiesSize()
         self.updateClockCenterPositionProperties()
         self.update()
@@ -2761,28 +2785,31 @@ class GaugeWidget( QWidget ):
             return
 
         delta = global_pos - self.resize_start_pos
+        new_diameter = self.resize_start_diameter
 
         if "right" in self.resize_corner:
-            new_diameter = max( 20, self.resize_start_diameter + delta.x() )
+            new_diameter = max( 20, self.resize_start_diameter + 2 * delta.x() )
 
         elif "left" in self.resize_corner:
-            new_diameter = max( 20, self.resize_start_diameter - delta.x() )
+            new_diameter = max( 20, self.resize_start_diameter - 2 * delta.x() )
 
-        else:
-            new_diameter = self.diameter
+        elif "top" in self.resize_corner:
+            new_diameter = max( 20, self.resize_start_diameter - 2 * delta.y() )
+
+        elif "bottom" in self.resize_corner:
+            new_diameter = max( 20, self.resize_start_diameter + 2 * delta.y() )
+
+        old_center_x = self.x() + self.diameter // 2
+        old_center_y = self.y() + self.diameter // 2
 
         self.diameter = new_diameter
         self.setFixedSize( new_diameter, new_diameter )
-        
-        if "left" in self.resize_corner:
-            delta_x = self.resize_start_diameter - new_diameter
-            self.move( self.x() + delta_x, self.y() )
 
-        if "top" in self.resize_corner:
-            delta_y = self.resize_start_diameter - new_diameter
-            self.move( self.x(), self.y() + delta_y )
+        new_x = old_center_x - new_diameter // 2
+        new_y = old_center_y - new_diameter // 2
+        self.move( new_x, new_y )
 
-        self.updateCenterPosition() 
+        self.updateCenterPosition()
         self.updateGaugePropertiesSize()
         self.updateGaugeCenterPositionProperties()
         self.update()
@@ -3129,26 +3156,29 @@ class DialWidget( QWidget ):
             return
 
         delta = global_pos - self.resize_start_pos
+        new_diameter = self.resize_start_diameter
 
         if "right" in self.resize_corner:
-            new_diameter = max( 20, self.resize_start_diameter + delta.x() )
+            new_diameter = max( 20, self.resize_start_diameter + 2 * delta.x() )
 
         elif "left" in self.resize_corner:
-            new_diameter = max( 20, self.resize_start_diameter - delta.x() )
+            new_diameter = max( 20, self.resize_start_diameter - 2 * delta.x() )
 
-        else:
-            new_diameter = self.diameter
+        elif "top" in self.resize_corner:
+            new_diameter = max( 20, self.resize_start_diameter - 2 * delta.y() )
+
+        elif "bottom" in self.resize_corner:
+            new_diameter = max( 20, self.resize_start_diameter + 2 * delta.y() )
+
+        old_center_x = self.x() + self.diameter // 2
+        old_center_y = self.y() + self.diameter // 2
 
         self.diameter = new_diameter
         self.setFixedSize( new_diameter, new_diameter )
-        
-        if "left" in self.resize_corner:
-            delta_x = self.resize_start_diameter - new_diameter
-            self.move( self.x() + delta_x, self.y() )
 
-        if "top" in self.resize_corner:
-            delta_y = self.resize_start_diameter - new_diameter
-            self.move( self.x(), self.y() + delta_y )
+        new_x = old_center_x - new_diameter // 2
+        new_y = old_center_y - new_diameter // 2
+        self.move( new_x, new_y )
 
         self.updateCenterPosition()
         self.updateDialPropertiesSize()
