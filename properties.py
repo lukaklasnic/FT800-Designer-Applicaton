@@ -6,36 +6,33 @@ from callbacks import*
 
 #------------------------------------------------------------CANVAS--------------------------------------------------------------
 
-def showCanvasProperties(main_window, canvas, current_index=0):
-    """Prikazuje properties za canvas na isti način kao za widgete"""
-    
-    # Sačuvaj referencu na trenutni canvas
+def showCanvasProperties( main_window, canvas, current_index = 0 ):
     main_window.current_canvas = canvas
     
-    shape_label = QLabel("CANVAS PROPERTIES")
-    shape_label.setStyleSheet("color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;")
-    main_window.properties_layout.insertWidget(current_index, shape_label)
+    shape_label = QLabel( "CANVAS PROPERTIES" )
+    shape_label.setStyleSheet( "color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, shape_label )
     current_index += 1
 
-    status_label = QLabel("Status")
-    status_label.setStyleSheet("color: darkorange; font-size: 12px; font-weight: bold; margin-top: 10px;")
-    main_window.properties_layout.insertWidget(current_index, status_label)
+    status_label = QLabel( "Status" )
+    status_label.setStyleSheet( "color: darkorange; font-size: 12px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, status_label )
     current_index += 1
 
     active_layout = QHBoxLayout()
-    active_layout.setContentsMargins(20, 5, 10, 5)
-    active_label = QLabel("Active:")
-    active_label.setStyleSheet("color: lightsalmon; font-size: 14px;")
-    active_layout.addWidget(active_label)
-    active_layout.addStretch(1)
+    active_layout.setContentsMargins( 20, 5, 10, 5 )
+    active_label = QLabel( "Active:" )
+    active_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
+    active_layout.addWidget( active_label )
+    active_layout.addStretch( 1 )
     main_window.active_checkbox_canvas = QCheckBox()
-    main_window.active_checkbox_canvas.setChecked(getattr(canvas, 'active', True))
-    main_window.active_checkbox_canvas.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
-    main_window.active_checkbox_canvas.stateChanged.connect(lambda state: updateCanvasActive(main_window, state))
-    active_layout.addWidget(main_window.active_checkbox_canvas)
+    main_window.active_checkbox_canvas.setChecked( getattr( canvas, 'active', True ) )
+    main_window.active_checkbox_canvas.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
+    main_window.active_checkbox_canvas.stateChanged.connect( lambda state: updateCanvasActive( main_window, state ) )
+    active_layout.addWidget( main_window.active_checkbox_canvas )
     active_widget = QWidget()
-    active_widget.setLayout(active_layout)
-    main_window.properties_layout.insertWidget(current_index, active_widget)
+    active_widget.setLayout( active_layout )
+    main_window.properties_layout.insertWidget( current_index, active_widget )
     current_index += 1
 
     visible_layout = QHBoxLayout()
@@ -55,121 +52,121 @@ def showCanvasProperties(main_window, canvas, current_index=0):
     current_index += 1
 
     static_layout = QHBoxLayout()
-    static_layout.setContentsMargins(20, 5, 10, 5)
-    static_label = QLabel("Static:")
-    static_label.setStyleSheet("color: lightsalmon; font-size: 14px;")
-    static_layout.addWidget(static_label)
-    static_layout.addStretch(1)
+    static_layout.setContentsMargins( 20, 5, 10, 5 )
+    static_label = QLabel( "Static:" )
+    static_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
+    static_layout.addWidget( static_label )
+    static_layout.addStretch( 1 )
     main_window.static_checkbox_canvas = QCheckBox()
-    main_window.static_checkbox_canvas.setChecked(getattr(canvas, 'static', False))
-    main_window.static_checkbox_canvas.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
-    main_window.static_checkbox_canvas.stateChanged.connect(lambda state: updateCanvasStatic(main_window, state))
-    static_layout.addWidget(main_window.static_checkbox_canvas)
+    main_window.static_checkbox_canvas.setChecked( getattr( canvas, 'static', False ) )
+    main_window.static_checkbox_canvas.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
+    main_window.static_checkbox_canvas.stateChanged.connect( lambda state: updateCanvasStatic( main_window, state ) )
+    static_layout.addWidget( main_window.static_checkbox_canvas )
     static_widget = QWidget()
-    static_widget.setLayout(static_layout)
-    main_window.properties_layout.insertWidget(current_index, static_widget)
+    static_widget.setLayout( static_layout )
+    main_window.properties_layout.insertWidget( current_index, static_widget )
     current_index += 1
 
-    name_label = QLabel("Canvas name")
-    name_label.setStyleSheet("color: darkorange; font-size: 12px; font-weight: bold; margin-top: 10px;")
-    main_window.properties_layout.insertWidget(current_index, name_label)
+    name_label = QLabel( "Canvas name" )
+    name_label.setStyleSheet( "color: darkorange; font-size: 12px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, name_label )
     current_index += 1
 
     name_input_layout = QHBoxLayout()
-    name_input_layout.setContentsMargins(20, 5, 10, 5)
-    name_input_label = QLabel("Name:")
-    name_input_label.setStyleSheet("color: lightsalmon; font-size: 14px;")
-    name_input_layout.addWidget(name_input_label)
-    name_input_layout.addStretch(1)
+    name_input_layout.setContentsMargins( 20, 5, 10, 5 )
+    name_input_label = QLabel( "Name:" )
+    name_input_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
+    name_input_layout.addWidget( name_input_label )
+    name_input_layout.addStretch( 1 )
     main_window.name_edit_canvas = QLineEdit()
-    main_window.name_edit_canvas.setText(canvas.custom_name)
-    main_window.name_edit_canvas.textChanged.connect(lambda text: updateCanvasName(main_window, text))
-    main_window.name_edit_canvas.setStyleSheet("color: lightsalmon; background-color: #383838;")
-    main_window.name_edit_canvas.setFixedWidth(80)
-    name_input_layout.addWidget(main_window.name_edit_canvas)
+    main_window.name_edit_canvas.setText( canvas.custom_name )
+    main_window.name_edit_canvas.textChanged.connect( lambda text: updateCanvasName( main_window, text ) )
+    main_window.name_edit_canvas.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
+    main_window.name_edit_canvas.setFixedWidth( 80 )
+    name_input_layout.addWidget( main_window.name_edit_canvas )
     name_input_widget = QWidget()
-    name_input_widget.setLayout(name_input_layout)
-    main_window.properties_layout.insertWidget(current_index, name_input_widget)
+    name_input_widget.setLayout( name_input_layout )
+    main_window.properties_layout.insertWidget( current_index, name_input_widget )
     current_index += 1
 
-    background_label = QLabel("Background")
-    background_label.setStyleSheet("color: darkorange; font-size: 12px; font-weight: bold; margin-top: 10px;")
-    main_window.properties_layout.insertWidget(current_index, background_label)
+    background_label = QLabel( "Background" )
+    background_label.setStyleSheet( "color: darkorange; font-size: 12px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, background_label )
     current_index += 1
 
     background_color_layout = QHBoxLayout()
-    background_color_layout.setContentsMargins(20, 5, 10, 5)
-    background_color_label = QLabel("Background color:")
-    background_color_label.setStyleSheet("color: lightsalmon; font-size: 14px;")
-    background_color_layout.addWidget(background_color_label)
-    background_color_layout.addStretch(1)
+    background_color_layout.setContentsMargins( 20, 5, 10, 5 )
+    background_color_label = QLabel( "Background color:" )
+    background_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
+    background_color_layout.addWidget( background_color_label )
+    background_color_layout.addStretch( 1 )
     
-    # Kreiraj ColorRectangle za boju canvasa
-    if isinstance(canvas.canvas_color, QColor):
+    if isinstance( canvas.canvas_color, QColor ):
         bg_color_hex = canvas.canvas_color.name()
+
     else:
-        bg_color_hex = str(canvas.canvas_color)
+        bg_color_hex = str( canvas.canvas_color )
     
-    main_window.canvas_color_rect = ColorRectangle(bg_color_hex)
-    main_window.canvas_color_rect.mousePressEvent = lambda e: updateCanvasColor(main_window)
-    main_window.canvas_color_rect.setCursor(Qt.CursorShape.PointingHandCursor)
-    background_color_layout.addWidget(main_window.canvas_color_rect)
+    main_window.canvas_color_rect = ColorRectangle( bg_color_hex )
+    main_window.canvas_color_rect.mousePressEvent = lambda e: updateCanvasColor( main_window )
+    main_window.canvas_color_rect.setCursor( Qt.CursorShape.PointingHandCursor )
+    background_color_layout.addWidget( main_window.canvas_color_rect )
 
     background_color_widget = QWidget()
-    background_color_widget.setLayout(background_color_layout)
-    main_window.properties_layout.insertWidget(current_index, background_color_widget)
+    background_color_widget.setLayout( background_color_layout )
+    main_window.properties_layout.insertWidget( current_index, background_color_widget )
     current_index += 1
 
-    grid_label = QLabel("Grid")
-    grid_label.setStyleSheet("color: darkorange; font-size: 12px; font-weight: bold; margin-top: 10px;")
-    main_window.properties_layout.insertWidget(current_index, grid_label)
+    grid_label = QLabel( "Grid" )
+    grid_label.setStyleSheet( "color: darkorange; font-size: 12px; font-weight: bold; margin-top: 10px;" )
+    main_window.properties_layout.insertWidget( current_index, grid_label )
     current_index += 1
 
     grid_enable_layout = QHBoxLayout()
-    grid_enable_layout.setContentsMargins(20, 5, 10, 5)
-    grid_enable_label = QLabel("Enable grid:")
-    grid_enable_label.setStyleSheet("color: lightsalmon; font-size: 14px;")
-    grid_enable_layout.addWidget(grid_enable_label)
-    grid_enable_layout.addStretch(1)
+    grid_enable_layout.setContentsMargins( 20, 5, 10, 5 )
+    grid_enable_label = QLabel( "Enable grid:" )
+    grid_enable_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
+    grid_enable_layout.addWidget( grid_enable_label )
+    grid_enable_layout.addStretch( 1 )
     main_window.grid_checkbox_canvas = QCheckBox()
-    main_window.grid_checkbox_canvas.setChecked(getattr(canvas, 'canvas_grid_enable', False))
-    main_window.grid_checkbox_canvas.setStyleSheet("QCheckBox::indicator { width: 15px; height: 15px; }")
-    main_window.grid_checkbox_canvas.stateChanged.connect(lambda state: updateToggleGrid(main_window, state))
-    grid_enable_layout.addWidget(main_window.grid_checkbox_canvas)
+    main_window.grid_checkbox_canvas.setChecked( getattr( canvas, 'canvas_grid_enable', False ) )
+    main_window.grid_checkbox_canvas.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
+    main_window.grid_checkbox_canvas.stateChanged.connect( lambda state: updateToggleGrid( main_window, state ) )
+    grid_enable_layout.addWidget( main_window.grid_checkbox_canvas )
     grid_enable_widget = QWidget()
-    grid_enable_widget.setLayout(grid_enable_layout)
-    main_window.properties_layout.insertWidget(current_index, grid_enable_widget)
+    grid_enable_widget.setLayout( grid_enable_layout )
+    main_window.properties_layout.insertWidget( current_index, grid_enable_widget )
     current_index += 1
 
     grid_color_layout = QHBoxLayout()
-    grid_color_layout.setContentsMargins(20, 5, 10, 5)
-    grid_color_label = QLabel("Grid color:")
-    grid_color_label.setStyleSheet("color: lightsalmon; font-size: 14px;")
-    grid_color_layout.addWidget(grid_color_label)
-    grid_color_layout.addStretch(1)
+    grid_color_layout.setContentsMargins( 20, 5, 10, 5 )
+    grid_color_label = QLabel( "Grid color:" )
+    grid_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
+    grid_color_layout.addWidget( grid_color_label )
+    grid_color_layout.addStretch( 1 )
     
-    # Kreiraj ColorRectangle za boju grida
-    if isinstance(canvas.grid_color, QColor):
+    if isinstance( canvas.grid_color, QColor ):
         grid_color_hex = canvas.grid_color.name()
+
     else:
-        grid_color_hex = str(canvas.grid_color)
+        grid_color_hex = str( canvas.grid_color )
     
-    main_window.grid_color_rect = ColorRectangle(grid_color_hex)
-    main_window.grid_color_rect.mousePressEvent = lambda e: updateGridColor(main_window)
-    main_window.grid_color_rect.setCursor(Qt.CursorShape.PointingHandCursor)
-    grid_color_layout.addWidget(main_window.grid_color_rect)
+    main_window.grid_color_rect = ColorRectangle( grid_color_hex )
+    main_window.grid_color_rect.mousePressEvent = lambda e: updateGridColor( main_window )
+    main_window.grid_color_rect.setCursor( Qt.CursorShape.PointingHandCursor )
+    grid_color_layout.addWidget( main_window.grid_color_rect )
 
     grid_color_widget = QWidget()
-    grid_color_widget.setLayout(grid_color_layout)
-    main_window.properties_layout.insertWidget(current_index, grid_color_widget)
+    grid_color_widget.setLayout( grid_color_layout )
+    main_window.properties_layout.insertWidget( current_index, grid_color_widget )
     current_index += 1
 
     grid_type_layout = QHBoxLayout()
-    grid_type_layout.setContentsMargins(20, 5, 10, 5)
-    grid_type_label = QLabel("Grid type:")
-    grid_type_label.setStyleSheet("color: lightsalmon; font-size: 14px;")
-    grid_type_layout.addWidget(grid_type_label)
-    grid_type_layout.addStretch(1)
+    grid_type_layout.setContentsMargins( 20, 5, 10, 5 )
+    grid_type_label = QLabel( "Grid type:" )
+    grid_type_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
+    grid_type_layout.addWidget( grid_type_label )
+    grid_type_layout.addStretch( 1 )
 
     main_window.grid_type_combo_canvas = QComboBox()
     main_window.grid_type_combo_canvas.addItems( [ "Lines", "Dots" ] )
@@ -184,21 +181,21 @@ def showCanvasProperties(main_window, canvas, current_index=0):
     current_index += 1
 
     grid_size_layout = QHBoxLayout()
-    grid_size_layout.setContentsMargins(20, 5, 10, 5)
-    grid_size_label = QLabel("Grid size:")
-    grid_size_label.setStyleSheet("color: lightsalmon; font-size: 14px;")
-    grid_size_layout.addWidget(grid_size_label)
-    grid_size_layout.addStretch(1)
+    grid_size_layout.setContentsMargins( 20, 5, 10, 5 )
+    grid_size_label = QLabel( "Grid size:" )
+    grid_size_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
+    grid_size_layout.addWidget( grid_size_label )
+    grid_size_layout.addStretch( 1 )
     main_window.grid_size_spin_canvas = QSpinBox()
-    main_window.grid_size_spin_canvas.setRange(5, 100)
-    main_window.grid_size_spin_canvas.setValue(getattr(canvas, 'grid_size', 20))
-    main_window.grid_size_spin_canvas.valueChanged.connect(lambda value: changeGridSize(main_window, value))
-    main_window.grid_size_spin_canvas.setStyleSheet("color: lightsalmon; background-color: #383838;")
-    main_window.grid_size_spin_canvas.setFixedWidth(60)
-    grid_size_layout.addWidget(main_window.grid_size_spin_canvas)
+    main_window.grid_size_spin_canvas.setRange( 5, 100 )
+    main_window.grid_size_spin_canvas.setValue( getattr( canvas, 'grid_size', 20 ) )
+    main_window.grid_size_spin_canvas.valueChanged.connect( lambda value: changeGridSize( main_window, value ) )
+    main_window.grid_size_spin_canvas.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
+    main_window.grid_size_spin_canvas.setFixedWidth( 60 )
+    grid_size_layout.addWidget( main_window.grid_size_spin_canvas )
     grid_size_widget = QWidget()
-    grid_size_widget.setLayout(grid_size_layout)
-    main_window.properties_layout.insertWidget(current_index, grid_size_widget)
+    grid_size_widget.setLayout( grid_size_layout )
+    main_window.properties_layout.insertWidget( current_index, grid_size_widget )
     current_index += 1
 
     return current_index

@@ -4208,7 +4208,7 @@ class ScrollBarWidget( QWidget ):
             'current_value': self.current_value,
             'thumb_size': self.thumb_size,
 
-            'type': 'Scroll_bar',
+            'type': 'ScrollBar',
             'id': None
         }
     
@@ -5118,7 +5118,7 @@ class ProgressBarWidget( QWidget ):
             'range': self.range,
             'current_value': self.value,
 
-            'type': 'Progress_bar',
+            'type': 'ProgressBar',
             'id': None
         }
     

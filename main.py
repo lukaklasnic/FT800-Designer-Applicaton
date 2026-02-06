@@ -827,15 +827,6 @@ class MainWindow( QMainWindow ):
             shape.custom_name = generateWidgetName( self, "Numeric" )
             shape.stack_order = len( self.getCurrentCanvasWidgets() ) + 1
 
-            shape.show()
-            self.canvas_widgets[ current_canvas.canvas_id ].append( shape )
-            self.updateWidgetsZOrder()
-            self.selectShape( shape )
-            QApplication.restoreOverrideCursor()
-            self.object_attached = False
-            self.selected_shape = None
-            return
-
         if shape:
             current_widgets_count = len( self.getCurrentCanvasWidgets() )
             shape.stack_order = current_widgets_count + 1
