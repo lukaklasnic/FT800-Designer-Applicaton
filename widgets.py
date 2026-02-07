@@ -67,7 +67,7 @@ class LineWidget( QWidget ):
             self.drawSelectionHandles( painter, local_start_x, local_start_y, local_end_x, local_end_y )
     
     def drawSelectionHandles( self, painter, start_x, start_y, end_x, end_y ):
-        handle_size = 10
+        handle_size = 8
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
@@ -80,17 +80,15 @@ class LineWidget( QWidget ):
         painter.drawEllipse( end_x - 1, end_y - 1, 2, 2 )
     
     def drawSelectionBorder( self, painter ):
-        margin = 2
-    
         local_start_x = self.start_x - self.x()
         local_start_y = self.start_y - self.y()
         local_end_x = self.end_x - self.x()
         local_end_y = self.end_y - self.y()
         
-        min_x = min( local_start_x, local_end_x ) - margin
-        min_y = min( local_start_y, local_end_y ) - margin
-        max_x = max( local_start_x, local_end_x ) + margin
-        max_y = max( local_start_y, local_end_y ) + margin
+        min_x = min( local_start_x, local_end_x )
+        min_y = min( local_start_y, local_end_y )
+        max_x = max( local_start_x, local_end_x )
+        max_y = max( local_start_y, local_end_y )
         
         selection_rect = QRect( min_x, min_y, max_x - min_x, max_y - min_y )
         
@@ -467,11 +465,12 @@ class RectangleWidget( QWidget ):
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        handle_size = 10
+        handle_size = 8
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
         painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
+
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
@@ -483,17 +482,16 @@ class RectangleWidget( QWidget ):
             painter.setPen(QPen(QColor(56, 56, 56), 1))
 
     def drawSelectionBorder( self, painter ):
-        margin = 2
-        selection_rect = QRect(margin, margin, self.width() - 2 * margin, self.height() - 2 * margin)
+        selection_rect = QRect( 0, 0, self.width(), self.height() )
 
-        selection_pen = QPen(QColor(255, 0, 0))
-        selection_pen.setWidth(3)
-        selection_pen.setStyle(Qt.PenStyle.DashLine)
-        selection_pen.setDashPattern([4, 2])
+        selection_pen = QPen( QColor( 255, 0, 0 ) )
+        selection_pen.setWidth( 2 )
+        selection_pen.setStyle(Qt.PenStyle.DashLine )
+        selection_pen.setDashPattern( [ 4, 2 ] )
 
-        painter.setPen(selection_pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(selection_rect)
+        painter.setPen( selection_pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( selection_rect )
 
     def handleResize( self, global_pos ):
         if not self.resize_corner:
@@ -794,16 +792,16 @@ class CircleWidget( QWidget ):
             self.drawSelectionHandles( painter )
             
     def drawSelectionHandles( self, painter ):
-        handle_size = 10
-        half_handle = handle_size // 2
+        handle_size = 8
+        half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
         painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
-        points = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( self.width() - 4, self.height() - 4 ), QPoint( 4, self.height() - 4 ) ]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
-        for point in points:
-            painter.drawEllipse( point.x() - half_handle, point.y() - half_handle, handle_size, handle_size )
+        for point in corners:
+            painter.drawEllipse( point.x() - half_size, point.y() - half_size, handle_size, handle_size )
             painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( point.x() - 1, point.y() - 1, 2, 2 )
@@ -811,11 +809,10 @@ class CircleWidget( QWidget ):
             painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder( self, painter ):
-        margin = 2
-        selection_rect = QRectF( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        selection_rect = QRectF( 0, 0, self.width(), self.height() )
         
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
         
@@ -1139,7 +1136,7 @@ class EllipseWidget( QWidget ):
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        handle_size = 10
+        handle_size = 8
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
@@ -1156,11 +1153,10 @@ class EllipseWidget( QWidget ):
             painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
     
     def drawSelectionBorder( self, painter ):
-        margin = 2
-        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        border_rect = QRect( 0, 0, self.width(), self.height() )
 
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
@@ -1561,11 +1557,10 @@ class ButtonWidget( QWidget ):
             painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
             
     def drawSelectionBorder(self, painter):
-        margin = 2
-        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        border_rect = QRect( 0, 0, self.width(), self.height() )
 
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
@@ -2077,16 +2072,13 @@ class KeysWidget( QWidget ):
         painter.drawLine( x + width, y + r, x + width, y + height - r )
 
     def drawSelectionHandles( self, painter ):
-        if not self.selected:
-            return
-        
         handle_size = 8
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
         painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
-        corners = [ QPoint( 4, 4 ), QPoint( self.keys_width - 4, 4 ), QPoint( 4, self.keys_height - 4 ), QPoint( self.keys_width - 4, self.keys_height - 4 ) ]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
@@ -2097,14 +2089,10 @@ class KeysWidget( QWidget ):
             painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
     
     def drawSelectionBorder( self, painter ):
-        if not self.selected:
-            return
-            
-        margin = 2
-        border_rect = QRect( margin, margin, self.keys_width - 2 * margin, self.keys_height - 2 * margin )
+        border_rect = QRect( 0, 0, self.keys_width, self.keys_height )
 
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
@@ -2533,16 +2521,16 @@ class ClockWidget( QWidget ):
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        handle_size = 10
-        half_handle = handle_size // 2
+        handle_size = 8
+        half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
         painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
-        points = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( self.width() - 4, self.height() - 4 ), QPoint( 4, self.height() - 4 ) ]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
-        for point in points:
-            painter.drawEllipse( point.x() - half_handle, point.y() - half_handle, handle_size, handle_size )
+        for point in corners:
+            painter.drawEllipse( point.x() - half_size, point.y() - half_size, handle_size, handle_size )
             painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( point.x() - 1, point.y() - 1, 2, 2 )
@@ -2550,11 +2538,10 @@ class ClockWidget( QWidget ):
             painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder( self, painter ):
-        margin = 2
-        selection_rect = QRectF( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        selection_rect = QRectF( 0, 0, self.width(), self.height() )
         
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
         
@@ -2918,16 +2905,16 @@ class GaugeWidget( QWidget ):
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        handle_size = 10
-        half_handle = handle_size // 2
+        handle_size = 8
+        half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
         painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
-        points = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( self.width() - 4, self.height() - 4 ), QPoint( 4, self.height() - 4 ) ]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
-        for point in points:
-            painter.drawEllipse( point.x() - half_handle, point.y() - half_handle, handle_size, handle_size )
+        for point in corners:
+            painter.drawEllipse( point.x() - half_size, point.y() - half_size, handle_size, handle_size )
             painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( point.x() - 1, point.y() - 1, 2, 2 )
@@ -2935,11 +2922,10 @@ class GaugeWidget( QWidget ):
             painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder( self, painter ):
-        margin = 2
-        selection_rect = QRectF( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        selection_rect = QRectF( 0, 0, self.width(), self.height() )
         
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
         
@@ -3281,16 +3267,16 @@ class DialWidget( QWidget ):
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        handle_size = 10
-        half_handle = handle_size // 2
+        handle_size = 8
+        half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
         painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
-        points = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( self.width() - 4, self.height() - 4), QPoint( 4, self.height() - 4 ) ]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
-        for point in points:
-            painter.drawEllipse( point.x() - half_handle, point.y() - half_handle, handle_size, handle_size )
+        for point in corners:
+            painter.drawEllipse( point.x() - half_size, point.y() - half_size, handle_size, handle_size )
             painter.setBrush( QColor( 255, 142, 62 ) )
             painter.setPen( Qt.PenStyle.NoPen )
             painter.drawEllipse( point.x() - 1, point.y() - 1, 2, 2 )
@@ -3298,11 +3284,10 @@ class DialWidget( QWidget ):
             painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder( self, painter ):
-        margin = 2
-        selection_rect = QRectF( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        selection_rect = QRectF( 0, 0, self.width(), self.height() )
         
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
         
@@ -3735,16 +3720,13 @@ class ToggleWidget( QWidget ):
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        if not self.selected:
-            return
-            
         handle_size = 8
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
         painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
-        corners = [ QPoint(4, 4), QPoint(self.width()-4, 4), ]
+        corners = [ QPoint( 4, 4 ), QPoint( self.width()-4, 4), ]
 
         for corner in corners:
             painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
@@ -3755,14 +3737,10 @@ class ToggleWidget( QWidget ):
             painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder( self, painter ):
-        if not self.selected:
-            return
-            
-        margin = 2
-        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        border_rect = QRect( 0, 0, self.width(), self.height() )
 
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
@@ -4147,16 +4125,11 @@ class ScrollBarWidget( QWidget ):
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        if not self.selected:
-            return
-            
         handle_size = 8
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
-        pen = QPen( QColor( 56, 56, 56 ) )
-        pen.setWidth( 1 )
-        painter.setPen( pen )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
@@ -4171,14 +4144,10 @@ class ScrollBarWidget( QWidget ):
             painter.setPen( pen )
 
     def drawSelectionBorder( self, painter ):
-        if not self.selected:
-            return
-            
-        margin = 2
-        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        border_rect = QRect( 0, 0, self.width(), self.height() )
 
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
@@ -4764,16 +4733,11 @@ class SliderWidget( QWidget ):
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        if not self.selected:
-            return
-            
         handle_size = 8
         half_size = handle_size // 2
 
         painter.setBrush( QColor( 255, 142, 62 ) )
-        pen = QPen( QColor( 56, 56, 56 ) )
-        pen.setWidth( 1 )
-        painter.setPen( pen )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
@@ -4789,14 +4753,10 @@ class SliderWidget( QWidget ):
 
 
     def drawSelectionBorder( self, painter ):
-        if not self.selected:
-            return
-            
-        margin = 2
-        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        border_rect = QRect( 0, 0, self.width(), self.height() )
 
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
@@ -5276,9 +5236,6 @@ class ProgressBarWidget( QWidget ):
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        if not self.selected:
-            return
-            
         handle_size = 8
         half_size = handle_size // 2
 
@@ -5296,14 +5253,10 @@ class ProgressBarWidget( QWidget ):
             painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder( self, painter ):
-        if not self.selected:
-            return
-            
-        margin = 2
-        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        border_rect = QRect( 0, 0, self.width(), self.height() )
 
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
@@ -5611,9 +5564,6 @@ class ImageWidget( QWidget ):
             self.drawSelectionHandles( painter )
 
     def drawSelectionHandles( self, painter ):
-        if not self.selected:
-            return
-            
         handle_size = 8
         half_size = handle_size // 2
 
@@ -5631,14 +5581,10 @@ class ImageWidget( QWidget ):
             painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
     
     def drawSelectionBorder( self, painter ):
-        if not self.selected:
-            return
-            
-        margin = 2
-        border_rect = QRect( margin, margin, self.width() - 2 * margin, self.height() - 2 * margin )
+        border_rect = QRect( 0, 0, self.width(), self.height() )
 
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
@@ -5982,9 +5928,6 @@ class LabelWidget( QWidget ):
             self.drawSelectionBorder( painter )
 
     def drawSelectionBorder( self, painter ):
-        if not self.selected:
-            return
-        
         font = QFont()
         font.setPointSize( int( ( 23 / 5 ) * self.text_size - 548 / 5 ) )
         font_metrics = QFontMetrics(font)
@@ -6015,12 +5958,12 @@ class LabelWidget( QWidget ):
             
         bbox_x = text_x
         bbox_y = text_y - ascent 
-        margin = 0
+    
         
-        border_rect = QRect( bbox_x - margin, bbox_y - margin, text_width + 2 * margin, text_height + 2 * margin )
+        border_rect = QRect( bbox_x, bbox_y, text_width, text_height )
     
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
     
@@ -6279,9 +6222,6 @@ class NumericWidget( QWidget ):
             self.drawSelectionBorder( painter )
 
     def drawSelectionBorder( self, painter ):
-        if not self.selected:
-            return
-        
         font = QFont()
         font.setPointSize( int( ( 23 / 5 ) * self.number_size - 548 / 5 ) )
         font_metrics = QFontMetrics( font )
@@ -6312,12 +6252,11 @@ class NumericWidget( QWidget ):
         
         bbox_x = text_x
         bbox_y = text_y - ascent 
-        margin = 0
         
-        border_rect = QRect( bbox_x - margin, bbox_y - margin, text_width + 2 * margin, text_height + 2 * margin )
+        border_rect = QRect( bbox_x, bbox_y, text_width, text_height )
     
         selection_pen = QPen( QColor( 255, 0, 0 ) )
-        selection_pen.setWidth( 3 )
+        selection_pen.setWidth( 2 )
         selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
     

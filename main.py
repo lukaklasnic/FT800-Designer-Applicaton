@@ -426,7 +426,7 @@ class MainWindow( QMainWindow ):
             widget_icon = WidgetIcon( shape )
             icons_layout.addWidget( widget_icon, row, col )
             col += 1
-            
+
             if col >= 2:
                 col = 0
                 row += 1
@@ -524,6 +524,19 @@ class MainWindow( QMainWindow ):
         properties_global.moveTopLeft( self.properties_widget.mapToGlobal( self.properties_widget.rect().topLeft() ) )
         global_pos = event.globalPosition().toPoint()
 
+        if not canvas_global.contains( global_pos ) and not properties_global.contains( global_pos ):
+            if self.object_attached and self.selected_shape:
+                QApplication.restoreOverrideCursor()
+                self.object_attached = False
+                self.selected_shape = None
+
+            self.hideCanvasProperties()
+            self.deselectAllShapes()
+            self.hideShapeProperties()
+
+            QWidget.mousePressEvent( self.main_widget, event )
+            return
+
         if canvas_global.contains( global_pos ):
             clicked_on_shape = False
             current_widgets = self.getCurrentCanvasWidgets()
@@ -549,11 +562,6 @@ class MainWindow( QMainWindow ):
             else:
                 self.deselectAllShapes()
                 self.hideShapeProperties()
-
-        if ( not canvas_global.contains( global_pos ) and not properties_global.contains( global_pos ) ):
-            self.hideCanvasProperties()
-            self.deselectAllShapes()
-            self.hideShapeProperties()
 
         QWidget.mousePressEvent( self.main_widget, event )
 
@@ -583,6 +591,20 @@ class MainWindow( QMainWindow ):
     def keyPressEvent( self, event ):
         if event.key() == Qt.Key.Key_Delete and self.current_shape:
             self.deleteSelectedShape()
+
+        elif event.key() == Qt.Key.Key_Escape:
+            if self.object_attached and self.selected_shape:
+                QApplication.restoreOverrideCursor()
+                self.object_attached = False
+                self.selected_shape = None
+                event.accept()
+                return
+
+            if self.current_shape:
+                self.deselectAllShapes()
+                self.hideShapeProperties()
+                event.accept()
+                return
 
         else:
             super().keyPressEvent( event )
