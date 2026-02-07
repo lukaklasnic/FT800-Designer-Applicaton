@@ -13,7 +13,6 @@ def updateCanvasActive( main_window, state ):
 def updateCanvasVisible( main_window, state ):
     state = state == Qt.CheckState.Checked.value 
     main_window.current_canvas.visible = state
-    main_window.current_canvas.setVisible( main_window.current_canvas.visible )
     main_window.current_canvas.update()
     main_window.current_canvas.updateDataDict()
 

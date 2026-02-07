@@ -405,4 +405,3 @@ class Canvas( QWidget ):
         
         if event.button() == Qt.MouseButton.LeftButton:
             self.clicked.emit( event )
-    

@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import ( QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QFrame, QPushButton, QSplashScreen, QFileDialog, QMessageBox )
 from generator import ( generateResources, generateComponents )
-from PyQt6.QtGui import ( QPixmap, QIcon, QGuiApplication )
+from PyQt6.QtGui import ( QPixmap, QIcon )
 from PyQt6.QtCore import ( Qt, QTimer )
 from ui_components import *
 from properties import * 
@@ -20,7 +20,7 @@ class MainWindow( QMainWindow ):
         self.all_canvas_data = {}
 
     def setTitleBar( self ):
-        self.setWindowTitle( "FT800 Designer application" )
+        self.setWindowTitle( "FT800 Designer" )
         self.setWindowIcon( QIcon( "designer_logo_ic" ) )
 
     def setScrollArea( self ):
@@ -1008,16 +1008,23 @@ class MainWindow( QMainWindow ):
         generateResources( self, self.output_dir )
         generateComponents( self, self.output_dir )
 
-if __name__ == "__main__":
-    QGuiApplication.setHighDpiScaleFactorRoundingPolicy( Qt.HighDpiScaleFactorRoundingPolicy.PassThrough )
-    app = QApplication(sys.argv)
-    BASE_DIR = Path(__file__).resolve().parent
-    logo_path = BASE_DIR / "bootup_logo.png"
-    splash_pix = QPixmap( str( logo_path ) )
-    splash = QSplashScreen( splash_pix.scaled( 800, 450, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation ), Qt.WindowType.WindowStaysOnTopHint )
+def startApp():
+    base_dir = Path( __file__ ).resolve().parent
+    logo_path = base_dir / "bootup_logo.png"
+
+    pix = QPixmap( str( logo_path ) )
+    splash_pix = pix.scaled( 800, 450, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation )
+
+    splash = QSplashScreen( splash_pix, Qt.WindowType.WindowStaysOnTopHint )
     splash.show()
-    app.processEvents()
+    QApplication.processEvents()
     window = MainWindow()
-    QTimer.singleShot( 3000, lambda: ( splash.finish( window ), window.show() ) )
-    window.resize( 1024, 720 ) 
+
+    QTimer.singleShot( 3000, lambda:( splash.finish( window ), window.showMaximized() ) )
+
+    return window
+
+if __name__ == "__main__":
+    app = QApplication( sys.argv )
+    window = startApp()
     sys.exit( app.exec() )
