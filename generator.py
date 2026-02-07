@@ -423,7 +423,7 @@ def generateComponentsC( canvas_data ):
     
     return content
 
-def generateResourcesH(self, all_images):
+def generateResourcesH( self, all_images ):
     if not all_images:
         return None
     
@@ -433,40 +433,32 @@ def generateResourcesH(self, all_images):
     h_content += f"#include \"stdint.h\"\n"
     h_content += "\n"
     
-    processed_images = {}
-    image_counter = 0  # Brojač za jedinstvene slike
+    generated_count = 0
     
     for img_widget in all_images:
         try:
-            if not hasattr(img_widget, 'pixmap') or img_widget.pixmap.isNull():
+            if not hasattr( img_widget, 'pixmap' ) or img_widget.pixmap.isNull():
                 continue
             
-            # Proveri da li je ova slika već obrađena
-            if img_widget in processed_images:
-                continue
-                
-            # Koristi custom_name ako postoji, inače generiši ime
-            if hasattr(img_widget, 'custom_name') and img_widget.custom_name:
-                clean_name = img_widget.custom_name.replace(' ', '_').replace('-', '_')
-                var_name = f"{clean_name}_hex"
+            if hasattr( img_widget, 'custom_name' ) and img_widget.custom_name:
+                clean_name = img_widget.custom_name.replace( ' ', '_' ).replace( '-', '_' )
+                var_name = f"{ clean_name }_hex"
+
             else:
-                # Generiši jedinstveno ime na osnovu rednog broja
-                var_name = f"image_{image_counter}_hex"
-                image_counter += 1
+                var_name = f"image_{ generated_count }_hex"
             
-            h_content += f"extern const code uint8_t {var_name}[];\n"
-            processed_images[img_widget] = var_name
+            h_content += f"extern const code uint8_t { var_name }[];\n"
+            generated_count += 1
             
         except Exception as e:
-            print(f"Error processing image in generateResourcesH: {e}")
             continue
-    
+        
     h_content += "\n"
     h_content += "#endif\n"
     
-    return h_content, processed_images
+    return h_content
 
-def generateResourcesC(self, all_images, processed_images):
+def generateResourcesC( self, all_images ):
     if not all_images:
         return None
 
@@ -475,156 +467,91 @@ def generateResourcesC(self, all_images, processed_images):
     c_content += f"#include \"resource.h\"\n"
     c_content += "\n"
 
-    # Set za praćenje već obrađenih slika
-    processed_widgets = set()
+    generated_count = 0
 
     for img_widget in all_images:
         try:
-            if not hasattr(img_widget, 'pixmap') or img_widget.pixmap.isNull():
+            if not hasattr( img_widget, 'pixmap' ) or img_widget.pixmap.isNull():
                 continue
             
-            # Preskoči ako je već obrađen
-            if img_widget in processed_widgets:
-                continue
-                
             image = img_widget.pixmap.toImage()
             width = img_widget.image_width
             height = img_widget.image_height
-            
-            # Skaliraj sliku na željene dimenzije
-            scaled_image = image.scaled(width, height, 
-                                       Qt.AspectRatioMode.IgnoreAspectRatio, 
-                                       Qt.TransformationMode.SmoothTransformation)
-            
-            # Konvertuj u RGB888 format
-            rgb888_image = scaled_image.convertToFormat(QImage.Format.Format_RGB888)
-            
-            # Konvertuj u RGB565 format
+            scaled_image = image.scaled( width, height, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation )
+            rgb888_image = scaled_image.convertToFormat( QImage.Format.Format_RGB888 )
             rgb565 = bytearray()
-            
-            for y in range(height):
-                for x in range(width):
-                    c = rgb888_image.pixelColor(x, y)
-                    r = min(max(c.red(), 0), 255) >> 3
-                    g = min(max(c.green(), 0), 255) >> 2
-                    b = min(max(c.blue(), 0), 255) >> 3
-                    value = (r << 11) | (g << 5) | b
-                    rgb565.append(value & 0xFF)
-                    rgb565.append((value >> 8) & 0xFF)
-            
-            size = len(rgb565)
-            
-            # Pronađi odgovarajuće ime niza
-            var_name = processed_images.get(img_widget)
-            if not var_name:
-                continue
-            
-            c_content += f"const code uint8_t {var_name}[{size}] = {{\n"
-            
-            # Formatiranje hex vrednosti
-            for i in range(0, size, 16):
-                line = ", ".join(f"0x{b:02X}" for b in rgb565[i:i+16])
-                c_content += f"    {line},\n"
-            
+
+            for y in range( height ):
+                for x in range( width ):
+                    c = rgb888_image.pixelColor( x, y )
+                    r = min( max( c.red(), 0 ), 255 ) >> 3
+                    g = min( max( c.green(), 0 ), 255 ) >> 2
+                    b = min( max( c.blue(), 0 ), 255 ) >> 3
+                    value = ( r << 11 ) | ( g << 5 ) | b
+                    rgb565.append( value & 0xFF )
+                    rgb565.append( ( value >> 8 ) & 0xFF )
+
+            size = len( rgb565 )
+
+            if hasattr( img_widget, 'custom_name' ) and img_widget.custom_name:
+                clean_name = img_widget.custom_name.replace( ' ', '_' ).replace( '-', '_' )
+                var_name = f" {clean_name }_hex"
+
+            else:
+                var_name = f"image_{ generated_count }_hex"
+
+            c_content += f"const code uint8_t { var_name }[ { size } ] = {{\n"
+
+            for i in range( 0, size, 16 ):
+                line = ", ".join( f"0x{b:02X}" for b in rgb565[ i:i+16 ] )
+                c_content += f"    { line },\n"
+
             c_content += "};\n\n"
-            
-            # Označi kao obrađenu
-            processed_widgets.add(img_widget)
-            
+            generated_count += 1
+
         except Exception as e:
-            print(f"Error processing image in generateResourcesC: {e}")
             continue
         
     return c_content
 
-def generateResources(main_window, out_dir=None):
-    # Prikupi sve slike sa svih canvas-a
+def generateResources( main_window, out_dir = None ):
     all_images = []
     canvas_data_dict = main_window.getAllCanvasData()
     
-    # Prvo, prikupi sve Image widget-e
     for canvas_id, canvas_info in canvas_data_dict.items():
         if 'widgets' in canvas_info:
-            for widget in canvas_info['widgets']:
-                if widget.get('type') == 'Image' and widget.get('active', True):
+            for widget in canvas_info[ 'widgets' ]:
+                if widget.get( 'type' ) == 'Image' and widget.get( 'active', True ):
                     if canvas_id in main_window.canvas_widgets:
-                        for widget_obj in main_window.canvas_widgets[canvas_id]:
-                            if isinstance(widget_obj, ImageWidget):
-                                # Dodaj widget samo ako je aktivan
-                                if widget.get('active', True):
-                                    all_images.append(widget_obj)
+                        for widget_obj in main_window.canvas_widgets[ canvas_id ]:
+                            if isinstance( widget_obj, ImageWidget ):
+                                all_images.append( widget_obj )
     
-    # Filtriraj duplikate - svaki widget treba da se pojavi samo jednom
-    unique_images = []
-    seen_widgets = set()
-    
-    for img_widget in all_images:
-        if img_widget not in seen_widgets:
-            unique_images.append(img_widget)
-            seen_widgets.add(img_widget)
-    
-    print(f"Found {len(unique_images)} unique images")
-    
-    if not unique_images:
-        # Nema slika za generisanje
-        print("No images found for resource generation")
+    if not all_images:
         return
     
     if out_dir is None:
-        out_dir = QFileDialog.getExistingDirectory(
-            main_window, 
-            "Select output directory for resource files"
-        )
+        out_dir = QFileDialog.getExistingDirectory( main_window, "Select output directory for resource files" )
         if not out_dir:
-            print("No output directory selected")
             return
     
     try:
-        print(f"Generating resource files in: {out_dir}")
-        
-        # Generiši header fajl sa pravilnim brojem nizova
-        result = generateResourcesH(main_window, unique_images)
-        
-        if result is None:
-            print("No resource H content generated")
-            return
-            
-        h_content, processed_images = result
-        
-        # Generiši source fajl sa tačnim brojem nizova
-        c_content = generateResourcesC(main_window, unique_images, processed_images)
-        
-        print(f"Generated header content length: {len(h_content) if h_content else 0}")
-        print(f"Generated source content length: {len(c_content) if c_content else 0}")
-        print(f"Processed images count: {len(processed_images)}")
+        h_content = generateResourcesH( main_window, all_images )
+        c_content = generateResourcesC( main_window, all_images )
         
         if h_content:
-            h_path = f"{out_dir}/resource.h"
-            with open(h_path, "w", encoding='utf-8') as h_file:
-                h_file.write(h_content)
-            print(f"Created: {h_path}")
+            with open( f"{ out_dir }/resource.h", "w", encoding = 'utf-8' ) as h_file:
+                h_file.write( h_content )
         
         if c_content:
-            c_path = f"{out_dir}/resource.c"
-            with open(c_path, "w", encoding='utf-8') as c_file:
-                c_file.write(c_content)
-            print(f"Created: {c_path}")
+            with open( f"{ out_dir }/resource.c", "w", encoding = 'utf-8' ) as c_file:
+                c_file.write( c_content )
         
-        # Pokaži poruku o uspehu
-        QMessageBox.information(
-            main_window, 
-            "Success", 
-            f"Generated {len(processed_images)} image array(s) in resource files.\nFiles saved to: {out_dir}"
-        )
         
     except Exception as e:
-        print(f"Error generating resources: {str(e)}")
-        QMessageBox.critical(
-            main_window, 
-            "Error", 
-            f"Failed to generate resource files:\n{str(e)}"
-        )
-        
+        QMessageBox.critical( main_window, "Error", f"Failed to generate resource files:\n{ str( e ) }" )
+
+
 def generateComponents( main_window, out_dir = None ):
     canvas_data_dict = main_window.getAllCanvasData()
     
