@@ -526,16 +526,20 @@ class MainWindow( QMainWindow ):
             clicked_on_shape = False
             current_widgets = self.getCurrentCanvasWidgets()
 
+            if self.object_attached and self.selected_shape:
+                self.addShapeToCanvas( global_pos )
+                event.accept()
+                return
+
             for shape in current_widgets:
                 global_shape = shape.frameGeometry()
                 global_shape.moveTopLeft( shape.mapToGlobal( shape.rect().topLeft() ) )
                 if global_shape.contains( global_pos ):
                     clicked_on_shape = True
-
                     break
-                
+
             if clicked_on_shape:
-                pass
+                pass  
 
             elif self.selected_shape and self.object_attached:
                 self.addShapeToCanvas( global_pos )

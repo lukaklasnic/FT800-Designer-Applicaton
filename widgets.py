@@ -305,9 +305,15 @@ class LineWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return 
+
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
-            
+
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
@@ -318,10 +324,11 @@ class LineWidget( QWidget ):
                     self.dragging = True
                     self.drag_start_global_pos = event.globalPosition().toPoint()
                     self.drag_start_line_pos = ( self.start_x, self.start_y, self.end_x, self.end_y )
-                
-                self.clicked.emit( self )
 
-        event.accept()
+                self.clicked.emit( self )
+                event.accept() 
+        else:
+            event.ignore()
 
     def mouseReleaseEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -401,7 +408,7 @@ class RectangleWidget(QWidget):
         self.dragging = False
         self.resize_start_pos = QPoint()
         self.resize_start_size = QSize()
-        self.resize_start_position = QPoint()  # Nova promenljiva za čuvanje početne pozicije
+        self.resize_start_position = QPoint()
         self.resize_corner = None
         self.drag_start_pos = QPoint()
 
@@ -639,6 +646,12 @@ class RectangleWidget(QWidget):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+            
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore() 
+                return 
+
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
 
@@ -953,9 +966,15 @@ class CircleWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore() 
+                return  
+
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
-            
+
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
@@ -965,7 +984,7 @@ class CircleWidget( QWidget ):
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
                 self.clicked.emit( self )
-                
+
             self.updateCircleCenterPositionProperties()
             event.accept()
 
@@ -1340,6 +1359,12 @@ class EllipseWidget( QWidget ):
     
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore() 
+                return 
+
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
 
@@ -1676,6 +1701,12 @@ class ButtonWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return 
+
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
 
@@ -2252,6 +2283,12 @@ class KeysWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return 
+
             mouse_pos = event.pos()
 
             self.resize_corner = self.getCornerAt( mouse_pos )
@@ -2631,9 +2668,15 @@ class ClockWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return
+
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
-            
+
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
@@ -2643,7 +2686,7 @@ class ClockWidget( QWidget ):
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
                 self.clicked.emit( self )
-                
+
             self.updateClockCenterPositionProperties()
             event.accept()
 
@@ -3001,9 +3044,15 @@ class GaugeWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return
+
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
-            
+
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
@@ -3013,7 +3062,7 @@ class GaugeWidget( QWidget ):
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
                 self.clicked.emit( self )
-                
+
             self.updateGaugeCenterPositionProperties()
             event.accept()
 
@@ -3398,9 +3447,15 @@ class DialWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr(main_window, 'object_attached') and main_window.object_attached:
+                event.ignore()
+                return
+
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
-            
+
             if self.resize_corner:
                 self.resizing = True
                 self.resize_start_pos = event.globalPosition().toPoint()
@@ -3414,7 +3469,7 @@ class DialWidget( QWidget ):
                     self.value = new_value
                     self.update()
                     self.updateValueProperty()
-                
+
                 self.clicked.emit( self )
                 event.accept()
                 return
@@ -3423,7 +3478,7 @@ class DialWidget( QWidget ):
                 self.dragging = True
                 self.drag_start_pos = mouse_pos
                 self.clicked.emit( self )
-                
+
             self.updateDialCenterPositionProperties()
             event.accept()
 
@@ -3794,6 +3849,12 @@ class ToggleWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return
+
             mouse_pos = event.pos()
 
             self.resize_corner = self.getCornerAt( mouse_pos )
@@ -4346,6 +4407,12 @@ class ScrollBarWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return
+
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
 
@@ -4883,6 +4950,12 @@ class SliderWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return
+
             mouse_pos = event.pos()
             thumb_rect = self.getThumbRectForInteraction()
             self.resize_corner = self.getCornerAt( mouse_pos )
@@ -5289,6 +5362,12 @@ class ProgressBarWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return
+
             mouse_pos = event.pos()
 
             self.resize_corner = self.getCornerAt( mouse_pos )
@@ -5647,6 +5726,12 @@ class ImageWidget( QWidget ):
     
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return
+
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
 
@@ -5973,6 +6058,12 @@ class LabelWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return
+
             self.dragging = True
             self.drag_start_global_pos = event.globalPosition().toPoint()
             self.drag_start_original_pos = ( self.original_x, self.original_y )
@@ -6264,6 +6355,12 @@ class NumericWidget( QWidget ):
 
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
+            main_window = self.findMainWindow()
+
+            if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
+                event.ignore()
+                return
+
             self.dragging = True
             self.drag_start_global_pos = event.globalPosition().toPoint()
             self.drag_start_original_pos = ( self.original_x, self.original_y )
