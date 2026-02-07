@@ -27,7 +27,7 @@ class LineWidget( QWidget ):
         self.end_x = 100
         self.end_y = 100
         self.line_color = QColor( 0, 0, 0 ) 
-        self.line_width = 5
+        self.line_width = 1
 
         self.selected = False
         self.resizing = False
@@ -39,20 +39,29 @@ class LineWidget( QWidget ):
         self.drag_start_line_pos = None
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            alpha = 255
+
+        else:
+            alpha = 50
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
-        
+
         local_start_x = self.start_x - self.x()
         local_start_y = self.start_y - self.y()
         local_end_x = self.end_x - self.x()
         local_end_y = self.end_y - self.y()
-        
-        pen = QPen( self.line_color )
+
+        line_color = QColor( self.line_color )
+        line_color.setAlpha( alpha )
+
+        pen = QPen( line_color )
         pen.setWidth( 2 * self.line_width )
         pen.setCapStyle( Qt.PenCapStyle.RoundCap )
         painter.setPen( pen )
         painter.drawLine( local_start_x, local_start_y, local_end_x, local_end_y )
-        
+
         if self.selected:
             self.drawSelectionBorder( painter )
             self.drawSelectionHandles( painter, local_start_x, local_start_y, local_end_x, local_end_y )
@@ -375,16 +384,16 @@ class LineWidget( QWidget ):
         
         event.accept()
 
-class RectangleWidget(QWidget):
-    clicked = pyqtSignal(object)
+class RectangleWidget( QWidget ):
+    clicked = pyqtSignal( object )
     
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__( self, parent = None ):
+        super().__init__( parent )
 
         self.defaultValues()
-        self.setFixedSize(self.rectangle_width, self.rectangle_height)
-        self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setFixedSize( self.rectangle_width, self.rectangle_height )
+        self.setMouseTracking( True )
+        self.setFocusPolicy( Qt.FocusPolicy.StrongFocus )
         self.setupDataDict()
         
     def defaultValues( self ):
@@ -396,12 +405,12 @@ class RectangleWidget(QWidget):
         self.tag = 0
         self.rectangle_width = 100 
         self.rectangle_height = 80 
-        self.edges_color = QColor(0, 0, 0)
-        self.edges_width = 5
+        self.edges_color = QColor( 0, 0, 0 )
+        self.edges_width = 1
         self.filled = False 
         self.gradient_direction = "Top-Bottom"
-        self.start_color = QColor(255, 0, 0)
-        self.end_color = QColor(0, 0, 255)
+        self.start_color = QColor( 255, 0, 0 )
+        self.end_color = QColor( 0, 0, 255 )
 
         self.selected = False
         self.resizing = False
@@ -412,49 +421,58 @@ class RectangleWidget(QWidget):
         self.resize_corner = None
         self.drag_start_pos = QPoint()
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
+    def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.edges_color.setAlpha( 255 )
+            self.start_color.setAlpha( 255 )
+            self.end_color.setAlpha( 255 )
+
+        else:
+            self.edges_color.setAlpha( 50 )
+            self.start_color.setAlpha( 50 )
+            self.end_color.setAlpha( 50 )
+
+        painter = QPainter( self )
+        painter.setRenderHint( QPainter.RenderHint.Antialiasing )
+
         if self.filled:
             gradient = None
             
             if self.gradient_direction == "Top-Bottom":
-                gradient = QLinearGradient(0, 0, 0, self.height())
+                gradient = QLinearGradient( 0, 0, 0, self.height() )
 
             elif self.gradient_direction == "Bottom-Top":
-                gradient = QLinearGradient(0, self.height(), 0, 0)
+                gradient = QLinearGradient( 0, self.height(), 0, 0 )
 
             elif self.gradient_direction == "Left-Right":
-                gradient = QLinearGradient(0, 0, self.width(), 0)
+                gradient = QLinearGradient( 0, 0, self.width(), 0 )
 
             elif self.gradient_direction == "Right-Left":
-                gradient = QLinearGradient(self.width(), 0, 0, 0)
+                gradient = QLinearGradient( self.width(), 0, 0, 0 )
 
-            gradient.setColorAt(0.0, self.start_color)
-            gradient.setColorAt(0.6, self.end_color)
-            gradient.setColorAt(1.0, self.end_color)    
-            painter.fillRect(self.rect(), gradient)
+            gradient.setColorAt( 0.0, self.start_color )
+            gradient.setColorAt( 0.6, self.end_color )
+            gradient.setColorAt( 1.0, self.end_color )    
+            painter.fillRect( self.rect(), gradient )
 
         
-        pen = QPen(self.edges_color)
-        pen.setWidth(2 * self.edges_width)
-        painter.setPen(pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRect(0, 0, self.width(), self.height())
+        pen = QPen( self.edges_color )
+        pen.setWidth( 2 * self.edges_width )
+        painter.setPen( pen )
+        painter.setBrush( Qt.BrushStyle.NoBrush )
+        painter.drawRect( 0, 0, self.width(), self.height() )
         
         if self.selected:
-            self.drawSelectionBorder(painter)
-            self.drawSelectionHandles(painter)
+            self.drawSelectionBorder( painter )
+            self.drawSelectionHandles( painter )
 
-    def drawSelectionHandles(self, painter):
+    def drawSelectionHandles( self, painter ):
         handle_size = 10
         half_size = handle_size // 2
 
-        painter.setBrush(QColor(255, 142, 62))
-        painter.setPen(QPen(QColor(56, 56, 56), 1))
-        corners = [QPoint(4, 4), QPoint(self.width() - 4, 4), 
-                   QPoint(4, self.height() - 4), QPoint(self.width() - 4, self.height() - 4)]
+        painter.setBrush( QColor( 255, 142, 62 ) )
+        painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
+        corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
             painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, handle_size, handle_size)
@@ -464,7 +482,7 @@ class RectangleWidget(QWidget):
             painter.setBrush(QColor(255, 142, 62))
             painter.setPen(QPen(QColor(56, 56, 56), 1))
 
-    def drawSelectionBorder(self, painter):
+    def drawSelectionBorder( self, painter ):
         margin = 2
         selection_rect = QRect(margin, margin, self.width() - 2 * margin, self.height() - 2 * margin)
 
@@ -647,7 +665,7 @@ class RectangleWidget(QWidget):
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             main_window = self.findMainWindow()
-            
+
             if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
                 event.ignore() 
                 return 
@@ -729,7 +747,7 @@ class CircleWidget( QWidget ):
         self.center_y = 0
         self.diameter = 100
         self.edges_color = QColor( 0, 0, 0 )
-        self.edges_width = 5
+        self.edges_width = 1
         self.filled = False 
         self.fill_color = QColor( 255, 0, 0 )
 
@@ -742,6 +760,14 @@ class CircleWidget( QWidget ):
         self.resize_start_diameter = 0
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.edges_color.setAlpha( 255 )
+            self.fill_color.setAlpha( 255 )
+
+        else:
+            self.edges_color.setAlpha( 50 )
+            self.fill_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         rect_size = min( self.width(), self.height() ) - 2 * self.edges_width
@@ -1051,7 +1077,7 @@ class EllipseWidget( QWidget ):
         self.center_x = 0
         self.center_y = 0
         self.edges_color = QColor( 0, 0, 0 )
-        self.edges_width = 5
+        self.edges_width = 1
         self.filled = False
         self.show_ellipse_warning = True
         self.gradient_direction = "Top-Bottom"
@@ -1067,6 +1093,16 @@ class EllipseWidget( QWidget ):
         self.resize_start_size = QSize()
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.edges_color.setAlpha( 255 )
+            self.gradient_start_color.setAlpha( 255 )
+            self.gradient_end_color.setAlpha( 255 )
+
+        else:
+            self.edges_color.setAlpha( 50 )
+            self.gradient_start_color.setAlpha( 50 )
+            self.gradient_end_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
@@ -1460,6 +1496,18 @@ class ButtonWidget( QWidget ):
         self.resize_start_position = QPoint() 
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.gradient_start_color.setAlpha( 255 )
+            self.gradient_end_color.setAlpha( 255 )
+            self.color_press.setAlpha( 255 )
+            self.text_color.setAlpha( 255 )
+
+        else:
+            self.gradient_start_color.setAlpha( 50 )
+            self.gradient_end_color.setAlpha( 50 )
+            self.color_press.setAlpha( 50 )
+            self.text_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
@@ -1805,6 +1853,16 @@ class KeysWidget( QWidget ):
         self.calculateOptimalSize()
     
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.gradient_start_color.setAlpha( 255 )
+            self.gradient_end_color.setAlpha( 255 )
+            self.text_color.setAlpha( 255 )
+
+        else:
+            self.gradient_start_color.setAlpha( 50 )
+            self.gradient_end_color.setAlpha( 50 )
+            self.text_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
@@ -1819,7 +1877,7 @@ class KeysWidget( QWidget ):
         current_y = margin_y
 
         r = int( 4 / 5 * self.font_size - 89 / 5 )
-        
+
         if self.key_type == "NUM":
             numbers = [ 7, 8, 9, 4, 5, 6, 1, 2, 3 ]
             number_index = 0
@@ -2388,6 +2446,14 @@ class ClockWidget( QWidget ):
         self.resize_start_diameter = 0
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.background_color.setAlpha( 255 )
+            self.face_color.setAlpha( 255 )
+
+        else:
+            self.background_color.setAlpha( 50 )
+            self.face_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
@@ -2767,6 +2833,14 @@ class GaugeWidget( QWidget ):
         self.resize_start_diameter = 0
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.background_color.setAlpha( 255 )
+            self.face_color.setAlpha( 255 )
+
+        else:
+            self.background_color.setAlpha( 50 )
+            self.face_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
@@ -3141,6 +3215,14 @@ class DialWidget( QWidget ):
         self.drag_start_pos = QPoint()
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.background_color.setAlpha( 255 )
+            self.pointer_color.setAlpha( 255 )
+
+        else:
+            self.background_color.setAlpha( 50 )
+            self.pointer_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
@@ -3569,6 +3651,16 @@ class ToggleWidget( QWidget ):
         self.resize_start_position = QPoint()
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.thumb_color.setAlpha( 255 )
+            self.background_color.setAlpha( 255 )
+            self.text_color.setAlpha( 255 )
+
+        else:
+            self.thumb_color.setAlpha( 50 )
+            self.background_color.setAlpha( 50 )
+            self.text_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
@@ -3959,6 +4051,14 @@ class ScrollBarWidget( QWidget ):
         self.rotated = False
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.thumb_color.setAlpha( 255 )
+            self.background_color.setAlpha( 255 )
+
+        else:
+            self.thumb_color.setAlpha( 50 )
+            self.background_color.setAlpha( 50 )
+        
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         self.rotated = self.height() > self.width()
@@ -4556,6 +4656,16 @@ class SliderWidget( QWidget ):
         self.rotated = False
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.background_color_left.setAlpha( 255 )
+            self.thumb_color.setAlpha( 255 )
+            self.background_color_right.setAlpha( 255 )
+
+        else:
+            self.background_color_left.setAlpha( 50 )
+            self.thumb_color.setAlpha( 50 )
+            self.background_color_right.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
@@ -5088,6 +5198,14 @@ class ProgressBarWidget( QWidget ):
         self.rotated = False
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.progress_color.setAlpha( 255 )
+            self.background_color.setAlpha( 255 )
+
+        else:
+            self.progress_color.setAlpha( 50 )
+            self.background_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         
@@ -5461,6 +5579,13 @@ class ImageWidget( QWidget ):
         self.original_pixmap = QPixmap()
 
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            opacity = 1.0
+            self.frame_color.setAlpha( 255 )
+        else:
+            opacity = 0.4
+            self.frame_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
         painter.setBrush( QColor( 240, 240, 240 ) )
@@ -5468,18 +5593,19 @@ class ImageWidget( QWidget ):
 
         if self.frame_enabled:
             painter.drawRect( 0, 0, self.image_width , self.image_height  )
-
         else:
             painter.drawRect( 0, 0, self.image_width , self.image_height )
-        
+
         if not self.pixmap.isNull():
-            painter.drawPixmap(0, 0, self.pixmap)
-        
+            painter.setOpacity( opacity )
+            painter.drawPixmap( 0, 0, self.pixmap )
+
         if self.frame_enabled:
-            painter.setPen( QPen( self.frame_color, self.frame_width ) )
+            frame_color = QColor( self.frame_color )
+            painter.setPen( QPen( frame_color, self.frame_width ) )
             painter.setBrush( Qt.BrushStyle.NoBrush )
             painter.drawRect( 0, 0, self.image_width, self.image_height )
-        
+
         if self.selected:
             self.drawSelectionBorder( painter )
             self.drawSelectionHandles( painter )
@@ -5819,6 +5945,12 @@ class LabelWidget( QWidget ):
         self.drag_start_original_pos = None
         
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.text_color.setAlpha( 255 )
+
+        else:
+            self.text_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 
@@ -6110,6 +6242,12 @@ class NumericWidget( QWidget ):
         self.drag_start_original_pos = None
         
     def paintEvent( self, event ):
+        if self.visible and self.active:
+            self.number_color.setAlpha( 255 )
+
+        else:
+            self.number_color.setAlpha( 50 )
+
         painter = QPainter( self )
         painter.setRenderHint( QPainter.RenderHint.Antialiasing )
 

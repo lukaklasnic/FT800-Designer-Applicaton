@@ -72,7 +72,6 @@ def updateLineActive( main_window, state ):
 
 def updateLineVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.visible = state 
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
@@ -132,7 +131,6 @@ def updateRectangleActive( main_window, state ):
 def updateRectangleVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -222,7 +220,6 @@ def updateCircleActive( main_window, state ):
 def updateCircleVisible( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible(state)
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -311,7 +308,6 @@ def updateEllipseActive( main_window, state ):
 def updateEllipseVisible( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible(state)
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -418,7 +414,6 @@ def updateButtonActive( main_window, state ):
 def updateButtonVisible( main_window, state ):
     state == Qt.CheckState.Checked.value 
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -509,7 +504,6 @@ def updateKeysActive( main_window, state ):
 def updateKeysVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state 
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -596,7 +590,6 @@ def updateClockActive( main_window, state ):
 def updateClockVisible( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -690,7 +683,6 @@ def updateGaugeActive( main_window, state ):
 def updateGaugeVisible( main_window, state ):
     state = state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -794,7 +786,6 @@ def updateDialActive( main_window, state ):
 def updateDialVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -883,7 +874,6 @@ def updateToggleActive( main_window, state ):
 def updateToggleVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -970,7 +960,6 @@ def updateScrollbarActive( main_window, state ):
 def updateScrollbarVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -1053,7 +1042,6 @@ def updateSliderActive( main_window, state ):
 def updateSliderVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -1140,7 +1128,6 @@ def updateProgressBarActive( main_window, state ):
 def updateProgressBarVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -1218,7 +1205,6 @@ def updateImageActive( main_window, state ):
 def updateImageVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -1290,7 +1276,6 @@ def updateLabelActive( main_window, state ):
 def updateLabelVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -1354,7 +1339,6 @@ def updateNumericActive( main_window, state ):
 def updateNumericVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
     main_window.current_shape.visible = state
-    main_window.current_shape.setVisible( state )
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
