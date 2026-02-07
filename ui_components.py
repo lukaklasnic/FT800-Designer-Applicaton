@@ -18,7 +18,7 @@ class WidgetIcon( QFrame ):
 
         palette = self.palette()
         palette.setColor( QPalette.ColorRole.Window, self.default_color )
-        self.setPalette(palette)
+        self.setPalette( palette )
 
     def paintEvent( self, event ):
         super().paintEvent( event )
@@ -29,7 +29,8 @@ class WidgetIcon( QFrame ):
         painter = QPainter( self )
         painter.setFont( font )
         painter.setPen( pen )
-        painter.drawText( self.rect(), Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter, self.shape )
+        text_rect = QRect( 0, 0, self.width(), self.height() - 5 )
+        painter.drawText( text_rect, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter, self.shape )
         
         shape_drawers = {
             "Line": self.drawLine,
@@ -84,31 +85,31 @@ class WidgetIcon( QFrame ):
         painter.drawEllipse( QPoint( 50, 45 ), 20, 20 )
         painter.translate( 50, 45 )
         for i in range( 12 ):  
-            painter.drawPoint( 0, -15 )
+            painter.drawPoint( 0, - 15 )
             painter.rotate( 30 )
         
         painter.rotate( 55 ) 
         needle_pen = QPen(QColor( 236, 238, 241 ) )
         needle_pen.setWidth( 1 )
         painter.setPen( needle_pen )
-        painter.drawLine( 0, 0, -2, 15 ) 
+        painter.drawLine( 0, 0, - 2, 15 ) 
         
         painter.rotate( -55 )
         needle_pen.setWidth( 2 )
         painter.setPen( needle_pen )
-        painter.drawLine( 0, 0, 4, -13 )
+        painter.drawLine( 0, 0, 4, - 13 )
         
-        painter.rotate( -55 )
+        painter.rotate( - 55 )
         needle_pen.setWidth( 3 )
         painter.setPen( needle_pen )
-        painter.drawLine( 0, 0, -10, -11 )
+        painter.drawLine( 0, 0, -10, - 11 )
 
     def drawGauge( self, painter ):
         painter.drawEllipse( QPoint( 50, 45 ), 20, 20 )
         painter.translate( 50, 45 )
         painter.rotate( -135 )
         for i in range( 6 ):  
-            painter.drawLine( 0, -15, 0, -12 )
+            painter.drawLine( 0, - 15, 0, - 12 )
             painter.rotate( 54 )
         painter.drawLine( 0, 0, 14, 10 )
 
@@ -120,7 +121,7 @@ class WidgetIcon( QFrame ):
         painter.drawLine( 35, 40, 65, 40 )
         painter.drawLine( 35, 60, 65, 60 )
         painter.drawArc( 25, 40, 20, 20, 90 * 16, 16 * 180 )
-        painter.drawArc( 55, 40, 20, 20, 90 * 16, -16 * 180 )
+        painter.drawArc( 55, 40, 20, 20, 90 * 16, - 16 * 180 )
         painter.setBrush( QColor( 255, 255, 255 ) )
         painter.drawEllipse( QPoint( 63, 50 ), 8, 8 )
         rect = QRect( 25, 40, 30, 20 )
@@ -131,17 +132,17 @@ class WidgetIcon( QFrame ):
         painter.drawLine( 25, 40, 75, 40 )
         painter.drawLine( 25, 50, 75, 50 )
         painter.drawArc( 20, 40, 10, 10, 90 * 16, 16 * 180 )
-        painter.drawArc( 70, 40, 10, 10, 90 * 16, -16 * 180 )
+        painter.drawArc( 71, 40, 10, 10, 90 * 16, - 16 * 180 )
         painter.setBrush( QColor( 255, 255, 255 ) )
         painter.drawRect( 30, 42, 20, 6 )
         painter.drawPie( 27, 42, 6, 6, 90 * 16, 16 * 180 )
-        painter.drawPie( 47, 42, 6, 6, 90 * 16, -16 * 180 )
+        painter.drawPie( 47, 42, 6, 6, 90 * 16, - 16 * 180 )
 
     def drawSlider( self, painter ):
-        painter.drawLine( 20, 42, 80, 42 )
-        painter.drawLine( 20, 48, 80, 48 )
+        painter.drawLine( 17, 42, 78, 42 )
+        painter.drawLine( 17, 48, 78, 48 )
         painter.drawArc( 15, 42, 6, 6, 90 * 16, 16 * 180 )
-        painter.drawArc( 75, 42, 6, 6, 90 * 16, -16 * 180 )
+        painter.drawArc( 75, 42, 6, 6, 90 * 16, - 16 * 180 )
         painter.setBrush( QColor( 255, 255, 255 ) )
         painter.drawEllipse( QPoint( 50, 45 ), 6, 6 )
 
@@ -150,7 +151,7 @@ class WidgetIcon( QFrame ):
         painter.drawLine( 25, 50, 75, 50 )
         painter.drawLine( 60, 40, 60, 50 )
         painter.drawArc( 20, 40, 10, 10, 90 * 16, 16 * 180 )
-        painter.drawArc( 70, 40, 10, 10, 90 * 16, -16 * 180 )
+        painter.drawArc( 70, 40, 10, 10, 90 * 16, - 16 * 180 )
         painter.setBrush( QColor( 255, 255, 255 ) )
         painter.drawPie( 22, 42, 6, 6, 90 * 16, 16 * 180 )
         painter.drawRect( 25, 42, 35, 6 )
@@ -161,11 +162,12 @@ class WidgetIcon( QFrame ):
         painter.drawLine( 45, 45, 65, 70 )
         painter.drawLine( 55, 55, 65, 45 )
         painter.drawLine( 65, 45, 75, 58 )
-        painter.drawArc( 15, 10, 25, 25, 0 * 16, -16 * 90 )
+        painter.drawArc( 15, 10, 25, 25, 0 * 16, - 16 * 90 )
         painter.translate( 25, 20 )
         painter.rotate( 110 )
+
         for i in range( 3 ):  
-            painter.drawLine( 0, -20, 0, -17 )
+            painter.drawLine( 0, - 20, 0, - 17 )
             painter.rotate( 25 )
 
     def drawLabel( self, painter ):
@@ -179,9 +181,9 @@ class WidgetIcon( QFrame ):
         painter.drawText( rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter, "Text" )
 
     def drawNumeric( self, painter ):
-        rect = QRect( 25, 20, 50, 50 )
+        rect = QRect( 25, 35, 50, 30 )
         painter.drawText( rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter, "123" )
-        painter.drawRoundedRect( rect, 5, 5 )
+        painter.drawRoundedRect( rect, 0, 0 )
 
     def createCustomCursor( self ):
         pix = QPixmap( 300, 130 )
@@ -204,8 +206,8 @@ class WidgetIcon( QFrame ):
             "Slider": lambda: painter.drawRoundedRect( 0, 0, 200, 30, 3, 3 ),
             "Progress bar": lambda: painter.drawRoundedRect( 0, 0, 200, 15, 3, 3 ),
             "Image": lambda: painter.drawRect( 0, 0, 100, 100 ),
-            "Label": lambda: painter.drawRect( 0, 0, 100, 40 ),
-            "Numeric": lambda: painter.drawRect( 0, 0, 65, 40 )
+            "Label": lambda: painter.drawRect( 0, 0, 55, 42 ),
+            "Numeric": lambda: painter.drawRect( 0, 0, 52, 42 )
         }
         
         if self.shape in cursor_actions:

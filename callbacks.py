@@ -1432,7 +1432,7 @@ def generateWidgetName( main_window, widget_type ):
                 same_type_count += 1
         
         base_name = widget_type.replace( " ", "_" )
-        name = f"{ base_name }_{ same_type_count + 1 }"
+        name = f"{ base_name }_{ same_type_count  }"
         
         existing_names = []
 
@@ -1459,7 +1459,7 @@ def generateWidgetName( main_window, widget_type ):
                 same_type_count += 1
         
         base_name = widget_type.replace( " ", "_" )
-        name = f"{ base_name }_{ same_type_count + 1 }"
+        name = f"{ base_name }_{ same_type_count }"
         existing_names = []
 
         for shape in main_window.all_shapes:

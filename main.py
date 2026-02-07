@@ -322,6 +322,7 @@ class MainWindow( QMainWindow ):
                 border: 1px solid #666666;
             }
         """ )
+
         browse_button.clicked.connect( self.chooseOutputDirectory )
         browse_button.setToolTip( "Change output directory" )
         bottom_layout.addWidget( browse_button )
@@ -425,13 +426,14 @@ class MainWindow( QMainWindow ):
             widget_icon = WidgetIcon( shape )
             icons_layout.addWidget( widget_icon, row, col )
             col += 1
+            
             if col >= 2:
                 col = 0
                 row += 1
 
         widgets_layout.addWidget( icons_container )
         
-    def addNewCanvas(self):
+    def addNewCanvas( self ):
         self.hideCanvasProperties()
         self.hideShapeProperties()
         self.deselectAllShapes()
