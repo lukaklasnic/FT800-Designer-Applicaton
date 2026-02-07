@@ -3223,7 +3223,7 @@ class DialWidget( QWidget ):
         start_radius_percentage = 0.70
         start_radius = radius * start_radius_percentage
 
-        angle = 90 + ( 360 * self.value / 100 )
+        angle = 90 - ( 360 * self.value / 100 )
         angle_rad = math.radians( angle )
 
         start_x = center_x + start_radius * math.cos( angle_rad )
@@ -3270,26 +3270,23 @@ class DialWidget( QWidget ):
     def calculateValueFromPosition( self, pos ):
         margin = 3
         adjusted_r = self.diameter - 2 * margin
-
+        
         center_x = margin + adjusted_r // 2
         center_y = margin + adjusted_r // 2
-
+        
         dx = pos.x() - center_x
         dy = pos.y() - center_y
-
+        
         if dx == 0 and dy == 0:
             return self.value
-
+            
         angle_rad = math.atan2( dy, dx )
         angle_deg = math.degrees( angle_rad )
-
         adjusted_angle = ( 90 - angle_deg ) % 360
-        normalized_angle = ( 90 - angle_deg ) % 360
-        adjusted_angle = ( 360 - normalized_angle ) % 360
 
         value = ( adjusted_angle / 360.0 ) * 100
         value = max( 0, min( 100, value ) )
-
+        
         return int( value )
 
     def handleResize( self, global_pos ):
