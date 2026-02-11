@@ -4744,38 +4744,39 @@ class SliderWidget( QWidget ):
         new_y = self.resize_start_position.y()
 
         if self.resize_corner == "bottom_right":
-            new_width = max( 1, self.resize_start_size.width() + delta.x() )
-            new_height = max( 1, self.resize_start_size.height() + delta.y() )
+            new_width = max( 20, self.resize_start_size.width() + delta.x() )
+            new_height = max( 20, self.resize_start_size.height() + delta.y() )
 
         elif self.resize_corner == "top_right":
-            new_width = max( 1, self.resize_start_size.width() + delta.x() )
-            new_height = max( 1, self.resize_start_size.height() - delta.y() )
+            new_width = max( 20, self.resize_start_size.width() + delta.x() )
+            new_height = max( 20, self.resize_start_size.height() - delta.y() )
             new_y = self.resize_start_position.y() + delta.y()
 
         elif self.resize_corner == "bottom_left":
-            new_width = max( 1, self.resize_start_size.width() - delta.x() )
-            new_height = max( 1, self.resize_start_size.height() + delta.y() )
+            new_width = max( 20, self.resize_start_size.width() - delta.x() )
+            new_height = max( 20, self.resize_start_size.height() + delta.y() )
             new_x = self.resize_start_position.x() + delta.x() 
 
         elif self.resize_corner == "top_left":
-            new_width = max( 1, self.resize_start_size.width() - delta.x() )
-            new_height = max( 1, self.resize_start_size.height() - delta.y() )
+            new_width = max( 20, self.resize_start_size.width() - delta.x() )
+            new_height = max( 20, self.resize_start_size.height() - delta.y() )
             new_x = self.resize_start_position.x() + delta.x() 
-            new_y = self.resize_start_position.y() + delta.y() 
+            new_y = self.resize_start_position.y() + delta.y()
 
         self.slider_width = new_width
         self.slider_height = new_height
+
         self.setFixedSize( self.slider_width, self.slider_height )
+        self.rotated = self.height() > self.width()
 
         if self.resize_corner in [ "top_left", "bottom_left" ]:
             self.move( new_x, new_y )
-
         elif self.resize_corner == "top_right":
-            self.move( self.x(), new_y ) 
+            self.move( self.x(), new_y )
 
         self.update()
         self.updatePropertiesSize()
-        self.updatePropertiesPosition() 
+        self.updatePropertiesPosition()
 
     def getCornerAt( self, pos ):
         handle_size = 12
@@ -4846,33 +4847,39 @@ class SliderWidget( QWidget ):
 
     def getTrackRectForInteraction( self ):
         if self.rotated:
-            w = self.height()
-            h = self.width() 
-
+            return QRect( 0, 0, self.width(), self.height() )
+        
         else:
             w = self.width()
             h = self.height()
-        
-        track_height = h // 3
-        track_y = h // 3
-        radius = h // 6 
-        
-        return QRect( radius, track_y, w - 2 * radius, track_height )
+            track_height = h // 3
+            track_y = h // 3
+            radius = h // 6 
+            return QRect( radius, track_y, w - 2 * radius, track_height )
 
     def getThumbRectForInteraction( self ):
-        track_rect = self.getTrackRectForInteraction()
-        
         if self.rotated:
-            h = self.width()
+            track_height = self.height()
+            track_width = self.width()
+            thumb_diameter = int( min( track_width * 2, track_height * 0.8 ) )
+            thumb_diameter = int( max( 20, min( track_height, thumb_diameter ) ) )
+            track_length = track_height
+            available_track = max( 1, track_length - thumb_diameter )
+            thumb_y = int( ( self.value / 100 ) * available_track )
+            thumb_x = int( ( track_width - thumb_diameter ) // 2 )
 
+            return QRect( thumb_x, thumb_y, thumb_diameter, thumb_diameter )
         else:
-            h = self.height()
-            
-        thumb_diameter = min( track_rect.height() * 2, h * 0.8 )
-        thumb_x = track_rect.x() + int( ( track_rect.width() - thumb_diameter ) * ( self.value / 100 ) )
-        thumb_y = ( h - thumb_diameter ) // 2
-        
-        return QRect( thumb_x, thumb_y, thumb_diameter, thumb_diameter )
+            track_width = self.width()
+            track_height = self.height()
+
+            thumb_diameter = int( min( track_height * 2, track_height * 0.8 ) )
+            thumb_diameter = int( max( 20, min( track_width, thumb_diameter ) ) )
+
+            thumb_x = int( ( track_width - thumb_diameter) * ( self.value / 100 ) )
+            thumb_y = int( ( track_height - thumb_diameter) // 2 )
+
+            return QRect( thumb_x, thumb_y, thumb_diameter, thumb_diameter )
 
     def setSelected( self, selected ):
         self.selected = selected
@@ -4990,7 +4997,6 @@ class SliderWidget( QWidget ):
     def mousePressEvent( self, event ):
         if event.button() == Qt.MouseButton.LeftButton:
             main_window = self.findMainWindow()
-
             if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
                 event.ignore()
                 return
@@ -5017,8 +5023,12 @@ class SliderWidget( QWidget ):
 
                 if track_rect.contains( event.pos() ):
                     if self.rotated:
-                        relative_y = event.pos().y() - track_rect.y()
-                        new_value = int( ( relative_y / track_rect.height() ) * 100 )
+                        thumb_diameter = int( min( track_rect.height() * 2, self.width() * 0.8 ) )
+                        thumb_diameter = int( max( 20, min( track_rect.height(), thumb_diameter ) ) )
+                        track_length = track_rect.height()
+                        available_track = max( 1, track_length - thumb_diameter )
+                        relative_y = event.pos().y() - track_rect.y() - thumb_diameter // 2
+                        new_value = int( ( relative_y / available_track ) * 100 )
 
                     else:
                         relative_x = event.pos().x() - track_rect.x()
@@ -5054,35 +5064,39 @@ class SliderWidget( QWidget ):
         if corner:
             if corner in [ "top_left", "bottom_right" ]:
                 self.setCursor( Qt.CursorShape.SizeFDiagCursor )
-
             elif corner in [ "top_right", "bottom_left" ]:
                 self.setCursor( Qt.CursorShape.SizeBDiagCursor )
         else:
             self.setCursor( Qt.CursorShape.ArrowCursor )
 
         if self.resizing and event.buttons() & Qt.MouseButton.LeftButton:
-            self.handleResize(event.globalPosition().toPoint())
+            self.handleResize( event.globalPosition().toPoint() )
 
         elif self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
             delta = mouse_pos - self.drag_start_pos
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-
             super().move( new_x, new_y )
             self.updatePropertiesPosition()
 
         elif self.thumb_dragging and event.buttons() & Qt.MouseButton.LeftButton:
-            track_rect = self.getTrackRectForInteraction()
-            delta = mouse_pos - self.thumb_drag_start_pos
-
             if self.rotated:
-                value_delta = int( ( delta.y() / track_rect.height() ) * 100 )
+                thumb_rect = self.getThumbRectForInteraction()
+                track_height = self.height()
+                thumb_diameter = thumb_rect.height()
+                available_track = max( 1, track_height - thumb_diameter )
+                new_y = mouse_pos.y() - thumb_diameter // 2
+                new_y = max( 0, min( new_y, track_height - thumb_diameter ) )
+                new_value = int( ( new_y / available_track ) * 100 )
+                self.value = max( 0, min( 100, new_value ) )
 
             else:
-                value_delta = int( ( delta.x() / track_rect.width() ) * 100 )
+                track_rect = self.getTrackRectForInteraction()
+                delta_x = mouse_pos.x() - self.thumb_drag_start_pos.x()
+                value_delta = int( ( delta_x / track_rect.width() ) * 100 )
+                new_value = self.thumb_drag_start_value + value_delta
+                self.value = max( 0, min( 100, new_value ) )
 
-            new_value = self.thumb_drag_start_value + value_delta
-            self.value = max( 0, min( 100, new_value ) )
             self.update()
             self.updatePropertiesValue()
 

@@ -1415,60 +1415,32 @@ def generateAutoTag( main_window, current_shape ):
     return 0
 
 def generateWidgetName( main_window, widget_type ):
-    if hasattr( main_window, 'canvas_widgets' ):
-        current_canvas = main_window.getCurrentCanvas()
-
-        if current_canvas:
-            current_widgets = main_window.canvas_widgets.get( current_canvas.canvas_id, [] )
-
-        else:
-            current_widgets = []
-        
-        same_type_count = 0
-
-        for widget in current_widgets:
-            if type( widget ).__name__.replace( "Widget", "" ) == widget_type.replace( " ", "" ):
-                same_type_count += 1
-        
-        base_name = widget_type.replace( " ", "_" )
-        name = f"{ base_name }_{ same_type_count  }"
-        
-        existing_names = []
-
-        for widget in current_widgets:
-            if hasattr( widget, 'custom_name' ):
-                existing_names.append( widget.custom_name )
-        
-        counter = same_type_count + 1
-
-        while name in existing_names:
-            name = f"{ base_name }_{ counter }"
-            counter += 1
-        
-        return name
+    all_widgets = []
     
-    else:
-        if not hasattr( main_window, 'all_shapes' ):
-            main_window.all_shapes = []
-        
-        same_type_count = 0
+    if hasattr(main_window, 'canvas_widgets'):
+        for canvas_id, widgets in main_window.canvas_widgets.items():
+            all_widgets.extend( widgets )
+    
+    same_type_count = 0
 
-        for shape in main_window.all_shapes:
-            if type( shape ).__name__.replace( "Widget", "" ) == widget_type.replace( " ", "" ):
-                same_type_count += 1
-        
-        base_name = widget_type.replace( " ", "_" )
-        name = f"{ base_name }_{ same_type_count }"
-        existing_names = []
+    for widget in all_widgets:
+        widget_type_name = type( widget ).__name__.replace( "Widget", "" )
+        if widget_type_name == widget_type.replace( " ", "" ):
+            same_type_count += 1
+    
+    base_name = widget_type.replace( " ", "_" )
+    name = f"{ base_name }_{ same_type_count }"
+    
+    existing_names = []
 
-        for shape in main_window.all_shapes:
-            if hasattr( shape, 'custom_name' ):
-                existing_names.append( shape.custom_name )
-        
-        counter = same_type_count + 1
-
-        while name in existing_names:
-            name = f"{ base_name }_{ counter }"
-            counter += 1
-        
-        return name
+    for widget in all_widgets:
+        if hasattr( widget, 'custom_name' ):
+            existing_names.append( widget.custom_name )
+    
+    counter = same_type_count + 1
+    
+    while name in existing_names:
+        name = f"{ base_name }_{ counter }"
+        counter += 1
+    
+    return name
