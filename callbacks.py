@@ -1010,7 +1010,7 @@ def updateScrollbarBackgroundColor( main_window ):
 
     if color.isValid():
         main_window.current_shape.background_color = color 
-        main_window.thumb_color_rect_scrollbar.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
+        main_window.bg_color_rect_scrollbar.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
 
