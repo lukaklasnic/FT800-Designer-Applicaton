@@ -1408,7 +1408,7 @@ def generateAutoTag( main_window, current_shape ):
             if hasattr( shape, 'tag' ) and shape != current_shape:
                 all_tags.append( shape.tag )
     
-    for i in range( 256 ):
+    for i in range( 1,255 ):
         if i not in all_tags:
             return i
     
