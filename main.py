@@ -88,10 +88,10 @@ class MainWindow( QMainWindow ):
         
         self.createNewCanvas()
         
-    def createNewCanvas(self):
+    def createNewCanvas( self ):
         canvas_id = len( self.canvases )
         canvas = Canvas()
-        canvas.clicked.connect(self.onCanvasClicked)
+        canvas.clicked.connect( self.onCanvasClicked )
 
         canvas.canvas_id = canvas_id 
         canvas.custom_name = f"Screen_{ canvas_id }"
@@ -99,11 +99,11 @@ class MainWindow( QMainWindow ):
         canvas.data_dict[ 'id' ] = canvas_id
         canvas.data_dict[ 'name' ] = canvas.custom_name
 
-        self.canvases.append(canvas)
-        self.canvas_widgets[canvas_id] = []
+        self.canvases.append( canvas )
+        self.canvas_widgets[ canvas_id ] = []
 
         return canvas_id
-        
+
     def showCanvas( self, canvas_index ):
         if 0 <= canvas_index < len( self.canvases ):
             self.hideCanvasProperties()
@@ -336,7 +336,7 @@ class MainWindow( QMainWindow ):
         self.updateOutputDirLabel()
 
     def deleteCurrentCanvas( self ):
-        if len(self.canvases) <= 1:
+        if len( self.canvases ) <= 1:
             return
 
         current_canvas = self.getCurrentCanvas()
@@ -344,7 +344,8 @@ class MainWindow( QMainWindow ):
             return
 
         current_canvas_id = current_canvas.canvas_id
-        reply = QMessageBox.question( self, 'Confirm Delete', f'Are you sure you want to delete canvas { current_canvas_id }?\nAll widgets on this canvas will be lost.', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No )
+        current_canvas_name = current_canvas.custom_name
+        reply = QMessageBox.question( self, 'Confirm Delete', f'Are you sure you want to delete { current_canvas_name } canvas ?\nAll widgets on this canvas will be lost.', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No )
 
         if reply == QMessageBox.StandardButton.No:
             return
@@ -549,6 +550,7 @@ class MainWindow( QMainWindow ):
             for shape in current_widgets:
                 global_shape = shape.frameGeometry()
                 global_shape.moveTopLeft( shape.mapToGlobal( shape.rect().topLeft() ) )
+
                 if global_shape.contains( global_pos ):
                     clicked_on_shape = True
                     break
@@ -973,7 +975,7 @@ class MainWindow( QMainWindow ):
             widget.raise_()
     
     def updateOutputDirLabel( self ):
-        if not hasattr(self, 'output_dir_label') or not self.output_dir_label:
+        if not hasattr( self, 'output_dir_label' ) or not self.output_dir_label:
             return
 
         if hasattr( self, 'output_dir' ) and self.output_dir:
@@ -983,7 +985,7 @@ class MainWindow( QMainWindow ):
                 display_path = display_path[ :20 ] + "..." + display_path[ -27: ]
 
             self.output_dir_label.setText( f"Output: { display_path }" )
-            self.output_dir_label.setToolTip(self.output_dir)
+            self.output_dir_label.setToolTip( self.output_dir )
 
         else:
             self.output_dir_label.setText( "Output: Not selected" )
