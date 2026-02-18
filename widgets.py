@@ -4744,22 +4744,22 @@ class SliderWidget( QWidget ):
         new_y = self.resize_start_position.y()
 
         if self.resize_corner == "bottom_right":
-            new_width = max( 20, self.resize_start_size.width() + delta.x() )
-            new_height = max( 20, self.resize_start_size.height() + delta.y() )
+            new_width = max( 1, self.resize_start_size.width() + delta.x() )
+            new_height = max( 1, self.resize_start_size.height() + delta.y() )
 
         elif self.resize_corner == "top_right":
-            new_width = max( 20, self.resize_start_size.width() + delta.x() )
-            new_height = max( 20, self.resize_start_size.height() - delta.y() )
+            new_width = max( 1, self.resize_start_size.width() + delta.x() )
+            new_height = max( 1, self.resize_start_size.height() - delta.y() )
             new_y = self.resize_start_position.y() + delta.y()
 
         elif self.resize_corner == "bottom_left":
-            new_width = max( 20, self.resize_start_size.width() - delta.x() )
-            new_height = max( 20, self.resize_start_size.height() + delta.y() )
+            new_width = max( 1, self.resize_start_size.width() - delta.x() )
+            new_height = max( 1, self.resize_start_size.height() + delta.y() )
             new_x = self.resize_start_position.x() + delta.x() 
 
         elif self.resize_corner == "top_left":
-            new_width = max( 20, self.resize_start_size.width() - delta.x() )
-            new_height = max( 20, self.resize_start_size.height() - delta.y() )
+            new_width = max( 1, self.resize_start_size.width() - delta.x() )
+            new_height = max( 1, self.resize_start_size.height() - delta.y() )
             new_x = self.resize_start_position.x() + delta.x() 
             new_y = self.resize_start_position.y() + delta.y()
 
