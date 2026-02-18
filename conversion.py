@@ -113,3 +113,6 @@ def convertToggleState( state ):
         
     else: 
         return 'FT800_OFF'
+    
+def scaleValue( value ):
+    return int( value * 65535 / 100 )

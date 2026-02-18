@@ -178,7 +178,7 @@ def generateWidgetStructure( widget_type, name, widget_data ):
         content += f"    { name }.background_color_left = { convertColorToHex( widget_data.get( 'left_background_color', '0x000000' ) ) };\n"
         content += f"    { name }.background_color_right = { convertColorToHex( widget_data.get( 'right_background_color', '0xFFFFFF' ) ) };\n"
         content += f"    { name }._3d = { convert3dEnabled( widget_data.get( 'effect_3d', True ) ) };\n"
-        content += f"    { name }.val = { widget_data.get( 'current_value', 32767 ) };\n"
+        content += f"    { name }.val = { scaleValue( widget_data.get( 'current_value', 32767 ) ) };\n"
         content += f"    { name }.tag = { widget_data.get( 'tag', 0 ) };\n"
         content += "\n"
     
