@@ -441,7 +441,7 @@ def showLineProperties( main_window, current_index ):
 
 #----------------------------------------------------------------RECTANGLE----------------------------------------------------------------
 
-def showRectangleProperties(main_window, current_index):
+def showRectangleProperties( main_window, current_index ):
     shape_label = QLabel( "RECTANGLE PROPERTIES" )
     shape_label.setStyleSheet( "color: darkorange; font-size: 14px; font-weight: bold; margin-top: 10px;" )
     main_window.properties_layout.insertWidget( current_index, shape_label )
@@ -475,7 +475,7 @@ def showRectangleProperties(main_window, current_index):
     visible_layout.addWidget( visible_label )
     visible_layout.addStretch( 1 )
     main_window.visible_checkbox_rect = QCheckBox()
-    main_window.visible_checkbox_rect.setChecked( getattr( main_window.current_shape, 'visible', True ) )
+    main_window.visible_checkbox_rect.setChecked(getattr( main_window.current_shape, 'visible', True ) )
     main_window.visible_checkbox_rect.setStyleSheet( "QCheckBox::indicator { width: 15px; height: 15px; }" )
     main_window.visible_checkbox_rect.stateChanged.connect( lambda state: updateRectangleVisible( main_window, state ) )
     visible_layout.addWidget( main_window.visible_checkbox_rect )
@@ -531,12 +531,10 @@ def showRectangleProperties(main_window, current_index):
     main_window.stack_order_spin_rect = QSpinBox()
     main_window.stack_order_spin_rect.setRange( 1, 255 )
     main_window.stack_order_spin_rect.setValue( main_window.current_shape.stack_order )
-    
     main_window.stack_order_spin_rect.valueChanged.connect( lambda value: updateRectangleStackOrder( main_window, value ) )
     main_window.stack_order_spin_rect.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.stack_order_spin_rect.setFixedWidth( 60 )
     stack_order_layout.addWidget( main_window.stack_order_spin_rect )
-    
     stack_order_widget = QWidget()
     stack_order_widget.setLayout( stack_order_layout )
     main_window.properties_layout.insertWidget( current_index, stack_order_widget )
@@ -548,7 +546,6 @@ def showRectangleProperties(main_window, current_index):
     tag_input_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     tag_layout.addWidget( tag_input_label )
     tag_layout.addStretch( 1 )
-
     main_window.tag_spin_rect = QSpinBox()
     main_window.tag_spin_rect.setRange( 1, 255 )
     main_window.tag_spin_rect.setValue( main_window.current_shape.tag )
@@ -556,7 +553,6 @@ def showRectangleProperties(main_window, current_index):
     main_window.tag_spin_rect.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.tag_spin_rect.setFixedWidth( 60 )
     tag_layout.addWidget( main_window.tag_spin_rect )
-
     tag_widget = QWidget()
     tag_widget.setLayout( tag_layout )
     main_window.properties_layout.insertWidget( current_index, tag_widget )
@@ -576,7 +572,7 @@ def showRectangleProperties(main_window, current_index):
     main_window.pos_x_spin_rect = QSpinBox()
     main_window.pos_x_spin_rect.setRange( -1024, 1023 )
     main_window.pos_x_spin_rect.setValue( main_window.current_shape.x() )
-    main_window.pos_x_spin_rect.valueChanged.connect( lambda value: updateRectanglePosition( main_window ) )
+    main_window.pos_x_spin_rect.valueChanged.connect( lambda: updateRectanglePosition( main_window ) )
     main_window.pos_x_spin_rect.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.pos_x_spin_rect.setFixedWidth( 70 )
     pos_x_layout.addWidget( main_window.pos_x_spin_rect )
@@ -594,7 +590,7 @@ def showRectangleProperties(main_window, current_index):
     main_window.pos_y_spin_rect = QSpinBox()
     main_window.pos_y_spin_rect.setRange( -1024, 1023 )
     main_window.pos_y_spin_rect.setValue( main_window.current_shape.y() )
-    main_window.pos_y_spin_rect.valueChanged.connect( lambda value: updateRectanglePosition( main_window ) )
+    main_window.pos_y_spin_rect.valueChanged.connect( lambda: updateRectanglePosition( main_window ) )
     main_window.pos_y_spin_rect.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.pos_y_spin_rect.setFixedWidth( 70 )
     pos_y_layout.addWidget( main_window.pos_y_spin_rect )
@@ -612,7 +608,7 @@ def showRectangleProperties(main_window, current_index):
     main_window.width_spin_rect = QSpinBox()
     main_window.width_spin_rect.setRange( 10, 2047 )
     main_window.width_spin_rect.setValue( main_window.current_shape.width() )
-    main_window.width_spin_rect.valueChanged.connect( lambda value: updateRectangleSize( main_window ) )
+    main_window.width_spin_rect.valueChanged.connect( lambda: updateRectangleSize( main_window ) )
     main_window.width_spin_rect.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.width_spin_rect.setFixedWidth( 70 )
     width_layout.addWidget( main_window.width_spin_rect )
@@ -630,7 +626,7 @@ def showRectangleProperties(main_window, current_index):
     main_window.height_spin_rect = QSpinBox()
     main_window.height_spin_rect.setRange( 10, 2047 )
     main_window.height_spin_rect.setValue( main_window.current_shape.height() )
-    main_window.height_spin_rect.valueChanged.connect( lambda value: updateRectangleSize( main_window ) )
+    main_window.height_spin_rect.valueChanged.connect( lambda: updateRectangleSize( main_window ) )
     main_window.height_spin_rect.setStyleSheet( "color: lightsalmon; background-color: #383838;" )
     main_window.height_spin_rect.setFixedWidth( 70 )
     height_layout.addWidget( main_window.height_spin_rect )
@@ -655,7 +651,6 @@ def showRectangleProperties(main_window, current_index):
     main_window.edges_color_rect_rect.mousePressEvent = lambda e: updateRectangleEdgesColor( main_window )
     main_window.edges_color_rect_rect.setCursor( Qt.CursorShape.PointingHandCursor )
     edges_color_layout.addWidget( main_window.edges_color_rect_rect )
-
     edges_color_widget = QWidget()
     edges_color_widget.setLayout( edges_color_layout )
     main_window.properties_layout.insertWidget( current_index, edges_color_widget )
@@ -701,7 +696,6 @@ def showRectangleProperties(main_window, current_index):
     gradient_type_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
     gradient_type_layout.addWidget( gradient_type_label )
     gradient_type_layout.addStretch( 1 )
-
     main_window.gradient_combo_rect = QComboBox()
     main_window.gradient_combo_rect.addItems( [ "Top-Bottom", "Bottom-Top", "Left-Right", "Right-Left" ] )
     main_window.gradient_combo_rect.setCurrentText( main_window.current_shape.gradient_direction )
@@ -715,17 +709,16 @@ def showRectangleProperties(main_window, current_index):
     current_index += 1
 
     start_color_layout = QHBoxLayout()
-    start_color_layout.setContentsMargins( 20, 5, 10, 5 ) 
+    start_color_layout.setContentsMargins( 20, 5, 10, 5 )
     start_color_label = QLabel( "Start color:" )
     start_color_label.setStyleSheet( "color: lightsalmon; font-size: 14px;" )
-    start_color_layout.addWidget( start_color_label )
+    start_color_layout.addWidget(start_color_label)
     start_color_layout.addStretch( 1 )
     start_color_hex = main_window.current_shape.start_color.name()
     main_window.start_color_rect_rect = ColorRectangle( start_color_hex )
     main_window.start_color_rect_rect.mousePressEvent = lambda e: updateRectangleGradientStartColor( main_window )
     main_window.start_color_rect_rect.setCursor( Qt.CursorShape.PointingHandCursor )
     start_color_layout.addWidget( main_window.start_color_rect_rect )
-    
     start_color_widget = QWidget()
     start_color_widget.setLayout( start_color_layout )
     main_window.properties_layout.insertWidget( current_index, start_color_widget )
@@ -742,7 +735,6 @@ def showRectangleProperties(main_window, current_index):
     main_window.end_color_rect_rect.mousePressEvent = lambda e: updateRectangleGradientEndColor( main_window )
     main_window.end_color_rect_rect.setCursor( Qt.CursorShape.PointingHandCursor )
     end_color_layout.addWidget( main_window.end_color_rect_rect )
-    
     end_color_widget = QWidget()
     end_color_widget.setLayout( end_color_layout )
     main_window.properties_layout.insertWidget( current_index, end_color_widget )

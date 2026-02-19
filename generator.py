@@ -163,7 +163,7 @@ def generateWidgetStructure( widget_type, name, widget_data ):
         content += f"    { name }.thumb_color = { convertColorToHex( widget_data.get( 'thumb_color', '0x000000' ) ) };\n"
         content += f"    { name }.background_color = { convertColorToHex( widget_data.get( 'background_color', '0xFFFFFF' ) ) };\n"
         content += f"    { name }._3d = { convert3dEnabled( widget_data.get( 'effect_3d', True ) ) };\n"
-        content += f"    { name }.val = { widget_data.get( 'current_value', 32767 ) };\n"
+        content += f"    { name }.val = { scaleValue( widget_data.get( 'current_value', 32767 ) ) };\n"
         content += f"    { name }.size = { widget_data.get( 'thumb_size', 1000 ) };\n"
         content += f"    { name }.tag = { widget_data.get( 'tag', 0 ) };\n"
         content += "\n"

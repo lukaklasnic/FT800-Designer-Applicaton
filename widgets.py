@@ -435,13 +435,10 @@ class RectangleWidget( QWidget ):
             
             if self.gradient_direction == "Top-Bottom":
                 gradient = QLinearGradient( 0, 0, 0, self.height() )
-
             elif self.gradient_direction == "Bottom-Top":
                 gradient = QLinearGradient( 0, self.height(), 0, 0 )
-
             elif self.gradient_direction == "Left-Right":
                 gradient = QLinearGradient( 0, 0, self.width(), 0 )
-
             elif self.gradient_direction == "Right-Left":
                 gradient = QLinearGradient( self.width(), 0, 0, 0 )
 
@@ -450,7 +447,6 @@ class RectangleWidget( QWidget ):
             gradient.setColorAt( 1.0, self.end_color )    
             painter.fillRect( self.rect(), gradient )
 
-        
         pen = QPen( self.edges_color )
         pen.setWidth( 2 * self.edges_width )
         painter.setPen( pen )
@@ -471,19 +467,18 @@ class RectangleWidget( QWidget ):
         corners = [ QPoint( 4, 4 ), QPoint( self.width() - 4, 4 ), QPoint( 4, self.height() - 4 ), QPoint( self.width() - 4, self.height() - 4 ) ]
 
         for corner in corners:
-            painter.drawEllipse(corner.x() - half_size, corner.y() - half_size, handle_size, handle_size)
-            painter.setBrush(QColor(255, 142, 62))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(corner.x() - 1, corner.y() - 1, 2, 2)
-            painter.setBrush(QColor(255, 142, 62))
-            painter.setPen(QPen(QColor(56, 56, 56), 1))
+            painter.drawEllipse( corner.x() - half_size, corner.y() - half_size, handle_size, handle_size )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( Qt.PenStyle.NoPen )
+            painter.drawEllipse( corner.x() - 1, corner.y() - 1, 2, 2 )
+            painter.setBrush( QColor( 255, 142, 62 ) )
+            painter.setPen( QPen( QColor( 56, 56, 56 ), 1 ) )
 
     def drawSelectionBorder( self, painter ):
         selection_rect = QRect( 0, 0, self.width(), self.height() )
-
         selection_pen = QPen( QColor( 255, 0, 0 ) )
         selection_pen.setWidth( 2 )
-        selection_pen.setStyle(Qt.PenStyle.DashLine )
+        selection_pen.setStyle( Qt.PenStyle.DashLine )
         selection_pen.setDashPattern( [ 4, 2 ] )
 
         painter.setPen( selection_pen )
@@ -547,7 +542,7 @@ class RectangleWidget( QWidget ):
         
         for corner_name, corner_pos in corners.items():
             corner_rect = QRect( corner_pos.x() - half_size, corner_pos.y() - half_size, handle_size, handle_size )
-    
+
             if corner_rect.contains( pos ):
                 return corner_name
         
@@ -559,40 +554,35 @@ class RectangleWidget( QWidget ):
 
     def updateRectanglePropertiesSize( self ):
         main_window = self.findMainWindow()
-
-        if not main_window:
-            return
-
-        try:        
-            if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'width_spin_rect' ) and hasattr( main_window, 'height_spin_rect' ) ):
-                main_window.width_spin_rect.blockSignals( True )
-                main_window.width_spin_rect.setValue( self.rectangle_width )
-                main_window.width_spin_rect.blockSignals( False )
-
-            if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'height_spin_rect' ) ):
-                main_window.height_spin_rect.blockSignals( True )
-                main_window.height_spin_rect.setValue( self.rectangle_height )
-                main_window.height_spin_rect.blockSignals( False )
-
+        
+        try:
+            if main_window and main_window.current_shape == self:
+                if hasattr( main_window, 'width_spin_rect' ):
+                    main_window.width_spin_rect.blockSignals( True )
+                    main_window.width_spin_rect.setValue( self.rectangle_width )
+                    main_window.width_spin_rect.blockSignals( False )
+                
+                if hasattr( main_window, 'height_spin_rect' ):
+                    main_window.height_spin_rect.blockSignals( True )
+                    main_window.height_spin_rect.setValue( self.rectangle_height )
+                    main_window.height_spin_rect.blockSignals( False )
         except:
             pass
 
     def updateRectanglePropertiesPosition( self ):
         main_window = self.findMainWindow()
-
-        if not main_window:
-            return
         
         try:
-            if ( hasattr( main_window, 'current_shape' ) and main_window.current_shape == self and hasattr( main_window, 'pos_x_spin_rect' ) and hasattr( main_window, 'pos_y_spin_rect' ) ):
-                main_window.pos_x_spin_rect.blockSignals( True )
-                main_window.pos_x_spin_rect.setValue( self.x() )
-                main_window.pos_x_spin_rect.blockSignals( False )
+            if main_window and main_window.current_shape == self:
+                if hasattr( main_window, 'pos_x_spin_rect' ):
+                    main_window.pos_x_spin_rect.blockSignals( True )
+                    main_window.pos_x_spin_rect.setValue( self.x() )
+                    main_window.pos_x_spin_rect.blockSignals( False )
                 
-                main_window.pos_y_spin_rect.blockSignals( True )
-                main_window.pos_y_spin_rect.setValue( self.y() )
-                main_window.pos_y_spin_rect.blockSignals( False )
-
+                if hasattr( main_window, 'pos_y_spin_rect' ):
+                    main_window.pos_y_spin_rect.blockSignals( True )
+                    main_window.pos_y_spin_rect.setValue( self.y() )
+                    main_window.pos_y_spin_rect.blockSignals( False )
         except:
             pass
 
@@ -614,7 +604,6 @@ class RectangleWidget( QWidget ):
             'gradient_direction': self.gradient_direction,
             'gradient_start_color': self.start_color,
             'gradient_end_color': self.end_color,
-        
             'type': 'Rectangle',
             'id': None
         }
@@ -648,13 +637,10 @@ class RectangleWidget( QWidget ):
 
     def findMainWindow( self ):
         parent = self.parent()
-
         while parent:
-            if isinstance( parent, QMainWindow ):
+            if isinstance(parent, QMainWindow):
                 return parent
-            
             parent = parent.parent()
-
         return None
 
     def mousePressEvent( self, event ):
@@ -662,8 +648,8 @@ class RectangleWidget( QWidget ):
             main_window = self.findMainWindow()
 
             if main_window and hasattr( main_window, 'object_attached' ) and main_window.object_attached:
-                event.ignore() 
-                return 
+                event.ignore()
+                return
 
             mouse_pos = event.pos()
             self.resize_corner = self.getCornerAt( mouse_pos )
@@ -695,7 +681,7 @@ class RectangleWidget( QWidget ):
 
     def mouseMoveEvent( self, event ):
         mouse_pos = event.pos()
-        corner = self.getCornerAt(mouse_pos)
+        corner = self.getCornerAt( mouse_pos )
 
         if corner:
             if corner in [ "top_left", "bottom_right" ]:
@@ -703,6 +689,7 @@ class RectangleWidget( QWidget ):
 
             elif corner in [ "top_right", "bottom_left" ]:
                 self.setCursor( Qt.CursorShape.SizeBDiagCursor )
+
         else:
             self.setCursor( Qt.CursorShape.ArrowCursor )
         
@@ -713,10 +700,9 @@ class RectangleWidget( QWidget ):
             delta = mouse_pos - self.drag_start_pos
             new_x = self.x() + delta.x()
             new_y = self.y() + delta.y()
-
             self.move( new_x, new_y )
             self.updateRectanglePropertiesPosition()
-        
+            
         event.accept()
 
 class CircleWidget( QWidget ):

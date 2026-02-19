@@ -122,14 +122,14 @@ def updateLineEdgesWidth( main_window, value ):
 #------------------------------------------------------------RECTANGLE--------------------------------------------------------------
 
 def updateRectangleActive( main_window, state ):
-    state == Qt.CheckState.Checked.value 
+    state == Qt.CheckState.Checked.value
     main_window.current_shape.active = state
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
 def updateRectangleVisible( main_window, state ):
     state == Qt.CheckState.Checked.value
-    main_window.current_shape.visible = state
+    main_window.current_shape.visible = state 
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
 
@@ -157,19 +157,25 @@ def updateRectangleTag( main_window, value ):
 
 def updateRectanglePosition( main_window ):
     main_window.current_shape.move( main_window.pos_x_spin_rect.value(), main_window.pos_y_spin_rect.value() )
+    main_window.current_shape.rectangle_width = main_window.current_shape.width()
+    main_window.current_shape.rectangle_height = main_window.current_shape.height()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
+    main_window.current_shape.updateRectanglePropertiesPosition()
 
 def updateRectangleSize( main_window ):
     main_window.current_shape.setFixedSize( main_window.width_spin_rect.value(), main_window.height_spin_rect.value() )
+    main_window.current_shape.rectangle_width = main_window.width_spin_rect.value()
+    main_window.current_shape.rectangle_height = main_window.height_spin_rect.value()
     main_window.current_shape.update()
     main_window.current_shape.updateDataDict()
+    main_window.current_shape.updateRectanglePropertiesSize()
 
 def updateRectangleEdgesColor( main_window ):
     color = QColorDialog.getColor( main_window.current_shape.edges_color )
 
     if color.isValid():
-        main_window.current_shape.edges_color =  color
+        main_window.current_shape.edges_color = color
         main_window.edges_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
@@ -180,10 +186,10 @@ def updateRectangleEdgesWidth( main_window, value ):
     main_window.current_shape.updateDataDict()
 
 def updateRectangleFilled( main_window, state ):
-        state == Qt.CheckState.Checked.value
-        main_window.current_shape.filled = state
-        main_window.current_shape.update()
-        main_window.current_shape.updateDataDict()
+    state == Qt.CheckState.Checked.value
+    main_window.current_shape.filled = state
+    main_window.current_shape.update()
+    main_window.current_shape.updateDataDict()
 
 def updateRectangleGradientDirection( main_window, text ):
     main_window.current_shape.gradient_direction = text
@@ -195,7 +201,7 @@ def updateRectangleGradientStartColor( main_window ):
 
     if color.isValid():
         main_window.current_shape.start_color = color
-        main_window.start_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; "f"border: 2px solid #666;" )
+        main_window.start_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; border: 2px solid #666;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
             
@@ -204,7 +210,7 @@ def updateRectangleGradientEndColor( main_window ):
 
     if color.isValid():
         main_window.current_shape.end_color = color
-        main_window.end_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; "f"border: 2px solid #666;" )
+        main_window.end_color_rect_rect.setStyleSheet( f"background-color: { color.name() }; border: 2px solid #666;" )
         main_window.current_shape.update()
         main_window.current_shape.updateDataDict()
         
