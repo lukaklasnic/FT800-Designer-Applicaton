@@ -6,6 +6,7 @@ from ui_components import *
 from properties import * 
 from pathlib import Path
 from widgets import *
+import ctypes
 import sys
 
 class MainWindow( QMainWindow ):
@@ -19,9 +20,9 @@ class MainWindow( QMainWindow ):
         self.setMainLayouts()
         self.all_canvas_data = {}
 
-    def setTitleBar( self ):
+    def setTitleBar(self):
         self.setWindowTitle( "FT800 Designer" )
-        self.setWindowIcon( QIcon( "designer_logo_ic" ) )
+        self.setWindowIcon( QIcon( str( Path( __file__ ).resolve().parent / "designer_logo_ic.ico" ) ) )
 
     def setScrollArea( self ):
         self.scroll_area = QScrollArea()
@@ -995,15 +996,14 @@ class MainWindow( QMainWindow ):
         generateComponents( self, self.output_dir )
 
 def startApp():
-    base_dir = Path( __file__ ).resolve().parent
-    logo_path = base_dir / "bootup_logo.png"
-
-    pix = QPixmap( str( logo_path ) )
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID( 'ft800.designer.app.1.0' )
+    pix = QPixmap(str( Path( __file__ ).resolve().parent / "bootup_logo.png" ) )
     splash_pix = pix.scaled( 800, 450, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation )
 
     splash = QSplashScreen( splash_pix, Qt.WindowType.WindowStaysOnTopHint )
     splash.show()
     QApplication.processEvents()
+    
     window = MainWindow()
 
     QTimer.singleShot( 3000, lambda:( splash.finish( window ), window.showMaximized() ) )
