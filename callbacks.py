@@ -5,19 +5,19 @@ from widgets import*
 #------------------------------------------------------------CANVAS--------------------------------------------------------------
 
 def updateCanvasActive( main_window, state ):
-    state = state == Qt.CheckState.Checked.value 
+    state == Qt.CheckState.Checked.value 
     main_window.current_canvas.active = state 
     main_window.current_canvas.update()
     main_window.current_canvas.updateDataDict()
 
 def updateCanvasVisible( main_window, state ):
-    state = state == Qt.CheckState.Checked.value 
+    state == Qt.CheckState.Checked.value 
     main_window.current_canvas.visible = state
     main_window.current_canvas.update()
     main_window.current_canvas.updateDataDict()
 
 def updateCanvasStatic( main_window, state ):
-    state = state == Qt.CheckState.Checked.value 
+    state == Qt.CheckState.Checked.value 
     main_window.current_canvas.static = state
     main_window.current_canvas.update()
     main_window.current_canvas.updateDataDict()
