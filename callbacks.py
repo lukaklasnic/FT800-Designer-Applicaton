@@ -32,7 +32,7 @@ def updateCanvasColor(main_window):
     
     if color.isValid():
         main_window.current_canvas.canvas_color = color
-        main_window.canvas_color_rect.setStyleSheet( f"background-color: {color.name()}; border: 1px solid #ccc;" )
+        main_window.canvas_color_rect.setStyleSheet( f"background-color: { color.name() }; border: 1px solid #ccc;" )
         main_window.current_canvas.update()
         main_window.current_canvas.updateDataDict() 
 

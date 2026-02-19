@@ -243,7 +243,6 @@ def generateComponentsH( canvas_data ):
             for widget in canvas[ 'widgets' ]:
                 if widget.get( 'type' ) == 'Image' and widget.get( 'active', True ):
                     has_images = True
-
                     break
 
         if has_images:
@@ -261,9 +260,9 @@ def generateComponentsH( canvas_data ):
     for i, canvas in enumerate( canvas_data ):
         if canvas.get( 'active', True ):
             name = canvas.get( 'name', f'Screen_{ i }' )
-
+            
             if canvas.get( 'static', False ):
-                static_prefix = 'static '  
+                static_prefix = 'static '
 
             else: 
                 static_prefix = 'extern '
@@ -272,41 +271,46 @@ def generateComponentsH( canvas_data ):
     
     content += "\n"
     
-    widget_types = {}
+    type_mapping = widgetStructureMapping()
     
     for i, canvas in enumerate( canvas_data ):
         if 'widgets' in canvas and canvas.get( 'active', True ):
+            canvas_name = canvas.get( 'name', f'Screen_{i}' )
+            
             for widget in canvas[ 'widgets' ]:
                 if widget.get( 'active', True ):
                     widget_type = widget.get( 'type' )
+                    
+                    if widget_type in type_mapping:
+                        if widget.get( 'name' ):
+                            widget_name = widget[ 'name' ]
 
-                    if widget_type not in widget_types:
-                        widget_types[ widget_type ] = []
+                        else:
+                            widget_count = 0
+                            for w in canvas[ 'widgets' ]:
+                                if w.get('type') == widget_type and w.get( 'active', True ):
+                                    if w is widget:
+                                        break
 
-                    widget_types[ widget_type ].append( widget )
-    
-    type_mapping = widgetStructureMapping()
-    
-    for widget_type, widgets in widget_types.items():
-        if widget_type in type_mapping:
-            for widget in widgets:
-                name = widget.get( 'name', f'{ widget_type }_{ widgets.index( widget ) }' )
+                                    widget_count += 1
+                            
+                            widget_name = f"{ widget_type }_{ canvas_name }_{ widget_count }"
+                        
+                        if widget.get( 'static', False ):
+                            static_prefix = 'static '
 
-                if widget.get( 'static', False ):
-                    static_prefix = 'static '  
+                        else:
+                            static_prefix = 'extern '
 
-                else:
-                    static_prefix = 'extern '
-
-                content += f"{ static_prefix }{type_mapping[ widget_type ] } { name };\n"
+                        content += f"{ static_prefix }{ type_mapping[ widget_type ] } { widget_name };\n"
     
     content += "\n"
 
     content += "void ft800_display_configuration();\n"
     
-    for i, canvas in enumerate( canvas_data ):
-        if canvas.get( 'active', True ):
-            content += f"void ft800_display_task_{ i }();\n"
+    for i, canvas in enumerate(canvas_data):
+        if canvas.get('active', True):
+            content += f"void ft800_display_task_{i}();\n"
     
     content += "\n#endif"
     
