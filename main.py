@@ -892,22 +892,6 @@ class MainWindow( QMainWindow ):
         self.hideShapeProperties()
         self.hideCanvasProperties()
         
-        stack_order_attrs = [
-            'stack_order_spin_rect', 'stack_order_spin_circle', 'stack_order_spin_button',
-            'stack_order_spin_line', 'stack_order_spin_ellipse', 'stack_order_spin_numeric',
-            'stack_order_spin_gauge', 'stack_order_spin_clock', 'stack_order_spin_progressbar',
-            'stack_order_spin_scrollbar', 'stack_order_spin_dial', 'stack_order_spin_slider',
-            'stack_order_spin_toggle', 'stack_order_spin_label', 'stack_order_spin_image',
-            'stack_order_spin_keys'
-        ]
-        
-        for attr in stack_order_attrs:
-            if hasattr( self, attr ):
-                delattr( self, attr )
-
-        if not self.current_shape:
-            return
-
         current_index = 0
 
         if isinstance( self.current_shape, LineWidget ):

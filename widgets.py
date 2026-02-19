@@ -3209,15 +3209,18 @@ class DialWidget( QWidget ):
         start_radius_percentage = 0.70
         start_radius = radius * start_radius_percentage
 
-        angle = 90 - ( 360 * self.value / 100 )
+        angle = 90 + ( 360 * self.value / 100 )
+        if angle > 360:
+            angle -= 360
+        
         angle_rad = math.radians( angle )
-
-        start_x = center_x + start_radius * math.cos( angle_rad )
-        start_y = center_y + start_radius * math.sin( angle_rad )
-
-        end_x = center_x + radius * math.cos( angle_rad )
-        end_y = center_y + radius * math.sin( angle_rad )
-
+    
+        start_x =  math.ceil ( center_x + start_radius * math.cos( angle_rad ) )
+        start_y = math.ceil ( center_y + start_radius * math.sin( angle_rad ) )
+    
+        end_x = math.ceil ( center_x + radius * math.cos( angle_rad ) )
+        end_y = math.ceil ( center_y + radius * math.sin( angle_rad ) )
+    
         painter.drawLine( int( start_x ), int( start_y ), int( end_x ), int( end_y ) )
     
         if self.selected:
@@ -3256,23 +3259,27 @@ class DialWidget( QWidget ):
     def calculateValueFromPosition( self, pos ):
         margin = 3
         adjusted_r = self.diameter - 2 * margin
-        
+
         center_x = margin + adjusted_r // 2
         center_y = margin + adjusted_r // 2
-        
+
         dx = pos.x() - center_x
         dy = pos.y() - center_y
-        
+
         if dx == 0 and dy == 0:
             return self.value
-            
+
         angle_rad = math.atan2( dy, dx )
         angle_deg = math.degrees( angle_rad )
-        adjusted_angle = ( 90 - angle_deg ) % 360
 
-        value = ( adjusted_angle / 360.0 ) * 100
+        if angle_deg < 0:
+            angle_deg += 360
+
+        angle_from_down = ( angle_deg - 90 ) % 360
+
+        value = ( angle_from_down / 360.0 ) * 100
         value = max( 0, min( 100, value ) )
-        
+
         return int( value )
 
     def handleResize( self, global_pos ):
@@ -6086,8 +6093,6 @@ class LabelWidget( QWidget ):
                 
                 self.original_x = self.drag_start_original_pos[ 0 ] + delta.x()
                 self.original_y = self.drag_start_original_pos[ 1 ] + delta.y()
-                self.original_x = max( 0, self.original_x )
-                self.original_y = max( 0, self.original_y )
                 
                 self.applyAlignmentOffset()
                 self.updatePropertiesPosition()
@@ -6384,8 +6389,6 @@ class NumericWidget( QWidget ):
                 
                 self.original_x = self.drag_start_original_pos[ 0 ] + delta.x()
                 self.original_y = self.drag_start_original_pos[ 1 ] + delta.y()
-                self.original_x = max( 0, self.original_x )
-                self.original_y = max( 0, self.original_y )
                 
                 self.applyAlignmentOffset()
                 self.updatePropertiesPosition()
