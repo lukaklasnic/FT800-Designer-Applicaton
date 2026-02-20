@@ -20,7 +20,7 @@ class MainWindow( QMainWindow ):
         self.setMainLayouts()
         self.all_canvas_data = {}
 
-    def setTitleBar(self):
+    def setTitleBar( self ):
         self.setWindowTitle( "FT800 Designer" )
         self.setWindowIcon( QIcon( str( Path( __file__ ).resolve().parent / "designer_logo_ic.ico" ) ) )
 
@@ -997,15 +997,14 @@ class MainWindow( QMainWindow ):
 
 def startApp():
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID( 'ft800.designer.app.1.0' )
+
     pix = QPixmap(str( Path( __file__ ).resolve().parent / "bootup_logo.png" ) )
     splash_pix = pix.scaled( 800, 450, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation )
-
     splash = QSplashScreen( splash_pix, Qt.WindowType.WindowStaysOnTopHint )
     splash.show()
-    QApplication.processEvents()
-    
-    window = MainWindow()
 
+    QApplication.processEvents()
+    window = MainWindow()
     QTimer.singleShot( 3000, lambda:( splash.finish( window ), window.showMaximized() ) )
 
     return window

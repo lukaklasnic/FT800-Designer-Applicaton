@@ -205,6 +205,7 @@ def generateWidgetStructure( widget_type, name, widget_data ):
         content += f"    { name }.frame = { convertBool( widget_data.get( 'frame', False ) ) };\n"
         content += f"    { name }.pen.color = { convertColorToHex( widget_data.get( 'frame_color', '0x000000' ) ) };\n"
         content += f"    { name }.pen.width = { widget_data.get( 'frame_width', 1 ) };\n"
+        content += f"    ft800_image_load( &ctx, &{ name } );\n"
         content += "\n"
     
     elif widget_type == 'Label':
