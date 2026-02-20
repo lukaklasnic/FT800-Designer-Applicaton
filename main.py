@@ -988,9 +988,6 @@ class MainWindow( QMainWindow ):
         if not self.output_dir:
             self.chooseOutputDirectory()
 
-        if not self.output_dir:
-            return
-
         self.updateOutputDirLabel()
         generateResources( self, self.output_dir )
         generateComponents( self, self.output_dir )
