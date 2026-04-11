@@ -1601,10 +1601,14 @@ class ButtonWidget( QWidget ):
 
     def updateButtonProperties3D( self ):
         main_window = self.findMainWindow()
-
-        main_window.effect_3d_checkbox.blockSignals( True )
-        main_window.effect_3d_checkbox.setChecked( self.effect_3d )
-        main_window.effect_3d_checkbox.blockSignals( False )
+        
+        try:
+            main_window.effect_3d_checkbox.blockSignals( True )
+            main_window.effect_3d_checkbox.setChecked( self.effect_3d )
+            main_window.effect_3d_checkbox.blockSignals( False )
+        
+        except:
+            pass
 
     def updateButtonPropertiesSize( self ):
         main_window = self.findMainWindow()
